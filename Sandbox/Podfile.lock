@@ -28,7 +28,7 @@ PODS:
 
 DEPENDENCIES:
   - IdentitySdkCore (from `../IdentitySdkCore.podspec`)
-  - IdentitySdkGoogle (from `../IdentitySdkGoogle.podspec`)
+  - IdentitySdkGoogle (from `../../reachfive-ios-google/IdentitySdkGoogle.podspec`)
 
 SPEC REPOS:
   trunk:
@@ -45,7 +45,7 @@ EXTERNAL SOURCES:
   IdentitySdkCore:
     :path: "../IdentitySdkCore.podspec"
   IdentitySdkGoogle:
-    :path: "../IdentitySdkGoogle.podspec"
+    :path: "../../reachfive-ios-google/IdentitySdkGoogle.podspec"
 
 SPEC CHECKSUMS:
   Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
@@ -59,6 +59,6 @@ SPEC CHECKSUMS:
   IdentitySdkCore: e74e8f81ce688fac4365183376e3b26f62f06b5f
   IdentitySdkGoogle: f977b56714cdb52c20ddab0e38178201a922517b
 
-PODFILE CHECKSUM: 267680a22d163da8ca9cfdcde2b57589f6434b8d
+PODFILE CHECKSUM: 6045bae86cff6e90865c7f03c8c2cbe20e55caaa
 
 COCOAPODS: 1.15.2
