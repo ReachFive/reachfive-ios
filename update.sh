@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cd IdentitySdkCore && pod update && cd ..
-cd IdentitySdkFacebook && pod update && cd ..
-cd IdentitySdkGoogle && pod update && cd ..
-cd IdentitySdkWeChat && pod update && cd ..
-cd Sandbox && pod update && cd ..
+cd IdentitySdkCore && pod update && cd ../..
+cd reachfive-ios-facebook && pod update && cd ..
+cd reachfive-ios-google && pod update && cd ..
+cd reachfive-ios-wechat && pod update && cd ..
+cd reachfive-ios/Sandbox && pod update && cd ..

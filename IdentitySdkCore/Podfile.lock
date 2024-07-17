@@ -3,7 +3,7 @@ PODS:
   - BrightFutures (8.2.0)
   - CryptoSwift (1.8.2)
   - DeviceKit (5.4.0)
-  - IdentitySdkCore (6.4.0.beta):
+  - IdentitySdkCore (6.4.0):
     - Alamofire (~> 5.8)
     - BrightFutures (~> 8.2.0)
     - CryptoSwift (~> 1.8)
@@ -28,7 +28,7 @@ SPEC CHECKSUMS:
   BrightFutures: 67e0e8cd974ab9f6c04650cc64153f7adf1ec489
   CryptoSwift: c63a805d8bb5e5538e88af4e44bb537776af11ea
   DeviceKit: bd34bb1766d926c3cc5a5f6e3e9a6dd10148b805
-  IdentitySdkCore: 9eb37bd066fc764482229f3da0473dba9cff58d3
+  IdentitySdkCore: dcbd36da5c5fba5eb0b36cc39e225c103c767b83
 
 PODFILE CHECKSUM: 69228cb9d320864e9d000b799d4be34aa4271d35
 
