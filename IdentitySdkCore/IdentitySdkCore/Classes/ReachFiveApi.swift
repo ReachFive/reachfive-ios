@@ -6,7 +6,7 @@ import DeviceKit
 public class ReachFiveApi {
     let decoder = JSONDecoder()
     let sdkConfig: SdkConfig
-    
+
     private let profile_fields = [
         "birthdate",
         "bio",
@@ -56,40 +56,40 @@ public class ReachFiveApi {
         "uid",
         "updated_at",
     ]
-    
+
     public init(sdkConfig: SdkConfig) {
         self.sdkConfig = sdkConfig
         decoder.keyDecodingStrategy = .convertFromSnakeCase
     }
-    
+
     func createUrl(path: String, params: [String: String?]? = nil) -> URL {
         var components = URLComponents()
         components.scheme = "https"
         components.host = sdkConfig.domain
         components.path = path.starts(with: "/") ? path : "/" + path
-        
+
         let deviceInfo: String = [Device.current.safeDescription, Device.current.systemName, Device.current.systemVersion].compactMap { $0 }.joined(separator: " ")
         let defaultParams: [String: String] = [
             "platform": "ios",
             // TODO: read from the version.rb. Either directly or indirectly from IdentitySdkCore.h, Info.plist...
-            "sdk": "6.3.0",
+            "sdk": "6.4.0",
             "device": deviceInfo,
         ]
-        
+
         let additionalParams = filter(params: params ?? [:])
         let allParams: [String: String] = defaultParams.merging(additionalParams) { current, _ in current }
-        
+
         components.queryItems = allParams.map { key, value in URLQueryItem(name: key, value: value) }
         // safe force-unwrap because the contract is respected:
         // If the NSURLComponents has an authority component (user, password, host or port) and a path component, then the path must either begin with "/" or be an empty string.
         return components.url!
     }
-    
+
     /// Keep only non-nil values
     private func filter(params: [String: String?]) -> [String: String] {
         params.compactMapValues { $0 }
     }
-    
+
     public func clientConfig() -> Future<ClientConfigResponse, ReachFiveError> {
         AF
             .request(createUrl(path: "/identity/v1/config", params: ["client_id": sdkConfig.clientId]))
@@ -97,7 +97,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: ClientConfigResponse.self, decoder: decoder)
     }
-    
+
     public func providersConfigs() -> Future<ProvidersConfigsResult, ReachFiveError> {
         AF
             .request(createUrl(path: "/api/v1/providers"))
@@ -105,7 +105,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: ProvidersConfigsResult.self, decoder: decoder)
     }
-    
+
     public func loginWithProvider(
         loginProviderRequest: LoginProviderRequest
     ) -> Future<AccessTokenResponse, ReachFiveError> {
@@ -118,7 +118,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
-    
+
     public func signupWithPassword(signupRequest: SignupRequest) -> Future<AccessTokenResponse, ReachFiveError> {
         AF
             .request(
@@ -130,7 +130,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
-    
+
     public func loginWithPassword(loginRequest: LoginRequest) -> Future<AuthenticationToken, ReachFiveError> {
         AF
             .request(
@@ -142,10 +142,10 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AuthenticationToken.self, decoder: decoder)
     }
-    
+
     public func loginCallback(loginCallback: LoginCallback) -> Future<String, ReachFiveError> {
         let promise = Promise<String, ReachFiveError>()
-        
+
         AF
             .request(
                 createUrl(path: "/oauth/authorize"),
@@ -170,7 +170,7 @@ public class ReachFiveApi {
             }
         return promise.future
     }
-    
+
     public func authWithCode(authCodeRequest: AuthCodeRequest) -> Future<AccessTokenResponse, ReachFiveError> {
         AF
             .request(
@@ -183,7 +183,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
-    
+
     public func refreshAccessToken(_ refreshRequest: RefreshRequest) -> Future<AccessTokenResponse, ReachFiveError> {
         AF
             .request(
@@ -196,7 +196,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
-    
+
     public func getProfile(authToken: AuthToken) -> Future<Profile, ReachFiveError> {
         AF
             .request(
@@ -208,7 +208,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: Profile.self, decoder: decoder)
     }
-    
+
     public func verifyPhoneNumber(
         authToken: AuthToken,
         verifyPhoneNumberRequest: VerifyPhoneNumberRequest
@@ -224,7 +224,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func updateEmail(
         authToken: AuthToken,
         updateEmailRequest: UpdateEmailRequest
@@ -241,7 +241,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: Profile.self, decoder: decoder)
     }
-    
+
     public func updateProfile(
         authToken: AuthToken,
         profile: Profile
@@ -258,7 +258,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: Profile.self, decoder: decoder)
     }
-    
+
     public func updatePassword(
         authToken: AuthToken?,
         updatePasswordRequest: UpdatePasswordRequest
@@ -275,7 +275,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func updatePhoneNumber(
         authToken: AuthToken,
         updatePhoneNumberRequest: UpdatePhoneNumberRequest
@@ -291,7 +291,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: Profile.self, decoder: decoder)
     }
-    
+
     public func startMfaPhoneRegistration(
         _ mfaStartPhoneRegistrationRequest: MfaStartPhoneRegistrationRequest,
         authToken: AuthToken
@@ -307,7 +307,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: MfaStartCredentialRegistrationResponse.self, decoder: decoder)
     }
-    
+
     public func startMfaEmailRegistration(
         _ mfaStartEmailRegistrationRequest: MfaStartEmailRegistrationRequest,
         authToken: AuthToken
@@ -323,7 +323,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: MfaStartCredentialRegistrationResponse.self, decoder: decoder)
     }
-    
+
     public func verifyMfaEmailRegistrationPost(
         _ mfaVerifyEmailRegistrationRequest: MfaVerifyEmailRegistrationPostRequest,
         authToken: AuthToken
@@ -339,7 +339,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: MfaCredentialItem.self, decoder: decoder)
     }
-    
+
     public func verifyMfaEmailRegistrationGet(
         _ request: MfaVerifyEmailRegistrationGetRequest
     ) -> Future<Void, ReachFiveError> {
@@ -353,7 +353,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func verifyMfaPhoneRegistration(
         _ mfaVerifyPhoneRegistrationRequest: MfaVerifyPhoneRegistrationRequest,
         authToken: AuthToken
@@ -369,7 +369,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: MfaCredentialItem.self, decoder: decoder)
     }
-    
+
     public func deleteMfaPhoneNumberCredential(
         phoneNumber: String,
         authToken: AuthToken
@@ -385,7 +385,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func deleteMfaEmailCredential(
         authToken: AuthToken
     ) -> Future<Void, ReachFiveError> {
@@ -399,7 +399,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func listMfaTrustedDevices(
         authToken: AuthToken
     ) -> Future<MfaListTrustedDevices, ReachFiveError> {
@@ -413,7 +413,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: MfaListTrustedDevices.self, decoder: decoder)
     }
-    
+
     public func deleteMfaTrustedDevice(
         deviceId: String,
         authToken: AuthToken
@@ -428,7 +428,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func mfaListCredentials(
         authToken: AuthToken
     ) -> Future<MfaCredentialsListResponse, ReachFiveError> {
@@ -441,7 +441,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: MfaCredentialsListResponse.self, decoder: decoder)
     }
-    
+
     public func startMfaStepUp(
         _ request: StartMfaStepUpRequest,
         authToken: AuthToken?
@@ -457,7 +457,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: StartMfaStepUpResponse.self, decoder: decoder)
     }
-    
+
     public func startPasswordless(mfa request: StartMfaPasswordlessRequest) -> Future<StartMfaPasswordlessResponse, ReachFiveError> {
         AF
             .request(
@@ -469,7 +469,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: StartMfaPasswordlessResponse.self, decoder: decoder)
     }
-    
+
     public func verifyPasswordless(mfa request: VerifyMfaPasswordlessRequest) -> Future<PasswordlessVerifyResponse, ReachFiveError> {
         AF
             .request(
@@ -481,7 +481,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: PasswordlessVerifyResponse.self, decoder: decoder)
     }
-    
+
     public func requestPasswordReset(
         requestPasswordResetRequest: RequestPasswordResetRequest
     ) -> Future<Void, ReachFiveError> {
@@ -507,7 +507,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func startPasswordless(_ startPasswordlessRequest: StartPasswordlessRequest) -> Future<Void, ReachFiveError> {
         AF
             .request(
@@ -519,7 +519,7 @@ public class ReachFiveApi {
             .validate(statusCode: 200..<300)
             .responseJson(decoder: decoder)
     }
-    
+
     public func verifyPasswordless(verifyPasswordlessRequest: VerifyPasswordlessRequest) -> Future<PasswordlessVerifyResponse, ReachFiveError> {
         AF
             .request(
@@ -530,7 +530,7 @@ public class ReachFiveApi {
             .validate(statusCode: 200..<300)
             .responseJson(type: PasswordlessVerifyResponse.self, decoder: decoder)
     }
-    
+
     public func verifyAuthCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) -> Future<Void, ReachFiveError> {
         AF
             .request(
@@ -542,7 +542,7 @@ public class ReachFiveApi {
             .validate(statusCode: 200..<300)
             .responseJson(decoder: decoder)
     }
-    
+
     public func logout() -> Future<Void, ReachFiveError> {
         AF
             .request(
@@ -552,15 +552,15 @@ public class ReachFiveApi {
             .validate(statusCode: 200..<300)
             .responseJson(decoder: decoder)
     }
-    
+
     func tokenHeader(_ authToken: AuthToken) -> HTTPHeaders {
         ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
     }
-    
+
     public func buildAuthorizeURL(queryParams: [String: String?]) -> URL {
         createUrl(path: "/oauth/authorize", params: queryParams)
     }
-    
+
     public func createWebAuthnSignupOptions(webAuthnSignupOptions: SignupOptions) -> Future<RegistrationOptions, ReachFiveError> {
         AF
             .request(
@@ -572,7 +572,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: RegistrationOptions.self, decoder: decoder)
     }
-    
+
     public func signupWithWebAuthn(webauthnSignupCredential: WebauthnSignupCredential, originR5: String? = nil) -> Future<AuthenticationToken, ReachFiveError> {
         AF
             .request(
@@ -584,7 +584,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AuthenticationToken.self, decoder: decoder)
     }
-    
+
     public func createWebAuthnAuthenticationOptions(webAuthnLoginRequest: WebAuthnLoginRequest) -> Future<AuthenticationOptions, ReachFiveError> {
         AF
             .request(
@@ -596,7 +596,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AuthenticationOptions.self, decoder: decoder)
     }
-    
+
     public func authenticateWithWebAuthn(authenticationPublicKeyCredential: AuthenticationPublicKeyCredential) -> Future<AuthenticationToken, ReachFiveError> {
         AF
             .request(
@@ -608,7 +608,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AuthenticationToken.self, decoder: decoder)
     }
-    
+
     public func createWebAuthnRegistrationOptions(authToken: AuthToken, registrationRequest: RegistrationRequest) -> Future<RegistrationOptions, ReachFiveError> {
         AF
             .request(
@@ -621,7 +621,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: RegistrationOptions.self, decoder: decoder)
     }
-    
+
     public func registerWithWebAuthn(authToken: AuthToken, publicKeyCredential: RegistrationPublicKeyCredential, originR5: String? = nil) -> Future<Void, ReachFiveError> {
         AF
             .request(
@@ -634,7 +634,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func createWebAuthnResetOptions(resetOptions: ResetOptions) -> Future<RegistrationOptions, ReachFiveError> {
         AF
             .request(
@@ -646,7 +646,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: RegistrationOptions.self, decoder: decoder)
     }
-    
+
     public func resetWebAuthn(resetPublicKeyCredential: ResetPublicKeyCredential, originR5: String? = nil) -> Future<Void, ReachFiveError> {
         AF
             .request(
@@ -658,7 +658,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func getWebAuthnRegistrations(authToken: AuthToken) -> Future<[DeviceCredential], ReachFiveError> {
         AF
             .request(
@@ -670,7 +670,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: [DeviceCredential].self, decoder: decoder)
     }
-    
+
     public func deleteWebAuthnRegistration(id: String, authToken: AuthToken) -> Future<Void, ReachFiveError> {
         AF
             .request(
