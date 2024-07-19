@@ -1,11 +1,11 @@
 require_relative './version'
 
 Pod::Spec.new do |spec|
-  spec.name                  = "IdentitySdkCore"
+  spec.name                  = "Reach5"
   spec.version               = $VERSION
-  spec.summary               = "ReachFive IdentitySdkCore"
+  spec.summary               = "Reachfive Identity SDK"
   spec.description           = <<-DESC
-      ReachFive Identity Sdk Core
+      ReachFive Identity Sdk for iOS
   DESC
   spec.homepage              = "https://github.com/ReachFive/reachfive-ios"
   spec.license               = { :type => "MIT", :file => "LICENSE" }

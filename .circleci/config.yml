@@ -15,12 +15,12 @@ jobs:
           name: Install CocoaPods
           command: gem install cocoapods --user-install
       - run:
-          name: Check IdentitySdkCore
+          name: Check Reach5
           command: |
             cd IdentitySdkCore
             pod install
             cd ../
-            pod lib lint IdentitySdkCore.podspec
+            pod lib lint Reach5.podspec
   build-for-release:
     macos:
       xcode: "15.3.0"
@@ -30,12 +30,12 @@ jobs:
           name: Install CocoaPods
           command: gem install cocoapods --user-install
       - run:
-          name: Check IdentitySdkCore
+          name: Check Reach5
           command: |
             cd IdentitySdkCore
             pod install
             cd ../
-            pod spec lint IdentitySdkCore.podspec
+            pod spec lint Reach5.podspec
   publish:
     macos:
       xcode: "15.3.0"
@@ -44,7 +44,7 @@ jobs:
       - run:
           name: Install CocoaPods
           command: gem install cocoapods --user-install
-      - run: pod trunk push IdentitySdkCore.podspec
+      - run: pod trunk push Reach5.podspec
   build-sandbox:
     macos:
       xcode: "15.3.0"

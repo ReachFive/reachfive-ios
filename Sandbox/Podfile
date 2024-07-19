@@ -5,9 +5,9 @@ platform :ios, '14.0'
 target 'Sandbox' do
   project 'Sandbox.xcodeproj'
   # Dev mode
-  pod 'IdentitySdkCore', :path => '../IdentitySdkCore.podspec'
-  pod 'IdentitySdkGoogle', :path => '../../reachfive-ios-google/IdentitySdkGoogle.podspec'
-  # pod 'IdentitySdkFacebook', :path => '../IdentitySdkFacebook.podspec'
-  # pod 'IdentitySdkWeChat', :path => '../IdentitySdkWeChat.podspec'
+  pod 'Reach5', :path => '../Reach5.podspec'
+  pod 'Reach5Google', :path => '../../reachfive-ios-google/Reach5Google.podspec'
+  # pod 'Reach5Facebook', :path => '../../reachfive-ios-facebook/Reach5Facebook.podspec'
+  # pod 'Reach5WeChat', :path => '../../reachfive-ios-wechat/Reach5WeChat.podspec'
 
 end

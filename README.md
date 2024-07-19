@@ -3,7 +3,7 @@
 </p>
 
 [![CircleCI](https://circleci.com/gh/ReachFive/reachfive-ios/tree/master.svg?style=svg)](https://circleci.com/gh/ReachFive/reachfive-ios/tree/master)
-[![Download](https://img.shields.io/cocoapods/v/IdentitySdkCore.svg?style=flat) ](https://cocoapods.org/pods/IdentitySdkCore)
+[![Download](https://img.shields.io/cocoapods/v/Reach5.svg?style=flat) ](https://cocoapods.org/pods/Reach5)
 
 # ReachFive Identity iOS SDK
 
@@ -14,14 +14,14 @@
 Add the following line to your **Podfile**:
 
 ```
-pod 'IdentitySdkCore'
+pod 'Reach5'
 ```
 
 and other dependencies, for Social Login, as needed:
 ```
-pod 'IdentitySdkFacebook'
-pod 'IdentitySdkGoogle'
-pod 'IdentitySdkWeChat'
+pod 'Reach5Facebook'
+pod 'Reach5Google'
+pod 'Reach5WeChat'
 ```
 
 
@@ -40,7 +40,7 @@ Or directly add it to the dependencies value of your Package.swift or the Packag
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "6.4.0"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "7.0.0"))
 ]
 ```
 
