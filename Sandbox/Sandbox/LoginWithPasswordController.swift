@@ -1,6 +1,6 @@
 import Foundation
 import UIKit
-import IdentitySdkCore
+import Reach5
 
 //TODO faire que la complétion soit sur email et pas custom identifier par défaut
 class LoginWithPasswordController: UIViewController {

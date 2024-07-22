@@ -1,6 +1,6 @@
 import UIKit
 import AuthenticationServices
-import IdentitySdkCore
+import Reach5
 import BrightFutures
 
 class DemoController: UIViewController {

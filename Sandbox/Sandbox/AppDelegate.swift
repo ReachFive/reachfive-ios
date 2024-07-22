@@ -1,6 +1,6 @@
 import UIKit
-import IdentitySdkCore
-import IdentitySdkGoogle
+import Reach5
+import Reach5Google
 
 #if targetEnvironment(macCatalyst)
 // we don't add WeChat and Facebook by default in order to be able to launch the app on mac Catalyst in order to test on local (more easily than with a simulator)
@@ -10,8 +10,8 @@ import IdentitySdkGoogle
 // Peut-être qu'un jour je serai capable de modifier les dépendance cocoapods par plateforme
 // https://betterprogramming.pub/why-dont-my-pods-compile-with-mac-catalyst-and-how-can-i-solve-it-ffc3fbec824e
 // Ce lien suggère une solution mais je ne vois pas les même choses dans Build Phases, je ne vois pas les dépendances Facebook et WeChat
-//import IdentitySdkFacebook
-//import IdentitySdkWeChat
+//import Reach5Facebook
+//import Reach5WeChat
 #endif
 
 //TODO

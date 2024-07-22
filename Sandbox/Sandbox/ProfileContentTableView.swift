@@ -1,6 +1,6 @@
 import Foundation
 import UIKit
-import IdentitySdkCore
+import Reach5
 
 struct Field {
     let name: String

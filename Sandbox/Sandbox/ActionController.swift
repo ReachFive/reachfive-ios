@@ -1,6 +1,6 @@
 import Foundation
 import UIKit
-import IdentitySdkCore
+import Reach5
 import AuthenticationServices
 
 class ActionController: UITableViewController {

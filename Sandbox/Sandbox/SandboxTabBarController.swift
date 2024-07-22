@@ -1,6 +1,6 @@
 import Foundation
 import UIKit
-import IdentitySdkCore
+import Reach5
 
 class SandboxTabBarController: UITabBarController {
     // I did not manage to regroup the management of the profile icon in one place

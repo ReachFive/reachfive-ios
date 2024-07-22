@@ -1,6 +1,6 @@
 import UIKit
 import Foundation
-import IdentitySdkCore
+import Reach5
 
 class UpdatePasswordController: UIViewController {
     var authToken: AuthToken?
