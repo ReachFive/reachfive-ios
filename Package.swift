@@ -24,7 +24,7 @@ let package = Package(
                 .product(name: "BrightFutures", package: "BrightFutures"),
             ],
             path: "IdentitySdkCore",
-            resources: [.copy("IdentitySdkCore/PrivacyInfo.xcprivacy")],
-        ),
+            resources: [.copy("IdentitySdkCore/PrivacyInfo.xcprivacy")]
+        )
     ]
 )
