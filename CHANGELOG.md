@@ -15,6 +15,7 @@ import Reach5
 ### New features
 - Support for Swift Package Manager
 - Support for passkey account recovery
+- Add privacy manifest
 
 ## v6.3.0
 ### New features
@@ -28,9 +29,6 @@ import Reach5
 - Allow the Sandbox app to run in the ARM iPhone simulator 
 
 ## v6.2.0
-### New features
-- Add privacy manifest.
-
 ### Bug fix
 - Fix a crash when calling `webviewLogin` in quick succession
 
