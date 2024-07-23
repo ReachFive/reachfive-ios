@@ -16,6 +16,9 @@ Pod::Spec.new do |spec|
   spec.source_files          = "IdentitySdkCore/IdentitySdkCore/Classes/**/*.*"
   spec.platform              = :ios
   spec.ios.deployment_target = $IOS_DEPLOYMENT_TARGET
+  spec.resource_bundle = {
+    'Reach5' => ['IdentitySdkCore/IdentitySdkCore/PrivacyInfo.xcprivacy']
+  }
 
   spec.dependency 'Alamofire', '~> 5.8'
   spec.dependency 'BrightFutures', '~> 8.2.0'
