@@ -76,6 +76,11 @@ swcutil developer-mode -e true
 
 # Development
 
+## Viewing the modules as libraries in XCode
+
+Open the project folder to view it as a package project, not the .xcodeproj or .xcworkspace which makes them seen as a Pod project
+
+
 ## Adding or renaming files
 While you can develop across all modules while being in the `Sandbox.xcworkspace`, 
 when you need to add a new file or rename one, you have to be in the specific module workspace and add it from within XCode so that the `project.pbxproj` is properly updated.
