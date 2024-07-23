@@ -17,12 +17,12 @@ PODS:
     - AppAuth/Core (~> 1.7)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
-  - Reach5 (7.0.0.beta):
+  - Reach5 (7.0.0.beta.2):
     - Alamofire (~> 5.8)
     - BrightFutures (~> 8.2.0)
     - CryptoSwift (~> 1.8)
     - DeviceKit (~> 5.1)
-  - Reach5Google (7.0.0.beta):
+  - Reach5Google (7.0.0):
     - GoogleSignIn (~> 7)
     - Reach5
 
@@ -56,9 +56,9 @@ SPEC CHECKSUMS:
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
-  Reach5: 8d8e2741c547308c29a0ba538869e805be301be8
-  Reach5Google: b92c03db323869dc71549c07fb88d9e788a79c8b
+  Reach5: 898a1dfb36b65f8fbb6a6a9bd3f539f22918cb9b
+  Reach5Google: dfd820c38cf95afc10904a9ea062efd409d08f48
 
-PODFILE CHECKSUM: adb78c06d059252528384aa40d295a3e34621a16
+PODFILE CHECKSUM: 75f77a9fd40029200b7106908ad11e21847844de
 
 COCOAPODS: 1.15.2
