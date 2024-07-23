@@ -23,6 +23,10 @@ let package = Package(
                 .product(name: "DeviceKit", package: "DeviceKit"),
                 .product(name: "BrightFutures", package: "BrightFutures"),
             ],
-            path: "IdentitySdkCore"),
+            path: "IdentitySdkCore",
+            resources: [
+              .copy("PrivacyInfo.xcprivacy")
+            ]
+        ),
     ]
 )
