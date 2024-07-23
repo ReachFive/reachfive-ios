@@ -1,4 +1,21 @@
 # Changelog
+## v7.0.0
+### Breaking changes
+- New name for the Pod: `Reach5`
+
+Change all your import from
+```
+import IdentitySdkCore
+```
+to
+```
+import Reach5
+```
+
+### New features
+- Support for Swift Package Manager
+- Support for passkey account recovery
+
 ## v6.3.0
 ### New features
 - add MfA credentials support methods:
