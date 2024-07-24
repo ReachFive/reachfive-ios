@@ -4,7 +4,74 @@
 
     ],
     "dependencies" : [
-
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "alamofire",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/Alamofire/Alamofire.git",
+          "name" : "Alamofire"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a",
+            "version" : "5.9.1"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "Alamofire"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "brightfutures",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/Thomvis/BrightFutures.git",
+          "name" : "BrightFutures"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "fa66fa183dce7196d431244d0215748cd14c5758",
+            "version" : "8.2.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "BrightFutures"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "cryptoswift",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
+          "name" : "CryptoSwift"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "c9c3df6ab812de32bae61fc0cd1bf6d45170ebf0",
+            "version" : "1.8.2"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "CryptoSwift"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "devicekit",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/devicekit/DeviceKit.git",
+          "name" : "DeviceKit"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "5757447e9f92c476ee2ca41ead7eb6db07936430",
+            "version" : "5.4.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "DeviceKit"
+      }
     ]
   },
   "version" : 6
