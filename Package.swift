@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "Reach5",
+    platforms: [.iOS(.v13)],
     products: [
         .library(name: "Reach5", targets: ["Reach5"]),
     ],
