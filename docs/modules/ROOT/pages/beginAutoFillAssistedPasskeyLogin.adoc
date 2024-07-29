@@ -1,0 +1,43 @@
+= {docname}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().{docname}(<<withRequest>>)
+----
+
+== Description
+
+Logs the user in using credentials stored in the keychain.
+The passkey is shown in the QuickType bar when selecting a field with the Username content type.
+
+== Usage
+
+Start the request automatically early in the view lifecycle (e.g., in ``viewDidAppear``), alone, or in reaction to a modal request with display ``IfImmediatelyAvailableCredentials`` that resulted in an `.AuthCanceled`.
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="withRequest"]
+
+|===
+
+== Response
+
+Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+
+This method returns the authorization token when successfully logged in or a {company} error if unsuccessful.
+
+include::partial$models.adoc[tag=authtoken]
+
+include::partial$models.adoc[tag=reachfiveerror]

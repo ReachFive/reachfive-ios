@@ -1,0 +1,75 @@
+= {docname}
+
+[.signature]
+[subs="normal,attributes,callouts"]
+----
+AppDelegate.reachfive().{docname}(WebviewLoginRequest(
+    <<presentationContextProvider>>
+    // optional
+    <<state>>,
+    <<nonce>>,
+    <<scope>>, <1>
+
+))
+----
+<1> Scope isn't explicitly required. 
+If not provided here, it defaults to the scopes set up in the client configuration which is picked up when you initiliaze the iOS SDK.
+
+== Description
+
+Opens a *secure* webview through the authorization endpoint.
+
+[NOTE]
+====
+You must have configured a Login URL and enabled xref:docs:ROOT:orchestration-token.adoc[request orchestration tokens] for your identity client.
+
+include::docs:ROOT:partial$general/snippets/r_orchestrated-flows-min-version.adoc[]
+====
+
+* If end-users have an active web SSO session, then the authorization endpoint immediately redirects to the application.
+* If end-users do not have an active web SSO session, they are redirected to the client's Login URL for authentication.
+
+When logging in with secure webview, a dialog pops up where you must select *Continue* and acknowledge that by continuing "This allows the app and the website to exchange information about you".
+
+image::sdk-ios:ROOT:secure-login-dialog.png[width=500px,role=zoom]
+
+== Usage
+
+Because of the <<presentationContextProvider,`presentationContextProvider`>> property, you must ensure that your link:https://developer.apple.com/documentation/uikit/uiviewcontroller[UIViewController^] implements the `ASWebAuthenticationPresentationContextProviding` protocol.
+
+To do this, add the following to your UIViewController:
+
+[source,swift]
+----
+func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+    view.window!
+}
+----
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="presentationContextProvider"]
+include::partial$params.adoc[tag="state"]
+include::partial$params.adoc[tag="nonce"]
+include::partial$params.adoc[tag="scope"]
+
+|===
+
+== Response
+
+Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+
+include::partial$models.adoc[tag=authtoken]
+
+include::partial$models.adoc[tag=reachfiveerror]

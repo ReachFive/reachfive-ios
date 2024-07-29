@@ -1,0 +1,26 @@
+= logout
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().logout()
+----
+
+== Description
+
+Kills the main SSO session as well as *all* provider sessions.
+
+include::docs::partial$tokens/r_revoke-refresh-token-note.adoc[] 
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Response
+
+Type: `Future<(), <<ReachFiveError>>>`
+
+include::partial$models.adoc[tag=reachfiveerror]

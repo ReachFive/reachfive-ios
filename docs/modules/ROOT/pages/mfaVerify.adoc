@@ -1,0 +1,58 @@
+= {docname}
+
+[.signature]
+[subs="normal,callouts"]
+----
+AppDelegate.reachfive().{docname}(
+    <<CredentialType>>, <1>
+    <<code>>,
+    <<authToken,authToken>>
+)
+----
+<1> This "CredentialType" should be either `.Email` or `.PhoneNumber` as shown in the <<Examples, examples>> below.
+
+== About this command
+
+Verifies the phone number or email as a second factor for MFA.
+
+== Examples
+
+[tabs]
+====
+Email icon:envelope-o[]::
++
+--
+[source, kotlin]
+----
+include::example${docname}WithEmail.swift[]
+----
+--
+Phone number icon:phone-square[]::
++
+--
+[source, kotlin]
+----
+include::example${docname}WithPhoneNumber.swift[]
+----
+--
+====
+
+== Parameters
+
+[.options]
+[cols="1,3a"]
+|===
+
+include::partial$params.adoc[tags="CredentialType,code,authtoken"]
+
+|===
+
+== Response
+
+`Future<MfaCredentialItem, ReachFiveError>`
+
+include::partial$models.adoc[tag=MfaCredentialItem]
+
+=== Error response
+
+include::partial$models.adoc[tag=reachfiveerror]

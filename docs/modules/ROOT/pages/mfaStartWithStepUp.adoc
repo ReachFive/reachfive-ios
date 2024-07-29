@@ -1,0 +1,45 @@
+= mfaStart(WithStepUp)
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().mfaStart(
+    <<startStepUp,stepUp>>
+)
+----
+
+== About this command
+
+Retrieves the stepup token needed for the MFA flow.
+
+IMPORTANT: The presence of an active session cookie is required. 
+It is automatically retrieved by the function.
+
+== Examples
+
+[source, kotlin]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[.options]
+[cols="1,3a"]
+|===
+
+include::partial$params.adoc[tags="startStepUp"]
+
+|===
+
+== Response
+
+`Future<ContinueStepUp, ReachFiveError>`
+
+`ContinueStepUp` contains the `challengeId`.
+
+=== Error response
+
+include::partial$models.adoc[tag=reachfiveerror]
+
+DELETE ** Maybe saying the ContinueStepUp has a challengeId **

@@ -1,0 +1,45 @@
+:fido:
+= signupWithWebAuthn
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().signupWithWebAuthn(
+    <<ProfileSignupRequest, profile>>,
+    <<origin>>,
+    <<viewController>>,
+    // Optional arguments
+    <<friendlyName>>,
+    <<scopes>>
+)
+----
+
+== Description
+
+The user requests to register a new account for the first time. This method retrieves a FIDO2 pending intent for signup with the options returned by the {company} server and launches it.
+
+It parses then the resulting intent and if successful, registers the new user and sends a verification code or token to the provided email address.
+
+[NOTE]
+====
+* The WebAuthn feature must be enabled on your {company} account.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[.options]
+[cols="1,3a"]
+|===
+include::partial$params.adoc[tag="profilesignuprequest"]
+include::partial$params.adoc[tag="origin"]
+include::partial$params.adoc[tag="viewcontroller"]
+include::partial$params.adoc[tag="friendlyname"]
+include::partial$params.adoc[tag="scopes"]
+|===

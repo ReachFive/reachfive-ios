@@ -1,0 +1,76 @@
+= getProvider
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().getProvider(<<name>>)
+----
+
+== Description
+
+Retrieve a provider registered on the {company} client by name.
+
+Refer at the iOS SDK Installation to initialize the providers at the client's instantiation.
+
+[NOTE]
+====
+* The scopes provided are the permissions setup in the provider's configuration through the console.
+====
+
+== Usage
+
+When using the <<Examples,`viewController`>> property for `.login`, you must ensure that your link:https://developer.apple.com/documentation/uikit/uiviewcontroller[UIViewController^] implements the `ASWebAuthenticationPresentationContextProviding` protocol.
+
+To do this, add the following to your `UIViewController`:
+
+[source,swift]
+----
+func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+    view.window!
+}
+----
+
+[NOTE]
+====
+This is not applicable for `.logout`.
+
+This only applies to providers that were not explicitly set in the provider list at configuration time.
+====
+
+== Examples
+
+[tabs]
+====
+Login::
++
+--
+[source, swift]
+----
+include::example${docname}AndLogin.swift[]
+----
+--
+Logout::
++
+--
+[source, swift]
+----
+include::example${docname}AndLogout.swift[]
+----
+--
+====
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="name"]
+
+|===
+
+== Response
+
+Type: `<<Provider>>`
+
+include::partial$models.adoc[tag=provider]

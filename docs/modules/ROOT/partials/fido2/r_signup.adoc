@@ -1,0 +1,23 @@
+= Signup
+
+The user requests to register a new account for the first time. Users don't need to provide a password, but instead provide an identifier like an email or mobile number as well as some personal data.
+
+Subsection::
+Jump to the <<Signup process, signup process>>
+
+Here is a snapshot of the signup view displayed to the user.
+
+image::webauthn-signup.png[width=40%,height=auto,role="zoom"]
+
+== Signup process
+
+The xref:signupWithWebAuthn.adoc[] method initiates the FIDO2 signup process to retrieve a randomly generated challenge, the Relying Party information, and the user information from the {company} server. The options are then passed to the *FIDO2 CLIENT* which returns an *FaceId Dialog* to generates a new credential *(WebauthnSignupCredential)*.
+
+Once the UI successfully generates a new credential, it sends the resulting data (which contains the information about this new credential) back to the {company} server and finalizes the FIDO2 signup process by returning a _one-time authentication token_.
+
+Finally, the result of the authentication callback request is parsed and a user's authentication token is retrieved.
+
+[source, swift]
+----
+include::example$usageSignupFido.swift[]
+----

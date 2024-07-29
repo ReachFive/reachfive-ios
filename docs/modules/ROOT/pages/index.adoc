@@ -1,0 +1,384 @@
+:mobile-sdk:
+= Getting Started
+
+// [.d-post]#*CocoaPods* `{sdk-ios-latest-version}`#
+image:https://img.shields.io/cocoapods/v/IdentitySdkCore.svg?style=flat&color=green[]
+
+== Requirements
+
+The minimal iOS version of an application using the {company} iOS SDKs has to be `{min-ios-version}`.
+
+include::docs::partial$domain-url-client-id-prereq.adoc[]
+
+== iOS specific prerequisites
+
+* The xref:docs:ROOT:clients.adoc[client] must be a `First-party client` with `Token Endpoint Authentication Method` set to `None`.
+* You must have the scheme registered in `Allowed Callback URLs`.
+* You should enforce PKCE for security purposes and enable Refresh Tokens for convenience.
+
+icon:book[] For more on configuring a client, see xref:docs:ROOT:clients.adoc#configure-client-first[Set up a client].
+
+== Installation
+
+{company} SDKs are published on https://cocoapods.org/pods/IdentitySdkCore[Cocoapods^] as independent modules. The latest version is `{sdk-ios-latest-version}`.
+
+TIP: You can also find releases directly on the {company} repo at link:https://github.com/ReachFive/identity-ios-sdk/releases/[ReachFive iOS SDK^].
+
+Below, you'll find a description and instructions for installation for each module.
+
+* <<SDK Core>>
+* <<Facebook native provider>>
+* <<Google native provider>>
+* <<WeChat Connect>>
+
+---
+
+=== SDK Core
+
+The core SDK contains all the main tools and interfaces, and methods related to standard authentication by identifier and password. It contains all common tools and interfaces and enables users to authenticate with their passwords.
+
+. Add these lines to your `Podfile` file, replacing `x.y.z` with the latest version:
++
+[source]
+----
+pod 'IdentitySdkCore', '~> x.y.z'
+----
+
+. Then run:
++
+[source, javascript]
+----
+pod install
+----
+
+. Configure your application's `Info.plist` file with the following XML snippet:
++
+[source,xml]
+----
+<!-- Info.plist -->
+
+<key>CFBundleURLTypes</key>
+
+<array>
+    <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>reachfive-${clientId}</string>
+        </array>
+    </dict>
+</array>
+----
+
+=== Facebook native provider
+
+This module uses the Facebook native SDK to provide a better user experience.
+
+TIP: Refer to the xref:docs::facebook.adoc[] guide to create your Facebook application.
+
+. Add these lines to your `Podfile` file, replacing `x.y.z` with the latest version:
++
+[source]
+----
+pod 'IdentitySdkFacebook', '~> x.y.z'
+----
+
+. Then run:
++
+[source]
+----
+pod install
+----
++
+NOTE: If you're using the latest version of the Facebook API, please remove the `user_gender` scope from the {company} client configuration to prevent any issues.
+
+. Configure the `Info.plist` file with the following XML snippet that contains data about your application:
++
+[source, xml]
+----
+<!-- Info.plist -->
+
+<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>fb$(YOUR_FACEBOOK_APPLICATION_ID)</string>
+        </array>
+    </dict>
+</array>
+<key>FacebookAppID</key>
+<string>$(YOUR_FACEBOOK_APPLICATION_ID)</string>
+<key>FacebookClientToken</key>
+<string>$(YOUR_FACEBOOK_CLIENT_TOKEN)</string>
+<key>FacebookDisplayName</key>
+<string>$(YOUR_APPLICATION_NAME)</string>
+----
+
+. Then to use any of the Facebook dialogs (e.g., Login, Share, App Invites, etc.) that can perform an app switch to Facebook apps, include the following lines:
++
+[source, xml]
+----
+<!-- Info.plist -->
+
+<key>LSApplicationQueriesSchemes</key>
+<array>
+    <string>fbapi</string>
+    <string>fb-messenger-share-api</string>
+</array>
+----
+
+TIP: See <<Info.plist reference>> for a comprehensive look at the file.
+
+=== Google native provider
+
+This module uses the Google native SDK to provide a better user experience.
+
+TIP: Refer to the xref:docs:ROOT:google.adoc[] guide to create your Google application.
+
+. Add these lines to your `Podfile` file, replacing `x.y.z` with the latest version:
++
+[source]
+----
+pod 'IdentitySdkGoogle', '~> x.y.z'
+----
+
+. Then run:
++
+[source]
+----
+pod install
+----
+[loweralpha]
+. Update your `Info.plist` file.
++
+[tabs]
+====
+``6.0.0`` and higher::
++
+--
+[loweralpha]
+. Add your Google Client ID to the `Info.plist` file:
++
+[source,xml]
+----
+...
+<key>GIDClientID</key>
+<string>GOOGLE_CLIENT_ID</string> <1>
+...
+----
+<1> This is your Google Client ID in standard format. For example, `1234567890-abcdefg.apps.googleusercontent.com`.
++
+TIP: See <<Info.plist reference>> for a comprehensive look a the file.
+
+. Add your reversed Google Client ID to the URL Scheme.
++
+[source,xml,subs=verbatim]
+----
+<key>CFBundleURLTypes</key>
+<array>
+<dict>
+    <key>CFBundleTypeRole</key>
+    <string>Editor</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+        <string>YOUR_REVERSED_GOOGLE_CLIENT_ID</string> <1>
+    </array>
+</dict>
+</array>
+----
+<1> The URL Scheme is the reversed Google Client ID (not {company}'s xref:docs:ROOT:clients.adoc[clientID]), which is your Google Client ID with the order of the dot-delimited fields reversed. For example, `com.googleusercontent.apps.abcdefg-1234567890`.
++
+TIP: See <<Info.plist reference>> for a comprehensive look a the file.
+
+--
+``5.8.0`` and lower::
++
+--
+[loweralpha]
+. Add your reversed Google Client ID to the URL Scheme.
++
+[source,xml,subs=verbatim]
+----
+<key>CFBundleURLTypes</key>
+<array>
+<dict>
+    <key>CFBundleTypeRole</key>
+    <string>Editor</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+        <string>YOUR_REVERSED_GOOGLE_CLIENT_ID</string> <1>
+    </array>
+</dict>
+</array>
+----
+<1> The URL Scheme is the reversed Google Client ID (not {company}'s xref:docs:ROOT:clients.adoc[clientID]), which is your Google Client ID with the order of the dot-delimited fields reversed. For example, `com.googleusercontent.apps.abcdefg-1234567890`.
++
+TIP: See <<Info.plist reference>> for a comprehensive look a the file.
+--
+====
+
+=== WeChat Connect
+
+This module uses the WeChat native SDK to provide an optimal user experience.
+Add the following to your `Info.plist` file.
+
+. Add these lines to your `Podfile` file, replacing `x.y.z` with the latest version:
++
+[source]
+----
+pod 'IdentityWeChat', '~> x.y.z'
+----
+
+. Then run:
++
+[source, javascript]
+----
+pod install
+----
+
+. Configure the `Info.plist` file with the following XML snippet that contains data about your application:
++
+.Info.plist
+[source,xml]
+----
+<key>LSApplicationQueriesSchemes</key>
+<array>
+    <string>weixin</string>
+    <string>weixinULAPI</string>
+    <string>weixinURLParamsAPI</string>
+</array>
+----
+
+// initialize the ios sdk
+include::partial$r_configure.adoc[leveloffset=+1]
+
+include::partial$r_initialize.adoc[leveloffset=+1]
+
+== iOS methods
+
+The sidebar contains are all the functions/methods accessible via the iOS SDK.
+
+In all the code examples, the {company} client is instantiated and stored in your `AppDelegate` class. 
+You can access it through the `AppDelegate.reachfive()` method as shown here and in <<Configuration>>.
+
+[source,swift]
+----
+    // Return the ReachFive client
+    static func reachfive() -> ReachFive {
+        let app = UIApplication.shared.delegate as! AppDelegate
+        return app.reachfive
+    }
+----
+
+== Info.plist reference
+
+If you configure all four SDKs, your `Info.plist` file should contain the following ``XML`` Snippet.
+
+// IMPORTANT: This snippet represents what is needed for the latest iOS SDK version which is currently ``{sdk-ios-latest-version}``.
+
+[tabs]
+====
+``6.0.0`` and higher::
++
+--
+[source,xml]
+----
+<key>CFBundleURLTypes</key>
+<array>
+   <dict>
+      <key>CFBundleURLSchemes</key>
+      <array>
+         <string>fb1634029666893228</string>
+      </array>
+   </dict>
+   <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+         <string>com.googleusercontent.apps.abcdefg-1234567890</string>
+      </array>
+   </dict>
+   <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+         <string>reachfive-TYAIHFRJ2a1FGJ1T8pKD</string>
+      </array>
+   </dict>
+</array>
+<key>GIDClientID</key>
+<string>1234567890-abcdefg.apps.googleusercontent.com</string>
+<key>FacebookAppID</key>
+<string>1634029666893228</string>
+<key>FacebookClientToken</key>
+<string>ec97b21afcd93ce699091a774a90e2e5</string>
+<key>FacebookDisplayName</key>
+<string>Reach5 SDK Mobile</string>
+<key>GIDClientID</key>
+<string>abcdefg-1234567890.apps.googleusercontent.com</string>
+<key>LSApplicationQueriesSchemes</key>
+<array>
+   <string>weixin</string>
+   <string>weixinULAPI</string>
+   <string>weixinURLParamsAPI</string>
+   <string>fbapi</string>
+   <string>fb-messenger-share-api</string>
+</array>
+----
+--
+``5.8.0`` and lower::
++
+--
+[source,xml]
+----
+<key>CFBundleURLTypes</key>
+<array>
+   <dict>
+      <key>CFBundleURLSchemes</key>
+      <array>
+         <string>fb1634029666893228</string>
+      </array>
+   </dict>
+   <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+         <string>com.googleusercontent.apps.abcdefg-1234567890</string>
+      </array>
+   </dict>
+   <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+         <string>tyaihfrj2a1fgj1t8pkd</string>
+      </array>
+   </dict>
+   <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+         <string>reachfive-TYAIHFRJ2a1FGJ1T8pKD</string>
+      </array>
+   </dict>
+</array>
+<key>FacebookAppID</key>
+<string>1634029666893228</string>
+<key>FacebookDisplayName</key>
+<string>Reach5 SDK Mobile</string>
+<key>LSApplicationQueriesSchemes</key>
+<array>
+   <string>fbapi</string>
+   <string>fb-messenger-share-api</string>
+   <string>fbauth2</string>
+   <string>fbshareextension</string>
+</array>
+----
+--
+====

@@ -1,0 +1,47 @@
+= updateProfile
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().updateProfile(<<authToken>>, <<profile>>)
+----
+
+== Description
+
+Update the information of the profile.
+
+[NOTE]
+====
+* The profile must have been granted the `full_write` scope at the last authentication.
+* The `email` and the `password` fields of the profile can't be updated with this method, except if the profile has no email address (usually when it is not provided by the social provider). Instead, use the xref:updateEmail.adoc[] method.
+* The `phoneNumber` field of the profile can't be updated if the SMS verification code is disabled on the account settings.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="authtoken"]
+include::partial$params.adoc[tag="profile"]
+
+|===
+
+== Response
+
+Type: `<<<Profile>>, <<ReachFiveError>>>`
+
+Return the profile with the updated data. If parameters are not valid or if the `full_write` scope is missing, the promise will be rejected and will return a `ReachFiveError`.
+
+include::partial$models.adoc[tag=profile]
+
+include::partial$models.adoc[tag=reachfiveerror]
+

@@ -1,0 +1,38 @@
+= mfaVerify(WithStepUp)
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().mfaVerify(
+    <<verifyStepUp,stepUp>>
+)
+----
+
+== About this command
+
+Verifies the step up process by passing the verification code and challenge ID.
+
+== Examples
+
+[source, kotlin]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[.options]
+[cols="1,3a"]
+|===
+
+include::partial$params.adoc[tags="verifyStepUp"]
+
+|===
+
+== Response
+
+`Future<AuthToken, ReachFiveError>`
+
+=== Error response
+
+include::partial$models.adoc[tag=reachfiveerror]

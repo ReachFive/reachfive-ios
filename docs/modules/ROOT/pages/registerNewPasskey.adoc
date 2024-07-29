@@ -1,0 +1,43 @@
+= {docname}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().registerNewPasskey(
+    <<NewPasskeyRequest,withRequest>>,
+    <<authToken>>
+)
+----
+
+== Description
+
+Registers a new passkey for an existing user which currently has no passkeys in the keychain, or replace the existing passkey with a new one.
+
+== Usage
+
+You should use this to allow users with existing accounts to register a passkey to their account.
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="NewPasskeyRequest"]
+include::partial$params.adoc[tag="authtoken"]
+
+|===
+
+== Response
+
+Type: `Future<(), <<ReachFiveError>>>`
+
+
+include::partial$models.adoc[tag=reachfiveerror]

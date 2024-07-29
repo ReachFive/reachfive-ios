@@ -1,0 +1,26 @@
+:fido-ios:
+= Passkeys on iOS
+
+== Introduction
+
+This guide explains how to implement passkey registration and authentication workflow on iOS applications. 
+
+TIP: The following code samples and screenshots are issued from our example application using our SDK. 
+Feel free to check out the link:{identity-ios-sdk-url}[Github project^]. 
+
+// passkeys requirements including ios setup
+include::partial$passkeys/r_prerequisites.adoc[leveloffset=+1]
+
+// initialize passkeys for ios
+include::partial$passkeys/p_get-started.adoc[leveloffset=+1]
+
+// follow-up screenshots for below
+
+// // passkeys signup flow for ios
+// include::partial$passkeys/r_signup.adoc[leveloffset=+1]
+
+// // passkeys authentication flow for ios
+// include::partial$passkeys/c_authentication.adoc[leveloffset=+1]
+
+// // manage passkeys devices for ios
+// include::partial$passkeys/r_manage-devices.adoc[leveloffset=+1]

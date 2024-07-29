@@ -1,0 +1,49 @@
+= login(withRequest)
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().login(
+    <<withRequest>>,
+    <<usingModalAuthorizationFor>>,
+    <<display>>
+)
+----
+
+== Description
+
+Logs the user in using credentials stored in the keychain. 
+The system displays all available credentials in a link:https://developer.apple.com/design/human-interface-guidelines/sheets[modal sheet^].
+Credentials can be passwords and/or passkeys.
+
+== Usage
+
+Start this request in response to a user interaction when the display is `.Always` or automatically and/or early in a view lifecycle (e.g., in ``viewDidAppear``).
+Alternatively, start the request during the application launch when the display is `.IfImmediatelyAvailableCredentials`.
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="withRequest"]
+include::partial$params.adoc[tag="usingModalAuthorizationFor"]
+include::partial$params.adoc[tag="display"]
+
+|===
+
+== Response
+
+Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+
+include::partial$models.adoc[tag=authtoken]
+
+include::partial$models.adoc[tag=reachfiveerror]

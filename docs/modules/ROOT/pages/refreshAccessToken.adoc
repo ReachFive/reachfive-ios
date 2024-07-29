@@ -1,0 +1,49 @@
+= refreshAccessToken
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().refreshAccessToken(<<authToken>>)
+----
+
+== Description
+
+Obtain a new `AuthToken` once your access token has expired.
+
+[NOTE]
+====
+* An expired access token (short-lived) can be renewed using a refresh token (long-lived).
+* Refreshing access tokens using an expired refresh token fails and invalidates all refresh tokens issued previously, for this {company} client only.
+* The profile must have been granted the `offline_access` scope at the last authentication to obtain a refresh token.
+* For refresh token to be included in your `AuthToken`, your client must be configured on the {cc} to enforce PKCE and to enable refresh tokens.
+
+{link-to-refresh-tokens}
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="authtoken"]
+
+|===
+
+== Response
+
+Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+
+If the credentials are valid, the promise will return the profile's authentication token. Otherwise it will be rejected and will return a `ReachFiveError`.
+
+include::partial$models.adoc[tag=authtoken]
+
+include::partial$models.adoc[tag=reachfiveerror]
+

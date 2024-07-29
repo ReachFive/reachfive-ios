@@ -1,0 +1,42 @@
+= signup(withRequest)
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().signup(
+    <<PasskeySignupRequest,withRequest>>
+)
+----
+
+== Description
+
+Signs up a user using a passkey.
+
+== Usage
+
+You should use this for users that don't have accounts and want to sign up using the passkey option.
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="PasskeySignupRequest"]
+
+|===
+
+== Response
+
+Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+
+include::partial$models.adoc[tag=authtoken]
+
+include::partial$models.adoc[tag=reachfiveerror]

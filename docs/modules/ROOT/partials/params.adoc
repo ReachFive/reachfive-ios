@@ -1,0 +1,425 @@
+// tag::authtoken[]
+|[[authToken, authToken]]authToken `AuthToken`|Authorization token of the profile retrieved from login.
+[cols="1,3a"]
+!===
+! idToken `string` ! The ID token {rfc-7519}[JSON Web Token (JWT)^] that contains the profile's information.
+! accessToken `string` ! The authorization credential {rfc-7519}[JSON Web Token (JWT)^] used to access the {company} API.
+! refreshToken `string` ! The refresh token {rfc-7519}[JSON Web Token (JWT)^] used to obtain new access tokens once they expire.
+! tokenType `string` ! The type of token. Always equal to `Bearer`.
+! expiresIn `number` a! The lifetime in seconds of the access token.
+
+If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
+
+! user `OpenIdUser` ! The user's information contained in the ID token.
+!===
+// end::authtoken[]
+
+// tag::startStepUp[]
+|[[startStepUp,startStepup]] stepUp
+|Contains the necessary fields to begin the step up process.
+
+This includes the following:
+
+* `authType`: The authorization type. This is `email` or `sms`.
+* `authToken`: The authorization token.
+* `scope`: The defined scope such as `openid`, `email`, or `phone_number`.
+* `redirectUri`: The URL to which the user is redirected.
+This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
+* `tkn`: The one-time use authentication token.
+* `origin`: The domain of the origin. 
+It must be a valid URL.
+
+You should only use one of `authToken` or `tkn`.
+
+[source,swift]
+----
+...
+AppDelegate.reachfive()
+  .mfaStart(stepUp(
+        authType: "email",
+        scope: scope,
+        authToken: profileAuthToken))
+...
+----
+
+// end::startStepUp[]
+
+// tag::verifyStepUp[]
+|[[verifyStepUp,verifyStepUp]] stepUp
+|Contains the necessary fields to begin the step up process.
+
+This includes the following:
+
+* `verificationCode`: The verification code sent by email or SMS.
+* `challengeId`: The code challenge ID to verify the user.
+* `trustDevice`: _Optional_ boolean to trust the device or not.
+Accepts `true` to mark the device as trusted and `false` to mark the device as not trusted.
+
+[source,swift]
+----
+...
+AppDelegate.reachfive()
+  .mfaVerify(stepUp(
+        challengeId: "m3DaoT...7Rzp1m",
+        verificationCode: "123456",
+        trustDevice: true))
+...
+----
+
+// end::verifyStepUp[]
+
+// tag::withRequest[]
+|[[withRequest,withRequest]] withRequest `NativeLoginRequest`
+|Object containing parameters to send along with the request.
+
+Object parameters:
+
+* `anchor`: The view that the credential provider uses if it requires user interaction.
+* `originWebAuthn`: The origin of the webauthn call.
+* `scopes`: The scopes granted to the profile.
+* `origin`: The origin of the call.
+This helps categorize inbound traffic.
+// end::withRequest[]
+
+// tag::forRequest[]
+|[[forRequest,forRequest]] forRequest `NativeLoginRequest`
+|Object containing parameters to send along with the request.
+
+Object parameters:
+
+* `anchor`: The view that the credential provider uses if it requires user interaction.
+* `originWebAuthn`: The origin of the webauthn call.
+* `scopes`: The scopes granted to the profile.
+* `origin`: The origin of the call.
+This helps categorize inbound traffic.
+// end::forRequest[]
+
+// tag::PasskeySignupRequest[]
+|[[PasskeySignupRequest,PasskeySignupRequest]] withRequest `PasskeySignupRequest`
+|Object containing parameters to send along with the request.
+
+Object parameters:
+
+* `passkeyProfile`: The data of the profile.
+* `friendlyName`: The name that is displayed by the system when presenting the passkey for login.
+* `anchor`: The view that the credential provider uses if it requires user interaction.
+* `originWebAuthn`: The origin of the webauthn call.
+* `scopes`: The scopes granted to the profile.
+* `origin`: The origin of the call.
+This helps categorize inbound traffic.
+// end::PasskeySignupRequest[]
+
+// tag::NewPasskeyRequest[]
+|[[NewPasskeyRequest,NewPasskeyRequest]] withRequest `NewPasskeyRequest`
+|Object containing parameters to send along with the request.
+
+Object parameters:
+
+* `anchor`: The view that the credential provider uses if it requires user interaction.
+* `friendlyName`: The name that is displayed by the system when presenting the passkey for login.
+* `originWebAuthn`: The origin of the webauthn call.
+* `origin`: The origin of the call.
+This helps categorize inbound traffic.
+// end::NewPasskeyRequest[]
+
+// tag::requestTypes[]
+|[[requestTypes,requestTypes]] `requestTypes`
+|Enum choice between password and/or passkey.
+// end::requestTypes[]
+
+// tag::mode[]
+|[[mode,mode]] `mode`
+|Choice of behaviour when no credentials are available.
+
+.options
+* option 1
+* option 2
+// end::mode[]
+
+// tag::Credential[]
+|[[Credential,Credential]]`registering`
+|The credential type to register.
+This is a method that requires an `authToken`.
+
+You pass either `.Email` or `.PhoneNumber`.
+
+For `.Email`, you also pass `redirectUri` as well.
+
+For `.PhoneNumber`, you also pass the `phoneNumber`.
+
+.Email example
+[source,swift]
+----
+AppDelegate.reachfive()
+  .mfaStart(.Email(
+        redirectUri: "reachfive-${clientId}://callback"),
+        authToken: profileAuthToken)
+----
+
+.PhoneNumber example
+[source,swift]
+----
+AppDelegate.reachfive()
+  .mfaStart(.PhoneNumber(
+        phoneNumber: "+3531235555"),
+        authToken: profileAuthToken)
+----
+
+// end::Credential[]
+
+// tag::CredentialType[]
+|[[CredentialType,CredentialType]]`CredentialType`
+|The credential type to verify.
+
+.Values
+* `.Email`
+* `.PhoneNumber`
+
+// end::CredentialType[]
+
+// tag::updateEmail[]
+|[[updateEmail, updateEmail]]email `string` 
+| The email address of the profile. The new email address must be different from the old one.
+
+include::docs:ROOT:page$email-address-management.adoc[tag=verifiedUnverified]
+
+TIP: For more, see our xref:docs:ROOT:email-address-management.adoc#changing-email-address-when-logged-in[Email address management page].
+
+// end::updateEmail[]
+
+// tag::email[]
+|[[email,email]] email `string` | The email address of the profile.
+// end::email[]
+
+// tag::freshauthtoken[]
+|[[freshAuthToken, freshAuthToken]]{sdk-fresh-at-desc} `AuthToken`|Authorization token of the profile retrieved from login (less than 5 minutes old).
+[cols="1,3a"]
+!===
+! idToken `string` ! The ID token {rfc-7519}[JSON Web Token (JWT)^] that contains the profile's information.
+! accessToken `string` ! The authorization credential {rfc-7519}[JSON Web Token (JWT)^] used to access the {company} API.
+! refreshToken `string` ! The refresh token {rfc-7519}[JSON Web Token (JWT)^] used to obtain new access tokens once they expire.@
+! tokenType `string` ! The type of token. Always equal to `Bearer`.
+! expiresIn `number` a! The lifetime in seconds of the access token.
+
+If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
+
+! user `OpenIdUser` ! The user's information contained in the ID token.
+!===
+// end::freshauthtoken[]
+
+// tag::friendlyname[]
+|[[friendlyName, friendlyName]]friendlyName `string` | The name that will be displayed by the system when presenting the passkey for login.
+// end::friendlyname[]
+
+// tag::name[]
+|[[name,name]] name `string` 
+| The name of the provider.
+
+.possible values
+- `facebook`
+- `google`
+- `paypal`
+- `twitter`
+- `franceconnect`
+- `apple`
+- `oney`
+
+// end::name[]
+
+// tag::newpassword[]
+|password `string` | The new password of the profile. Password must meet the minimum requirements defined by the {zxcvbn} used. It must also be different from the old one.
+// end::newpassword[]
+
+// tag::oldpassword[]
+|[[oldPassword,oldPassword]]oldPassword `string` | The old password of the profile.
+// end::oldpassword[]
+
+// tag::password[]
+|[[password,password]] password `string` | The password of the profile.
+// end::password[]
+
+// tag::passwordlesscallback[]
+|[[passwordlessCallback,passwordlessCallback]] passwordlessCallback `PasswordlessCallback` | The callback that will be executed when the magic link is intercepted.
+// end::passwordlesscallback[]
+
+// tag::passwordlessrequest[]
+include::partial$params.adoc[tag="email"]
+include::partial$params.adoc[tag="phoneNumber"]
+include::partial$params.adoc[tag="redirecturi"]
+// end::passwordlessrequest[]
+
+// tag::phoneNumber[]
+|[[phoneNumber,phoneNumber]] phoneNumber `string` | The phone number of the profile.
+
+Both the international format and the national conventions of the account's country are accepted if configured in account settings.
+// end::phoneNumber[]
+
+// tag::nonce[]
+|[[nonce,nonce]] nonce `string`
+|An OIDC nonce value.
+
+NOTE: This binds the tokens with the client and serves as a token validation parameter.
+
+// end::nonce[]
+
+// tag::withNonDiscoverableUserName[]
+|[[withNonDiscoverableUserName,withNonDiscoverableUserName]] withNonDiscoverableUserName
+|The username of the profile.
+// end::withNonDiscoverableUserName[]
+
+// tag::reachfive[]
+|[[reachfive,reachfive]]reachfive
+|The {company} `AppDelegate` method.
+// end::reachfive[]
+
+// tag::promise[]
+|[[promise,promise]]promise
+|Passes a promise that will return the response in the future (_asynchronously_).
+// end::promise[]
+
+// tag::usingModalAuthorizationFor[]
+|[[usingModalAuthorizationFor,usingModalAuthorizationFor]] usingModalAuthorizationFor
+|The type of credential, passkey and/or password.
+// end::usingModalAuthorizationFor[]
+
+// tag::usingModalAuthorizationForNonDiscoverable[]
+|[[usingModalAuthorizationForNonDiscoverable,usingModalAuthorizationForNonDiscoverable]] usingModalAuthorizationFor
+|The type of credential, currently only passkey supported.
+// end::usingModalAuthorizationForNonDiscoverable[]
+
+// tag::display[]
+|[[display,display]] display
+|Choice of behaviour when there are no credentials available.
+
+.options
+* `Always`: If credentials are available, presents a modal sign-in sheet.
+If there are no locally saved credentials and the authorization is for ``.Passkey``, the system presents a QR code to allow signing in with a passkey from a nearby device.
+If there are no locally saved credentials and the authorization is for ``.Password``, no UI appears.
+You can start this request in response to a user interaction.
+* `IfImmediatelyAvailableCredentials`: If credentials are available, presents a modal sign-in sheet. 
+If there are no locally saved credentials, no UI appears and the call ends in `ReachFiveError.AuthCanceled`. 
+You can start a request automatically early in the view lifecycle (e.g., in ``viewDidAppear``) or at app launch.
+// end::display[]
+
+// tag::presentationContextProvider[]
+|[[presentationContextProvider,presentationContextProvider]] presentationContextProvider `string`
+|A delegate that provides a display context whereby the system is able to present an authentication session to the user.
+
+TIP: For more, see link:https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession/3237232-presentationcontextprovider[here^].
+
+// end::presentationContextProvider[]
+
+// tag::state[]
+|[[state,state]] state `string`
+|The OAuth2 state value.
+
+NOTE: This is a random string sent to the auth server. The auth server sends the state parameter back. If they match, you're good to go. If they don't match, someone (or something) else initiated the auth request.
+
+// end::state[]
+
+// tag::customIdentifier[]
+| [[customIdentifier, customIdentifier]]customIdentifier `string` | A string that allows users to authenticate with something other than an `email` or `phone_number`. It's important to note that an `email` and/or `phone_number` is still required to create a managed profile. Each `custom_identifier` value must be unique. The `custom_identifier` must be between _4-80_ characters.
+// end::customIdentifier[]
+
+// tag::profile[]
+|[[profile,profile]] profile `Profile` | The profile with the new data. Only the provided fields will be updated.
+// end::profile[]
+
+// tag::profilesignuprequest[]
+|[[profileSignupRequest, ProfileSignupRequest]] profile `ProfileSignupRequest` | The data of the profile.
+[cols="1,3a"]
+!===
+! password `string` ! The password of the profile. Password must meet the minimum requirements defined by the {zxcvbn} used.
+! email `string` ! The primary email address of the profile.
+! phoneNumber `string` ! The primary phone number of the profile.
+
+Both the international format and the national conventions of the account's country are accepted if configured in account settings.
+
+! customIdentifier `string` !A string that allows users to authenticate with something other than an `email` or `phone_number`. It's important to note that an `email` and/or `phone_number` is still required to create a managed profile. Each `custom_identifier` value must be unique. The `custom_identifier` must be between _4-80_ characters.
+
+! givenName `string` ! The given name of the profile.
+! middleName `string` ! The middle name of the profile.
+! familyName `string` ! The family name of the profile.
+! name `string` ! The full name of the profile.
+! nickname `string` ! The nickname of the profile.
+! birthdate `string` ! The birthdate of the profile, represented as an {iso-8601}[ISO 8601^] `YYYY-MM-DD` format.
+! profileURL `string` ! The URL of one of the user’s profile page (usually a social provider’s page).
+! picture `string` ! The URL of one of the profile picture. This URL refers to an image file (PNG, JPEG, or GIF image file).
+! username `string` ! The username of the profile (the login's name).
+! gender `string` ! The gender of the profile.
+
+Allowed values are `female`, `male` and `other`.
+! company `string` ! The company's name of the profile.
+// submodel to do
+! addresses `ProfileAddress[]` ! The list of the profile's postal addresses
+! locale `string` ! The profile's language code in lowercase and country code in uppercase, separated by a dash (eg `en`, `fr-FR` ...).
+! bio `string` ! The biography of the profile.
+! customFields `Map<string, any>` ! The custom fields of the profile.
+! consents `Map<string, Consent>` ! The consents granted to the profile. It is a map of string keys with the associated consent object.
+!===
+// end::profilesignuprequest[]
+
+// tag::origin[]
+|[[origin, origin]]origin `string` | The origin of the call.
+// end::origin[]
+
+// tag::redirecturl[]
+|[[redirectUrl,redirectUrl]] redirectUrl `string` | The URL to which the user is redirected.
+
+NOTE: This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
+
+// end::redirecturl[]
+
+// tag::redirecturi[]
+|[[redirectUri,redirectUri]] redirectUri `string` | The URL where the user will be redirected after the passwordless success. Default value is `reachfive-$\{clientId}://callback`.
+// end::redirecturi[]
+
+// tag::scope[]
+|[[scope,scope]] scope `string[]` | The scopes granted to the profile. Make sure they are allowed by the client.
+
+Default scopes are the allowed scopes set up in the client's configuration.
+// end::scope[]
+
+// tag::scopes[]
+|[[scopes,scopes]] scopes `string[]` | The scopes granted to the profile. Make sure they are allowed by the client.
+
+Default scopes are the allowed scopes set up in the client's configuration.
+// end::scopes[]
+
+// tag::username[]
+|[[username,username]] username `string` |  Username of the profile: email address or phone number.
+
+Both the international format and the national conventions of the account's country are accepted if configured in account settings.
+// end::username[]
+
+// tag::verificationcode[]
+|[[verificationCode{sdk-code-anchor}]]verificationCode `string` | The verification code sent by email or SMS.
+// end::verificationcode[]
+
+// tag::code[]
+|[[code,code]]code `string` | The verification code sent by email or SMS.
+// end::code[]
+
+// tag::verifyauthcoderequest[]
+|[[verifyAuthCodeRequest, verifyAuthCodeRequest]]verifyAuthCodeRequest `VerifyAuthCodeRequest`|
+
+[cols="1,3a"]
+!===
+
+! phoneNumber `string` 
+! The phone number of the profile.
+
+NOTE: Both the international format and the national conventions of the account's country are accepted if configured in account settings.
+
+! verificationCode `string` 
+! *Required* The verification code sent by SMS.
+
+! email `string`
+! The email address.
+
+!===
+// end::verifyauthcoderequest[]
+
+// tag::viewcontroller[]
+|[[viewController,viewController]] viewController `string` | An object that manages a view hierarchy for your UIKit app.
+// end::viewcontroller[]
