@@ -34,14 +34,23 @@ Below, you'll find a description and instructions for installation for each modu
 
 === SDK Core
 
-The core SDK contains all the main tools and interfaces, and methods related to standard authentication by identifier and password. 
+The core SDK contains all the main tools and interfaces, and methods related to standard authentication by identifier and password.
 It contains all common tools and interfaces and enables users to authenticate with their passwords.
 
-. Add these lines to your `Podfile` file, replacing `x.y.z` with the latest version:
+
+==== Installation
+
+[tabs]
+====
+Cocoapods::
++
+--
+
+. Add these lines to your `Podfile` file, replacing `x` with the latest version:
 +
 [source]
 ----
-pod 'IdentitySdkCore', '~> x.y.z'
+pod 'Reach5', '~> x'
 ----
 
 . Then run:
@@ -50,8 +59,29 @@ pod 'IdentitySdkCore', '~> x.y.z'
 ----
 pod install
 ----
+--
+Swift Package Manager::
++
+--
+Add the package dependency with XCode using this package URL:
 
-. Configure your application's `Info.plist` file with the following XML snippet:
+https://github.com/ReachFive/reachfive-ios.git
+
+Or directly add this to the dependencies in `Package.swift`
+
+[source,swift]
+----
+dependencies: [
+    .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "7.0.0"))
+]
+----
+
+--
+====
+
+==== Configuration
+- Configure your application's `Info.plist` file with the following XML snippet:
+
 +
 [source,xml]
 ----
@@ -77,11 +107,19 @@ This module uses the Facebook native SDK to provide a better user experience.
 
 TIP: Refer to the xref:docs::facebook.adoc[] guide to create your Facebook application.
 
-. Add these lines to your `Podfile` file, replacing `x.y.z` with the latest version:
+==== Installation
+
+[tabs]
+====
+Cocoapods::
++
+--
+
+. Add these lines to your `Podfile` file, replacing `x` with the latest version:
 +
 [source]
 ----
-pod 'IdentitySdkFacebook', '~> x.y.z'
+pod 'Reach5Facebook', '~> x'
 ----
 
 . Then run:
@@ -92,6 +130,27 @@ pod install
 ----
 +
 NOTE: If you're using the latest version of the Facebook API, please remove the `user_gender` scope from the {company} client configuration to prevent any issues.
+--
+Swift Package Manager::
++
+--
+Add the package dependency with XCode using this package URL:
+
+https://github.com/ReachFive/reachfive-ios-facebook.git
+
+Or directly add this to the dependencies in `Package.swift`
+
+[source,swift]
+----
+dependencies: [
+    .package(url: "https://github.com/ReachFive/reachfive-ios-facebook.git", .upToNextMajor(from: "7.0.0"))
+]
+----
+--
+====
+
+==== Configuration
+
 
 . Configure the `Info.plist` file with the following XML snippet that contains data about your application:
 +
@@ -137,11 +196,19 @@ This module uses the Google native SDK to provide a better user experience.
 
 TIP: Refer to the xref:docs:ROOT:google.adoc[] guide to create your Google application.
 
-. Add these lines to your `Podfile` file, replacing `x.y.z` with the latest version:
+==== Installation
+
+[tabs]
+====
+Cocoapods::
++
+--
+
+. Add these lines to your `Podfile` file, replacing `x` with the latest version:
 +
 [source]
 ----
-pod 'IdentitySdkGoogle', '~> x.y.z'
+pod 'Reach5Google', '~> x'
 ----
 
 . Then run:
@@ -150,8 +217,30 @@ pod 'IdentitySdkGoogle', '~> x.y.z'
 ----
 pod install
 ----
-[loweralpha]
-. Update your `Info.plist` file.
+
+--
+Swift Package Manager::
++
+--
+Add the package dependency with XCode using this package URL:
+
+https://github.com/ReachFive/reachfive-ios-google.git
+
+Or directly add this to the dependencies in `Package.swift`
+
+[source,swift]
+----
+dependencies: [
+    .package(url: "https://github.com/ReachFive/reachfive-ios-google.git", .upToNextMajor(from: "7.0.0"))
+]
+----
+--
+====
+
+==== Configuration
+
+- Configure the `Info.plist` file with the following XML snippet that contains data about your application:
+
 +
 [tabs]
 ====
@@ -163,10 +252,10 @@ pod install
 +
 [source,xml]
 ----
-...
+<!-- Info.plist -->
+
 <key>GIDClientID</key>
 <string>GOOGLE_CLIENT_ID</string> <1>
-...
 ----
 <1> This is your Google Client ID in standard format. For example, `1234567890-abcdefg.apps.googleusercontent.com`.
 +
@@ -201,6 +290,8 @@ TIP: See <<Info.plist reference>> for a comprehensive look a the file.
 +
 [source,xml,subs=verbatim]
 ----
+<!-- Info.plist -->
+
 <key>CFBundleURLTypes</key>
 <array>
 <dict>
@@ -221,14 +312,21 @@ TIP: See <<Info.plist reference>> for a comprehensive look a the file.
 
 === WeChat Connect
 
-This module uses the WeChat native SDK to provide an optimal user experience.
-Add the following to your `Info.plist` file.
+This module uses the WeChat native SDK to be able to interact with the WeChat app.
 
-. Add these lines to your `Podfile` file, replacing `x.y.z` with the latest version:
+==== Installation
+
+[tabs]
+====
+Cocoapods::
++
+--
+
+. Add these lines to your `Podfile` file, replacing `x` with the latest version:
 +
 [source]
 ----
-pod 'IdentityWeChat', '~> x.y.z'
+pod 'Reach5WeChat', '~> x'
 ----
 
 . Then run:
@@ -237,12 +335,22 @@ pod 'IdentityWeChat', '~> x.y.z'
 ----
 pod install
 ----
-
-. Configure the `Info.plist` file with the following XML snippet that contains data about your application:
+--
+Swift Package Manager::
 +
-.Info.plist
+--
+Swift Package Manager not yet supported.
+--
+====
+
+==== Configuration
+
+- Configure the `Info.plist` file with the following XML snippet that contains data about your application:
++
 [source,xml]
 ----
+<!-- Info.plist -->
+
 <key>LSApplicationQueriesSchemes</key>
 <array>
     <string>weixin</string>
