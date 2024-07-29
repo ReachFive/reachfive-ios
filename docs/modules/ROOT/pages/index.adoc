@@ -1,5 +1,6 @@
 :mobile-sdk:
 = Getting Started
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
 // [.d-post]#*CocoaPods* `{sdk-ios-latest-version}`#
 image:https://img.shields.io/cocoapods/v/IdentitySdkCore.svg?style=flat&color=green[]
