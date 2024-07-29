@@ -1,0 +1,48 @@
+* Introduction
+** xref:index.adoc[]
+// ** xref:guides/auth-ios.adoc[]
+** xref:guides/passkeys.adoc[]
+** xref:reference/errors.adoc[]
+
+.Methods
+
+** MFA
+*** xref:mfaStart.adoc[]
+*** xref:mfaStartWithStepUp.adoc[]
+*** xref:mfaVerify.adoc[]
+*** xref:mfaVerifyWithStepUp.adoc[]
+*** xref:mfaListCredentials.adoc[]
+*** xref:mfaDeleteCredential.adoc[]
+** Passkey
+*** xref:beginAutoFillAssistedPasskeyLogin.adoc[]
+*** xref:loginWithRequest.adoc[]
+*** xref:loginWithNonDiscoverableUserName.adoc[]
+*** xref:registerNewPasskey.adoc[]
+*** xref:signupWithRequest.adoc[]
+** Password
+*** xref:loginWithPassword.adoc[]
+*** xref:logout.adoc[]
+*** xref:requestPasswordReset.adoc[]
+*** xref:signup.adoc[]
+** Passwordless
+*** xref:addPasswordlessCallback.adoc[]
+*** xref:startPasswordless.adoc[]
+*** xref:verifyPasswordlessCode.adoc[]
+** Profile
+*** xref:getProfile.adoc[]
+*** xref:refreshAccessToken.adoc[]
+*** xref:updateEmail.adoc[]
+*** xref:updatePassword.adoc[]
+*** xref:updatePhoneNumber.adoc[]
+*** xref:updateProfile.adoc[]
+*** xref:verifyPhoneNumber.adoc[]
+** Social
+*** xref:getProvider.adoc[]
+*** xref:getProviders.adoc[]
+** Webview
+*** xref:loadLoginWebview.adoc[]
+*** xref:webviewLogin.adoc[]
+
+// * xref:listWebAuthnDevices.adoc[]
+// * xref:loginWithWebAuthn.adoc[]
+// * xref:signupWithWebAuthn.adoc[]

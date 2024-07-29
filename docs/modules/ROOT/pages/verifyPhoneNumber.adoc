@@ -1,0 +1,50 @@
+= verifyPhoneNumber
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().verifyPhoneNumber(
+    <<authToken,authToken>>,
+    <<phoneNumber>>,
+    <<verificationCode, verificationCode>>
+)
+----
+
+== Description
+
+Verify the profile's phone number with the verification code sent by SMS after signup.
+
+[NOTE]
+====
+* The profile must have been granted the `full_write` scope at the last authentication.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+:sdk-fresh-at-desc: authToken
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="authtoken"]
+include::partial$params.adoc[tag="phoneNumber"]
+include::partial$params.adoc[tag="verificationcode"]
+
+|===
+
+== Response
+
+Type: `Future<(), <<ReachFiveError>>>`
+
+If the `full_write` scope is missing or if the verification code is incorrect, the promise will be rejected and will return a `ReachFiveError`.
+
+include::partial$models.adoc[tag=reachfiveerror]

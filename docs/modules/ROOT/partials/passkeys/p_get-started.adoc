@@ -1,0 +1,89 @@
+= Get started
+
+This section describes important terms and concepts as well the steps needed to get started with passkeys for iOS with {company}.
+
+== Relying Party ID 
+
+The Relying Party ID is the domain to which passkeys are bound. 
+Once bound to a domain, it can be used on subdomains but not other full domains.
+
+Using the Relying Party ID of ``boulangerie.com`` allows the use of credentials on ``help.boulangerie.com`` for example, but not on a different full domain like ``boulangerie.fr``. 
+
+Also, if the Relying Part ID is bound to a subdomain such as `login.boulangerie.com`, then it cannot be used on the root domain, another full root domain, or another subdomain of `boulangerie.com` such as `help.boulangerie.com`.
+
+In this case, customers would need a common login page for passkeys for varying full domains like the stated example here.
+
+== Discoverable login
+
+With discoverable logins, the passkey manager presents the user with all the stored credentials for this app or website meaning that the user does not have to manually enter his or her identifier.
+
+Discoverable logins aren't restricted to passkeys.
+This is also applicable to passwords.
+See xref:sdk-ios:ROOT:loginWithRequest.adoc[] for more details.
+
+== Non-discoverable login
+
+With non-discoverable login, the user must manually enter his or her username before the passkey manager can find a credential.
+
+== apple-app-site-association
+
+You need to host a link:https://developer.apple.com/documentation/xcode/supporting-associated-domains[apple-app-site-association^] file on `\https://<your_domain>/.well-known/apple-app-site-association` to allow the application to register and authenticate with credentials associated with the Relying Party ID `<your_domain>`.
+
+.apple-app-site-association example
+[source,json]
+----
+{
+  "webcredentials": {"apps": ["ABCDE12345.com.example.app"]} <1>
+}
+----
+<1> A value of the following format: `<Application Identifier Prefix>.<Bundle Identifier>`.
+
+// === `assetlinks` response
+
+// The `\https://<RelyingPartyId>/.well-known/assetlinks.json` link must return a `200` HTTP response with a JSON MIME `Content-Type` header. 
+// Returning a `301` or `302` HTTP redirect or a non-JSON Content-Type causes verification to fail. See link:https://developer.android.com/training/sign-in/passkeys#add-support-dal[Android's docs^] for more details.
+
+=== Hosted pages
+
+If you are using's {company}'s xref:docs:ROOT:hosted-pages.adoc[] and need the `apple-app-site-association` file hosted on your domain at {company}, you should input the content of your `apple-app-site-association` file into the text area called *apple-app-site-association* in the menu:Settings[WebAuthn] section of the {cc}.
+
+CAUTION: We do not perform any validation on the file.
+
+[tabs]
+====
+No custom domain [.red]#icon:close[]#::
++
+--
+If you do not use a custom domain, the Relying Party ID associated to credentials created on Hosted Pages is `<account>.reach5.net`.
+Your apple-app-site-association file is served at `\https://<account>.reach5.net/.well-known/apple-app-site-association`.
+--
+Using custom domain icon:check-circle[]::
++
+--
+If you do use a custom domain, your Relying Party ID is `\https://<custom_domain>`.
+Your apple-app-site-association file is served at `\https://<custom_domain>/.well-known/apple-app-site-association`.
+
+You could also choose to host the `apple-app-site-association` file on your root domain.
+Hosted Pages are accessible via `auth.example.com`.
+You could then host the `apple-app-site-association` file at `example.com`.
+This is a viable long-term option in the case you may not use Hosted Pages in the future.
+--
+====
+
+=== Self-hosted
+
+If you do not use {company}'s Hosted Pages option, you should host the file on your own.
+
+[source]
+----
+https://<your_domain>/.well-known/apple-app-site-association <1>
+----
+<1> Ensure you use the correct Relying Party ID as your domain here.
+
+== Allowed origins
+
+In the {cc}, under menu:Settings[WebAuthn] you must allow:
+
+* the URL of the domain that corresponds to the Relying Party ID
+
+image::console-webauthn-settings.png[role="zoom"]

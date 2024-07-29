@@ -1,0 +1,32 @@
+= getProviders
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().getProviders()
+----
+
+== Description
+
+Retrieve all the providers registered on the {company} client.
+
+Refer at the iOS SDK Installation to initialize the providers at the client's instantiation.
+
+[NOTE]
+====
+* The scopes provided are the permissions setup in the provider's configuration through the console.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Response
+
+Type: `<<Provider, Provider[]>>`
+
+include::partial$models.adoc[tag=provider]

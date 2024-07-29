@@ -1,0 +1,65 @@
+= signup
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().signup(
+    <<ProfileSignupRequest, profile>>,
+    // Optional arguments
+    <<redirectUrl>>,
+    <<scope>>
+)
+----
+
+== Description
+
+Create and authenticate a new user with the specified data.
+
+NOTE: Users can identify themselves with an email address or mobile number (if the `SMS` feature is enabled).
+
+== Examples
+
+[tabs]
+====
+With an email::
++
+--
+[source, swift]
+----
+include::example${docname}WithEmail.swift[]
+----
+--
+With a phone number::
++
+--
+[source, swift]
+----
+include::example${docname}WithPhoneNumber.swift[]
+----
+--
+====
+
+
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="profilesignuprequest"]
+include::partial$params.adoc[tag="redirecturl"]
+include::partial$params.adoc[tag="scope"]
+
+|===
+
+== Response
+
+Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+
+Return the profile's authentication token. If the parameters are invalid or if a profile already exists with the same email address, the promise will be rejected and will return a `ReachFiveError`.
+
+include::partial$models.adoc[tag=authtoken]
+
+include::partial$models.adoc[tag=reachfiveerror]

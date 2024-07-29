@@ -1,0 +1,311 @@
+// tag::authtoken[]
+=== AuthToken
+
+The authentication token.
+
+[cols="1a,2a"]
+|===
+|idToken|The ID token {rfc-7519}[JSON Web Token (JWT)^] that contains the profile's information.
+|accessToken|The authorization credential {rfc-7519}[JSON Web Token (JWT)^] used to access the {company} API.
+|refreshToken
+|The refresh token {rfc-7519}[JSON Web Token (JWT)^] used to obtain new access tokens once they expire. This is only available when the `offline_access` xref:docs:ROOT:scope.adoc[scope] is requested.
+
+|tokenType|The type of token. Always equal to `Bearer`.
+|expiresIn|The lifetime in seconds of the access token.
+
+If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
+|user **OpenIDUser**|The user's information contained in the ID token.
+
+!===
+! id `string`! The identifier of the user.
+! name `string`! The full name of the user in displayable form including all name parts, possibly including titles and suffixes, ordered according to the user's locale and preferences.
+! preferredUsername `string`! The shorthand name by which the user wishes to be referred to.
+! givenName `string`! The given name or first name of the user.
+! familyName `string`! The surname or last name of the user.
+! middleName `string`! The middle name of the user.
+! nickname `string`! The casual name of the user that may or may not be the same as the givenName
+! picture `string`! The URL of the user's profile picture.
+! website `string`! The URL of the user's web page or blog.
+! email `string`! The user's preferred e-mail address.
+! emailVerified `boolean`! True if the user's e-mail address has been verified; otherwise false.
+! gender `string`! The user's gender.
+! zoneinfo `string`! The string from zoneinfo time zone database representing the user's time zone.
+! locale `string`! The user's language code in lowercase and country code in uppercase, separated by a dash.
+! phoneNumber `string`! The user's preferred telephone number.
+! phoneNumberVerified `boolean`! `true` if the user's phone number has been verified; otherwise `false`.
+! address `string`! The user's preferred postal address.
+!===
+|===
+// end::authtoken[]
+
+// tag::profile[]
+=== Profile
+
+[cols="1,2a"]
+|===
+| id `string` | The {company} identifier of the profile.
+| givenName `string` | The given name of the profile.
+| middleName `string` | The middle name of the profile.
+| familyName `string` | The family name of the profile.
+| name `string` | The full name of the profile.
+| nickname `string` | The nickname of the profile.
+| birthdate `string` | The birthdate of the profile, represented as an {iso-8601}[ISO 8601^] `YYYY-MM-DD` format.
+| profileURL `string` | The URL of one of the user’s profile page (usually a social provider’s page).
+| picture `string` | The URL of one of the profile picture. This URL refers to an image file (PNG, JPEG, or GIF image file).
+| externalId `string` | The external identifier of the profile.
+| authTypes `String[]` | The list of the authentication providers used to login by the profile (e.g. facebook, password ...).
+| loginSummary `LoginSummary` | The login activities history of the profile.
+!===
+!firstLogin `string`!The time of the first login.
+!lastLogin `string`!The time of the last login.
+!total `string`!The number of login.
+!origins `string`!Some additional information about the login.
+!devices `string`!The devices used for login (`desktop`, `ios`, `android`, `mobile_web` and `windows_phone`).
+!lastProvider `string`!The last provider used for login (e.g. `local`, `lite`, `facebook` ...).
+!===
+| username `string` | The username of the profile (the login's name).
+| gender `string` | The gender of the profile.
+
+Allowed values are `female`, `male` and `other`.
+| email `string` | The primary email address of the profile.
+| emailVerified `boolean` | `true` if the profile's e-mail address has been verified; otherwise `false`.
+| emails `Emails` | The e-mail addresses of the profile.
+!===
+!verified `string[]`!The list of the verified e-mail addresses of the profile.
+!unverified `string[]`!The list of the unverified e-mail addresses of the profile.
+!===
+| phoneNumber `string` | The primary phone number of the profile.
+
+Both the international format and the national conventions of the account's country are accepted if configured in account settings.
+
+| phoneNumberVerified `boolean` | `true` if the user's phone number has been verified; otherwise `false`.
+| addresses `List of ProfileAddress` | The list of the profile's postal addresses. To get this attribute, the profile must have been granted the `address` scope at the last authentication.
+!===
+!title `string`!The title of the address.
+
+This value can't be an empty string.
+!isDefault `boolean`!Whether the address is the default postal address of the profile. Only a single address can be the default address.
+
+Defaults to `true`.
+!addressType `string`!The type of address
+
+Allowed values: `delivery` or `billing`.
+!streetAddress `string`!The full street address component which may include the house number, the street's name and the extended street address information separated by newlines.
+
+This value can't be an empty string.
+
+!addressComplement | A complementary address field which can contain additional information about the address.
+!locality `string`!The name of the city.
+!region `string`!The name of the region.
+!postalCode `string`!The zip code.
+!country `string`!The name of the country.
+
+This value can't be an empty string.
+!deliveryNote `string`!An additional note from the profile for the delivery.
+!recipient `string`!The name of the recipient located at this address.
+!company `string`!The name of the company located at this address.
+!phoneNumber `string`!The phone number of the contact point at this address (no format validation is required).
+!===
+
+| locale `string` | The profile's language code in lowercase and country code in uppercase, separated by a dash (e.g. `en`, `fr-FR` ...).
+
+| bio `string` | The biography of the profile.
+
+| customFields `Map<string, any>` | The custom fields of the profile.
+| consents `Map<string, Consent>` | The consents granted to the profile. It is a map of string keys with the associated consent object.
+
+!===
+!granted `boolean`!Whether the consent was granted to the profile or not.
+!consentType `boolean`!The type of consent.
+
+Allowed values: `opt-in` `opt-out`.
+!date `string`!The time the consent was last updated.
+!===
+
+| createdAt `string` | The time the profile's information was created.
+| updatedAt `string` | The time the profile's information was last updated.
+|===
+// end::profile[]
+
+// tag::provider[]
+=== Provider
+
+The provider which name matches the name passed in argument.
+
+[cols="1,3a"]
+|===
+| name `string` | The name of the provider.
+
+.possible values
+- `facebook`
+- `google`
+- `paypal`
+- `twitter`
+- `franceconnect`
+- `apple`
+- `oney`
+
+| login `function` | Expect the following arguments:
+
+- `scope` `[String]`: the list of the profile’s scopes. Make sure they are allowed by the client. Default scopes are the allowed scopes set up in the client’s configuration.
+- `origin` `String`: the origin of the call
+- `viewController` `UIViewController`: the class that manages the views of your iOS app.
+
+It authenticates the profile with the provider otherwise it returns a `ReachFiveError`.
+| logout `function` | No argument is expected. Kill the SSO session of the profile otherwise returns a `ReachFiveError`.
+|===
+// end::provider[]
+
+// tag::reachfiveerror[]
+=== ReachFiveError
+
+Based on the problem, the `ReachFiveError` will be:
+
+* `RequestError(requestErrors: RequestErrors)` if it's a bad request error.
++
+
+[cols="1,2a"]
+|===
+|error `string`|The main error message.
+|errorId `string`|The identifier of the error.
+|errorUserMsg `string`|The user-friendly error message.
+
+NOTE: This property is translated according to the user's browser settings. Currently supported languages:
+
+include::docs::partial$general/r_supported-languages.adoc[tags="all"]
+
+|errorMessageKey `string`|The error message key.
+|errorDescription `string`|The technical error message.
+
+|errorDetails **FieldError[]**
+|
+!===
+!field `string`!The field concerned by the error.
+!message `string`!The message error returned for the `field`.
+!code `string`!The code error returned for the `field`.
+!===
+
+* `AuthFailure(reason: String)` if the authentication has failed.
+* `AuthCanceled` if the authentication was cancelled.
+* `TechnicalError(reason: String)` if it's an internal server error.
+
+|===
+
+// end::reachfiveerror[]
+
+// tag::deviceCredential[]
+=== DeviceCredential
+
+The details of a device credential.
+
+[cols="2,5a"]
+|===
+
+| friendlyName `string` 
+| The name that is displayed by the system when presenting the passkey for login.
+
+| id `string` 
+| The identifier of the credential.
+
+|===
+// end::deviceCredential[]
+
+// tag::MfaCredentialItem[]
+=== MfaCredentialItem
+
+[cols="4,6a"]
+|===
+
+| friendlyName `string` 
+| The name that is displayed by the system for the MFA credential item.
+
+| createdAt `string` 
+| The time when the MFA credential item was created.
+
+| phoneNumber `string` 
+| The phone number for the MFA credential.
+
+This is only applicable for the type `sms`.
+
+| email `string` 
+| The email for the MFA credential.
+
+This is only applicable for the type `email`.
+
+| type `CredentialType`
+| The MFA credential type.
+
+* `sms`
+* `email`
+
+|===
+
+// end::MfaCredentialItem[]
+
+// tag::MfaCredentialsListResponse[]
+=== MfaCredentialsListResponse
+
+[tabs]
+====
+Email::
++
+--
+[source,json]
+----
+credentials: [
+    {"createdAt": "createdAtDate", "friendlyName": "friendlyName", "email": "joe@example.com", "type": CredentialType}
+] <1>
+----
+<1> Contains array of `MfaCredentialItem` objects.
+--
+Phone number::
++
+--
+[source,json]
+----
+credentials: [
+    {"createdAt": "createdAtDate", "friendlyName": "friendlyName", "phoneNumber": "+35312345678", "type": CredentialType}
+] <1>
+----
+<1> Contains array of `MfaCredentialItem` objects.
+--
+====
+
+
+[cols="20%s,35%,55%a"]
+|===
+
+| credentials
+|
+|
+
+|
+| friendlyName `string` 
+| The name that is displayed by the system for the MFA credential item.
+
+|
+| createdAt `string` 
+| The time when the MFA credential item was created.
+
+|
+| phoneNumber `string` 
+| The phone number for the MFA credential.
+
+This is only applicable for the type `sms`.
+
+|
+| email `string` 
+| The email for the MFA credential.
+
+This is only applicable for the type `email`.
+
+|
+| type `CredentialType`
+| The MFA credential type.
+
+* `sms`
+* `email`
+
+|===
+
+// end::MfaCredentialsListResponse[]

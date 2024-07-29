@@ -1,0 +1,43 @@
+:fido:
+= loginWithWebAuthn
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().loginWithWebAuthn(
+    <<email>>,
+    <<origin>>,
+    <<viewController>>,
+    // Optional arguments
+    <<scopes>>
+)
+----
+
+== Description
+
+A user with an already registered credential can authenticate with a registered FIDO2 device. This method will get a FIDO2 pending intent for authentication with the options returned by the {company} server and launch it.
+
+It will then parse the resulting intent and if successful, the user receives a one-time authentication token. An authentication callback task is then launched to exchange the token with the server for an access token.
+
+[NOTE]
+====
+* The WebAuthn feature must be enabled on your {company} account.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[.options]
+[cols="1,3a"]
+|===
+include::partial$params.adoc[tag="email"]
+include::partial$params.adoc[tag="origin"]
+include::partial$params.adoc[tag="viewcontroller"]
+include::partial$params.adoc[tag="scopes"]
+|===

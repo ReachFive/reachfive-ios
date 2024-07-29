@@ -1,0 +1,15 @@
+= Passkeys prerequisites
+
+To successfully enable passkeys for iOS:
+
+* Enable the *WebAuthn* feature on your ReachFive account.
++
+TIP: You may need to contact link:mailto:{r5supportEmail}[support] to have this enabled if you do not see it on your {cc}.
+
+You'll also need:
+
+* An iOS device that supports passkeys.
+* iOS OS {min-ios-passkey} or later.
+* To install our xref:sdk-ios:ROOT:index.adoc#sdk-core[SDK Core] which exposes all of the passkey methods.
+* End users and those testing the setup need an iCloud account with 2-step authentication enabled.
+iCloud Keychain must be activated.

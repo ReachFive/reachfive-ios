@@ -1,0 +1,23 @@
+= Authentication
+
+Once the user has a credential registered on the server and the device, they can use it to easily login with their identifier.
+
+Subsection::
+Jump to the <<Authentication process, authentication process>>
+
+Here is a snapshot of the login view displayed to the user.
+
+image::webauthn-login.png[width=40%,height=auto,role="zoom"]
+
+== Authentication process
+
+The xref:loginWithWebAuthn.adoc[] method initiates the FIDO2 authentication process to retrieve the list of previously registered credentials and a challenge string from the server. This information is passed to the *FIDO2 CLIENT* which searches for a credential that matches the *Relying Party ID* and creates an *FaceID dialog* for the user to consent for authentication *(AuthenticationPublicKeyCredential)* .
+
+After that the UI successfully retrieves the existing credential, the operation's result is returned to the ReachFive server and finalizes the FIDO2 authentication process by returning a _one-time authentication token_.
+
+Finally, the result of the authentication callback request is parsed and the user's authentication token is retrieved.
+
+[source, swift]
+----
+include::example$usageLoginFido.swift[]
+----
