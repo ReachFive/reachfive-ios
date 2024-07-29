@@ -1,0 +1,56 @@
+= updatePhoneNumber
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().updatePhoneNumber(<<authToken, authToken>>, <<phoneNumber>>)
+----
+
+== Description
+
+Update the profile's phone number and send a verification code by SMS.
+
+[NOTE]
+====
+* The profile must have been granted the `full_write` scope at the last authentication.
+* It is required to configure and to enable the _Verification SMS_ template in the account's settings.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+:sdk-fresh-at-desc: authToken
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="authtoken"]
+|[[phoneNumber,phoneNumber]] phoneNumber `string` | The phone number of the profile. The new phone number can be identical to the old one.
+
+NOTE: Both the international format and the national conventions of the account's country are accepted if configured in account settings.
+
+|===
+
+== Response
+
+Type: `Future<<<Profile>>, <<ReachFiveError>>>`
+
+It will return the profile with the updated phone number.
+
+The promise will be rejected and will return a `ReachFiveError` if:
+
+- The parameters are invalid,
+- The `full_write` scope is missing,
+- The SMS template is incomplete.
+
+include::partial$models.adoc[tag=profile]
+
+include::partial$models.adoc[tag=reachfiveerror]

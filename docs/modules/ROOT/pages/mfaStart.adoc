@@ -1,0 +1,64 @@
+= {docname}
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().{docname}(
+    <<Credential,registering>>,
+    <<authToken,authToken>>
+)
+----
+
+== About this command
+
+Starts the MFA email registration flow. 
+When the flow is started, an email or SMS is sent to the user for verification depending on which `Credential` is used.
+
+== Examples
+
+[tabs]
+====
+Email icon:envelope-o[]::
++
+--
+[source, kotlin]
+----
+include::example${docname}WithEmail.swift[]
+----
+--
+Phone number icon:phone-square[]::
++
+--
+[source, kotlin]
+----
+include::example${docname}WithPhoneNumber.swift[]
+----
+--
+====
+
+== Parameters
+
+[.options]
+[cols="1,3a"]
+|===
+
+include::partial$params.adoc[tags="authtoken,Credential"]
+
+|===
+
+== Response
+
+`Future<MfaStartRegistrationResponse, ReachFiveError>`
+
+=== Credential verified
+
+If the credential is already verified, you receive a success with the MFA credential item.
+
+=== Credential unverified
+
+If the credential is unverified, you receive `ContinueRegistration` allowing you to then use the `mfaVerify` method.
+
+=== Error response
+
+include::partial$models.adoc[tag=reachfiveerror]

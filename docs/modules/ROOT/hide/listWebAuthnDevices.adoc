@@ -1,0 +1,42 @@
+:fido:
+= listWebAuthnDevices
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().listWebAuthnDevices(<<authToken>>)
+----
+
+== Description
+
+When authenticated, the user can list the registred FIDO2 devices.
+
+[NOTE]
+====
+* The WebAuthn feature must be enabled on your {company} account.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[.options]
+[cols="1,3a"]
+|===
+include::partial$params.adoc[tag="authtoken"]
+|===
+
+== Response
+
+Type: `Future<[DeviceCredential], ReachFiveError>`
+
+It will return the list of devices credentials, otherwise you'll get a `ReachFiveError`.
+
+include::partial$models.adoc[tag=deviceCredential]
+
+include::partial$models.adoc[tag=reachfiveerror]

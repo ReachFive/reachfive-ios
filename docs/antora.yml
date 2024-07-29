@@ -1,0 +1,12 @@
+name: sdk-ios
+version: '7.0.0'
+title: iOS SDK
+start_page: index.adoc
+nav:
+- modules/ROOT/nav.adoc
+
+asciidoc:
+  attributes:
+    sdk-type: iOS
+    min-ios-version: 13
+    sdk-ios-latest-version: 7.0.0@

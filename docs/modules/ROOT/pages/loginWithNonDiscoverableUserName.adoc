@@ -1,0 +1,54 @@
+= login(withNonDiscoverableUserName)
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().login(
+    <<withNonDiscoverableUserName>>,
+    <<forRequest>>,
+    <<usingModalAuthorizationForNonDiscoverable,usingModalAuthorizationFor>>,
+    <<display>>
+)
+----
+
+== Description
+
+Logs the user in using credentials stored in the keychain. 
+The system only displays the credential associated with the given username in a link:https://developer.apple.com/design/human-interface-guidelines/sheets[modal sheet^].
+
+NOTE: In this case, the user needs to manually enter the username in the username field.
+
+== Usage
+
+By default, you should use the xref:sdk-ios:ROOT:loginWithRequest.adoc[] method.
+
+TIP: Use this method only when heightened security is required or when the user has already supplied a username.
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="withNonDiscoverableUserName"]
+include::partial$params.adoc[tag="forRequest"]
+include::partial$params.adoc[tag="usingModalAuthorizationForNonDiscoverable"]
+include::partial$params.adoc[tag="display"]
+
+|===
+
+== Response
+
+Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+
+include::partial$models.adoc[tag=authtoken]
+
+include::partial$models.adoc[tag=reachfiveerror]

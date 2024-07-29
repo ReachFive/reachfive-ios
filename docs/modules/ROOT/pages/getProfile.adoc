@@ -1,0 +1,64 @@
+= getProfile
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().getProfile(<<authToken>>)
+----
+
+== Description
+
+Retrieve the profile's information.
+
+[NOTE]
+====
+* The profile must have been granted the `profile` scope at the last authentication otherwise the profile's attributes are null.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="authtoken"]
+
+|===
+
+== Response
+
+Type: `Future<<<Profile>>, <<ReachFiveError>>>`
+
+It will return the fetched profile, otherwise you'll get a `ReachFiveError`.
+
+include::partial$models.adoc[tag=profile]
+
+include::partial$models.adoc[tag=reachfiveerror]
+
+// +++ <details><summary> +++
+// Profile
+// +++ </summary><div> +++
+// [.options]
+// [cols="1,3a"]
+// |===
+// include::partial$models.adoc[tag="authtoken"]
+// |===
+// +++ </div></details> +++
+
+// +++ <details><summary> +++
+// ReachFiveError
+// +++ </summary><div> +++
+// [.options]
+// [cols="1,3a"]
+// |===
+// include::partial$models.adoc[tag="reachfiveerror"]
+// |===
+// +++ </div></details> +++

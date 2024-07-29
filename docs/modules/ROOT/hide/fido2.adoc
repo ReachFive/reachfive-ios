@@ -1,0 +1,17 @@
+:fido-ios:
+= FIDO2
+
+== Introduction
+
+This guide explains how to implement the FIDO2 registration and authentication workflow on iOS applications. You'll find a detailed introduction about FIDO2 in our xref:docs::fido2.adoc[FIDO2 guide].
+
+TIP: The following code samples and screenshots are issued from our example application using our SDK. Feel free to check out the link:{identity-ios-sdk-url}[Github project^]. 
+
+// fido2 requirements including ios setup
+include::docs::partial$fido2/r_prerequisites.adoc[leveloffset=+1]
+
+// fido2 signup flow for ios
+include::partial$fido2/r_signup.adoc[leveloffset=+1]
+
+// fido2 authentication flow for ios
+include::partial$fido2/c_authentication.adoc[leveloffset=+1]

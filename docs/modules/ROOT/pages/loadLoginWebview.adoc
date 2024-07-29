@@ -1,0 +1,53 @@
+= {docname}
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal,attributes"]
+----
+loginWebview.{docname}(<<reachfive>>: AppDelegate.reachfive())
+----
+
+== Description
+
+Opens an _insecure_ webview through the authorization endpoint:
+
+* If end-users have an active in-app SSO session, the authorization endpoint immediately redirects to the application.
+* If end-users do not have an active in-app SSO session, they are redirected to the client's Login URL for authentication.
+
+[NOTE]
+====
+You must have configured a Login URL and enabled xref:docs:ROOT:orchestration-token.adoc[request orchestration tokens] for your identity client.
+
+include::docs:ROOT:partial$general/snippets/r_orchestrated-flows-min-version.adoc[]
+====
+
+CAUTION: We recommend using the standard native login or standard webview login for iOS. Proceed with caution while using this particular method for user authentication.
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+TIP: You can find this example with its UI integration in the link:https://github.com/ReachFive/identity-ios-sdk/blob/master/Sandbox/Sandbox/LoginWKWebviewController.swift[{company} sandbox^].
+
+== Customisation
+
+To further customise the behaviour and appearance of the `WKWebview`, please see the link:https://github.com/ReachFive/identity-ios-sdk/blob/master/Sandbox/Sandbox/LoginCustomWebviewController.swift[{company} sandbox^].
+
+== Parameters
+
+[cols="3m,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tags="reachfive"]
+
+|===
+
+== Response
+
+Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+
+include::partial$models.adoc[tags="authtoken,reachfiveerror"]

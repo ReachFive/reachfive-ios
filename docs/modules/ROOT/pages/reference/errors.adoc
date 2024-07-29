@@ -1,0 +1,12 @@
+= {sdk-type} SDK error response
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+This page contains information on how errors are formatted and the error types you may encounter while using the {sdk-type} SDK.
+
+NOTE: This is a comprehensive list and therefore, not all errors present in the table may apply to the {sdk-type} SDK.
+
+// format
+include::docs:ROOT:partial$errors/r_error-formatting.adoc[leveloffset=+1,tags="sdk-error-format"]
+
+// error table
+include::docs:ROOT:partial$errors/r_error-table.adoc[leveloffset=+1]

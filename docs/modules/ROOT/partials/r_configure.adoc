@@ -1,0 +1,88 @@
+= Configure the iOS SDK
+
+You must configure the iOS SDK to use it.
+This is where you provide the values for your domain and client ID, and define which native library you want to integrate with for Social Login.
+
+By default, the URL scheme follows this  pattern: `reachfive-$\{clientId\}://callback`.
+
+There are multiple schemes.
+All *must be* whitelisted in Allowed Callback URLs on your {cc}.
+
+[cols="4m,6a"]
+|===
+|Allowed URL |Notes
+
+|reachfive-$\{clientId\}://callback
+|This callback URL is used to open the app from another app such as an email client or the web for passwordless.
+
+Other uses:
+
+* Switching from web context to app context in `webviewLogin`.
+* OAuth flow
+
+|reachfive-$\{clientId\}://mfa
+|This callback URL is used for MFA verification.
+
+Available from version `6.3.0`.
+
+|reachfive-$\{clientId\}://account-recovery
+|This callback URL is used for account recovery code verification.
+
+Available from version `7.0.0`.
+
+|===
+
+== Configuration
+
+[source,swift,subs="normal,callouts"]
+----
+    let reachfive = ReachFive(
+        // The configuration parameters required to initialize the ReachFive client
+        sdkConfig: SdkConfig( <1>
+            domain: DOMAIN,
+            clientId: CLIENT_ID
+            ),
+        // The list of the social providers needed by the application 
+        providersCreators: [GoogleProvider(), FacebookProvider(), WeChatProvider()] <2>
+    )
+----
+<1> Sets the required parameters such as `domain`, {company} `clientId`, and the `scheme`.
+<2> Lists the social providers you need for your iOS application.
+
+=== Customise `scheme`
+
+You can also specify a scheme manually and customise schemes as shown here.
+
+[source,swift,subs="verbatim,callouts"]
+----
+let ReachFive = ReachFive(
+    sdkConfig: SdkConfig(
+        domain: DOMAIN,
+        clientId: CLIENT_ID,
+        scheme: "reachfive-${clientId}://toto", <1>
+        mfaUri: "reachfive-${clientId}://tata", <2>
+        accountRecoveryUri: "reachfive-${clientId}://tutu" <3>
+    )
+)
+----
+<1> Where the callback `scheme` ends with `toto`.
+<2> Where the callback mfaUri `scheme` ends with `tata`.
+<3> Where the callback accountRecoveryUri `scheme` ends with `tutu`.
+
+=== Customise storage
+
+Storage is used by the iOS SDK to store the PKCE code during passwordless and MFA flows.
+
+By default it uses the link:https://developer.apple.com/documentation/foundation/userdefaults[UserDefaults storage^], but it can be customised to be any object that implements our link:https://github.com/ReachFive/reachfive-ios/blob/master/IdentitySdkCore/IdentitySdkCore/Classes/utils/Storage.swift[`Storage` protocol^].
+
+[source,swift,subs="verbatim,callouts"]
+----
+let ReachFive = ReachFive(
+    sdkConfig: SdkConfig(
+        domain: DOMAIN,
+        clientId: CLIENT_ID
+    ),
+    storage: UserDefaultsStorage()
+)
+----
+<1> This value can be any object that implements our `Storage` protocol.

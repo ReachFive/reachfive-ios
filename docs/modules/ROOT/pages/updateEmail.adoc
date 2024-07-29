@@ -1,0 +1,58 @@
+= updateEmail
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().updateEmail(
+    <<authToken,authToken>>,
+    <<updateEmail,email>>,
+    // Optional arguments
+    <<redirectUrl>>
+)
+----
+
+== Description
+
+Update the profile's email address and send a verification email.
+
+[NOTE]
+====
+* The profile must have been granted the `full_write` scope at the last authentication.
+* It is required to configure and to enable the xref:docs:ROOT:email-templates.adoc[Email update template] in the account's settings.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+:sdk-fresh-at-desc: authToken
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tags="authtoken,redirecturl,updateEmail"]
+
+|===
+
+== Response
+
+Type: `Future<<<Profile>>, <<ReachFiveError>>>`
+
+Return the profile with the updated email address.
+
+The promise will be rejected and will return a `ReachFiveError` if:
+
+- The parameters are invalid,
+- The `full_write` scope is missing,
+- The email template is incomplete.
+
+include::partial$models.adoc[tag=profile]
+
+include::partial$models.adoc[tag=reachfiveerror]
