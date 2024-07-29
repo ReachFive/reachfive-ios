@@ -11,14 +11,14 @@ include::docs::partial$domain-url-client-id-prereq.adoc[]
 == iOS specific prerequisites
 
 * The xref:docs:ROOT:clients.adoc[client] must be a `First-party client` with `Token Endpoint Authentication Method` set to `None`.
-* You must have the scheme registered in `Allowed Callback URLs`.
+* You must have the schemes registered in `Allowed Callback URLs`.
 * You should enforce PKCE for security purposes and enable Refresh Tokens for convenience.
 
 icon:book[] For more on configuring a client, see xref:docs:ROOT:clients.adoc#configure-client-first[Set up a client].
 
 == Installation
 
-{company} SDKs are published on link:https://www.swift.org/documentation/package-manager/[Swift Package Manager^] link:https://cocoapods.org/pods/IdentitySdkCore[Cocoapods^] as independent modules. 
+{company} SDKs are available with Swift Package Manager and link:https://cocoapods.org/pods/Reach5[Cocoapods^] as independent modules.
 The latest version is `{sdk-ios-latest-version}`.
 
 TIP: You can also find releases directly on the {company} repo at link:https://github.com/ReachFive/reachfive-ios/releases/[ReachFive iOS SDK^].
@@ -34,8 +34,7 @@ Below, you'll find a description and instructions for installation for each modu
 
 === SDK Core
 
-The core SDK contains all the main tools and interfaces, and methods related to standard authentication by identifier and password.
-It contains all common tools and interfaces and enables users to authenticate with their passwords.
+The core SDK contains all the main tools and interfaces, and methods related to standard authentication by identifier and password, passkey, passwordless, etc.
 
 
 ==== Installation
@@ -46,7 +45,7 @@ Cocoapods::
 +
 --
 
-. Add these lines to your `Podfile` file, replacing `x` with the latest version:
+. Add this line to your `Podfile` file, replacing `x` with the latest version:
 +
 [source]
 ----
@@ -88,7 +87,6 @@ dependencies: [
 <!-- Info.plist -->
 
 <key>CFBundleURLTypes</key>
-
 <array>
     <dict>
         <key>CFBundleTypeRole</key>
@@ -100,6 +98,8 @@ dependencies: [
     </dict>
 </array>
 ----
+
+TIP: See <<Info.plist reference>> for a comprehensive look at the file.
 
 === Facebook native provider
 
@@ -115,7 +115,7 @@ Cocoapods::
 +
 --
 
-. Add these lines to your `Podfile` file, replacing `x` with the latest version:
+. Add this line to your `Podfile` file, replacing `x` with the latest version:
 +
 [source]
 ----
@@ -128,8 +128,6 @@ pod 'Reach5Facebook', '~> x'
 ----
 pod install
 ----
-+
-NOTE: If you're using the latest version of the Facebook API, please remove the `user_gender` scope from the {company} client configuration to prevent any issues.
 --
 Swift Package Manager::
 +
@@ -151,6 +149,7 @@ dependencies: [
 
 ==== Configuration
 
+NOTE: If you're using the latest version of the Facebook API, please remove the `user_gender` scope from the {company} client configuration to prevent any issues.
 
 . Configure the `Info.plist` file with the following XML snippet that contains data about your application:
 +
@@ -204,7 +203,7 @@ Cocoapods::
 +
 --
 
-. Add these lines to your `Podfile` file, replacing `x` with the latest version:
+. Add this line to your `Podfile` file, replacing `x` with the latest version:
 +
 [source]
 ----
@@ -259,7 +258,7 @@ dependencies: [
 ----
 <1> This is your Google Client ID in standard format. For example, `1234567890-abcdefg.apps.googleusercontent.com`.
 +
-TIP: See <<Info.plist reference>> for a comprehensive look a the file.
+TIP: See <<Info.plist reference>> for a comprehensive look at the file.
 
 . Add your reversed Google Client ID to the URL Scheme.
 +
@@ -279,7 +278,7 @@ TIP: See <<Info.plist reference>> for a comprehensive look a the file.
 ----
 <1> The URL Scheme is the reversed Google Client ID (not {company}'s xref:docs:ROOT:clients.adoc[clientID]), which is your Google Client ID with the order of the dot-delimited fields reversed. For example, `com.googleusercontent.apps.abcdefg-1234567890`.
 +
-TIP: See <<Info.plist reference>> for a comprehensive look a the file.
+TIP: See <<Info.plist reference>> for a comprehensive look at the file.
 
 --
 ``5.8.0`` and lower::
@@ -306,7 +305,7 @@ TIP: See <<Info.plist reference>> for a comprehensive look a the file.
 ----
 <1> The URL Scheme is the reversed Google Client ID (not {company}'s xref:docs:ROOT:clients.adoc[clientID]), which is your Google Client ID with the order of the dot-delimited fields reversed. For example, `com.googleusercontent.apps.abcdefg-1234567890`.
 +
-TIP: See <<Info.plist reference>> for a comprehensive look a the file.
+TIP: See <<Info.plist reference>> for a comprehensive look at the file.
 --
 ====
 
@@ -322,7 +321,7 @@ Cocoapods::
 +
 --
 
-. Add these lines to your `Podfile` file, replacing `x` with the latest version:
+. Add this line to your `Podfile` file, replacing `x` with the latest version:
 +
 [source]
 ----
@@ -359,6 +358,8 @@ Swift Package Manager not yet supported.
 </array>
 ----
 
+TIP: See <<Info.plist reference>> for a comprehensive look at the file.
+
 // initialize the ios sdk
 include::partial$r_configure.adoc[leveloffset=+1]
 
@@ -368,7 +369,7 @@ include::partial$r_initialize.adoc[leveloffset=+1]
 
 The sidebar contains are all the functions/methods accessible via the iOS SDK.
 
-In all the code examples, the {company} client is instantiated and stored in your `AppDelegate` class. 
+In all the code examples, the {company} client is instantiated and stored in your `AppDelegate` class.
 You can access it through the `AppDelegate.reachfive()` method as shown here and in <<Configuration>>.
 
 [source,swift]
