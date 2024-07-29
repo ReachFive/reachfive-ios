@@ -1,4 +1,4 @@
-import IdentitySdkCore
+import Reach5
 
 let verifyAuthCodeRequest = VerifyAuthCodeRequest(
   email: emailInput,

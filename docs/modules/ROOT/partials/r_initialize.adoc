@@ -22,7 +22,7 @@ Minimum configuration::
 [source, swift]
 ----
 import UIKit <1>
-import IdentitySdkCore
+import Reach5
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let DOMAIN    = "Here paste your ReachFive domain" <2>
@@ -52,10 +52,10 @@ Full configuration::
 [source,swift,subs="normal,callouts"]
 ----
 import UIKit
-import IdentitySdkCore
-import IdentitySdkFacebook
-import IdentitySdkGoogle
-import IdentitySdkWeChat
+import Reach5
+import Reach5Facebook
+import Reach5Google
+import Reach5WeChat
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let DOMAIN    = "Here paste your ReachFive domain" // e.g. integ-sandbox-squad2.reach5.dev

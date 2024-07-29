@@ -1,4 +1,4 @@
-import IdentitySdkCore
+import Reach5
 
 let freshProfileAuthToken: AuthToken = // Here paste the authorization token of the profile retrieved after login (less than 5 min)
 AppDelegate

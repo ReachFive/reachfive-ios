@@ -1,4 +1,4 @@
-import IdentitySdkCore
+import Reach5
 
 AppDelegate.reachfive()
   .startPasswordless(.Email(email: "john.doe@gmail.com", redirectUri: "reachfive-${clientId}://callback"))
