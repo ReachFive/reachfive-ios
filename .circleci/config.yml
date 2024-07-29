@@ -21,27 +21,6 @@ jobs:
             pod install
             cd ../
             pod lib lint IdentitySdkCore.podspec
-      - run:
-          name: Check IdentitySdkFacebook
-          command: |
-            cd IdentitySdkFacebook
-            pod install
-            cd ../
-            pod lib lint IdentitySdkFacebook.podspec
-      - run:
-          name: Check IdentitySdkGoogle
-          command: |
-            cd IdentitySdkGoogle
-            pod install
-            cd ../
-            pod lib lint IdentitySdkGoogle.podspec
-      - run:
-          name: Check IdentitySdkWeChat
-          command: |
-            cd IdentitySdkWeChat
-            pod install
-            cd ../
-            pod lib lint IdentitySdkWeChat.podspec
   build-for-release:
     macos:
       xcode: "15.3.0"
@@ -57,28 +36,6 @@ jobs:
             pod install
             cd ../
             pod spec lint IdentitySdkCore.podspec
-      - run:
-          name: Check IdentitySdkFacebook
-          command: |
-            cd IdentitySdkFacebook
-            pod install
-            cd ../
-            pod spec lint IdentitySdkFacebook.podspec
-      - run:
-          name: Check IdentitySdkGoogle
-          command: |
-            cd IdentitySdkGoogle
-            pod install
-            cd ../
-            pod spec lint IdentitySdkGoogle.podspec
-      - run:
-          name: Check IdentitySdkWeChat
-          command: |
-            cd IdentitySdkWeChat
-            pod install
-            cd ../
-            pod spec lint IdentitySdkWeChat.podspec
-
   publish:
     macos:
       xcode: "15.3.0"
@@ -88,9 +45,6 @@ jobs:
           name: Install CocoaPods
           command: gem install cocoapods --user-install
       - run: pod trunk push IdentitySdkCore.podspec
-      - run: pod trunk push IdentitySdkFacebook.podspec
-      - run: pod trunk push IdentitySdkGoogle.podspec
-      - run: pod trunk push IdentitySdkWeChat.podspec
   build-sandbox:
     macos:
       xcode: "15.3.0"
