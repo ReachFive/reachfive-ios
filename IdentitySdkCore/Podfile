@@ -3,7 +3,7 @@ source 'https://cdn.cocoapods.org/'
 # Comment the next line to not define a global platform for your project
 platform :ios, '13.0'
 
-target 'IdentitySdkCore' do
+target 'Reach5' do
   # Comment the next line if you do not want to use dynamic frameworks
   use_frameworks!
   pod 'Reach5', :path => '../'
