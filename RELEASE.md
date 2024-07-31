@@ -9,7 +9,7 @@ $VERSION = 'x.x.x'
 ```swift
 let defaultParams: [String: String] = [
     "platform": "ios",
-    // TODO: read from the version.rb. Either directly or indirectly from IdentitySdkCore.h, Info.plist...
+    // TODO: read from the version.rb. Either directly or indirectly from Reach5.h, Info.plist...
     "sdk": "x.x.x",
     "device": deviceInfo,
 ]
