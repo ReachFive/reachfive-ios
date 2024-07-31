@@ -91,7 +91,7 @@ Instead they reference the latest version available on Cocoapods.<br>
 This means that the non-core pods will not have access to the core changes on CI until the core changes are deployed.<br>
 Local development is not impacted by this problem.
 
-So first release IdentitySdkCore, then you can use the new APIs from this release in the Facebook/Google/Webview/WeChat pods.
+So first release Reach5, then you can use the new APIs from this release in the Facebook/Google/Webview/WeChat pods.
 
 ### When to add a new module for a provider
 
