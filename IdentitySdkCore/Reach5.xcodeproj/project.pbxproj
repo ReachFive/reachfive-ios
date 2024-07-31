@@ -133,7 +133,7 @@
 		34689A9D22CE4666002970F9 /* VerifyPhoneNumberRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyPhoneNumberRequest.swift; sourceTree = "<group>"; };
 		34689AA022CE5D08002970F9 /* UpdateEmailRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateEmailRequest.swift; sourceTree = "<group>"; };
 		3474D28A22D32F3A005112C1 /* RequestPasswordResetRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestPasswordResetRequest.swift; sourceTree = "<group>"; };
-		347FDB42229BE84500660687 /* IdentitySdkCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IdentitySdkCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		347FDB42229BE84500660687 /* Reach5.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Reach5.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		347FDB45229BE84500660687 /* IdentitySdkCore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IdentitySdkCore.h; sourceTree = "<group>"; };
 		347FDB46229BE84500660687 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		347FDB53229BE8F800660687 /* Provider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
@@ -273,7 +273,7 @@
 		347FDB43229BE84500660687 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				347FDB42229BE84500660687 /* IdentitySdkCore.framework */,
+				347FDB42229BE84500660687 /* Reach5.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -399,9 +399,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		347FDB41229BE84500660687 /* IdentitySdkCore */ = {
+		347FDB41229BE84500660687 /* Reach5 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 347FDB4A229BE84500660687 /* Build configuration list for PBXNativeTarget "IdentitySdkCore" */;
+			buildConfigurationList = 347FDB4A229BE84500660687 /* Build configuration list for PBXNativeTarget "Reach5" */;
 			buildPhases = (
 				3E48ED07786CEAA846211855 /* [CP] Check Pods Manifest.lock */,
 				347FDB3D229BE84500660687 /* Headers */,
@@ -413,9 +413,9 @@
 			);
 			dependencies = (
 			);
-			name = IdentitySdkCore;
+			name = Reach5;
 			productName = IdentitySdkCore;
-			productReference = 347FDB42229BE84500660687 /* IdentitySdkCore.framework */;
+			productReference = 347FDB42229BE84500660687 /* Reach5.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -433,7 +433,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 347FDB3C229BE84500660687 /* Build configuration list for PBXProject "IdentitySdkCore" */;
+			buildConfigurationList = 347FDB3C229BE84500660687 /* Build configuration list for PBXProject "Reach5" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -445,7 +445,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				347FDB41229BE84500660687 /* IdentitySdkCore */,
+				347FDB41229BE84500660687 /* Reach5 */,
 			);
 		};
 /* End PBXProject section */
@@ -774,7 +774,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		347FDB3C229BE84500660687 /* Build configuration list for PBXProject "IdentitySdkCore" */ = {
+		347FDB3C229BE84500660687 /* Build configuration list for PBXProject "Reach5" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				347FDB48229BE84500660687 /* Debug */,
@@ -783,7 +783,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		347FDB4A229BE84500660687 /* Build configuration list for PBXNativeTarget "IdentitySdkCore" */ = {
+		347FDB4A229BE84500660687 /* Build configuration list for PBXNativeTarget "Reach5" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				347FDB4B229BE84500660687 /* Debug */,
