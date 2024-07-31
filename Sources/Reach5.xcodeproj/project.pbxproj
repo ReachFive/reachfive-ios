@@ -264,7 +264,7 @@
 			isa = PBXGroup;
 			children = (
 				74FB8B4B94CB262BEC297380 /* Frameworks */,
-				347FDB44229BE84500660687 /* Reach5 */,
+				347FDB44229BE84500660687 /* Core */,
 				927803C28AA84ED9FC3390CF /* Pods */,
 				347FDB43229BE84500660687 /* Products */,
 			);
@@ -278,7 +278,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		347FDB44229BE84500660687 /* Reach5 */ = {
+		347FDB44229BE84500660687 /* Core */ = {
 			isa = PBXGroup;
 			children = (
 				347FDB45229BE84500660687 /* Reach5.h */,
@@ -286,7 +286,7 @@
 				2A2D5B102BA4C59300245439 /* PrivacyInfo.xcprivacy */,
 				34173218229D801500681CFD /* Classes */,
 			);
-			path = Reach5;
+			path = Core;
 			sourceTree = "<group>";
 		};
 		34E18B8D22A6C13100952EBD /* models */ = {
@@ -720,7 +720,7 @@
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/BrightFutures\"",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/CryptoSwift\"",
 				);
-				INFOPLIST_FILE = Reach5/Info.plist;
+				INFOPLIST_FILE = Core/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -753,7 +753,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Reach5/Info.plist;
+				INFOPLIST_FILE = Core/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
