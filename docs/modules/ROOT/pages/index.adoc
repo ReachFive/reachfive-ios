@@ -34,8 +34,7 @@ Below, you'll find a description and instructions for installation for each modu
 
 === SDK Core
 
-The core SDK contains all the main tools and interfaces, and methods related to standard authentication by identifier and password, passkey, passwordless, etc.
-
+The core SDK contains all the main tools, interfaces, and methods related to standard authentication by identifier and password, passkey, passwordless, and so on.
 
 ==== Installation
 
@@ -64,14 +63,17 @@ Swift Package Manager::
 --
 Add the package dependency with XCode using this package URL:
 
+[source]
+----
 https://github.com/ReachFive/reachfive-ios.git
+----
 
 Or directly add this to the dependencies in `Package.swift`
 
-[source,swift]
+[source,swift,subs="attributes"]
 ----
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "7.0.0"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "{page-component-version}"))
 ]
 ----
 
@@ -79,9 +81,9 @@ dependencies: [
 ====
 
 ==== Configuration
-- Configure your application's `Info.plist` file with the following XML snippet:
 
-+
+Configure your application's `Info.plist` file with the following XML snippet:
+
 [source,xml]
 ----
 <!-- Info.plist -->
@@ -134,14 +136,17 @@ Swift Package Manager::
 --
 Add the package dependency with XCode using this package URL:
 
+[source]
+----
 https://github.com/ReachFive/reachfive-ios-facebook.git
+----
 
 Or directly add this to the dependencies in `Package.swift`
 
-[source,swift]
+[source,swift,subs="attributes"]
 ----
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios-facebook.git", .upToNextMajor(from: "7.0.0"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios-facebook.git", .upToNextMajor(from: "{page-component-version}"))
 ]
 ----
 --
@@ -149,7 +154,7 @@ dependencies: [
 
 ==== Configuration
 
-NOTE: If you're using the latest version of the Facebook API, please remove the `user_gender` scope from the {company} client configuration to prevent any issues.
+NOTE: If you're using the latest version of the Facebook API, remove the `user_gender` scope from the {company} client configuration to prevent any issues.
 
 . Configure the `Info.plist` file with the following XML snippet that contains data about your application:
 +
@@ -223,7 +228,10 @@ Swift Package Manager::
 --
 Add the package dependency with XCode using this package URL:
 
+[source]
+----
 https://github.com/ReachFive/reachfive-ios-google.git
+----
 
 Or directly add this to the dependencies in `Package.swift`
 
@@ -238,15 +246,8 @@ dependencies: [
 
 ==== Configuration
 
-- Configure the `Info.plist` file with the following XML snippet that contains data about your application:
+Configure the `Info.plist` file with the following XML snippet that contains data about your application:
 
-+
-[tabs]
-====
-``6.0.0`` and higher::
-+
---
-[loweralpha]
 . Add your Google Client ID to the `Info.plist` file:
 +
 [source,xml]
@@ -258,7 +259,7 @@ dependencies: [
 ----
 <1> This is your Google Client ID in standard format. For example, `1234567890-abcdefg.apps.googleusercontent.com`.
 +
-TIP: See <<Info.plist reference>> for a comprehensive look at the file.
+See <<Info.plist reference>> for a comprehensive look at the file.
 
 . Add your reversed Google Client ID to the URL Scheme.
 +
@@ -276,38 +277,10 @@ TIP: See <<Info.plist reference>> for a comprehensive look at the file.
 </dict>
 </array>
 ----
-<1> The URL Scheme is the reversed Google Client ID (not {company}'s xref:docs:ROOT:clients.adoc[clientID]), which is your Google Client ID with the order of the dot-delimited fields reversed. For example, `com.googleusercontent.apps.abcdefg-1234567890`.
+<1> The URL Scheme is the reversed Google Client ID (not {company}'s xref:docs:ROOT:clients.adoc[clientID]), which is your Google Client ID with the order of the dot-delimited fields reversed. 
+For example, `com.googleusercontent.apps.abcdefg-1234567890`.
 +
-TIP: See <<Info.plist reference>> for a comprehensive look at the file.
-
---
-``5.8.0`` and lower::
-+
---
-[loweralpha]
-. Add your reversed Google Client ID to the URL Scheme.
-+
-[source,xml,subs=verbatim]
-----
-<!-- Info.plist -->
-
-<key>CFBundleURLTypes</key>
-<array>
-<dict>
-    <key>CFBundleTypeRole</key>
-    <string>Editor</string>
-    <key>CFBundleURLSchemes</key>
-    <array>
-        <string>YOUR_REVERSED_GOOGLE_CLIENT_ID</string> <1>
-    </array>
-</dict>
-</array>
-----
-<1> The URL Scheme is the reversed Google Client ID (not {company}'s xref:docs:ROOT:clients.adoc[clientID]), which is your Google Client ID with the order of the dot-delimited fields reversed. For example, `com.googleusercontent.apps.abcdefg-1234567890`.
-+
-TIP: See <<Info.plist reference>> for a comprehensive look at the file.
---
-====
+See <<Info.plist reference>> for a comprehensive look at the file.
 
 === WeChat Connect
 
@@ -338,7 +311,7 @@ pod install
 Swift Package Manager::
 +
 --
-Swift Package Manager not yet supported.
+Swift Package Manager is not yet supported.
 --
 ====
 
@@ -387,11 +360,6 @@ If you configure all four SDKs, your `Info.plist` file should contain the follow
 
 // IMPORTANT: This snippet represents what is needed for the latest iOS SDK version which is currently ``{sdk-ios-latest-version}``.
 
-[tabs]
-====
-``6.0.0`` and higher::
-+
---
 [source,xml]
 ----
 <key>CFBundleURLTypes</key>
@@ -438,56 +406,3 @@ If you configure all four SDKs, your `Info.plist` file should contain the follow
    <string>fb-messenger-share-api</string>
 </array>
 ----
---
-``5.8.0`` and lower::
-+
---
-[source,xml]
-----
-<key>CFBundleURLTypes</key>
-<array>
-   <dict>
-      <key>CFBundleURLSchemes</key>
-      <array>
-         <string>fb1634029666893228</string>
-      </array>
-   </dict>
-   <dict>
-      <key>CFBundleTypeRole</key>
-      <string>Editor</string>
-      <key>CFBundleURLSchemes</key>
-      <array>
-         <string>com.googleusercontent.apps.abcdefg-1234567890</string>
-      </array>
-   </dict>
-   <dict>
-      <key>CFBundleTypeRole</key>
-      <string>Editor</string>
-      <key>CFBundleURLSchemes</key>
-      <array>
-         <string>tyaihfrj2a1fgj1t8pkd</string>
-      </array>
-   </dict>
-   <dict>
-      <key>CFBundleTypeRole</key>
-      <string>Editor</string>
-      <key>CFBundleURLSchemes</key>
-      <array>
-         <string>reachfive-TYAIHFRJ2a1FGJ1T8pKD</string>
-      </array>
-   </dict>
-</array>
-<key>FacebookAppID</key>
-<string>1634029666893228</string>
-<key>FacebookDisplayName</key>
-<string>Reach5 SDK Mobile</string>
-<key>LSApplicationQueriesSchemes</key>
-<array>
-   <string>fbapi</string>
-   <string>fb-messenger-share-api</string>
-   <string>fbauth2</string>
-   <string>fbshareextension</string>
-</array>
-----
---
-====
