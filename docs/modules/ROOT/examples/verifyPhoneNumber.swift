@@ -1,4 +1,4 @@
-import IdentitySdkCore
+import Reach5
 
 let profileAuthToken: AuthToken = // Here paste the authorization token of the profile retrieved after login
 

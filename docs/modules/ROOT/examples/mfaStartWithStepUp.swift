@@ -1,4 +1,4 @@
-import IdentitySdkCore
+import Reach5
 
 let scope = ["openid", "email", "profile", "phone", "full_write", "offline_access"]
 

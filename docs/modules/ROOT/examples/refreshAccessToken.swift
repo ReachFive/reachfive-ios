@@ -1,4 +1,4 @@
-import IdentitySdkCore
+import Reach5
 
 val authToken: AuthToken = // The authentication token obtained from login or signup.
 

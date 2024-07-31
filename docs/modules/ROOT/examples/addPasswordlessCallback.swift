@@ -1,4 +1,4 @@
-import IdentitySdkCore
+import Reach5
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

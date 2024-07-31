@@ -1,4 +1,4 @@
-import IdentitySdkCore
+import Reach5
 
 AppDelegate.reachfive()
   .startPasswordless(.PhoneNumber(phoneNumber: "+33792244940", redirectUri: "reachfive-${clientId}://callback"))

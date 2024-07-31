@@ -1,4 +1,4 @@
-import IdentitySdkCore
+import Reach5
 
 let providerName: String = // Here paste the name of the provider
 

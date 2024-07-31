@@ -7,7 +7,7 @@ You initialize your iOS client with:
 
 [source,swift]
 ----
-   reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
+reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
 ----
 
 == Full examples
@@ -22,22 +22,16 @@ Minimum configuration::
 [source, swift]
 ----
 import UIKit <1>
-import IdentitySdkCore
+import Reach5
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let DOMAIN    = "Here paste your ReachFive domain" <2>
     let CLIENT_ID = "Here paste your ReachFive client ID" <3>
 
-    let reachfive = ReachFive( 
+    let reachfive = ReachFive(
         // The configuration parameters required to initialize the ReachFive client
         sdkConfig: SdkConfig(domain: DOMAIN, clientId: CLIENT_ID)
     )
-
-    // Return the ReachFive client
-    static func reachfive() -> ReachFive {
-        let app = UIApplication.shared.delegate as! AppDelegate
-        return app.reachfive
-    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Initialize the ReachFive client
@@ -58,10 +52,10 @@ Full configuration::
 [source,swift,subs="normal,callouts"]
 ----
 import UIKit
-import IdentitySdkCore
-import IdentitySdkFacebook
-import IdentitySdkGoogle
-import IdentitySdkWeChat
+import Reach5
+import Reach5Facebook
+import Reach5Google
+import Reach5WeChat
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let DOMAIN    = "Here paste your ReachFive domain" // e.g. integ-sandbox-squad2.reach5.dev
@@ -82,29 +76,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         reachfive.addPasswordlessCallback { result in
-            // Add the callback that will be executed when the magic link is intercepted
+            // Check result and extract the authToken if the callback was successful, then continue your flow (for example redirect to the profile page)
         }
 
         // Initialize the ReachFive client
         return reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
-    
+
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         reachfive.application(application, continue: userActivity, restorationHandler: restorationHandler) <2>
     }
-    
+
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         reachfive.application(app, open: url, options: options) <3>
     }
-    
+
     func applicationDidBecomeActive(_ application: UIApplication) {
         reachfive.applicationDidBecomeActive(application) <4>
     }
 }
 ----
-<1> An example of how to access of the {company} object from within the app.
+<1> An example of how to access the {company} object from within the app.
 <2> This method is used to handle universal links which are used by providers.
-<3> This method is used to handle callback schemes which are used by passwordless and MFA as well as for account recovery, and providers.
+<3> This method is used to handle callback schemes which are used by passwordless, MFA and account recovery, as well as providers.
 <4> This method is used to provide functionality to the providers.
 
 --
