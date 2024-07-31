@@ -264,7 +264,7 @@
 			isa = PBXGroup;
 			children = (
 				74FB8B4B94CB262BEC297380 /* Frameworks */,
-				347FDB44229BE84500660687 /* IdentitySdkCore */,
+				347FDB44229BE84500660687 /* Reach5 */,
 				927803C28AA84ED9FC3390CF /* Pods */,
 				347FDB43229BE84500660687 /* Products */,
 			);
@@ -278,7 +278,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		347FDB44229BE84500660687 /* IdentitySdkCore */ = {
+		347FDB44229BE84500660687 /* Reach5 */ = {
 			isa = PBXGroup;
 			children = (
 				347FDB45229BE84500660687 /* IdentitySdkCore.h */,
@@ -286,7 +286,7 @@
 				2A2D5B102BA4C59300245439 /* PrivacyInfo.xcprivacy */,
 				34173218229D801500681CFD /* Classes */,
 			);
-			path = IdentitySdkCore;
+			path = Reach5;
 			sourceTree = "<group>";
 		};
 		34E18B8D22A6C13100952EBD /* models */ = {
