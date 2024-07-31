@@ -1,5 +1,5 @@
 name: sdk-ios
-version: '7.0.0'
+version: "7.0.0"
 title: iOS SDK
 start_page: index.adoc
 nav:
