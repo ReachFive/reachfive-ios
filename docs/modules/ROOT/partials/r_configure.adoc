@@ -73,7 +73,7 @@ let ReachFive = ReachFive(
 
 Storage is used by the iOS SDK to store the PKCE code during passwordless and MFA flows.
 
-By default it uses the link:https://developer.apple.com/documentation/foundation/userdefaults[UserDefaults storage^], but it can be customised to be any object that implements our link:https://github.com/ReachFive/reachfive-ios/blob/master/IdentitySdkCore/IdentitySdkCore/Classes/utils/Storage.swift[`Storage` protocol^].
+By default it uses the link:https://developer.apple.com/documentation/foundation/userdefaults[UserDefaults storage^], but it can be customised to be any object that implements our link:https://github.com/ReachFive/reachfive-ios/blob/master/Sources/Core/Classes/utils/Storage.swift[`Storage` protocol^].
 
 For an example of a custom implementation, see link:https://github.com/ReachFive/reachfive-ios/blob/master/Sandbox/Sandbox/SecureStorage.swift[{company}-ios: Secure storage^] using the keychain.
 

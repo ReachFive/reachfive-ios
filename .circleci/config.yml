@@ -17,7 +17,7 @@ jobs:
       - run:
           name: Check Reach5
           command: |
-            cd IdentitySdkCore
+            cd Sources
             pod install
             cd ../
             pod lib lint Reach5.podspec
@@ -32,7 +32,7 @@ jobs:
       - run:
           name: Check Reach5
           command: |
-            cd IdentitySdkCore
+            cd Sources
             pod install
             cd ../
             pod spec lint Reach5.podspec

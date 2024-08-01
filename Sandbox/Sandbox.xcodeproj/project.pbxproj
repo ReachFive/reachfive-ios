@@ -469,20 +469,6 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2SHU255SWF;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/Alamofire\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/BrightFutures\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/CryptoSwift\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/FBSDKCoreKit\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/FBSDKLoginKit\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/GTMSessionFetcher\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/GoogleToolboxForMac\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/IdentitySdkCore\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/IdentitySdkFacebook\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/IdentitySdkGoogle\"",
-					"\"${PODS_ROOT}/GoogleSignIn/Frameworks\"",
-				);
 				INFOPLIST_FILE = Sandbox/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Sandbox;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
