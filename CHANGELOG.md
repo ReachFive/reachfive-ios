@@ -1,7 +1,7 @@
 # Changelog
 ## v7.0.0
 ### Breaking changes
-- New name for the Pod: `Reach5`
+- New name for the module: `Reach5`
 
 Change all your import from
 ```
@@ -13,7 +13,7 @@ import Reach5
 ```
 
 ### New features
-- Support for Swift Package Manager
+- Support for Swift Package Manager. (The WeChat module is not yet available on SPM.)
 - Support for passkey account recovery
 - Add privacy manifest
 
