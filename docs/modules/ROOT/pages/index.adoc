@@ -21,7 +21,7 @@ icon:book[] For more on configuring a client, see xref:docs:ROOT:clients.adoc#co
 
 == Installation
 
-{company} SDKs are published on https://cocoapods.org/pods/IdentitySdkCore[Cocoapods^] as independent modules. The latest version is `{sdk-ios-latest-version}`.
+{company} SDKs are published on https://cocoapods.org/pods/IdentitySdkCore[Cocoapods^] as independent modules.
 
 TIP: You can also find releases directly on the {company} repo at link:https://github.com/ReachFive/identity-ios-sdk/releases/[ReachFive iOS SDK^].
 
