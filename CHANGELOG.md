@@ -16,6 +16,10 @@ import Reach5
 - Support for Swift Package Manager. (The WeChat module is not yet available on SPM.)
 - Support for passkey account recovery
 - Add privacy manifest
+- Add MFA trusted devices support methods:
+    - listMfaTrustedDevices(authToken: AuthToken)
+    - mfaDelete(trustedDeviceId deviceId: String, authToken: AuthToken)
+
 
 ## v6.3.0
 ### New features
