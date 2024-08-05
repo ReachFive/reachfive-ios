@@ -1,6 +1,6 @@
 :mobile-sdk:
 = Getting Started
-// :page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
 == Requirements
 
@@ -19,7 +19,6 @@ icon:book[] For more on configuring a client, see xref:docs:ROOT:clients.adoc#co
 == Installation
 
 {company} SDKs are available with Swift Package Manager and link:https://cocoapods.org/pods/Reach5[Cocoapods^] as independent modules.
-The latest version is `{sdk-ios-latest-version}`.
 
 TIP: You can also find releases directly on the {company} repo at link:https://github.com/ReachFive/reachfive-ios/releases/[ReachFive iOS SDK^].
 
@@ -283,6 +282,9 @@ For example, `com.googleusercontent.apps.abcdefg-1234567890`.
 See <<Info.plist reference>> for a comprehensive look at the file.
 
 === WeChat Connect
+
+As of {localdate}, WeChat is not yet available for our iOS SDK version {page-component-version}.
+We will update this page accordingly when it is available.
 
 This module uses the WeChat native SDK to be able to interact with the WeChat app.
 

@@ -1,5 +1,5 @@
 = {sdk-type} SDK error response
-// :page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
 This page contains information on how errors are formatted and the error types you may encounter while using the {sdk-type} SDK.
 
