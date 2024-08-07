@@ -554,7 +554,10 @@ public class ReachFiveApi {
     }
 
     func tokenHeader(_ authToken: AuthToken) -> HTTPHeaders {
-        ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
+        guard let accessToken = authToken.accessToken else {
+            fatalError("Missing access token")
+        }
+        return ["Authorization": "\(authToken.tokenType ?? "Bearer") \(accessToken)"]
     }
 
     public func buildAuthorizeURL(queryParams: [String: String?]) -> URL {

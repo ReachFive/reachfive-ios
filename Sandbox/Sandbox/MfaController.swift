@@ -87,6 +87,7 @@ class MfaController: UIViewController {
         configureHierarchy()
         configureDataSource()
         fetchMfaCredentials()
+        fetchTrustedDevices()
     }
     
     @IBAction func startStepUp(_ sender: UIButton) {

@@ -25,15 +25,17 @@ public struct StartStepUp {
     var tkn: String?
     var scope: [String]?
     var origin: String?
+    var stepUpToken: String?
     public var authType: MfaCredentialItemType
     
-    public init(authType: MfaCredentialItemType, authToken: AuthToken? = nil, redirectUri: String? = nil, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil) {
+    public init(authType: MfaCredentialItemType, authToken: AuthToken? = nil, redirectUri: String? = nil, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil, stepUpToken: String? = nil) {
         self.redirectUri = redirectUri
         self.authToken = authToken
         self.tkn = tkn
         self.scope = scope
         self.origin = origin
         self.authType = authType
+        self.stepUpToken = stepUpToken
     }
 }
 
@@ -123,18 +125,24 @@ public extension ReachFive {
     
     func mfaStart(stepUp request: StartStepUp) -> Future<ContinueStepUp, ReachFiveError> {
         let redirectUri = request.redirectUri ?? sdkConfig.redirectUri
-        let pkce = Pkce.generate()
-        storage.save(key: pkceKey, value: pkce)
-        return reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId,
-                                                                 redirectUri: redirectUri,
-                                                                 codeChallenge: pkce.codeChallenge,
-                                                                 codeChallengeMethod: pkce.codeChallengeMethod,
-                                                                 scope: (request.scope ?? scope).joined(separator: " "),
-                                                                 tkn: request.tkn),
-                                           authToken: request.authToken)
-            .flatMap { result in
+        guard let stepUpToken = request.stepUpToken else {
+            let pkce = Pkce.generate()
+            storage.save(key: pkceKey, value: pkce)
+            return reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId,
+                                                                     redirectUri: redirectUri,
+                                                                     codeChallenge: pkce.codeChallenge,
+                                                                     codeChallengeMethod: pkce.codeChallengeMethod,
+                                                                     scope: (request.scope ?? scope).joined(separator: " "),
+                                                                     tkn: request.tkn,
+                                                                     stepUp: request.stepUpToken),
+                                            authToken: request.authToken).flatMap { result in
                 self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: request.authType, origin: request.origin))
             }.map { response in
+                ContinueStepUp(challengeId: response.challengeId, reachFive: self)
+            }
+        }
+        return self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri, clientId: self.sdkConfig.clientId, stepUp: stepUpToken, authType: request.authType, origin: request.origin))
+            .map { response in
                 ContinueStepUp(challengeId: response.challengeId, reachFive: self)
             }
     }
