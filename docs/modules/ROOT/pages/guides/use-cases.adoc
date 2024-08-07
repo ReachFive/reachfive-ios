@@ -1,0 +1,177 @@
+= iOS use cases
+
+There are a few different ways that you can leverage our {company} iOS SDK.
+How you use it depends on your specific requirements and technical ecosystem.
+This page provides an overview of important key terms for our iOS SDK as well as as the primary ways in which you can leverage it.
+
+There are several potential use cases.
+However, there are two core use cases that we would like to cover here:
+
+* <<I want everything inside my iOS app>>
+* <<I have an iOS app but want to use my site authentication>>
+
+== I want everything inside my iOS app
+
+[.released]#icon:check-square-o[] Recommended#
+
+This is possible using native SDK methods, for example with xref:loginWithPassword.adoc[].
+Allowing your users to log in natively from your iOS application is of course the ideal solution.
+This is the approach we recommend when it's possible for your setup.
+
+In this scenario, access tokens, refresh tokens, and cookies are handled inside the iOS app.
+You're able to share these with <<WKWebView>> as well if needed.
+
+Using the native approach, users authenticates in the native iOS application and navigate through the mobile app.
+They can leverage their native app session on other mobile apps as long as it is synchronised with their Apple account and permitted by the integrator (that's you).
+This is possible by link:https://developer.apple.com/documentation/security/keychain_services/keychain_items/sharing_access_to_keychain_items_among_a_collection_of_apps/[icon:apple[] Apple docs: Sharing keychain items among apps^].
+
+[tabs]
+====
+When to use it icon:check-square-o[]::
++
+--
+* When you require a seamless user experience without leaving the app interface.
+* When you need integration with other native functionalities.
+* When performance and responsiveness are absolutely critical.
+--
+When not to use it [.red]#icon:window-close[]#::
++
+--
+* If your users typically authenticate on your website first and use your mobile app to navigate through screens.
+* If your users typically authenticate on your mobile app and use your website to navigate through screens using Safari.
+--
+====
+
+== I have an iOS app but want to use my site authentication
+
+If you have an iOS app but prefer for whatever reason that you want to use your existing authentication/login page from your website, you have a couple of options which are outlined here.
+
+[cols="4s,6a"]
+|===
+|Option |Details
+
+|Use auth page and session from site
+|If you want to use both your authentication/login page from your site and also share the session from the site inside the iOS app, it is possible through <<ASWebAuthenticationSession>>.
+
+|Use only auth page from site
+|If you only want to use the authentication/login page from your site, but not necessarily the session, it's possible through either <<ASWebAuthenticationSession>> or <<WKWebView>>.
+However, we recommend you do not use <<WKWebView>> unless there are no other options.
+
+|===
+
+=== ASWebAuthenticationSession
+
+ASWebAuthenticationSession is an Apple-provided API that allows apps to perform web-based authentication using the system's default browser (Safari). 
+It presents a secure, single sign-on (SSO) experience without requiring users to leave the app.
+
+ASWebAuthenticationSession uses Safari's existing session data to facilitate authentication but keeps the session isolated, meaning Safari's cookies are not accessible to the native app context. 
+
+The app receives the necessary tokens (e.g., access and refresh tokens) through a redirect or callback URL after the user successfully authenticates, but it does not directly access or manipulate Safari's cookies.
+
+// visual
+[.expand]
+icon:random[] See how the flow works
+
+[.expand-content]
+====
+image:flows/flow_ASWebAuthenticationSession.jpeg[role=zoom]
+// [mermaid]
+// ----
+// %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#00c24a', 'fontSize': '20px', 'noteBkgColor': '#c1c1c1', 'edgeLabelBackground':'#fff', 'tertiaryColor': '#e1e1e1'}}}%%
+// flowchart TD
+//     B[User Initiates Login]
+//     B --> C[App Opens ASWebAuthenticationSession]
+//     C --> D[User Enters Credentials in Safari View]
+//     D --> E[ReachFive Verifies Credentials]
+//     E --> F{Are Credentials Valid?}
+//     F -->|Yes| G[ReachFive Sends Token to App]
+//     G --> H[App Stores Token]
+//     H --> I[User Granted Access]
+//     F -->|No| J[Show Error Message]
+// ----
+====
+
+icon:code[] You can use the xref:sdk-ios:ROOT:webviewLogin.adoc[] method for this approach.
+
+[tabs]
+====
+When to use it icon:check-square-o[]::
++
+--
+* When your users authenticate through your website (in Safari) and use your mobile iOS app to navigate through other native screens.
+* When you want your users to leverage the Safari session on other mobile apps.
+* When wanting to strictly adhere to Apple security standards.
+--
+When not to use it [.red]#icon:window-close[]#::
++
+--
+If your users typically authenticate on your website first and use a hybrid mobile app approach to navigate screens, this approach is not recommended.
+This is because Safari session context isn't shared with <<WKWebView>> in this hybrid scenario.
+--
+====
+
+=== WKWebView
+
+WKWebView is a web view component that allows developers to embed web content within their app. 
+This can be used to present a web-based login from directly within the app.
+
+CAUTION: OAuth standards discourage using this approach as it uses insecure communication channels.
+
+// visual
+[.expand]
+icon:random[] See how the flow works
+
+[.expand-content]
+====
+image:flows/flow_WKWebView.jpeg[role=zoom]
+// [mermaid]
+// ----
+// %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#00c24a', 'fontSize': '20px', 'noteBkgColor': '#c1c1c1', 'edgeLabelBackground':'#fff', 'tertiaryColor': '#e1e1e1'}}}%%
+// flowchart TD
+//     B[User Initiates Login]
+//     B --> C[App Loads WKWebView with Login URL]
+//     C --> D[User Enters Credentials in WKWebView]
+//     D --> E[ReachFive Verifies Credentials]
+//     E --> F{Are Credentials Valid?}
+//     F -->|Yes| G[ReachFive Sends Token to App]
+//     G --> H[App Stores Token]
+//     H --> I[User Granted Access]
+//     F -->|No| J[Show Error Message]
+// ----
+====
+
+icon:code[] You can use the xref:sdk-ios:ROOT:loadLoginWebview.adoc[] method for this approach.
+
+[tabs]
+====
+When to use it icon:check-square-o[]::
++
+--
+* When your users authenticate through your website through webviews and use your mobile iOS app to navigate through other native screens or webviews.
+--
+When not to use it [.red]#icon:window-close[]#::
++
+--
+If your users typically authenticate on your website first and use a hybrid mobile app approach to navigate screens, this approach is not recommended.
+--
+====
+
+== Key terms
+
+Webview::
+A view that allows developers to embed web content directly within their applications. 
+The primary component used for this purpose in modern iOS development is `WKWebView`, which is part of the WebKit framework.
+We explain more on this later in the page.
+
+<<I want everything inside my iOS app, Native mobile app>>::
+A mobile app that relies only on screens built using native context, without any external web context.
+
+Hybrid mobile app::
+A mobile app that uses both native screens and webviews.
+
+<<ASWebAuthenticationSession>>::
+ASWebAuthenticationSession is an Apple-provided API that allows apps to perform web-based authentication using the system's default browser (Safari).
+
+<<WKWebView>>::
+WKWebView is a web view component that allows developers to embed web content within their app. 
+This can be used to present a web-based login form directly within the app.
