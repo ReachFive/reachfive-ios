@@ -19,18 +19,74 @@ public enum Credential {
     }
 }
 
-public struct StartStepUp {
-    var redirectUri: String?
-    var authToken: AuthToken?
-    var tkn: String?
-    var scope: [String]?
-    var origin: String?
-    var stepUpToken: String?
+public protocol StartStepUp {
+    var redirectUri: String? { get }
+//    var authToken: AuthToken? { get }
+    var tkn: String? { get }
+    var scope: [String]? { get }
+    var origin: String? { get }
+//    var stepUpToken: String? { get }
+    var authType: MfaCredentialItemType  { get set }
+}
+
+//public struct StartStepUp {
+//    var redirectUri: String?
+//    var authToken: AuthToken?
+//    var tkn: String?
+//    var scope: [String]?
+//    var origin: String?
+//    var stepUpToken: String?
+//    public var authType: MfaCredentialItemType
+//    
+//    public init(authType: MfaCredentialItemType, authToken: AuthToken? = nil, redirectUri: String? = nil, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil, stepUpToken: String? = nil) {
+//        self.redirectUri = redirectUri
+//        self.authToken = authToken
+//        self.tkn = tkn
+//        self.scope = scope
+//        self.origin = origin
+//        self.authType = authType
+//        self.stepUpToken = stepUpToken
+//    }
+//}
+
+public struct StartStepUpAuthTokenFlow: StartStepUp {
+    public var redirectUri: String?
+    
+    public var authToken: AuthToken
+    
+    public var tkn: String?
+    
+    public var scope: [String]?
+    
+    public var origin: String?
+        
     public var authType: MfaCredentialItemType
     
-    public init(authType: MfaCredentialItemType, authToken: AuthToken? = nil, redirectUri: String? = nil, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil, stepUpToken: String? = nil) {
+    public init(redirectUri: String? = nil, authToken: AuthToken, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil, authType: MfaCredentialItemType) {
         self.redirectUri = redirectUri
         self.authToken = authToken
+        self.tkn = tkn
+        self.scope = scope
+        self.origin = origin
+        self.authType = authType
+    }
+}
+
+public struct StartStepUpLoginFlow: StartStepUp {
+    public var redirectUri: String?
+    
+    public var tkn: String?
+    
+    public var scope: [String]?
+    
+    public var origin: String?
+    
+    public var authType: MfaCredentialItemType
+    
+    public var stepUpToken: String
+    
+    public init(redirectUri: String? = nil, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil, authType: MfaCredentialItemType, stepUpToken: String) {
+        self.redirectUri = redirectUri
         self.tkn = tkn
         self.scope = scope
         self.origin = origin
@@ -125,7 +181,14 @@ public extension ReachFive {
     
     func mfaStart(stepUp request: StartStepUp) -> Future<ContinueStepUp, ReachFiveError> {
         let redirectUri = request.redirectUri ?? sdkConfig.redirectUri
-        guard let stepUpToken = request.stepUpToken else {
+        
+        switch request {
+        case let r as StartStepUpLoginFlow:
+            return self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri, clientId: self.sdkConfig.clientId, stepUp: r.stepUpToken, authType: r.authType, origin: r.origin))
+                .map { response in
+                    ContinueStepUp(challengeId: response.challengeId, reachFive: self)
+                }
+        case let r as StartStepUpAuthTokenFlow:
             let pkce = Pkce.generate()
             storage.save(key: pkceKey, value: pkce)
             return reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId,
@@ -133,18 +196,15 @@ public extension ReachFive {
                                                                      codeChallenge: pkce.codeChallenge,
                                                                      codeChallengeMethod: pkce.codeChallengeMethod,
                                                                      scope: (request.scope ?? scope).joined(separator: " "),
-                                                                     tkn: request.tkn,
-                                                                     stepUp: request.stepUpToken),
-                                            authToken: request.authToken).flatMap { result in
+                                                                     tkn: request.tkn, stepUp: nil),
+                                               authToken: r.authToken).flatMap { result in
                 self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: request.authType, origin: request.origin))
             }.map { response in
                 ContinueStepUp(challengeId: response.challengeId, reachFive: self)
             }
+        default:
+            fatalError("request type not recognized")
         }
-        return self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri, clientId: self.sdkConfig.clientId, stepUp: stepUpToken, authType: request.authType, origin: request.origin))
-            .map { response in
-                ContinueStepUp(challengeId: response.challengeId, reachFive: self)
-            }
     }
     
     func mfaVerify(stepUp request: VerifyStepUp) -> Future<AuthToken, ReachFiveError> {

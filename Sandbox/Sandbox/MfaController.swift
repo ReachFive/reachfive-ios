@@ -105,7 +105,7 @@ class MfaController: UIViewController {
         }
         let mfaAction = MfaAction(presentationAnchor: self)
         
-        mfaAction.mfaStart(stepUp: StartStepUp(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"]), authToken: authToken).onSuccess { freshToken in
+        mfaAction.mfaStart(stepUp: StartStepUpAuthTokenFlow(authToken: authToken,scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"], authType: stepUpSelectedType), authToken: authToken).onSuccess { freshToken in
             AppDelegate.storage.setToken(freshToken)
             self.fetchTrustedDevices()
         }

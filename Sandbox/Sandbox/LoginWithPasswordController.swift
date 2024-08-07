@@ -50,7 +50,7 @@ class LoginWithPasswordController: UIViewController {
             fatalError("AMR does not exist")
         }
         return UIAlertAction(title: amr, style: .default) { _ in
-            AppDelegate().reachfive.mfaStart(stepUp: StartStepUp(authType: mfaCredentialItemType, stepUpToken: stepUpToken)).onSuccess{ resp in
+            AppDelegate().reachfive.mfaStart(stepUp: StartStepUpLoginFlow(authType: mfaCredentialItemType, stepUpToken: stepUpToken)).onSuccess{ resp in
                  self.handleStartVerificationCode(resp, stepUpType: mfaCredentialItemType)
                     .onSuccess{ authTkn in
                         self.goToProfile(authTkn)
