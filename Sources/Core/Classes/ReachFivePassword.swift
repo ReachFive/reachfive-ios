@@ -23,6 +23,7 @@ public extension ReachFive {
         scope: [String]? = nil,
         origin: String? = nil
     ) -> Future<AuthToken, ReachFiveError> {
+        let strScope = (scope ?? self.scope).joined(separator: " ")
         let loginRequest = LoginRequest(
             email: email,
             phoneNumber: phoneNumber,
@@ -30,11 +31,31 @@ public extension ReachFive {
             password: password,
             grantType: "password",
             clientId: sdkConfig.clientId,
-            scope: (scope ?? self.scope).joined(separator: " "),
+            scope: strScope,
             origin: origin
         )
         return reachFiveApi
             .loginWithPassword(loginRequest: loginRequest)
-            .flatMap({ self.loginCallback(tkn: $0.tkn, scopes: scope, origin: origin) })
+            .flatMap({ resp in
+                if(resp.mfaRequired == true) {
+                    let pkce = Pkce.generate()
+                    self.storage.save(key: self.pkceKey, value: pkce)
+                    return self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, codeChallenge: pkce.codeChallenge, codeChallengeMethod: pkce.codeChallengeMethod, scope: strScope, tkn: resp.tkn, stepUp: nil), authToken: nil)
+                        .map({ res in
+                            AuthToken(
+                                idToken: nil,
+                                accessToken: nil,
+                                refreshToken: nil,
+                                tokenType: nil,
+                                expiresIn: nil,
+                                token: res.token,
+                                amr: res.amr,
+                                user: nil
+                            )
+                        })
+                } else {
+                    return self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
+                }
+            })
     }
 }

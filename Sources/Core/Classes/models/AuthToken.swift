@@ -3,18 +3,23 @@ import BrightFutures
 
 public class AuthToken: Codable {
     public let idToken: String?
-    public let accessToken: String
+    public let accessToken: String?
     public let refreshToken: String?
     public let tokenType: String?
     public let expiresIn: Int?
     public let user: OpenIdUser?
+    // Step-up token
+    public let token: String?
+    public let amr: [String]?
     
     public init(
         idToken: String?,
-        accessToken: String,
+        accessToken: String?,
         refreshToken: String?,
         tokenType: String?,
         expiresIn: Int?,
+        token: String?,
+        amr: [String]?,
         user: OpenIdUser?
     ) {
         self.idToken = idToken
@@ -23,6 +28,8 @@ public class AuthToken: Codable {
         self.tokenType = tokenType
         self.expiresIn = expiresIn
         self.user = user
+        self.amr = amr
+        self.token = token
     }
     
     public static func fromOpenIdTokenResponseFuture(
@@ -48,6 +55,8 @@ public class AuthToken: Codable {
             refreshToken: accessTokenResponse.refreshToken,
             tokenType: accessTokenResponse.tokenType,
             expiresIn: accessTokenResponse.expiresIn,
+            token: nil,
+            amr: nil,
             user: user
         )
     }
