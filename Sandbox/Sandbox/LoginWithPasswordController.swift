@@ -10,7 +10,7 @@ class LoginWithPasswordController: UIViewController {
     @IBOutlet weak var customIdentifierInput: UITextField!
     @IBOutlet weak var passwordInput: UITextField!
     @IBOutlet weak var error: UILabel!
-//    weak var authToken: AuthToken?
+
     let amrToMfaCredentialItemType = ["sms": MfaCredentialItemType.sms, "email": MfaCredentialItemType.email]
     
     @IBAction func login(_ sender: Any) {
