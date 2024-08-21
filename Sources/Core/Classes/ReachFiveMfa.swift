@@ -21,33 +21,11 @@ public enum Credential {
 
 public protocol StartStepUp {
     var redirectUri: String? { get }
-//    var authToken: AuthToken? { get }
     var tkn: String? { get }
     var scope: [String]? { get }
     var origin: String? { get }
-//    var stepUpToken: String? { get }
     var authType: MfaCredentialItemType  { get set }
 }
-
-//public struct StartStepUp {
-//    var redirectUri: String?
-//    var authToken: AuthToken?
-//    var tkn: String?
-//    var scope: [String]?
-//    var origin: String?
-//    var stepUpToken: String?
-//    public var authType: MfaCredentialItemType
-//    
-//    public init(authType: MfaCredentialItemType, authToken: AuthToken? = nil, redirectUri: String? = nil, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil, stepUpToken: String? = nil) {
-//        self.redirectUri = redirectUri
-//        self.authToken = authToken
-//        self.tkn = tkn
-//        self.scope = scope
-//        self.origin = origin
-//        self.authType = authType
-//        self.stepUpToken = stepUpToken
-//    }
-//}
 
 public struct StartStepUpAuthTokenFlow: StartStepUp {
     public var redirectUri: String?
