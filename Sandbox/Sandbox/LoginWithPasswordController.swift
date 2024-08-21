@@ -23,22 +23,18 @@ class LoginWithPasswordController: UIViewController {
             .loginWithPassword(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")
             .onSuccess { token in
                 self.error.text = nil
-                if(token.token == nil) {
-                    self.goToProfile(token)
-                } else {
-                    let selectMfaAuthTypeAlert = UIAlertController(title: "Select MFA", message: "Select MFA auth type", preferredStyle: UIAlertController.Style.alert)
-                    guard let stepUpToken = token.token else {
-                        fatalError("Step up token cannot be null")
-                    }
-                    guard let amrs = token.amr else {
-                        fatalError("AMR cannot be null")
-                    }
-                    amrs.forEach({amr in
-                        selectMfaAuthTypeAlert.addAction(self.createSelectMfaAuthTypeAlert(amr: amr, stepUpToken: stepUpToken))
-                    })
-                    selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-                    self.present(selectMfaAuthTypeAlert, animated: true, completion: nil)
+                guard let stepUpToken = token.token else {
+                    return self.goToProfile(token)
                 }
+                let selectMfaAuthTypeAlert = UIAlertController(title: "Select MFA", message: "Select MFA auth type", preferredStyle: UIAlertController.Style.alert)
+                guard let amrs = token.amr else {
+                    fatalError("AMR cannot be null")
+                }
+                amrs.forEach({amr in
+                    selectMfaAuthTypeAlert.addAction(self.createSelectMfaAuthTypeAlert(amr: amr, stepUpToken: stepUpToken))
+                })
+                selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                self.present(selectMfaAuthTypeAlert, animated: true, completion: nil)
             }
             .onFailure { error in
                 self.error.text = error.message()
