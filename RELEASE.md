@@ -24,20 +24,20 @@
 
 5. Submit and merge the pull request
 
-6. If The branch was merged into master, then keep the branch open.<br>
-If the branch was squashed, then delete the branch and recreate a new branch still named `x.x.x`.<br>
-This `x.x.x` branch will for now on be used for doc updates and should be kept open forever.
-
-7. Add git tag `x.x.x` to the merge commit
+6. Add git tag `x.x.x` to the merge commit
     ```sh
     git tag x.x.x
     ```
 
-8. Push the tag
+7. Push the tag
     ```sh
     git push origin x.x.x
     ```
 
-9. The CI will automatically publish this new version
+8. The CI will automatically publish this new version
 
-10. Finally, draft a new release in the [Github releases tab](https://github.com/ReachFive/reachfive-ios/releases) (copy & paste the changelog in the release's description).
+9. Finally, draft a new release in the [Github releases tab](https://github.com/ReachFive/reachfive-ios/releases) (copy & paste the changelog in the release's description).
+
+10. If the new version needs a fork of the documentation, the a `x.x.x` should exist in perpetuity for the purpose of this documentation.<br>
+    If, at step 6., the `x.x.x` branch was merged (not squashed) into master, then keep the branch open.<br>
+    If the branch was squashed, then delete the branch and recreate a new branch still named `x.x.x`.
