@@ -1,16 +1,16 @@
 import UIKit
 import Reach5
 import Reach5Google
+import Reach5Facebook
 
 #if targetEnvironment(macCatalyst)
-// we don't add WeChat and Facebook by default in order to be able to launch the app on mac Catalyst in order to test on local (more easily than with a simulator)
-// we can add back Facebook when we migrate to Swift Package Manager, or try this crazy fix: https://betterprogramming.pub/macos-catalyst-debugging-problems-using-catalyst-and-cocoapods-579679150fa9
+// we don't add WeChat by default in order to be able to launch the app on mac Catalyst in order to test on local (more easily than with a simulator)
+// Facebook itself provided a fix on the latest version apparently
 // WeChat appears to just not be able to run on Catalyst at all
 #else
 // Peut-être qu'un jour je serai capable de modifier les dépendance cocoapods par plateforme
 // https://betterprogramming.pub/why-dont-my-pods-compile-with-mac-catalyst-and-how-can-i-solve-it-ffc3fbec824e
 // Ce lien suggère une solution mais je ne vois pas les même choses dans Build Phases, je ne vois pas les dépendances Facebook et WeChat
-//import Reach5Facebook
 //import Reach5WeChat
 #endif
 
@@ -52,14 +52,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     )
     
     #if targetEnvironment(macCatalyst)
-    static let macProviders: [ProviderCreator] = [GoogleProvider()]
+    static let macProviders: [ProviderCreator] = [GoogleProvider(), FacebookProvider()]
     static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: macProviders, storage: storage)
-    // app-site-association does not seem to work
     static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: macProviders, storage: storage)
     let reachfive = macLocal
     #else
 //    static let providers: [ProviderCreator] = [GoogleProvider(), FacebookProvider(), WeChatProvider()]
-    static let providers: [ProviderCreator] = [GoogleProvider()]
+    static let providers: [ProviderCreator] = [GoogleProvider(), FacebookProvider()]
     static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
     static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
     #if targetEnvironment(simulator)

@@ -7,8 +7,16 @@ PODS:
   - AppAuth/ExternalUserAgent (1.7.5):
     - AppAuth/Core
   - BrightFutures (8.2.0)
-  - CryptoSwift (1.8.2)
+  - CryptoSwift (1.8.3)
   - DeviceKit (5.4.0)
+  - FBAEMKit (17.0.3):
+    - FBSDKCoreKit_Basics (= 17.0.3)
+  - FBSDKCoreKit (17.0.3):
+    - FBAEMKit (= 17.0.3)
+    - FBSDKCoreKit_Basics (= 17.0.3)
+  - FBSDKCoreKit_Basics (17.0.3)
+  - FBSDKLoginKit (17.0.3):
+    - FBSDKCoreKit (= 17.0.3)
   - GoogleSignIn (7.1.0):
     - AppAuth (< 2.0, >= 1.7.3)
     - GTMAppAuth (< 5.0, >= 4.1.1)
@@ -22,12 +30,17 @@ PODS:
     - BrightFutures (~> 8.2.0)
     - CryptoSwift (~> 1.8)
     - DeviceKit (~> 5.1)
+  - Reach5Facebook (7.0.0):
+    - FBSDKCoreKit (~> 17.0.0)
+    - FBSDKLoginKit (~> 17.0.0)
+    - Reach5
   - Reach5Google (7.0.0):
     - GoogleSignIn (~> 7)
     - Reach5
 
 DEPENDENCIES:
   - Reach5 (from `../Reach5.podspec`)
+  - Reach5Facebook (from `../../reachfive-ios-facebook/Reach5Facebook.podspec`)
   - Reach5Google (from `../../reachfive-ios-google/Reach5Google.podspec`)
 
 SPEC REPOS:
@@ -37,6 +50,10 @@ SPEC REPOS:
     - BrightFutures
     - CryptoSwift
     - DeviceKit
+    - FBAEMKit
+    - FBSDKCoreKit
+    - FBSDKCoreKit_Basics
+    - FBSDKLoginKit
     - GoogleSignIn
     - GTMAppAuth
     - GTMSessionFetcher
@@ -44,6 +61,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Reach5:
     :path: "../Reach5.podspec"
+  Reach5Facebook:
+    :path: "../../reachfive-ios-facebook/Reach5Facebook.podspec"
   Reach5Google:
     :path: "../../reachfive-ios-google/Reach5Google.podspec"
 
@@ -51,14 +70,19 @@ SPEC CHECKSUMS:
   Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   BrightFutures: 67e0e8cd974ab9f6c04650cc64153f7adf1ec489
-  CryptoSwift: c63a805d8bb5e5538e88af4e44bb537776af11ea
+  CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
   DeviceKit: bd34bb1766d926c3cc5a5f6e3e9a6dd10148b805
+  FBAEMKit: 9900b2edd99a2d21629a6277e6166f14c6215799
+  FBSDKCoreKit: 0791f8f68a8630931a4c12aa23a56cc021551596
+  FBSDKCoreKit_Basics: 46d6b472c0dd0a5a7e972c025033d1c567f54eb4
+  FBSDKLoginKit: b4a4eba1d62eb452544411824f41689adabd5bd2
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   Reach5: d5f162142895fe7120e1c0dd5a3ae0f7494fd58b
+  Reach5Facebook: b8e92bc1338a148f7753dc949cc5d0a4be49df45
   Reach5Google: 1eb1a19a04d9586b85d34fe197856842bd4a4f3a
 
-PODFILE CHECKSUM: 75f77a9fd40029200b7106908ad11e21847844de
+PODFILE CHECKSUM: d9a60d02a850d62859602414096b80b721aba150
 
 COCOAPODS: 1.15.2
