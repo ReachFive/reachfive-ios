@@ -19,58 +19,9 @@ public enum Credential {
     }
 }
 
-public protocol StartStepUp {
-    var redirectUri: String? { get }
-    var tkn: String? { get }
-    var scope: [String]? { get }
-    var origin: String? { get }
-    var authType: MfaCredentialItemType  { get set }
-}
-
-public struct StartStepUpAuthTokenFlow: StartStepUp {
-    public var redirectUri: String?
-    
-    public var authToken: AuthToken
-    
-    public var tkn: String?
-    
-    public var scope: [String]?
-    
-    public var origin: String?
-        
-    public var authType: MfaCredentialItemType
-    
-    public init(redirectUri: String? = nil, authToken: AuthToken, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil, authType: MfaCredentialItemType) {
-        self.redirectUri = redirectUri
-        self.authToken = authToken
-        self.tkn = tkn
-        self.scope = scope
-        self.origin = origin
-        self.authType = authType
-    }
-}
-
-public struct StartStepUpLoginFlow: StartStepUp {
-    public var redirectUri: String?
-    
-    public var tkn: String?
-    
-    public var scope: [String]?
-    
-    public var origin: String?
-    
-    public var authType: MfaCredentialItemType
-    
-    public var stepUpToken: String
-    
-    public init(redirectUri: String? = nil, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil, authType: MfaCredentialItemType, stepUpToken: String) {
-        self.redirectUri = redirectUri
-        self.tkn = tkn
-        self.scope = scope
-        self.origin = origin
-        self.authType = authType
-        self.stepUpToken = stepUpToken
-    }
+public enum StartStepUp{
+    case StartStepUpAuthTokenFlow(redirectUri: String?, scope: [String]?, origin: String?, authType: MfaCredentialItemType, authToken: AuthToken)
+    case StartStepUpLoginFlow(redirectUri: String?, origin: String?, authType: MfaCredentialItemType, stepUpToken: String)
 }
 
 public class ContinueStepUp {
@@ -158,30 +109,27 @@ public extension ReachFive {
     }
     
     func mfaStart(stepUp request: StartStepUp) -> Future<ContinueStepUp, ReachFiveError> {
-        let redirectUri = request.redirectUri ?? sdkConfig.redirectUri
-        
         switch request {
-        case let r as StartStepUpLoginFlow:
-            return self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri, clientId: self.sdkConfig.clientId, stepUp: r.stepUpToken, authType: r.authType, origin: r.origin))
+        case .StartStepUpLoginFlow(let redirectUri, let origin, let authType, let stepUpToken):
+            return self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: self.sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin))
                 .map { response in
                     ContinueStepUp(challengeId: response.challengeId, reachFive: self)
                 }
-        case let r as StartStepUpAuthTokenFlow:
+        case .StartStepUpAuthTokenFlow(let redirectUri, let overwrittenScope, let origin, let authType, let authToken):
             let pkce = Pkce.generate()
             storage.save(key: pkceKey, value: pkce)
             return reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId,
-                                                                     redirectUri: redirectUri,
+                                                                     redirectUri: redirectUri ?? sdkConfig.redirectUri,
                                                                      codeChallenge: pkce.codeChallenge,
                                                                      codeChallengeMethod: pkce.codeChallengeMethod,
-                                                                     scope: (request.scope ?? scope).joined(separator: " "),
-                                                                     tkn: request.tkn, stepUp: nil),
-                                               authToken: r.authToken).flatMap { result in
-                self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: request.authType, origin: request.origin))
+                                                                     scope: (overwrittenScope ?? scope).joined(separator: " "),
+                                                                     tkn: nil,
+                                                                     stepUp: nil),
+                                               authToken: authToken).flatMap { result in
+                self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? self.sdkConfig.redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: authType, origin: origin))
             }.map { response in
                 ContinueStepUp(challengeId: response.challengeId, reachFive: self)
             }
-        default:
-            fatalError("request type not recognized")
         }
     }
     

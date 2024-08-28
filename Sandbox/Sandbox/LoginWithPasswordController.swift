@@ -27,10 +27,7 @@ class LoginWithPasswordController: UIViewController {
                     return self.goToProfile(token)
                 }
                 let selectMfaAuthTypeAlert = UIAlertController(title: "Select MFA", message: "Select MFA auth type", preferredStyle: UIAlertController.Style.alert)
-                guard let amrs = token.amr else {
-                    fatalError("AMR cannot be null")
-                }
-                amrs.forEach({amr in
+                token.amr?.forEach({amr in
                     selectMfaAuthTypeAlert.addAction(self.createSelectMfaAuthTypeAlert(amr: amr, stepUpToken: stepUpToken))
                 })
                 selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
@@ -43,10 +40,10 @@ class LoginWithPasswordController: UIViewController {
 
     private func createSelectMfaAuthTypeAlert(amr: String, stepUpToken: String) -> UIAlertAction {
         guard let mfaCredentialItemType = self.amrToMfaCredentialItemType[amr] else {
-            fatalError("AMR does not exist")
+            return UIAlertAction(title: "OK", style: .default)
         }
         return UIAlertAction(title: amr, style: .default) { _ in
-            AppDelegate().reachfive.mfaStart(stepUp: StartStepUpLoginFlow(authType: mfaCredentialItemType, stepUpToken: stepUpToken)).onSuccess{ resp in
+            AppDelegate().reachfive.mfaStart(stepUp: .StartStepUpLoginFlow(redirectUri: nil, origin: nil, authType: mfaCredentialItemType, stepUpToken: stepUpToken)).onSuccess{ resp in
                  self.handleStartVerificationCode(resp, stepUpType: mfaCredentialItemType)
                     .onSuccess{ authTkn in
                         self.goToProfile(authTkn)

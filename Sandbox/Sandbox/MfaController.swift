@@ -105,7 +105,7 @@ class MfaController: UIViewController {
         }
         let mfaAction = MfaAction(presentationAnchor: self)
         
-        mfaAction.mfaStart(stepUp: StartStepUpAuthTokenFlow(authToken: authToken,scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"], authType: stepUpSelectedType), authToken: authToken).onSuccess { freshToken in
+        mfaAction.mfaStart(stepUp: StartStepUp.StartStepUpAuthTokenFlow(redirectUri: nil, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"], origin: nil, authType: stepUpSelectedType, authToken: authToken), authToken: authToken).onSuccess { freshToken in
             AppDelegate.storage.setToken(freshToken)
             self.fetchTrustedDevices()
         }
@@ -167,6 +167,12 @@ class MfaAction {
     }
     
     func mfaStart(stepUp startStepUp: StartStepUp, authToken: AuthToken) -> Future<AuthToken, ReachFiveError> {
+        let authType = switch startStepUp {
+        case .StartStepUpLoginFlow(let redirectUri, let origin, let authType, let stepUpToken):
+            authType
+        case .StartStepUpAuthTokenFlow(let redirectUri, let overwrittenScope, let origin, let authType, let authToken):
+            authType
+        }
         return AppDelegate.reachfive()
             .mfaStart(stepUp: startStepUp)
             .recoverWith { error in
@@ -185,7 +191,7 @@ class MfaAction {
                     }
             }
             .flatMap { resp in
-                self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
+                self.handleStartVerificationCode(resp, stepUpType: authType)
             }
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.message())")
