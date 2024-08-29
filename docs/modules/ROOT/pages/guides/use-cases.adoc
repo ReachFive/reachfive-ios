@@ -7,10 +7,10 @@ This page provides an overview of important key terms for our iOS SDK as well as
 There are several potential use cases.
 However, there are two core use cases that we would like to cover here, which primarily focus around whether the login is native or web-based.
 
-* <<I want to authenticate users within my iOS app>>
-* <<I have an iOS app but want to use my website authentication>>
+* <<You want to authenticate users within your iOS app>>
+* <<You have an iOS app but want to use your website authentication>>
 
-== I want to authenticate users within my iOS app
+== You want to authenticate users within your iOS app
 
 [.released]#icon:check-square-o[] Recommended#
 
@@ -42,9 +42,9 @@ When not to use it [.red]#icon:window-close[]#::
 --
 ====
 
-== I have an iOS app but want to use my website authentication
+== You have an iOS app but want to use your website authentication
 
-If you have an iOS app but prefer for whatever reason that you want to use your existing authentication/login page from your website or third-party social provider, you have a couple of options which are outlined here.
+If you have an iOS app but prefer to use your existing authentication/login page from your website or third-party social provider, you have a couple of options which are outlined here.
 
 [cols="4s,6a"]
 |===
@@ -151,7 +151,7 @@ icon:code[] You can use the xref:sdk-ios:ROOT:loadLoginWebview.adoc[] method for
 When to use it icon:check-square-o[]::
 +
 --
-* When your users authenticate through your website through webviews and use your mobile iOS app to navigate through other native screens or webviews.
+* When your users authenticate with your website through webviews and use your mobile iOS app to navigate through other native screens or webviews.
 --
 When not to use it [.red]#icon:window-close[]#::
 +
@@ -166,15 +166,14 @@ If your users typically authenticate on your website first and use a hybrid mobi
 ASWebAuthenticationSession is an Apple-provided API that allows apps to perform web-based authentication using the system's default browser (Safari).
 
 Hybrid mobile app::
-A mobile app that embeds web content whereby the user needs to be authenticated to navigate.
+A mobile app that embeds web content where the user needs to be authenticated to navigate.
 
-<<I want to authenticate users within my iOS app, Native mobile app>>::
+<<You want to authenticate users within your iOS app, Native mobile app>>::
 A mobile app that relies only on screens built using native context, without any external web context.
 
 Webview::
 A view that allows developers to embed web content directly within their applications. 
 The primary component used for this purpose in modern iOS development is `WKWebView`, which is part of the WebKit framework.
-We explain more on this later in the page.
 
 <<WKWebView>>::
 WKWebView is a web view component that allows developers to embed web content within their app. 
