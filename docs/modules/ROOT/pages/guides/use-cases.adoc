@@ -5,12 +5,12 @@ How you use it depends on your specific requirements and technical ecosystem.
 This page provides an overview of important key terms for our iOS SDK as well as as the primary ways in which you can leverage it.
 
 There are several potential use cases.
-However, there are two core use cases that we would like to cover here:
+However, there are two core use cases that we would like to cover here, which primarily focus around whether the login is native or web-based.
 
-* <<I want everything inside my iOS app>>
+* <<I want to authenticate users within my iOS app>>
 * <<I have an iOS app but want to use my website authentication>>
 
-== I want everything inside my iOS app
+== I want to authenticate users within my iOS app
 
 [.released]#icon:check-square-o[] Recommended#
 
@@ -42,23 +42,24 @@ When not to use it [.red]#icon:window-close[]#::
 --
 ====
 
-== I have an iOS app but want to use my site authentication
+== I have an iOS app but want to use my website authentication
 
-If you have an iOS app but prefer for whatever reason that you want to use your existing authentication/login page from your website, you have a couple of options which are outlined here.
+If you have an iOS app but prefer for whatever reason that you want to use your existing authentication/login page from your website or third-party social provider, you have a couple of options which are outlined here.
 
 [cols="4s,6a"]
 |===
 |Option |Details
 
-|Use auth page and session from your site
-|If you want to use both your authentication/login page from your site and also share the session from the site inside the iOS app, it is possible through <<ASWebAuthenticationSession>>.
+|Use auth page and session from your website
+|You want to use both your authentication/login page from your website and also share the session from the website inside the iOS app, it is possible through <<ASWebAuthenticationSession>>.
 
-|Use session from a second or third-party site
-|I you want to leverage your own Social Connector or a third-party one (like Facebook Login, Google Login...), it is possible through <<ASWebAuthenticationSession>>.
+|Use session from a second or third-party website
+|You want to leverage your own social connector or a third-party one (like Facebook Login, Google Login, and so on), it is possible through <<ASWebAuthenticationSession>>.
 
-|Use only auth page from your site
-|If you only want to use the authentication/login page from your site, but not necessarily the session, it's possible through either <<ASWebAuthenticationSession>> or <<WKWebView>>.
-However, we recommend you do not use <<WKWebView>> unless there are no other options.
+|Use only auth page from your website
+|You only want to use the authentication/login page from your website, but not necessarily the session, it's possible through either <<ASWebAuthenticationSession>> or <<WKWebView>>.
+
+IMPORTANT: We recommend you do not use <<WKWebView>> unless there are no other options.
 
 |===
 
@@ -161,19 +162,19 @@ If your users typically authenticate on your website first and use a hybrid mobi
 
 == Key terms
 
+<<ASWebAuthenticationSession>>::
+ASWebAuthenticationSession is an Apple-provided API that allows apps to perform web-based authentication using the system's default browser (Safari).
+
+Hybrid mobile app::
+A mobile app that embeds web content whereby the user needs to be authenticated to navigate.
+
+<<I want to authenticate users within my iOS app, Native mobile app>>::
+A mobile app that relies only on screens built using native context, without any external web context.
+
 Webview::
 A view that allows developers to embed web content directly within their applications. 
 The primary component used for this purpose in modern iOS development is `WKWebView`, which is part of the WebKit framework.
 We explain more on this later in the page.
-
-<<I want everything inside my iOS app, Native mobile app>>::
-A mobile app that relies only on screens built using native context, without any external web context.
-
-Hybrid mobile app::
-A mobile app that uses both native screens and webviews.
-
-<<ASWebAuthenticationSession>>::
-ASWebAuthenticationSession is an Apple-provided API that allows apps to perform web-based authentication using the system's default browser (Safari).
 
 <<WKWebView>>::
 WKWebView is a web view component that allows developers to embed web content within their app. 
