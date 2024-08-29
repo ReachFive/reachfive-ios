@@ -117,7 +117,7 @@ This is because Safari session context isn't shared with <<WKWebView>> in this h
 === WKWebView
 
 WKWebView is a web view component that allows developers to embed web content within their app. 
-This can be used to present a web-based login from directly within the app.
+This can be used to present a web-based login form directly within the app.
 
 CAUTION: OAuth standards discourage using this approach as it uses insecure communication channels.
 
