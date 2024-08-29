@@ -22,7 +22,7 @@ In this scenario, access tokens, refresh tokens, and cookies are handled inside 
 You're able to share these with <<WKWebView>> as well if needed.
 
 Using the native approach, users authenticates in the native iOS application and navigate through the mobile app.
-They can leverage their native app session on other mobile apps as long as it is synchronised with their Apple account and permitted by the integrator (that's you).
+They can leverage their native app session on other mobile apps as long as it is synchronised with their Apple account and implemented by the integrator (that's you).
 This is possible by link:https://developer.apple.com/documentation/security/keychain_services/keychain_items/sharing_access_to_keychain_items_among_a_collection_of_apps/[icon:apple[] Apple docs: Sharing keychain items among apps^].
 
 [tabs]
