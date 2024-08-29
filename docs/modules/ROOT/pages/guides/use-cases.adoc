@@ -50,10 +50,13 @@ If you have an iOS app but prefer for whatever reason that you want to use your 
 |===
 |Option |Details
 
-|Use auth page and session from site
+|Use auth page and session from your site
 |If you want to use both your authentication/login page from your site and also share the session from the site inside the iOS app, it is possible through <<ASWebAuthenticationSession>>.
 
-|Use only auth page from site
+|Use session from a second or third-party site
+|I you want to leverage your own Social Connector or a third-party one (like Facebook Login, Google Login...), it is possible through <<ASWebAuthenticationSession>>.
+
+|Use only auth page from your site
 |If you only want to use the authentication/login page from your site, but not necessarily the session, it's possible through either <<ASWebAuthenticationSession>> or <<WKWebView>>.
 However, we recommend you do not use <<WKWebView>> unless there are no other options.
 
