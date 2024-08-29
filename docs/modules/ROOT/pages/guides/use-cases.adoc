@@ -8,7 +8,7 @@ There are several potential use cases.
 However, there are two core use cases that we would like to cover here:
 
 * <<I want everything inside my iOS app>>
-* <<I have an iOS app but want to use my site authentication>>
+* <<I have an iOS app but want to use my website authentication>>
 
 == I want everything inside my iOS app
 
