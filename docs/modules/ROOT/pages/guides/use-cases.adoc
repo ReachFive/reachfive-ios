@@ -7,10 +7,10 @@ This page provides an overview of important key terms for our iOS SDK as well as
 There are several potential use cases.
 However, there are two core use cases that we would like to cover here, which primarily focus around whether the login is native or web-based.
 
-* <<You want to authenticate users within your iOS app>>
+* <<You want to authenticate users natively within your iOS app>>
 * <<You have an iOS app but want to use your website authentication>>
 
-== You want to authenticate users within your iOS app
+== You want to authenticate users natively within your iOS app
 
 [.released]#icon:check-square-o[] Recommended#
 
@@ -168,7 +168,7 @@ ASWebAuthenticationSession is an Apple-provided API that allows apps to perform 
 Hybrid mobile app::
 A mobile app that embeds web content where the user needs to be authenticated to navigate.
 
-<<You want to authenticate users within your iOS app, Native mobile app>>::
+<<You want to authenticate users natively within your iOS app, Native mobile app>>::
 A mobile app that relies only on screens built using native context, without any external web context.
 
 Webview::
