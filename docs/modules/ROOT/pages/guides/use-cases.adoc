@@ -70,7 +70,7 @@ It presents a secure, single sign-on (SSO) experience without requiring users to
 
 ASWebAuthenticationSession uses Safari's existing session data to facilitate authentication but keeps the session isolated, meaning Safari's cookies are not accessible to the native app context.
 
-The app receives the necessary tokens (e.g., access and refresh tokens) through a redirect or callback URL after the user successfully authenticates, but it does not directly access or manipulate Safari's cookies.
+The app receives the necessary tokens (e.g., access and refresh tokens) after the user successfully authenticates, but it does not directly access or manipulate Safari's cookies.
 
 // visual
 [.expand]
@@ -111,7 +111,7 @@ When not to use it [.red]#icon:window-close[]#::
 +
 --
 If your users typically authenticate on your website first and use a hybrid mobile app approach to navigate screens, this approach is not recommended.
-This is because Safari session context isn't shared with <<WKWebView>> in this hybrid scenario.
+This is because Safari session cookie isn't shared with the app.
 --
 ====
 
