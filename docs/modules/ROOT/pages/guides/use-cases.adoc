@@ -65,10 +65,10 @@ IMPORTANT: We recommend you do not use <<WKWebView>> unless there are no other o
 
 === ASWebAuthenticationSession
 
-ASWebAuthenticationSession is an Apple-provided API that allows apps to perform web-based authentication using the system's default browser (Safari). 
+ASWebAuthenticationSession is an Apple-provided API that allows apps to perform web-based authentication using the system's default browser (Safari).
 It presents a secure, single sign-on (SSO) experience without requiring users to leave the app.
 
-ASWebAuthenticationSession uses Safari's existing session data to facilitate authentication but keeps the session isolated, meaning Safari's cookies are not accessible to the native app context. 
+ASWebAuthenticationSession uses Safari's existing session data to facilitate authentication but keeps the session isolated, meaning Safari's cookies are not accessible to the native app context.
 
 The app receives the necessary tokens (e.g., access and refresh tokens) through a redirect or callback URL after the user successfully authenticates, but it does not directly access or manipulate Safari's cookies.
 
@@ -83,15 +83,16 @@ image:flows/flow_ASWebAuthenticationSession.jpeg[role=zoom]
 // ----
 // %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#00c24a', 'fontSize': '20px', 'noteBkgColor': '#c1c1c1', 'edgeLabelBackground':'#fff', 'tertiaryColor': '#e1e1e1'}}}%%
 // flowchart TD
-//     B[User Initiates Login]
-//     B --> C[App Opens ASWebAuthenticationSession]
-//     C --> D[User Enters Credentials in Safari View]
-//     D --> E[ReachFive Verifies Credentials]
-//     E --> F{Are Credentials Valid?}
-//     F -->|Yes| G[ReachFive Sends Token to App]
-//     G --> H[App Stores Token]
-//     H --> I[User Granted Access]
-//     F -->|No| J[Show Error Message]
+//     B[User initiates login]
+//     B --> C[App opens ASWebAuthenticationSession]
+//     C --> D[User enters credentials in safari view]
+//     D --> E[ReachFive verifies credentials]
+//     E --> F{Are credentials valid?}
+//     F -->|Yes| G[ReachFive sends cookie and token]
+//     G --> H[App stores token]
+//     G --> I[Safari stores cookie]
+//     H --> J[User granted access]
+//     F -->|No| K[Show error message]
 // ----
 ====
 
@@ -104,7 +105,7 @@ When to use it icon:check-square-o[]::
 --
 * When your users authenticate through your website (in Safari) and use your mobile iOS app to navigate through other native screens.
 * When you want your users to leverage the Safari session on other mobile apps.
-* When wanting to strictly adhere to Apple security standards.
+* When wanting to strictly adhere to OAuth and Apple security standards.
 --
 When not to use it [.red]#icon:window-close[]#::
 +
@@ -116,10 +117,10 @@ This is because Safari session context isn't shared with <<WKWebView>> in this h
 
 === WKWebView
 
-WKWebView is a web view component that allows developers to embed web content within their app. 
+WKWebView is a web view component that allows developers to embed web content within their app.
 This can be used to present a web-based login form directly within the app.
 
-CAUTION: OAuth standards discourage using this approach as it uses insecure communication channels.
+CAUTION: OAuth and Apple security standards discourage using this approach as it uses insecure communication channels.
 
 // visual
 [.expand]
@@ -132,15 +133,15 @@ image:flows/flow_WKWebView.jpeg[role=zoom]
 // ----
 // %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#00c24a', 'fontSize': '20px', 'noteBkgColor': '#c1c1c1', 'edgeLabelBackground':'#fff', 'tertiaryColor': '#e1e1e1'}}}%%
 // flowchart TD
-//     B[User Initiates Login]
-//     B --> C[App Loads WKWebView with Login URL]
-//     C --> D[User Enters Credentials in WKWebView]
-//     D --> E[ReachFive Verifies Credentials]
-//     E --> F{Are Credentials Valid?}
-//     F -->|Yes| G[ReachFive Sends Token to App]
-//     G --> H[App Stores Token]
-//     H --> I[User Granted Access]
-//     F -->|No| J[Show Error Message]
+//     B[User initiates login]
+//     B --> C[App loads WKWebView with login URL]
+//     C --> D[User enters credentials in WKWebView]
+//     D --> E[ReachFive verifies credentials]
+//     E --> F{Are credentials valid?}
+//     F -->|Yes| G[ReachFive sends cookie and token]
+//     G --> H[App stores cookie and token]
+//     H --> I[User granted access]
+//     F -->|No| J[Show error message]
 // ----
 ====
 
@@ -172,9 +173,9 @@ A mobile app that embeds web content where the user needs to be authenticated to
 A mobile app that relies only on screens built using native context, without any external web context.
 
 Webview::
-A view that allows developers to embed web content directly within their applications. 
+A view that allows developers to embed web content directly within their applications.
 The primary component used for this purpose in modern iOS development is `WKWebView`, which is part of the WebKit framework.
 
 <<WKWebView>>::
-WKWebView is a web view component that allows developers to embed web content within their app. 
+WKWebView is a web view component that allows developers to embed web content within their app.
 This can be used to present a web-based login form directly within the app.
