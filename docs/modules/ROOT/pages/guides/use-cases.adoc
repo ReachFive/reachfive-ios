@@ -8,7 +8,7 @@ There are several potential use cases.
 However, there are two core use cases that we would like to cover here, which primarily focus around whether the login is native or web-based.
 
 * <<You want to authenticate users natively within your iOS app>>
-* <<You have an iOS app but want to use your website authentication>>
+* <<You want to reuse your website authentication inside your iOS app>>
 
 == You want to authenticate users natively within your iOS app
 
@@ -42,7 +42,7 @@ When not to use it [.red]#icon:window-close[]#::
 --
 ====
 
-== You have an iOS app but want to use your website authentication
+== You want to reuse your website authentication inside your iOS app
 
 If you have an iOS app but prefer to use your existing authentication/login page from your website or third-party social provider, you have a couple of options which are outlined here.
 
