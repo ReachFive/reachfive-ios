@@ -111,7 +111,7 @@ When not to use it [.red]#icon:window-close[]#::
 +
 --
 If your users typically authenticate on your website first and use a hybrid mobile app approach to navigate screens, this approach is not recommended.
-This is because Safari session cookie isn't shared with the app.
+This is because the Safari session cookie isn't shared with the app.
 --
 ====
 
