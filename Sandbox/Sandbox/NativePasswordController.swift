@@ -1,24 +1,23 @@
-import Foundation
-import UIKit
-import Reach5
 import BrightFutures
+import Foundation
+import Reach5
+import UIKit
 
 class NativePasswordController: UIViewController {
-    
-    @IBOutlet weak var username: UITextField!
-    @IBOutlet weak var password: UITextField!
+    @IBOutlet var username: UITextField!
+    @IBOutlet var password: UITextField!
     
     @IBAction func passwordEditingDidEnd(_ sender: Any) {
         guard let pass = password.text, !pass.isEmpty, let user = username.text, !user.isEmpty else { return }
         let origin = "NativePasswordController.passwordEditingDidEnd"
         
-        let fut: Future<AuthToken, ReachFiveError>
-        if (user.contains("@")) {
+        let fut: Future<LoginWithPasswordFlow, ReachFiveError>
+        if user.contains("@") {
             fut = AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
         } else {
             fut = AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
         }
-        fut.onSuccess(callback: goToProfile)
+        fut.onSuccess(callback: handleFlow)
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                 self.present(alert, animated: true)

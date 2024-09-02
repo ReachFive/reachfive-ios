@@ -1,6 +1,8 @@
-import UIKit
+import BrightFutures
+import Foundation
 import Reach5
 import Reach5Google
+import UIKit
 
 #if targetEnvironment(macCatalyst)
 // we don't add WeChat and Facebook by default in order to be able to launch the app on mac Catalyst in order to test on local (more easily than with a simulator)
@@ -10,11 +12,11 @@ import Reach5Google
 // Peut-être qu'un jour je serai capable de modifier les dépendance cocoapods par plateforme
 // https://betterprogramming.pub/why-dont-my-pods-compile-with-mac-catalyst-and-how-can-i-solve-it-ffc3fbec824e
 // Ce lien suggère une solution mais je ne vois pas les même choses dans Build Phases, je ne vois pas les dépendances Facebook et WeChat
-//import Reach5Facebook
-//import Reach5WeChat
+// import Reach5Facebook
+// import Reach5WeChat
 #endif
 
-//TODO
+// TODO:
 // Mettre une nouvelle page dans une quatrième tabs ou dans l'app réglages:
 // - Paramétrage : scopes, origin, utilisation du refresh au démarage ?
 // Voir pour utiliser les scènes : 1 par que c'est plus moderne, deux par qu'il faut peut-être adapter certaines interface pour les app clients qui utilisent les scènes
@@ -53,15 +55,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     #if targetEnvironment(macCatalyst)
     static let macProviders: [ProviderCreator] = [GoogleProvider()]
-    static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: macProviders, storage: storage)
+    static let macLocal: ReachFive = .init(sdkConfig: sdkLocal, providersCreators: macProviders, storage: storage)
     // app-site-association does not seem to work
-    static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: macProviders, storage: storage)
+    static let macRemote: ReachFive = .init(sdkConfig: sdkRemote, providersCreators: macProviders, storage: storage)
     let reachfive = macLocal
     #else
 //    static let providers: [ProviderCreator] = [GoogleProvider(), FacebookProvider(), WeChatProvider()]
     static let providers: [ProviderCreator] = [GoogleProvider()]
-    static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
-    static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
+    static let local: ReachFive = .init(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
+    static let remote: ReachFive = .init(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
     #if targetEnvironment(simulator)
     let reachfive = local
     #else
@@ -151,7 +153,6 @@ extension AppDelegate {
 }
 
 extension UIViewController {
-    
     func goToProfile(_ authToken: AuthToken) {
         AppDelegate.storage.setToken(authToken)
         
@@ -163,10 +164,81 @@ extension UIViewController {
     
     func showToast(message: String, seconds: Double) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        self.present(alert, animated: true)
+        present(alert, animated: true)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + seconds) {
             alert.dismiss(animated: true)
         }
+    }
+    
+    func handleFlow(loginWithPassword flow: LoginWithPasswordFlow) {
+        switch flow {
+        case .AchievedLogin(let authToken):
+            goToProfile(authToken)
+        case .OngoingStepUp(let token, let amr):
+            let selectMfaAuthTypeAlert = UIAlertController(title: "Select MFA", message: "Select MFA auth type", preferredStyle: UIAlertController.Style.alert)
+            for amr in amr {
+                selectMfaAuthTypeAlert.addAction(createSelectMfaAuthTypeAlert(amr: amr, stepUpToken: token))
+            }
+            selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            present(selectMfaAuthTypeAlert, animated: true, completion: nil)
+        }
+    }
+    
+    private func amrToMfaCredentialItemType(_ amr: String) -> MfaCredentialItemType? {
+        switch amr {
+        case "email": MfaCredentialItemType.email
+        case "sms": MfaCredentialItemType.sms
+        default: nil
+        }
+    }
+    
+    private func createSelectMfaAuthTypeAlert(amr: String, stepUpToken: String) -> UIAlertAction {
+        guard let mfaCredentialItemType = amrToMfaCredentialItemType(amr) else {
+            return UIAlertAction(title: "OK", style: .default)
+        }
+        return UIAlertAction(title: amr, style: .default) { _ in
+            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(redirectUri: nil, origin: nil, authType: mfaCredentialItemType, stepUpToken: stepUpToken)).onSuccess { resp in
+                self.handleStartVerificationCode(resp, stepUpType: mfaCredentialItemType)
+                    .onSuccess { authTkn in
+                        self.goToProfile(authTkn)
+                    }
+            }
+        }
+    }
+    
+    private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) -> Future<AuthToken, ReachFiveError> {
+        let promise: Promise<AuthToken, ReachFiveError> = Promise()
+        let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.placeholder = "Verification code"
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            promise.failure(.AuthCanceled)
+        }
+        
+        let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
+            guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
+                print("verification code cannot be empty")
+                promise.failure(.AuthFailure(reason: "no verification code"))
+                return
+            }
+            let future = resp.verify(code: verificationCode, trustDevice: true)
+            promise.completeWith(future)
+            future
+                .onSuccess { _ in
+                    let alert = AppDelegate.createAlert(title: "Step Up", message: "Success")
+                    self.present(alert, animated: true)
+                }
+                .onFailure { error in
+                    let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
+                    self.present(alert, animated: true)
+                }
+        }
+        alert.addAction(cancelAction)
+        alert.addAction(submitVerificationCode)
+        alert.preferredAction = submitVerificationCode
+        present(alert, animated: true)
+        return promise.future
     }
 }
 

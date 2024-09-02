@@ -1,17 +1,16 @@
-import UIKit
 import AuthenticationServices
-import Reach5
 import BrightFutures
+import Reach5
+import UIKit
 
 class DemoController: UIViewController {
-    
-    @IBOutlet weak var usernameLabel: UILabel!
-    @IBOutlet weak var usernameField: UITextField!
-    @IBOutlet weak var passwordLabel: UILabel!
-    @IBOutlet weak var passwordField: UITextField!
-    @IBOutlet weak var loginButton: UIButton!
-    @IBOutlet weak var createAccountButton: UIButton!
-    @IBOutlet weak var loginProviderStackView: UIStackView!
+    @IBOutlet var usernameLabel: UILabel!
+    @IBOutlet var usernameField: UITextField!
+    @IBOutlet var passwordLabel: UILabel!
+    @IBOutlet var passwordField: UITextField!
+    @IBOutlet var loginButton: UIButton!
+    @IBOutlet var createAccountButton: UIButton!
+    @IBOutlet var loginProviderStackView: UIStackView!
     
     override func viewDidLoad() {
         print("DemoController.viewDidLoad")
@@ -94,7 +93,7 @@ class DemoController: UIViewController {
         
         if !username.isEmpty, #available(iOS 16.0, *) {
             let profile: ProfilePasskeySignupRequest
-            if (username.contains("@")) {
+            if username.contains("@") {
                 profile = ProfilePasskeySignupRequest(email: username)
             } else {
                 profile = ProfilePasskeySignupRequest(phoneNumber: username)
@@ -135,8 +134,7 @@ class DemoController: UIViewController {
             (username.isEmpty ?
                 // this is optional, but a good way to present a modal with a fallback to QR code for loging using a nearby device
                 AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always) :
-                AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
-            )
+                AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always))
                 .onSuccess(callback: goToProfile)
                 .onFailure { error in
                     switch error {
@@ -162,13 +160,14 @@ class DemoController: UIViewController {
         guard let pass = passwordField.text, !pass.isEmpty, let user = usernameField.text, !user.isEmpty else { return }
         let origin = "DemoController.loginWithPassword"
         
-        let fut: Future<AuthToken, ReachFiveError>
-        if (user.contains("@")) {
+        let fut: Future<LoginWithPasswordFlow, ReachFiveError>
+        if user.contains("@") {
             fut = AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
         } else {
             fut = AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
         }
-        fut.onSuccess(callback: goToProfile)
+        
+        fut.onSuccess(callback: handleFlow)
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                 self.present(alert, animated: true)
@@ -193,25 +192,23 @@ extension DemoController: UITextFieldDelegate {
         return false
     }
     
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-    }
+    func textFieldDidBeginEditing(_ textField: UITextField) {}
     
-    func textFieldDidEndEditing(_ textField: UITextField) {
-    }
+    func textFieldDidEndEditing(_ textField: UITextField) {}
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        true;
+        true
     }
     
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
-        true;
+        true
     }
     
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-        true;
+        true
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        true;
+        true
     }
 }

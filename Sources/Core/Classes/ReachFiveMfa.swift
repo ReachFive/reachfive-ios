@@ -19,9 +19,9 @@ public enum Credential {
     }
 }
 
-public enum StartStepUp{
-    case StartStepUpAuthTokenFlow(redirectUri: String?, scope: [String]?, origin: String?, authType: MfaCredentialItemType, authToken: AuthToken)
-    case StartStepUpLoginFlow(redirectUri: String?, origin: String?, authType: MfaCredentialItemType, stepUpToken: String)
+public enum StartStepUp {
+    case AuthTokenFlow(redirectUri: String? = nil, scope: [String]? = nil, origin: String?, authType: MfaCredentialItemType, authToken: AuthToken)
+    case LoginFlow(redirectUri: String? = nil, origin: String? = nil, authType: MfaCredentialItemType, stepUpToken: String)
 }
 
 public class ContinueStepUp {
@@ -110,12 +110,12 @@ public extension ReachFive {
     
     func mfaStart(stepUp request: StartStepUp) -> Future<ContinueStepUp, ReachFiveError> {
         switch request {
-        case .StartStepUpLoginFlow(let redirectUri, let origin, let authType, let stepUpToken):
-            return self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: self.sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin))
+        case let .LoginFlow(redirectUri, origin, authType, stepUpToken):
+            return reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin))
                 .map { response in
                     ContinueStepUp(challengeId: response.challengeId, reachFive: self)
                 }
-        case .StartStepUpAuthTokenFlow(let redirectUri, let overwrittenScope, let origin, let authType, let authToken):
+        case let .AuthTokenFlow(redirectUri, overwrittenScope, origin, authType, authToken):
             let pkce = Pkce.generate()
             storage.save(key: pkceKey, value: pkce)
             return reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId,
@@ -159,7 +159,7 @@ public extension ReachFive {
     func mfaListTrustedDevices(authToken: AuthToken) -> Future<[TrustedDevice], ReachFiveError> {
         return reachFiveApi
             .listMfaTrustedDevices(authToken: authToken)
-            .map{ res in res.trustedDevices }
+            .map { res in res.trustedDevices }
     }
     
     func mfaDelete(trustedDeviceId deviceId: String, authToken: AuthToken) -> Future<Void, ReachFiveError> {
