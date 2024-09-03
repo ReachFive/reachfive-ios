@@ -1,7 +1,8 @@
 # Changelog
 ## Unreleased
-### New features
-- Allow to initiate a mfa step up when required during a call to loginWithPassword
+### Breaking changes
+- Allow to initiate an mfa step up when required during a call to `loginWithPassword`. For that the return type of this method was changed from `AuthToken` to a new type `LoginWithPasswordFlow` to represent the potential new MFA step introduced.
+- Change the name of `StartStepUp` to `StartStepUp.AuthTokenFlow`
 
 ## v7.0.0
 ### Breaking changes

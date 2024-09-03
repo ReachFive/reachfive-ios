@@ -124,14 +124,8 @@ public extension ReachFive {
         case let .AuthTokenFlow(authType, authToken, redirectUri, overwrittenScope, origin):
             let pkce = Pkce.generate()
             storage.save(key: pkceKey, value: pkce)
-            return reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId,
-                                                                     redirectUri: redirectUri ?? sdkConfig.redirectUri,
-                                                                     codeChallenge: pkce.codeChallenge,
-                                                                     codeChallengeMethod: pkce.codeChallengeMethod,
-                                                                     scope: (overwrittenScope ?? scope).joined(separator: " "),
-                                                                     tkn: nil,
-                                                                     stepUp: nil),
-                                               authToken: authToken).flatMap { result in
+            let stepUp = StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: redirectUri ?? sdkConfig.redirectUri, pkce: pkce, scope: (overwrittenScope ?? scope).joined(separator: " "))
+            return reachFiveApi.startMfaStepUp(stepUp, authToken: authToken).flatMap { result in
                 self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? self.sdkConfig.redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: authType, origin: origin))
             }.map { response in
                 ContinueStepUp(challengeId: response.challengeId, reachFive: self)

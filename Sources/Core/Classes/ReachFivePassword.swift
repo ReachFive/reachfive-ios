@@ -45,7 +45,7 @@ public extension ReachFive {
                 if resp.mfaRequired == true {
                     let pkce = Pkce.generate()
                     self.storage.save(key: self.pkceKey, value: pkce)
-                    return self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, codeChallenge: pkce.codeChallenge, codeChallengeMethod: pkce.codeChallengeMethod, scope: strScope, tkn: resp.tkn))
+                    return self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
                         .map { res in
                             .OngoingStepUp(token: res.token, amr: res.amr)
                         }

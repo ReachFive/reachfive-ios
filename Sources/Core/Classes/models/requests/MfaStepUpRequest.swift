@@ -4,21 +4,19 @@ public class StartMfaStepUpRequest: Codable, DictionaryEncodable {
     public let responseType: String
     public let clientId: String
     public let redirectUri: String
-    public let codeChallenge: String?
-    public let codeChallengeMethod: String?
+    public let codeChallenge: String
+    public let codeChallengeMethod: String
     public let scope: String?
     public let tkn: String?
-    public let stepUp: String?
 
-    public init(clientId: String, redirectUri: String, codeChallenge: String? = nil, codeChallengeMethod: String? = nil, scope: String? = nil, tkn: String? = nil, stepUp: String? = nil) {
+    public init(clientId: String, redirectUri: String, pkce: Pkce, scope: String? = nil, tkn: String? = nil) {
         self.clientId = clientId
         self.responseType = "code"
         self.redirectUri = redirectUri
-        self.codeChallenge = codeChallenge
-        self.codeChallengeMethod = codeChallengeMethod
+        self.codeChallenge = pkce.codeChallenge
+        self.codeChallengeMethod = pkce.codeChallengeMethod
         self.scope = scope
         self.tkn = tkn
-        self.stepUp = stepUp
     }
 }
 
