@@ -21,7 +21,13 @@ public enum Credential {
 
 public enum StartStepUp {
     case AuthTokenFlow(authType: MfaCredentialItemType, authToken: AuthToken, redirectUri: String? = nil, scope: [String]? = nil, origin: String? = nil)
-    case LoginFlow(redirectUri: String? = nil, origin: String? = nil, authType: MfaCredentialItemType, stepUpToken: String)
+    case LoginFlow(authType: MfaCredentialItemType, stepUpToken: String, redirectUri: String? = nil, origin: String? = nil)
+    public var authType: MfaCredentialItemType {
+        switch self {
+        case let .AuthTokenFlow(authType, _, _, _, _): return authType
+        case let .LoginFlow(authType, _, _, _): return authType
+        }
+    }
 }
 
 public class ContinueStepUp {
@@ -110,7 +116,7 @@ public extension ReachFive {
     
     func mfaStart(stepUp request: StartStepUp) -> Future<ContinueStepUp, ReachFiveError> {
         switch request {
-        case let .LoginFlow(redirectUri, origin, authType, stepUpToken):
+        case let .LoginFlow(authType, stepUpToken, redirectUri, origin):
             return reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin))
                 .map { response in
                     ContinueStepUp(challengeId: response.challengeId, reachFive: self)

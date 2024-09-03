@@ -197,7 +197,7 @@ extension UIViewController {
             return UIAlertAction(title: "OK", style: .default)
         }
         return UIAlertAction(title: amr, style: .default) { _ in
-            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(redirectUri: nil, origin: nil, authType: mfaCredentialItemType, stepUpToken: stepUpToken)).onSuccess { resp in
+            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: mfaCredentialItemType, stepUpToken: stepUpToken)).onSuccess { resp in
                 self.handleStartVerificationCode(resp, stepUpType: mfaCredentialItemType)
                     .onSuccess { authTkn in
                         self.goToProfile(authTkn)

@@ -167,12 +167,6 @@ class MfaAction {
     }
     
     func mfaStart(stepUp startStepUp: StartStepUp, authToken: AuthToken) -> Future<AuthToken, ReachFiveError> {
-        let authType = switch startStepUp {
-        case let .LoginFlow(redirectUri, origin, authType, stepUpToken):
-            authType
-        case let .AuthTokenFlow(authType, authToken, redirectUri, overwrittenScope, origin):
-            authType
-        }
         return AppDelegate.reachfive()
             .mfaStart(stepUp: startStepUp)
             .recoverWith { error in
@@ -191,7 +185,7 @@ class MfaAction {
                     }
             }
             .flatMap { resp in
-                self.handleStartVerificationCode(resp, stepUpType: authType)
+                self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
             }
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.message())")
@@ -355,8 +349,7 @@ extension MfaController {
             self.listMfaCredentialsView.collectionViewLayout.collectionView?.dequeueConfiguredReusableSupplementary(
                 using: supplementaryRegistration, for: index)
         }
-        currentListMfaCredentialSnapshot = NSDiffableDataSourceSnapshot
-        <Section, MfaCredential>()
+        currentListMfaCredentialSnapshot = NSDiffableDataSourceSnapshot<Section, MfaCredential>()
         currentListMfaCredentialSnapshot.appendSections([.main])
         currentListMfaCredentialSnapshot.appendItems(mfaCredentialsToDisplay)
         listMfaCredentialsDataSource.apply(currentListMfaCredentialSnapshot, animatingDifferences: false)
