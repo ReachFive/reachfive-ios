@@ -131,7 +131,7 @@ public class ReachFiveApi {
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
 
-    public func loginWithPassword(loginRequest: LoginRequest) -> Future<AuthenticationToken, ReachFiveError> {
+    public func loginWithPassword(loginRequest: LoginRequest) -> Future<TknMfa, ReachFiveError> {
         AF
             .request(
                 createUrl(path: "/identity/v1/password/login"),
@@ -140,7 +140,7 @@ public class ReachFiveApi {
                 encoding: JSONEncoding.default
             )
             .validate(contentType: ["application/json"])
-            .responseJson(type: AuthenticationToken.self, decoder: decoder)
+            .responseJson(type: TknMfa.self, decoder: decoder)
     }
 
     public func loginCallback(loginCallback: LoginCallback) -> Future<String, ReachFiveError> {

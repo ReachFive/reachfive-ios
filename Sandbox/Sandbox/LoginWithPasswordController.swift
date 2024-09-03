@@ -1,7 +1,6 @@
 import Foundation
 import UIKit
 import Reach5
-import BrightFutures
 
 //TODO faire que la complétion soit sur email et pas custom identifier par défaut
 class LoginWithPasswordController: UIViewController {
@@ -11,8 +10,6 @@ class LoginWithPasswordController: UIViewController {
     @IBOutlet weak var passwordInput: UITextField!
     @IBOutlet weak var error: UILabel!
 
-    let amrToMfaCredentialItemType = ["sms": MfaCredentialItemType.sms, "email": MfaCredentialItemType.email]
-    
     @IBAction func login(_ sender: Any) {
         let email = emailInput.text
         let phoneNumber = phoneNumberInput.text
@@ -21,7 +18,10 @@ class LoginWithPasswordController: UIViewController {
         
         AppDelegate.reachfive()
             .loginWithPassword(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")
-            .onSuccess (callback: handleFlow)
+            .onSuccess { resp in
+                self.error.text = nil
+                self.handleLoginWithPassword(flow: resp)
+            }
             .onFailure { error in
                 self.error.text = error.message()
             }

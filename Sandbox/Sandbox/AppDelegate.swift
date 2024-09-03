@@ -16,7 +16,7 @@ import UIKit
 // import Reach5WeChat
 #endif
 
-// TODO:
+// TODO
 // Mettre une nouvelle page dans une quatrième tabs ou dans l'app réglages:
 // - Paramétrage : scopes, origin, utilisation du refresh au démarage ?
 // Voir pour utiliser les scènes : 1 par que c'est plus moderne, deux par qu'il faut peut-être adapter certaines interface pour les app clients qui utilisent les scènes
@@ -55,15 +55,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     #if targetEnvironment(macCatalyst)
     static let macProviders: [ProviderCreator] = [GoogleProvider()]
-    static let macLocal: ReachFive = .init(sdkConfig: sdkLocal, providersCreators: macProviders, storage: storage)
+    static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: macProviders, storage: storage)
     // app-site-association does not seem to work
-    static let macRemote: ReachFive = .init(sdkConfig: sdkRemote, providersCreators: macProviders, storage: storage)
+    static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: macProviders, storage: storage)
     let reachfive = macLocal
     #else
 //    static let providers: [ProviderCreator] = [GoogleProvider(), FacebookProvider(), WeChatProvider()]
     static let providers: [ProviderCreator] = [GoogleProvider()]
-    static let local: ReachFive = .init(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
-    static let remote: ReachFive = .init(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
+    static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
+    static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
     #if targetEnvironment(simulator)
     let reachfive = local
     #else
@@ -170,17 +170,21 @@ extension UIViewController {
         }
     }
     
-    func handleFlow(loginWithPassword flow: LoginWithPasswordFlow) {
+    func handleLoginWithPassword(flow: LoginWithPasswordFlow) {
         switch flow {
         case .AchievedLogin(let authToken):
             goToProfile(authToken)
         case .OngoingStepUp(let token, let amr):
             let selectMfaAuthTypeAlert = UIAlertController(title: "Select MFA", message: "Select MFA auth type", preferredStyle: UIAlertController.Style.alert)
+            var lastAction: UIAlertAction? = nil
             for amr in amr {
-                selectMfaAuthTypeAlert.addAction(createSelectMfaAuthTypeAlert(amr: amr, stepUpToken: token))
+                let action = createSelectMfaAuthTypeAlert(amr: amr, stepUpToken: token)
+                selectMfaAuthTypeAlert.addAction(action)
+                lastAction = action
             }
-            selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-            present(selectMfaAuthTypeAlert, animated: true, completion: nil)
+            selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            selectMfaAuthTypeAlert.preferredAction = lastAction
+            present(selectMfaAuthTypeAlert, animated: true)
         }
     }
     
@@ -223,16 +227,11 @@ extension UIViewController {
                 return
             }
             let future = resp.verify(code: verificationCode, trustDevice: true)
-            promise.completeWith(future)
-            future
-                .onSuccess { _ in
-                    let alert = AppDelegate.createAlert(title: "Step Up", message: "Success")
-                    self.present(alert, animated: true)
-                }
                 .onFailure { error in
                     let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
                     self.present(alert, animated: true)
                 }
+            promise.completeWith(future)
         }
         alert.addAction(cancelAction)
         alert.addAction(submitVerificationCode)

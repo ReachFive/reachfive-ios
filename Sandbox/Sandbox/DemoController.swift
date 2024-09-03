@@ -167,7 +167,7 @@ class DemoController: UIViewController {
             fut = AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
         }
         
-        fut.onSuccess(callback: handleFlow)
+        fut.onSuccess(callback: handleLoginWithPassword)
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                 self.present(alert, animated: true)

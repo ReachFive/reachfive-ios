@@ -42,7 +42,7 @@ public extension ReachFive {
         return reachFiveApi
             .loginWithPassword(loginRequest: loginRequest)
             .flatMap { resp in
-                if resp.mfaRequired {
+                if resp.mfaRequired == true {
                     let pkce = Pkce.generate()
                     self.storage.save(key: self.pkceKey, value: pkce)
                     return self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, codeChallenge: pkce.codeChallenge, codeChallengeMethod: pkce.codeChallengeMethod, scope: strScope, tkn: resp.tkn))
