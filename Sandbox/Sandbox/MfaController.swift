@@ -105,7 +105,7 @@ class MfaController: UIViewController {
         }
         let mfaAction = MfaAction(presentationAnchor: self)
         
-        mfaAction.mfaStart(stepUp: StartStepUp.AuthTokenFlow(redirectUri: nil, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"], origin: nil, authType: stepUpSelectedType, authToken: authToken), authToken: authToken).onSuccess { freshToken in
+        mfaAction.mfaStart(stepUp: StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"]), authToken: authToken).onSuccess { freshToken in
             AppDelegate.storage.setToken(freshToken)
             self.fetchTrustedDevices()
         }
@@ -170,7 +170,7 @@ class MfaAction {
         let authType = switch startStepUp {
         case let .LoginFlow(redirectUri, origin, authType, stepUpToken):
             authType
-        case let .AuthTokenFlow(redirectUri, overwrittenScope, origin, authType, authToken):
+        case let .AuthTokenFlow(authType, authToken, redirectUri, overwrittenScope, origin):
             authType
         }
         return AppDelegate.reachfive()

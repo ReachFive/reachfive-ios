@@ -20,7 +20,7 @@ public enum Credential {
 }
 
 public enum StartStepUp {
-    case AuthTokenFlow(redirectUri: String? = nil, scope: [String]? = nil, origin: String?, authType: MfaCredentialItemType, authToken: AuthToken)
+    case AuthTokenFlow(authType: MfaCredentialItemType, authToken: AuthToken, redirectUri: String? = nil, scope: [String]? = nil, origin: String? = nil)
     case LoginFlow(redirectUri: String? = nil, origin: String? = nil, authType: MfaCredentialItemType, stepUpToken: String)
 }
 
@@ -115,7 +115,7 @@ public extension ReachFive {
                 .map { response in
                     ContinueStepUp(challengeId: response.challengeId, reachFive: self)
                 }
-        case let .AuthTokenFlow(redirectUri, overwrittenScope, origin, authType, authToken):
+        case let .AuthTokenFlow(authType, authToken, redirectUri, overwrittenScope, origin):
             let pkce = Pkce.generate()
             storage.save(key: pkceKey, value: pkce)
             return reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId,
