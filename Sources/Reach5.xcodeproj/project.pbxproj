@@ -201,6 +201,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2AE040E22C88CFD800162014 /* TestGroup */ = {
+			isa = PBXGroup;
+			children = (
+				2A63DD932C88BA830031E77B /* TknMfa.swift */,
+			);
+			path = TestGroup;
+			sourceTree = "<group>";
+		};
 		34173218229D801500681CFD /* Classes */ = {
 			isa = PBXGroup;
 			children = (
@@ -352,7 +360,7 @@
 		8496EB2F25DEB021005098DD /* responses */ = {
 			isa = PBXGroup;
 			children = (
-				2A63DD932C88BA830031E77B /* TknMfa.swift */,
+				2AE040E22C88CFD800162014 /* TestGroup */,
 				9958690A2C32DDC0005CD5C4 /* trustedDevices */,
 				8496EB3025DEB033005098DD /* webAuthn */,
 			);

@@ -7,7 +7,7 @@ PODS:
   - AppAuth/ExternalUserAgent (1.7.5):
     - AppAuth/Core
   - BrightFutures (8.2.0)
-  - CryptoSwift (1.8.2)
+  - CryptoSwift (1.8.3)
   - DeviceKit (5.4.0)
   - GoogleSignIn (7.1.0):
     - AppAuth (< 2.0, >= 1.7.3)
@@ -51,7 +51,7 @@ SPEC CHECKSUMS:
   Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   BrightFutures: 67e0e8cd974ab9f6c04650cc64153f7adf1ec489
-  CryptoSwift: c63a805d8bb5e5538e88af4e44bb537776af11ea
+  CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
   DeviceKit: bd34bb1766d926c3cc5a5f6e3e9a6dd10148b805
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
