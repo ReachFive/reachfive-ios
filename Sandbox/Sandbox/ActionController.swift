@@ -13,6 +13,14 @@ class ActionController: UITableViewController {
         if indexPath.section == 1 {
             // Sign in with Apple
             if indexPath.row == 1 {
+//                let alert = UIAlertController(
+//                    title: "SIWA",
+//                    message: "Coucou",
+//                    preferredStyle: UIAlertController.Style.alert
+//                )
+//                alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default))
+//                present(alert, animated: true)
+
                 AppDelegate.reachfive()
                     .login(withRequest: NativeLoginRequest(anchor: window, origin: "ActionController: Section Native"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
                     .onSuccess(callback: goToProfile)
