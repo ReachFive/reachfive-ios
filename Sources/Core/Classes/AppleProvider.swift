@@ -1,6 +1,7 @@
 import Foundation
 import BrightFutures
 
+/*
 public class AppleProvider: ProviderCreator {
     public static let NAME = "apple"
 
@@ -33,6 +34,7 @@ private class NoProvider: Provider {
 
     func logout() -> Future<(), ReachFiveError> { fatalError("do not use") }
 }
+*/
 
 //TODO https://developer.apple.com/documentation/authenticationservices/implementing_user_authentication_with_sign_in_with_apple
 //  et https://developer.apple.com/documentation/security/password_autofill/about_the_password_autofill_workflow
@@ -55,7 +57,8 @@ private class NoProvider: Provider {
 // textContentType = .newPassword pour la création de compte ✔︎
 
 class ConfiguredAppleProvider: NSObject, Provider {
-    let name: String = AppleProvider.NAME
+    public static let NAME = "apple"
+    let name: String = NAME
 
     let sdkConfig: SdkConfig
     let providerConfig: ProviderConfig
