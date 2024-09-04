@@ -12,6 +12,7 @@
 		2A0305142C063DEA00A92524 /* ResetPublicKeyCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0305132C063DEA00A92524 /* ResetPublicKeyCredential.swift */; };
 		2A624FDA2B2BDBC400BF33A7 /* DefaultProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */; };
 		2A63DD942C88BA830031E77B /* TknMfa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A63DD932C88BA830031E77B /* TknMfa.swift */; };
+		2A63DD962C88BB030031E77B /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A63DD952C88BB030031E77B /* Test.swift */; };
 		2AB29A0B2C1225F500D0C5C8 /* ReachFiveApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB29A0A2C1225F500D0C5C8 /* ReachFiveApplication.swift */; };
 		2ADFF84F2BFE661300A659FE /* RequestAccountRecoveryRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */; };
 		2AE18CDB29FC1DAF00258D2B /* LoginWKWebview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE18CDA29FC1DAF00258D2B /* LoginWKWebview.swift */; };
@@ -100,6 +101,7 @@
 		2A2D5B102BA4C59300245439 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultProvider.swift; sourceTree = "<group>"; };
 		2A63DD932C88BA830031E77B /* TknMfa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TknMfa.swift; sourceTree = "<group>"; };
+		2A63DD952C88BB030031E77B /* Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
 		2AB29A0A2C1225F500D0C5C8 /* ReachFiveApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveApplication.swift; sourceTree = "<group>"; };
 		2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestAccountRecoveryRequest.swift; sourceTree = "<group>"; };
 		2AE18CDA29FC1DAF00258D2B /* LoginWKWebview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWKWebview.swift; sourceTree = "<group>"; };
@@ -216,6 +218,7 @@
 				34BDDA4322E5D95B00D16DAE /* ReachFiveProfile.swift */,
 				34BDDA3F22E5D73900D16DAE /* ReachFiveProviders.swift */,
 				2AE53307299462DD00EF97E0 /* ReachFiveWebviewLogin.swift */,
+				2A63DD952C88BB030031E77B /* Test.swift */,
 				34E18B8D22A6C13100952EBD /* models */,
 				34689A9A22CE3E34002970F9 /* utils */,
 			);
@@ -552,6 +555,7 @@
 				2A624FDA2B2BDBC400BF33A7 /* DefaultProvider.swift in Sources */,
 				8496EB3C25DEB141005098DD /* R5PublicKeyCredentialParameter.swift in Sources */,
 				2AE533222994638100EF97E0 /* PasskeySignupRequest.swift in Sources */,
+				2A63DD962C88BB030031E77B /* Test.swift in Sources */,
 				2AE5331F2994638100EF97E0 /* SignupOptions.swift in Sources */,
 				34689A9E22CE4666002970F9 /* VerifyPhoneNumberRequest.swift in Sources */,
 				3404A40C22CBA6DD002FFEDB /* AuthCodeRequest.swift in Sources */,
