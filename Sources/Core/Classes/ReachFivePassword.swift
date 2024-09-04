@@ -3,7 +3,7 @@ import Foundation
 
 public enum LoginWithPasswordFlow {
     case AchievedLogin(authToken: AuthToken)
-    case OngoingStepUp(token: String, amr: [String])
+    case OngoingStepUp(token: String, availableMfaCredentialItemTypes: [String])
 }
 
 public extension ReachFive {
@@ -46,8 +46,8 @@ public extension ReachFive {
                     let pkce = Pkce.generate()
                     self.storage.save(key: self.pkceKey, value: pkce)
                     return self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
-                        .map { res in
-                            .OngoingStepUp(token: res.token, amr: res.amr)
+                        .map { intiationStepUpResponse in
+                            LoginWithPasswordFlow.OngoingStepUp(token: intiationStepUpResponse.token, availableMfaCredentialItemTypes: intiationStepUpResponse.amr)
                         }
                 } else {
                     return self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)

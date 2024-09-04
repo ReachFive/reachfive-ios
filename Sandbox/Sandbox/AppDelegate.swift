@@ -212,6 +212,7 @@ extension UIViewController {
     
     private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) -> Future<AuthToken, ReachFiveError> {
         let promise: Promise<AuthToken, ReachFiveError> = Promise()
+        
         let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
         alert.addTextField { textField in
             textField.placeholder = "Verification code"
@@ -219,8 +220,7 @@ extension UIViewController {
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
             promise.failure(.AuthCanceled)
         }
-        
-        let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
+        func submitVerificationCode(withTrustDevice: Bool?) -> Void {
             guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
                 print("verification code cannot be empty")
                 promise.failure(.AuthFailure(reason: "no verification code"))
@@ -233,9 +233,20 @@ extension UIViewController {
                 }
             promise.completeWith(future)
         }
+        
+        let submitVerificationTrustDevice = UIAlertAction(title: "trust device", style: .default) { _ in
+            submitVerificationCode(withTrustDevice: true)
+        }
+        let submitVerificationNoTrustDevice = UIAlertAction(title: "Don't trust device", style: .default) { _ in
+            submitVerificationCode(withTrustDevice: false)
+        }
+        let submitVerificationWithoutRba = UIAlertAction(title: "Ignore RBA", style: .default) { _ in
+            submitVerificationCode(withTrustDevice: nil)
+        }
         alert.addAction(cancelAction)
-        alert.addAction(submitVerificationCode)
-        alert.preferredAction = submitVerificationCode
+        alert.addAction(submitVerificationTrustDevice)
+        alert.addAction(submitVerificationNoTrustDevice)
+        alert.addAction(submitVerificationWithoutRba)
         present(alert, animated: true)
         return promise.future
     }
