@@ -3,11 +3,11 @@ import BrightFutures
 
 public class AppleProvider: ProviderCreator {
     public static let NAME = "apple"
-    
+
     public var name: String = NAME
-    
+
     public init() {}
-    
+
     public func create(
         sdkConfig: SdkConfig,
         providerConfig: ProviderConfig,
@@ -20,17 +20,17 @@ public class AppleProvider: ProviderCreator {
 
 private class NoProvider: Provider {
     private(set) var name: String = "ERROR"
-    
+
     func login(scope: [String]?, origin: String, viewController: UIViewController?) -> Future<AuthToken, ReachFiveError> { fatalError("do not use") }
-    
+
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool { fatalError("do not use") }
-    
-    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool { fatalError("do not use") }
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool { fatalError("do not use") }
-    
+
     func applicationDidBecomeActive(_ application: UIApplication) {}
-    
+
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([any UIUserActivityRestoring]?) -> Void) -> Bool { fatalError("do not use") }
+
     func logout() -> Future<(), ReachFiveError> { fatalError("do not use") }
 }
 
@@ -56,12 +56,12 @@ private class NoProvider: Provider {
 
 class ConfiguredAppleProvider: NSObject, Provider {
     let name: String = AppleProvider.NAME
-    
+
     let sdkConfig: SdkConfig
     let providerConfig: ProviderConfig
     let clientConfigResponse: ClientConfigResponse
     let credentialManager: CredentialManager
-    
+
     public init(
         sdkConfig: SdkConfig,
         providerConfig: ProviderConfig,
@@ -73,7 +73,7 @@ class ConfiguredAppleProvider: NSObject, Provider {
         self.clientConfigResponse = clientConfigResponse
         self.credentialManager = credentialManager
     }
-    
+
     public func login(
         scope: [String]?,
         origin: String,
@@ -81,29 +81,29 @@ class ConfiguredAppleProvider: NSObject, Provider {
     ) -> Future<AuthToken, ReachFiveError> {
         guard let window = viewController?.view.window else { fatalError("The view was not in the app's view hierarchy!") }
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
-        return credentialManager.login(withRequest: NativeLoginRequest(anchor: window, origin: origin, scopes: scope), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+        return credentialManager.login(withRequest: NativeLoginRequest(anchor: window, scopes: scope, origin: origin), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
     }
-    
+
     public func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
         true
     }
-    
-    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-        true
-    }
-    
+
     //TODO rafraichissement du token ici ?
     public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         true
     }
-    
+
     public func applicationDidBecomeActive(_ application: UIApplication) {
     }
-    
+
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([any UIUserActivityRestoring]?) -> Void) -> Bool {
+        true
+    }
+
     public func logout() -> Future<(), ReachFiveError> {
         Future(value: ())
     }
-    
+
     override var description: String {
         "Provider: \(name)"
     }
