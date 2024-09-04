@@ -4,7 +4,7 @@ import Reach5
 import BrightFutures
 
 class DemoController: UIViewController {
-    
+
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var usernameField: UITextField!
     @IBOutlet weak var passwordLabel: UILabel!
@@ -12,16 +12,18 @@ class DemoController: UIViewController {
     @IBOutlet weak var loginButton: UIButton!
     @IBOutlet weak var createAccountButton: UIButton!
     @IBOutlet weak var loginProviderStackView: UIStackView!
-    
+
     override func viewDidLoad() {
         print("DemoController.viewDidLoad")
         super.viewDidLoad()
-        
+
+        setupProviderLoginView()
+
         // set delegates to manage the keyboard Return/Done button behavior
         usernameField.delegate = self
         passwordField.delegate = self
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         print("DemoController.viewWillAppear")
         usernameField.isHidden = true
@@ -31,16 +33,16 @@ class DemoController: UIViewController {
         loginButton.isHidden = true
         createAccountButton.isHidden = true
         loginProviderStackView.isHidden = true
-        
+
         super.viewWillAppear(animated)
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         print("DemoController.viewDidAppear")
         super.viewDidAppear(animated)
-        
+
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-        var types: [ModalAuthorization] = [.Password]
+        var types: [ModalAuthorization] = [.Password, .SignInWithApple]
         if #available(iOS 16.0, *) {
             types.append(.Passkey)
         }
@@ -53,7 +55,7 @@ class DemoController: UIViewController {
         AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
             .onSuccess(callback: goToProfile)
             .onFailure { error in
-                
+
                 self.usernameField.isHidden = false
                 self.usernameLabel.isHidden = false
                 self.loginButton.isHidden = false
@@ -61,7 +63,7 @@ class DemoController: UIViewController {
                 self.passwordField.isHidden = false
                 self.passwordLabel.isHidden = false
                 self.loginProviderStackView.isHidden = false
-                
+
                 switch error {
                 case .AuthCanceled:
                     #if targetEnvironment(macCatalyst)
@@ -79,11 +81,11 @@ class DemoController: UIViewController {
                 }
             }
     }
-    
+
     @IBAction func createAccount(_ sender: Any) {
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         guard let username = usernameField.text else { return }
-        
+
         func goToSignup() {
             if let signupController = storyboard?.instantiateViewController(withIdentifier: "SignupController") as? SignupController {
                 signupController.initialEmail = username
@@ -91,7 +93,7 @@ class DemoController: UIViewController {
                 navigationController?.pushViewController(signupController, animated: true)
             }
         }
-        
+
         if !username.isEmpty, #available(iOS 16.0, *) {
             let profile: ProfilePasskeySignupRequest
             if (username.contains("@")) {
@@ -99,7 +101,7 @@ class DemoController: UIViewController {
             } else {
                 profile = ProfilePasskeySignupRequest(phoneNumber: username)
             }
-            
+
             AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
                 .onSuccess(callback: goToProfile)
                 .onFailure { error in
@@ -114,24 +116,24 @@ class DemoController: UIViewController {
             goToSignup()
         }
     }
-    
+
     @IBAction func tappedBackground(_ sender: Any) {
         print("tappedBackground")
         view.endEditing(true)
     }
-    
+
     @IBAction func login(_ sender: Any) {
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         guard let pass = passwordField.text, let username = usernameField.text else { return }
-        
+
         if !pass.isEmpty {
             loginWithPassword()
             return
         }
-        
+
         if #available(iOS 16.0, *) {
             let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
-            
+
             (username.isEmpty ?
                 // this is optional, but a good way to present a modal with a fallback to QR code for loging using a nearby device
                 AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always) :
@@ -157,11 +159,11 @@ class DemoController: UIViewController {
                 }
         }
     }
-    
+
     func loginWithPassword() {
         guard let pass = passwordField.text, !pass.isEmpty, let user = usernameField.text, !user.isEmpty else { return }
         let origin = "DemoController.loginWithPassword"
-        
+
         let fut: Future<AuthToken, ReachFiveError>
         if (user.contains("@")) {
             fut = AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
@@ -172,6 +174,27 @@ class DemoController: UIViewController {
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                 self.present(alert, animated: true)
+            }
+    }
+
+    func setupProviderLoginView() {
+        let authorizationButton = ASAuthorizationAppleIDButton()
+        authorizationButton.addTarget(self, action: #selector(handleAuthorizationAppleIDButtonPress), for: .touchDown)
+        loginProviderStackView.addArrangedSubview(authorizationButton)
+    }
+
+    @objc func handleAuthorizationAppleIDButtonPress() {
+        print("handleAuthorizationAppleIDButtonPress")
+        guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
+        AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+            .onSuccess(callback: goToProfile)
+            .onFailure { error in
+                switch error {
+                case .AuthCanceled: return
+                default:
+                    let alert = AppDelegate.createAlert(title: "Signup with Apple", message: "Error: \(error.message())")
+                    self.present(alert, animated: true, completion: nil)
+                }
             }
     }
 }
@@ -192,25 +215,25 @@ extension DemoController: UITextFieldDelegate {
         }
         return false
     }
-    
+
     func textFieldDidBeginEditing(_ textField: UITextField) {
     }
-    
+
     func textFieldDidEndEditing(_ textField: UITextField) {
     }
-    
+
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         true;
     }
-    
+
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
         true;
     }
-    
+
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
         true;
     }
-    
+
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         true;
     }

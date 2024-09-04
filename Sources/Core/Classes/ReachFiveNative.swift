@@ -99,6 +99,7 @@ public enum Username {
 
 public enum ModalAuthorization: Equatable {
     case Password
+    case SignInWithApple
     @available(iOS 16.0, *)
     case Passkey
 }

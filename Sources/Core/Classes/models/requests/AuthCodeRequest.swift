@@ -5,29 +5,29 @@ public class AuthCodeRequest: Codable, DictionaryEncodable {
     public let code: String
     public let grantType: String
     public let redirectUri: String
-    public let codeVerifier: String
-    
+    public let codeVerifier: String?
+
     public convenience init(
         clientId: String,
         code: String,
         redirectUri: String,
-        pkce: Pkce
+        pkce: Pkce? = nil
     ) {
         self.init(
             clientId: clientId,
             code: code,
             grantType: "authorization_code",
             redirectUri: redirectUri,
-            codeVerifier: pkce.codeVerifier
+            codeVerifier: pkce?.codeVerifier
         )
     }
-    
+
     public init(
         clientId: String,
         code: String,
         grantType: String,
         redirectUri: String,
-        codeVerifier: String
+        codeVerifier: String?
     ) {
         self.clientId = clientId
         self.code = code
