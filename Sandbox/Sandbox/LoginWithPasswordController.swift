@@ -21,10 +21,7 @@ class LoginWithPasswordController: UIViewController {
                 self.dismiss(animated: true)
                 switch result {
                 case let .success(freshToken):
-                    AppDelegate.storage.setToken(freshToken)
-                    let alert = AppDelegate.createAlert(title: "Step up", message: "Success")
                     self.goToProfile(freshToken)
-                    self.present(alert, animated: true)
                 case let .failure(error):
                     let alert = AppDelegate.createAlert(title: "Step failed", message: "Error: \(error.message())")
                     self.present(alert, animated: true)
