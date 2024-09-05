@@ -231,7 +231,7 @@ extension UIViewController {
             promise.completeWith(future)
         }
         
-        let submitVerificationTrustDevice = UIAlertAction(title: "trust device", style: .default) { _ in
+        let submitVerificationTrustDevice = UIAlertAction(title: "Trust device", style: .default) { _ in
             submitVerificationCode(withTrustDevice: true)
         }
         let submitVerificationNoTrustDevice = UIAlertAction(title: "Don't trust device", style: .default) { _ in
