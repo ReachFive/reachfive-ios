@@ -220,13 +220,13 @@ extension UIViewController {
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
             promise.failure(.AuthCanceled)
         }
-        func submitVerificationCode(withTrustDevice: Bool?) -> Void {
+        func submitVerificationCode(withTrustDevice trustDevice: Bool?) -> Void {
             guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
                 print("verification code cannot be empty")
                 promise.failure(.AuthFailure(reason: "no verification code"))
                 return
             }
-            let future = resp.verify(code: verificationCode, trustDevice: true)
+            let future = resp.verify(code: verificationCode, trustDevice: trustDevice)
                 .onFailure { error in
                     let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
                     self.present(alert, animated: true)
