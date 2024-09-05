@@ -11,11 +11,23 @@ class DemoController: UIViewController {
     @IBOutlet var loginButton: UIButton!
     @IBOutlet var createAccountButton: UIButton!
     @IBOutlet var loginProviderStackView: UIStackView!
+    var tokenNotification: NSObjectProtocol?
     
     override func viewDidLoad() {
         print("DemoController.viewDidLoad")
         super.viewDidLoad()
-        
+        tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
+            if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
+                self.dismiss(animated: true)
+                switch result {
+                case let .success(freshToken):
+                    self.goToProfile(freshToken)
+                case let .failure(error):
+                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.message())")
+                    self.present(alert, animated: true)
+                }
+            }
+        }
         // set delegates to manage the keyboard Return/Done button behavior
         usernameField.delegate = self
         passwordField.delegate = self

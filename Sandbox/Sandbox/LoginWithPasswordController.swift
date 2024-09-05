@@ -23,7 +23,7 @@ class LoginWithPasswordController: UIViewController {
                 case let .success(freshToken):
                     self.goToProfile(freshToken)
                 case let .failure(error):
-                    let alert = AppDelegate.createAlert(title: "Step failed", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.message())")
                     self.present(alert, animated: true)
                 }
             }

@@ -6,6 +6,23 @@ import UIKit
 class NativePasswordController: UIViewController {
     @IBOutlet var username: UITextField!
     @IBOutlet var password: UITextField!
+    var tokenNotification: NSObjectProtocol?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
+            if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
+                self.dismiss(animated: true)
+                switch result {
+                case let .success(freshToken):
+                    self.goToProfile(freshToken)
+                case let .failure(error):
+                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.message())")
+                    self.present(alert, animated: true)
+                }
+            }
+        }
+    }
     
     @IBAction func passwordEditingDidEnd(_ sender: Any) {
         guard let pass = password.text, !pass.isEmpty, let user = username.text, !user.isEmpty else { return }
