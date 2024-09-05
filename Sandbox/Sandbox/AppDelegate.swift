@@ -196,13 +196,10 @@ extension UIViewController {
         }
     }
     
-    private func createSelectMfaAuthTypeAlert(amr: String, stepUpToken: String) -> UIAlertAction {
-        guard let mfaCredentialItemType = amrToMfaCredentialItemType(amr) else {
-            return UIAlertAction(title: "OK", style: .default)
-        }
-        return UIAlertAction(title: amr, style: .default) { _ in
-            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: mfaCredentialItemType, stepUpToken: stepUpToken)).onSuccess { resp in
-                self.handleStartVerificationCode(resp, stepUpType: mfaCredentialItemType)
+    private func createSelectMfaAuthTypeAlert(amr: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
+        return UIAlertAction(title: amr.rawValue, style: .default) { _ in
+            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: amr, stepUpToken: stepUpToken)).onSuccess { resp in
+                self.handleStartVerificationCode(resp, stepUpType: amr)
                     .onSuccess { authTkn in
                         self.goToProfile(authTkn)
                     }

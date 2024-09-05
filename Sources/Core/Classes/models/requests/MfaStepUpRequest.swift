@@ -21,10 +21,10 @@ public class StartMfaStepUpRequest: Codable, DictionaryEncodable {
 }
 
 public class StartMfaStepUpResponse: Codable, DictionaryEncodable {
-    public let amr: [String]
+    public let amr: [MfaCredentialItemType]
     public let token: String
 
-    public init(amr: [String], token: String) {
+    public init(amr: [MfaCredentialItemType], token: String) {
         self.amr = amr
         self.token = token
     }

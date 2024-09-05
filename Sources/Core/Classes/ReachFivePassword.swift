@@ -3,7 +3,7 @@ import Foundation
 
 public enum LoginWithPasswordFlow {
     case AchievedLogin(authToken: AuthToken)
-    case OngoingStepUp(token: String, availableMfaCredentialItemTypes: [String])
+    case OngoingStepUp(token: String, availableMfaCredentialItemTypes: [MfaCredentialItemType])
 }
 
 public extension ReachFive {
