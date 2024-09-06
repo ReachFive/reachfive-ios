@@ -14,8 +14,8 @@ class NativePasswordController: UIViewController {
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
                 self.dismiss(animated: true)
                 switch result {
-                case let .success(freshToken):
-                    self.goToProfile(freshToken)
+                case let .success(authToken):
+                    self.goToProfile(authToken)
                 case let .failure(error):
                     let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.message())")
                     self.present(alert, animated: true)

@@ -174,11 +174,11 @@ extension UIViewController {
         switch flow {
         case .AchievedLogin(let authToken):
             goToProfile(authToken)
-        case .OngoingStepUp(let token, let amr):
+        case .OngoingStepUp(let token, let availableMfaCredentialItemTypes):
             let selectMfaAuthTypeAlert = UIAlertController(title: "Select MFA", message: "Select MFA auth type", preferredStyle: UIAlertController.Style.alert)
             var lastAction: UIAlertAction? = nil
-            for amr in amr {
-                let action = createSelectMfaAuthTypeAlert(amr: amr, stepUpToken: token)
+            for type in availableMfaCredentialItemTypes {
+                let action = createSelectMfaAuthTypeAction(type: type, stepUpToken: token)
                 selectMfaAuthTypeAlert.addAction(action)
                 lastAction = action
             }
@@ -188,26 +188,18 @@ extension UIViewController {
         }
     }
     
-    private func amrToMfaCredentialItemType(_ amr: String) -> MfaCredentialItemType? {
-        switch amr {
-        case "email": MfaCredentialItemType.email
-        case "sms": MfaCredentialItemType.sms
-        default: nil
-        }
-    }
-    
-    private func createSelectMfaAuthTypeAlert(amr: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
-        return UIAlertAction(title: amr.rawValue, style: .default) { _ in
-            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: amr, stepUpToken: stepUpToken)).onSuccess { resp in
-                self.handleStartVerificationCode(resp, stepUpType: amr)
-                    .onSuccess { authTkn in
-                        self.goToProfile(authTkn)
+    private func createSelectMfaAuthTypeAction(type: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
+        return UIAlertAction(title: type.rawValue, style: .default) { _ in
+            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken)).onSuccess { resp in
+                self.handleStartVerificationCode(resp, authType: type)
+                    .onSuccess { authToken in
+                        self.goToProfile(authToken)
                     }
             }
         }
     }
     
-    private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) -> Future<AuthToken, ReachFiveError> {
+    private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) -> Future<AuthToken, ReachFiveError> {
         let promise: Promise<AuthToken, ReachFiveError> = Promise()
         
         let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
