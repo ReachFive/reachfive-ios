@@ -23,7 +23,7 @@ class ActionController: UITableViewController {
 
                 AppDelegate.reachfive()
                     .login(withRequest: NativeLoginRequest(anchor: window, origin: "ActionController: Section Native"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
-                    .onSuccess(callback: goToProfile)
+                    .onComplete { self.handleResult(result: $0) }
             }
         }
 

@@ -1,48 +1,13 @@
 import Foundation
 import BrightFutures
 
-/*
-public class AppleProvider: ProviderCreator {
-    public static let NAME = "apple"
-
-    public var name: String = NAME
-
-    public init() {}
-
-    public func create(
-        sdkConfig: SdkConfig,
-        providerConfig: ProviderConfig,
-        reachFiveApi: ReachFiveApi,
-        clientConfigResponse: ClientConfigResponse
-    ) -> Provider {
-        NoProvider()
-    }
-}
-
-private class NoProvider: Provider {
-    private(set) var name: String = "ERROR"
-
-    func login(scope: [String]?, origin: String, viewController: UIViewController?) -> Future<AuthToken, ReachFiveError> { fatalError("do not use") }
-
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool { fatalError("do not use") }
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool { fatalError("do not use") }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {}
-
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([any UIUserActivityRestoring]?) -> Void) -> Bool { fatalError("do not use") }
-
-    func logout() -> Future<(), ReachFiveError> { fatalError("do not use") }
-}
-*/
-
-//TODO https://developer.apple.com/documentation/authenticationservices/implementing_user_authentication_with_sign_in_with_apple
+//https://developer.apple.com/documentation/authenticationservices/implementing_user_authentication_with_sign_in_with_apple
 //  et https://developer.apple.com/documentation/security/password_autofill/about_the_password_autofill_workflow
 // ajout de la "capability" SIWA ✔︎
 // au lancement de l'app : appleIDProvider.getCredentialState(forUserID) (4 cas dont transferred)
 //      voir si ça ne se marche pas sur les pieds du refresh token (reco : 1 fois par jour)
 // utiliser les state et nonce
-// sur iOS 16, utiliser "prefersImeediatelyAvailableCredentials"
+// sur iOS 16, utiliser "prefersImmediatelyAvailableCredentials"
 // register for revocation notification dans l'app (https://developer.apple.com/videos/play/wwdc2022/10122/?time=738)
 // gérer l'upgrade d'un mot de passe vers SIWA ou mdp fort : https://developer.apple.com/videos/play/wwdc2020/10666
 // côté serveur
@@ -91,7 +56,6 @@ class ConfiguredAppleProvider: NSObject, Provider {
         true
     }
 
-    //TODO rafraichissement du token ici ?
     public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         true
     }
