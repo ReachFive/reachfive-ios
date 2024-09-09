@@ -94,6 +94,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             case .authorized: print("getCredentialState: authorized")
             case .revoked: print("getCredentialState: revoked")
             case .notFound: print("getCredentialState: not found")
+            case .transferred: print("getCredentialState: transferred")
             default:
                 break
             }
