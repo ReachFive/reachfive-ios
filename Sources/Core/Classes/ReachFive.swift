@@ -36,7 +36,7 @@ public class ReachFive: NSObject {
         self.providersCreators = providersCreators
         self.reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig)
         self.storage = storage ?? UserDefaultsStorage()
-        self.credentialManager = CredentialManager(reachFiveApi: reachFiveApi)
+        self.credentialManager = CredentialManager(reachFiveApi: reachFiveApi, storage: self.storage)
     }
     
     public override var description: String {
