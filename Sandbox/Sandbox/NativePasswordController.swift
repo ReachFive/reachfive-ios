@@ -28,7 +28,7 @@ class NativePasswordController: UIViewController {
         guard let pass = password.text, !pass.isEmpty, let user = username.text, !user.isEmpty else { return }
         let origin = "NativePasswordController.passwordEditingDidEnd"
         
-        let fut: Future<LoginWithPasswordFlow, ReachFiveError>
+        let fut: Future<LoginFlow, ReachFiveError>
         if user.contains("@") {
             fut = AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
         } else {
@@ -48,7 +48,7 @@ class NativePasswordController: UIViewController {
         
         AppDelegate.reachfive()
             .login(withRequest: NativeLoginRequest(anchor: window, origin: "NativePasswordController.viewDidAppear"), usingModalAuthorizationFor: [.Password], display: .Always)
-            .onSuccess(callback: goToProfile)
+            .onSuccess(callback: handleLoginWithPassword)
             .onFailure { error in
                 switch error {
                 case .AuthCanceled: return

@@ -1,7 +1,7 @@
 import BrightFutures
 import Foundation
 
-public enum LoginWithPasswordFlow {
+public enum LoginFlow {
     case AchievedLogin(authToken: AuthToken)
     case OngoingStepUp(token: String, availableMfaCredentialItemTypes: [MfaCredentialItemType])
 }
@@ -27,7 +27,7 @@ public extension ReachFive {
         password: String,
         scope: [String]? = nil,
         origin: String? = nil
-    ) -> Future<LoginWithPasswordFlow, ReachFiveError> {
+    ) -> Future<LoginFlow, ReachFiveError> {
         let strScope = (scope ?? self.scope).joined(separator: " ")
         let loginRequest = LoginRequest(
             email: email,
@@ -47,7 +47,7 @@ public extension ReachFive {
                     self.storage.save(key: self.pkceKey, value: pkce)
                     return self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
                         .map { intiationStepUpResponse in
-                            LoginWithPasswordFlow.OngoingStepUp(token: intiationStepUpResponse.token, availableMfaCredentialItemTypes: intiationStepUpResponse.amr)
+                            LoginFlow.OngoingStepUp(token: intiationStepUpResponse.token, availableMfaCredentialItemTypes: intiationStepUpResponse.amr)
                         }
                 } else {
                     return self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)

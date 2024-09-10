@@ -62,7 +62,7 @@ class DemoController: UIViewController {
             mode = .Always
         }
         AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
-            .onSuccess(callback: goToProfile)
+            .onSuccess(callback: handleLoginWithPassword)
             .onFailure { error in
                 
                 self.usernameField.isHidden = false
@@ -142,29 +142,34 @@ class DemoController: UIViewController {
         
         if #available(iOS 16.0, *) {
             let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
-            
-            (username.isEmpty ?
-                // this is optional, but a good way to present a modal with a fallback to QR code for loging using a nearby device
-                AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always) :
-                AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always))
-                .onSuccess(callback: goToProfile)
-                .onFailure { error in
-                    switch error {
-                    case .AuthCanceled:
-                        #if targetEnvironment(macCatalyst)
-                            return
-                        #else
-                            AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
-                                .onSuccess(callback: self.goToProfile)
-                                .onFailure { error in
-                                    print("error: \(error) \(error.message())")
-                                }
-                        #endif
-                    default:
-                        let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
-                        self.present(alert, animated: true)
-                    }
+            func onFailure(error: ReachFiveError) -> Void {
+                switch error {
+                case .AuthCanceled:
+                    #if targetEnvironment(macCatalyst)
+                        return
+                    #else
+                        AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
+                            .onSuccess(callback: self.goToProfile)
+                            .onFailure { error in
+                                print("error: \(error) \(error.message())")
+                            }
+                    #endif
+                default:
+                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
+                    self.present(alert, animated: true)
                 }
+            }
+            
+            if username.isEmpty {
+                AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                .onSuccess(callback: handleLoginWithPassword)
+                .onFailure(callback: onFailure)
+
+            } else {
+                AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                .onSuccess(callback: goToProfile)
+                .onFailure(callback: onFailure)
+            }
         }
     }
     
@@ -172,7 +177,7 @@ class DemoController: UIViewController {
         guard let pass = passwordField.text, !pass.isEmpty, let user = usernameField.text, !user.isEmpty else { return }
         let origin = "DemoController.loginWithPassword"
         
-        let fut: Future<LoginWithPasswordFlow, ReachFiveError>
+        let fut: Future<LoginFlow, ReachFiveError>
         if user.contains("@") {
             fut = AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
         } else {

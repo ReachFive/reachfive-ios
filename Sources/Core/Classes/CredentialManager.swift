@@ -9,7 +9,9 @@ public class CredentialManager: NSObject {
     // Do not erase them at the end of a request because requests can be interleaved (modal and auto-fill requests)
     
     // promise for authentification
-    var promise: Promise<AuthToken, ReachFiveError>
+    var promise: Promise<LoginFlow, ReachFiveError>
+    
+    var promiseWithAuthToken: Promise<AuthToken, ReachFiveError>
     // promise for new key registration
     var registrationPromise: Promise<(), ReachFiveError>
     
@@ -20,7 +22,7 @@ public class CredentialManager: NSObject {
     var authController: ASAuthorizationController?
     
     // indicates whether the request is modal or auto-fill, in order to show a special error when the modal is canceled by the user
-    var isPerformingModalReqest = false
+    var isPerformingModalRequest = false
     // data for signup/register
     var passkeyCreationType: PasskeyCreationType?
     // the scope of the request
@@ -38,6 +40,7 @@ public class CredentialManager: NSObject {
     
     public init(reachFiveApi: ReachFiveApi) {
         promise = Promise()
+        promiseWithAuthToken = Promise()
         registrationPromise = Promise()
         self.reachFiveApi = reachFiveApi
     }
@@ -46,7 +49,7 @@ public class CredentialManager: NSObject {
     @available(iOS 16.0, *)
     func signUp(withRequest request: SignupOptions, anchor: ASPresentationAnchor, originR5: String? = nil) -> Future<AuthToken, ReachFiveError> {
         authController?.cancel()
-        promise = Promise()
+        promiseWithAuthToken = Promise()
         authenticationAnchor = anchor
         scope = request.scope
         self.originR5 = originR5
@@ -73,11 +76,11 @@ public class CredentialManager: NSObject {
                 authController.performRequests()
                 
                 self.authController = authController
-                self.isPerformingModalReqest = true
+                self.isPerformingModalRequest = true
             }
             .onFailure { error in self.promise.failure(error) }
         
-        return promise.future
+        return promiseWithAuthToken.future
     }
     
     // MARK: - Register
@@ -112,7 +115,7 @@ public class CredentialManager: NSObject {
                 authController.performRequests()
                 
                 self.authController = authController
-                self.isPerformingModalReqest = true
+                self.isPerformingModalRequest = true
             }
             .onFailure { error in self.registrationPromise.failure(error) }
         
@@ -152,7 +155,7 @@ public class CredentialManager: NSObject {
                 authController.performRequests()
                 
                 self.authController = authController
-                self.isPerformingModalReqest = true
+                self.isPerformingModalRequest = true
             }
             .onFailure { error in self.registrationPromise.failure(error) }
         
@@ -164,7 +167,7 @@ public class CredentialManager: NSObject {
     @available(iOS 16.0, *)
     func beginAutoFillAssistedPasskeySignIn(request: NativeLoginRequest) -> Future<AuthToken, ReachFiveError> {
         authController?.cancel()
-        promise = Promise()
+        promiseWithAuthToken = Promise()
         authenticationAnchor = request.anchor
         originR5 = request.origin
         
@@ -181,17 +184,17 @@ public class CredentialManager: NSObject {
                 authController.presentationContextProvider = self
                 authController.performAutoFillAssistedRequests()
                 self.authController = authController
-                self.isPerformingModalReqest = false
+                self.isPerformingModalRequest = false
             }
             .onFailure { error in self.promise.failure(error) }
         
-        return promise.future
+        return promiseWithAuthToken.future
     }
     
     // MARK: - Modal
     func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) -> Future<AuthToken, ReachFiveError> {
         if #available(iOS 16.0, *) { authController?.cancel() }
-        promise = Promise()
+        promiseWithAuthToken = Promise()
         authenticationAnchor = request.anchor
         originR5 = request.origin
         
@@ -212,7 +215,7 @@ public class CredentialManager: NSObject {
         
         let authzs = requestTypes.compactMap { adaptAuthz($0) }
         
-        return signInWith(webAuthnLoginRequest, withMode: mode, authorizing: authzs) { assertionRequestOptions in
+        signInWith(webAuthnLoginRequest, withMode: mode, authorizing: authzs) { assertionRequestOptions in
             guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 16 context
                 return .success(nil)
             }
@@ -230,9 +233,10 @@ public class CredentialManager: NSObject {
                 }
                 .map { $0 }
         }
+        return promiseWithAuthToken.future
     }
     
-    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) -> Future<AuthToken, ReachFiveError> {
+    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) -> Future<LoginFlow, ReachFiveError> {
         if #available(iOS 16.0, *) { authController?.cancel() }
         promise = Promise()
         authenticationAnchor = request.anchor
@@ -240,15 +244,16 @@ public class CredentialManager: NSObject {
         
         let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFiveApi.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
         
-        return signInWith(webAuthnLoginRequest, withMode: mode, authorizing: requestTypes) { authenticationOptions in
+        signInWith(webAuthnLoginRequest, withMode: mode, authorizing: requestTypes) { authenticationOptions in
             guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 15 context
                 return .success(nil)
             }
             return self.createCredentialAssertionRequest(authenticationOptions).map { $0 }
         }
+        return promise.future
     }
     
-    private func signInWith(_ webAuthnLoginRequest: WebAuthnLoginRequest, withMode mode: Mode, authorizing requestTypes: [ModalAuthorization], makeAuthorization: @escaping (AuthenticationOptions) -> Result<ASAuthorizationRequest?, ReachFiveError>) -> Future<AuthToken, ReachFiveError> {
+    private func signInWith(_ webAuthnLoginRequest: WebAuthnLoginRequest, withMode mode: Mode, authorizing requestTypes: [ModalAuthorization], makeAuthorization: @escaping (AuthenticationOptions) -> Result<ASAuthorizationRequest?, ReachFiveError>) -> Void {
         scope = webAuthnLoginRequest.scope
         
         requestTypes.traverse { type -> Future<ASAuthorizationRequest?, ReachFiveError> in
@@ -288,12 +293,13 @@ public class CredentialManager: NSObject {
                 }
                 
                 self.authController = authController
-                self.isPerformingModalReqest = true
+                self.isPerformingModalRequest = true
             }
-            .onFailure { error in self.promise.failure(error) }
-        
-        return promise.future
-    }
+            .onFailure { error in
+                self.promise.failure(error)
+                self.promiseWithAuthToken.failure(error)
+            }
+        }
 }
 
 // MARK: - ASAuthorizationControllerPresentationContextProviding
@@ -404,7 +410,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
         if authorizationError.code == .canceled {
             // Either the system doesn't find any credentials and the request ends silently, or the user cancels the request.
             // This is a good time to show a traditional login form, or ask the user to create an account.
-            if isPerformingModalReqest {
+            if isPerformingModalRequest {
                 promise.tryFailure(.AuthCanceled)
                 registrationPromise.tryFailure(.AuthCanceled)
             }
@@ -435,14 +441,15 @@ extension CredentialManager {
         return nil
     }
     
-    func loginCallback(tkn: String, scope: String, origin: String? = nil) -> Future<AuthToken, ReachFiveError> {
+    func loginCallback(tkn: String, scope: String, origin: String? = nil) -> Future<LoginFlow, ReachFiveError> {
         let pkce = Pkce.generate()
         
         return reachFiveApi.loginCallback(loginCallback: LoginCallback(sdkConfig: reachFiveApi.sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
             .flatMap({ self.authWithCode(code: $0, pkce: pkce) })
+            
     }
     
-    func authWithCode(code: String, pkce: Pkce) -> Future<AuthToken, ReachFiveError> {
+    func authWithCode(code: String, pkce: Pkce) -> Future<LoginFlow, ReachFiveError> {
         let authCodeRequest = AuthCodeRequest(
             clientId: reachFiveApi.sdkConfig.clientId,
             code: code,
@@ -452,5 +459,8 @@ extension CredentialManager {
         return reachFiveApi
             .authWithCode(authCodeRequest: authCodeRequest)
             .flatMap({ AuthToken.fromOpenIdTokenResponseFuture($0) })
+            .map({authToken in
+                LoginFlow.AchievedLogin(authToken: authToken)
+            })
     }
 }
