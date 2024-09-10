@@ -350,9 +350,25 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 return
             }
 
-            guard let identityToken = appleIDCredential.identityToken, let idToken = String(data: identityToken, encoding: .utf8) else {
-                promise.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: unreadable id token \(appleIDCredential.identityToken)"))
+            guard let identityToken = appleIDCredential.identityToken else {
+                promise.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: no id token returned"))
                 return
+            }
+
+            guard let idToken = String(data: identityToken, encoding: .utf8) else {
+                promise.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: unreadable id token \(identityToken)"))
+                return
+            }
+
+            print("appleIDCredential.user               \(appleIDCredential.user)")
+            print("appleIDCredential.authorizedScopes   \(appleIDCredential.authorizedScopes)")
+            print("appleIDCredential.state              \(appleIDCredential.state)")
+            print("appleIDCredential.authorizationCode  \(appleIDCredential.authorizationCode)")
+            print("appleIDCredential.email              \(appleIDCredential.email)")
+            print("appleIDCredential.fullName           \(appleIDCredential.fullName)")
+            print("appleIDCredential.realUserStatus     \(appleIDCredential.realUserStatus)")
+            if #available(macCatalyst 17.0, *) {
+                print("appleIDCredential.userAgeRange       \(appleIDCredential.userAgeRange)")
             }
 
             let pkce = Pkce.generate()
@@ -363,10 +379,11 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 "response_type": "code",
                 "redirect_uri": reachFiveApi.sdkConfig.scheme,
                 "scope": scope,
-                "platform": "ios",
                 "code_challenge": pkce.codeChallenge,
                 "code_challenge_method": pkce.codeChallengeMethod,
-                "nonce": nonce
+                "nonce": nonce,
+                "given_name": appleIDCredential.fullName?.givenName,
+                "family_name": appleIDCredential.fullName?.familyName
             ]).flatMap({ self.authWithCode(code: $0) }))
         } else if #available(iOS 16.0, *), let credentialRegistration = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration {
             // A new passkey was registered

@@ -172,7 +172,7 @@ public class ReachFiveApi {
     }
 
     //FIXME ça pourrait être bien de pas dupliquer cette méthode
-    internal func authorize(params: [String: String]) -> Future<String, ReachFiveError> {
+    internal func authorize(params: [String: String?]) -> Future<String, ReachFiveError> {
         let promise = Promise<String, ReachFiveError>()
 
         AF
