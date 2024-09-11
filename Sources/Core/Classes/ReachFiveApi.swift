@@ -181,6 +181,15 @@ public class ReachFiveApi {
             )
             .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
+            .response { response in
+                if let headerFields = response.response?.allHeaderFields as? [String: String],
+                   let URL = response.request?.url {
+                    let cookies = HTTPCookie.cookies(withResponseHeaderFields: headerFields, for: URL)
+                    for cookie in cookies {
+                        HTTPCookieStorage.shared.setCookie(cookie)
+                    }
+                }
+            }
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
 
