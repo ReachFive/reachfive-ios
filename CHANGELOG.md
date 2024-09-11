@@ -1,9 +1,9 @@
 # Changelog
 ## Unreleased
 ### Breaking changes
-- Allow to initiate an mfa step up when required during a call to `loginWithPassword`. For that the return type of this method was changed from `AuthToken` to a new type `LoginWithPasswordFlow` to represent the potential new MFA step introduced.
+- Allow to initiate an mfa step up when required during a call to `loginWithPassword`. For that the return type of this method was changed from `AuthToken` to a new type `LoginFlow` to represent the potential new MFA step up introduced.
 - Change the name of `StartStepUp` to `StartStepUp.AuthTokenFlow` and make its authToken parameter mandatory
-
+- login with stored credentials returns a LoginFlow instead of an AuthToken due to the new MFA step up introduced
 ## v7.0.0
 ### Breaking changes
 - New name for the module: `Reach5`
