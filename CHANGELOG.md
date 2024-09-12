@@ -1,4 +1,8 @@
 # Changelog
+## Unreleased
+### New features
+- Support for native (that is, not inside a webview) Sign in with Apple
+
 ## v7.0.0
 ### Breaking changes
 - New name for the module: `Reach5`
