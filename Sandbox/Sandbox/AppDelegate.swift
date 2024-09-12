@@ -87,13 +87,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         let appleIDProvider = ASAuthorizationAppleIDProvider()
-        //TODO tester si SIWA marche toujours en webview, tester le comportement avec getProvider,
+        // Ceci est l'id tel que renvoyé par Apple dans idToken.sub ou AppleIDCredential.user
         appleIDProvider.getCredentialState(forUserID: "000707.3cc381460bce4bcc96e6fd5abdc1f121.1742") { (credentialState, error) in
             switch credentialState {
-            case .authorized: print("getCredentialState: authorized")
-            case .revoked: print("getCredentialState: revoked")
-            case .notFound: print("getCredentialState: not found")
-            case .transferred: print("getCredentialState: transferred")
+            case .authorized: print("Apple Id state: authorized")
+            case .revoked: print("Apple Id state: revoked")
+            case .notFound: print("Apple Id state: not found")
+            case .transferred: print("Apple Id state: transferred")
             default:
                 break
             }

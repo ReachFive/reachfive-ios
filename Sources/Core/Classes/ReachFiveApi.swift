@@ -153,7 +153,7 @@ public class ReachFiveApi {
                 parameters: loginCallback.dictionary()
             )
             .redirect(using: Redirector.doNotFollow)
-            .validate(statusCode: 300...308) // TODO: pas de 305/306
+            .validate(statusCode: 300...308) //TODO pas de 305/306
             .response { responseData in
                 let callbackURL = responseData.response?.allHeaderFields["Location"] as? String
                 guard let callbackURL else {

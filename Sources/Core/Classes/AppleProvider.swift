@@ -13,7 +13,7 @@ import BrightFutures
 // côté serveur
 //      Apple ID notif de changement (lien app-appleId supprimé depuis les settings, compte apple id carrément supprimé, private relay activé ou désactivé) https://developer.apple.com/videos/play/wwdc2020/10173?time=691
 //      ajouter le well-known-change-password-url (wwdc2020/10666)
-//      vérifier que l'on fait bien les bonnes vérification : signature, identityToken.iss="appleid.apple.com", identityToken.aud="bundle id", nonce, exp (https://developer.apple.com/videos/play/wwdc2022/10122/?time=540)
+//      vérifier que l'on fait bien les bonnes vérification : signature, identityToken.iss="appleid.apple.com", identityToken.aud="bundle id", nonce, exp (https://developer.apple.com/videos/play/wwdc2022/10122/?time=540) ✔︎
 //      utiliser realUserStatus
 //      utiliser les refresh token d'Apple
 //      suppression de compte (https://developer.apple.com/videos/play/wwdc2022/10122/?time=835)

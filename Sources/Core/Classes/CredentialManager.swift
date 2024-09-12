@@ -360,17 +360,6 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 return
             }
 
-            print("appleIDCredential.user               \(appleIDCredential.user)")
-            print("appleIDCredential.authorizedScopes   \(appleIDCredential.authorizedScopes)")
-            print("appleIDCredential.state              \(appleIDCredential.state)")
-            print("appleIDCredential.authorizationCode  \(appleIDCredential.authorizationCode)")
-            print("appleIDCredential.email              \(appleIDCredential.email)")
-            print("appleIDCredential.fullName           \(appleIDCredential.fullName)")
-            print("appleIDCredential.realUserStatus     \(appleIDCredential.realUserStatus)")
-            if #available(macCatalyst 17.0, *) {
-                print("appleIDCredential.userAgeRange       \(appleIDCredential.userAgeRange)")
-            }
-
             let pkce = Pkce.generate()
             promise.completeWith(reachFiveApi.authorize(params: [
                 "provider": "apple",

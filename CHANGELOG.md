@@ -1,7 +1,7 @@
 # Changelog
 ## Unreleased
 ### New features
-- Support for native (that is, not inside a webview) Sign in with Apple
+- Support for native Sign in with Apple (that is, the system view will open, not a webview)
 
 ## v7.0.0
 ### Breaking changes
