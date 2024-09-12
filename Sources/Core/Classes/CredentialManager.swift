@@ -382,6 +382,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 "code_challenge": pkce.codeChallenge,
                 "code_challenge_method": pkce.codeChallengeMethod,
                 "nonce": nonce,
+                "origin": originR5,
                 "given_name": appleIDCredential.fullName?.givenName,
                 "family_name": appleIDCredential.fullName?.familyName
             ]).flatMap({ self.authWithCode(code: $0) }))

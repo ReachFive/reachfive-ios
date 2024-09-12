@@ -186,7 +186,7 @@ class DemoController: UIViewController {
     @objc func handleAuthorizationAppleIDButtonPress() {
         print("handleAuthorizationAppleIDButtonPress")
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-        AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+        AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
             .onSuccess(callback: goToProfile)
             .onFailure { error in
                 switch error {
