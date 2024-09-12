@@ -1,7 +1,7 @@
 # Changelog
 ## Unreleased
 ### New features
-If you activate "Include SSO cookie in token endpoint response" in your OAuth client, you can complete a flow with `webviewLogin` and automatically get the session cookie inside the app for use in `WKWebView`.
+If you activate 'Include SSO cookie in token endpoint response' in your OAuth client, you can complete a flow with `webviewLogin` and automatically get the session cookie inside the app for use in `WKWebView`.
 
 ## v7.0.0
 ### Breaking changes
