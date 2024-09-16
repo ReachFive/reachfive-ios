@@ -234,7 +234,7 @@ public class CredentialManager: NSObject {
         }
     }
 
-    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) -> Future<AuthToken, ReachFiveError> {
+    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?) -> Future<AuthToken, ReachFiveError> {
         if #available(iOS 16.0, *) { authController?.cancel() }
         promise = Promise()
         authenticationAnchor = request.anchor
@@ -242,7 +242,7 @@ public class CredentialManager: NSObject {
 
         let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFiveApi.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
 
-        return signInWith(webAuthnLoginRequest, withMode: mode, authorizing: requestTypes) { authenticationOptions in
+        return signInWith(webAuthnLoginRequest, withMode: mode, authorizing: requestTypes, appleProvider: appleProvider) { authenticationOptions in
             guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 15 context
                 return .success(nil)
             }
@@ -250,7 +250,7 @@ public class CredentialManager: NSObject {
         }
     }
 
-    private func signInWith(_ webAuthnLoginRequest: WebAuthnLoginRequest, withMode mode: Mode, authorizing requestTypes: [ModalAuthorization], makeAuthorization: @escaping (AuthenticationOptions) -> Result<ASAuthorizationRequest?, ReachFiveError>) -> Future<AuthToken, ReachFiveError> {
+    private func signInWith(_ webAuthnLoginRequest: WebAuthnLoginRequest, withMode mode: Mode, authorizing requestTypes: [ModalAuthorization], appleProvider: ConfiguredAppleProvider? = nil, makeAuthorization: @escaping (AuthenticationOptions) -> Result<ASAuthorizationRequest?, ReachFiveError>) -> Future<AuthToken, ReachFiveError> {
         scope = webAuthnLoginRequest.scope
 
         requestTypes.traverse { type -> Future<ASAuthorizationRequest?, ReachFiveError> in
@@ -264,7 +264,16 @@ public class CredentialManager: NSObject {
                 case .SignInWithApple:
                     // Allow the user to use a Sign In With Apple, if they have one.
                     let appleIDRequest = ASAuthorizationAppleIDProvider().createRequest()
-                    appleIDRequest.requestedScopes = [.fullName, .email]
+                    var appleScopes: [ASAuthorization.Scope] = []
+                    if let scope = appleProvider?.providerConfig.scope {
+                        if scope.contains(where: { s in s == "email"}) {
+                            appleScopes.append(.email)
+                        }
+                        if scope.contains(where: { s in s == "name"}) {
+                            appleScopes.append(.fullName)
+                        }
+                    }
+                    appleIDRequest.requestedScopes = appleScopes
                     nonce = Pkce.generate().codeChallenge
                     appleIDRequest.nonce = nonce
 

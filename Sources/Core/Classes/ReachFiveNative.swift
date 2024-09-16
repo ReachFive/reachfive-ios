@@ -48,7 +48,8 @@ public extension ReachFive {
     ///   - mode: choose the behavior when there are no credentials available
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
     func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) -> Future<AuthToken, ReachFiveError> {
-        credentialManager.login(withRequest: adapt(request), usingModalAuthorizationFor: requestTypes, display: mode)
+        let appleProvider = providers.first { $0.name == ConfiguredAppleProvider.NAME } as? ConfiguredAppleProvider
+        return credentialManager.login(withRequest: adapt(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider)
     }
     
     /// Signs in the user using credentials stored in the keychain, letting the system display the credentials corresponding to the given username in a modal sheet.
