@@ -144,35 +144,10 @@ public class ReachFiveApi {
     }
 
     public func loginCallback(loginCallback: LoginCallback) -> Future<String, ReachFiveError> {
-        let promise = Promise<String, ReachFiveError>()
-
-        AF
-            .request(
-                createUrl(path: "/oauth/authorize"),
-                method: .get,
-                parameters: loginCallback.dictionary()
-            )
-            .redirect(using: Redirector.doNotFollow)
-            .validate(statusCode: 300...308) //TODO pas de 305/306
-            .response { responseData in
-                let callbackURL = responseData.response?.allHeaderFields["Location"] as? String
-                guard let callbackURL else {
-                    promise.failure(.TechnicalError(reason: "No location"))
-                    return
-                }
-                let params = URLComponents(string: callbackURL)?.queryItems
-                let code = params?.first(where: { $0.name == "code" })?.value
-                guard let code else {
-                    promise.failure(.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params)))
-                    return
-                }
-                promise.success(code)
-            }
-        return promise.future
+        authorize(params: loginCallback.dictionary() as? [String: String])
     }
 
-    //FIXME ça pourrait être bien de pas dupliquer cette méthode
-    internal func authorize(params: [String: String?]) -> Future<String, ReachFiveError> {
+    func authorize(params: [String: String?]?) -> Future<String, ReachFiveError> {
         let promise = Promise<String, ReachFiveError>()
 
         AF

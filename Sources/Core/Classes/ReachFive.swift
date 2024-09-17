@@ -36,8 +36,6 @@ public class ReachFive: NSObject {
         self.providersCreators = providersCreators
         self.reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig)
         self.storage = storage ?? UserDefaultsStorage()
-        //TODO Passer les providers, ou juste le provider Apple au CredentialManager pour avoir accès aux scopes sélectionnés parmi .fullName et .email
-        //TODO Tester mes changements de CredentialManager avec la branche MFA de Sacha
         self.credentialManager = CredentialManager(reachFiveApi: reachFiveApi)
     }
 

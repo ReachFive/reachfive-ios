@@ -18,7 +18,6 @@ import Reach5Facebook
 //TODO
 // Mettre une nouvelle page dans une quatrième tabs ou dans l'app réglages:
 // - Paramétrage : scopes, origin, utilisation du refresh au démarage ?
-// Voir pour utiliser les scènes : 1 par que c'est plus moderne, deux par qu'il faut peut-être adapter certaines interface pour les app clients qui utilisent les scènes
 // cf. wireframe de JC pour d'autres idées : https://miro.com/app/board/uXjVOMB0pG4=/
 // Pouvoir sélectionner entre plusieurs confs ReachFive
 // - d'abord en dur ici et dans les entitlements. Sélectionner la bonne dans le let reachfive: ReachFive =
@@ -29,6 +28,11 @@ import Reach5Facebook
 // Mettre la version des SDK en tant que version de la Sandbox (vérif : User Agent Alamofire des user events)
 // Mettre un bouton recharger conf (lancer initialize) pour si la conf backend a changé
 // Apparemment sur Mac Catalyst pour que le remplissage automatique des mots de passe fonctionne il faut mettre "l'appid" dans apple-app-site-association. cf. https://developer.apple.com/videos/play/wwdc2019/516?time=289
+// register for revocation notification dans l'app (https://developer.apple.com/videos/play/wwdc2022/10122/?time=738)
+// gérer l'upgrade d'un mot de passe vers SIWA ou mdp fort : https://developer.apple.com/videos/play/wwdc2020/10666
+// synchroniser les règles de mdp de la console avec les password rules, à mettre dans la conf de l'app (https://developer.apple.com/videos/play/wwdc2020/10666?time=658)
+// voir si les SMS 2FA sont auto-complétés
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
