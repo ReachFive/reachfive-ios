@@ -70,7 +70,7 @@ It presents a secure, single sign-on (SSO) experience without requiring users to
 
 ASWebAuthenticationSession uses Safari's existing session data to facilitate authentication.
 
-The app receives the necessary tokens (e.g. access and refresh tokens) after the user successfully authenticates. <br />
+The app receives the necessary tokens (e.g. access and refresh tokens) after the user successfully authenticates. +
 While the session with Safari is isolated, meaning Safari's cookies are not accessible to the native app context, ReachFive can provide the session cookie necessary to authenticate your webviews if you activate "Include SSO cookie in token endpoint response".
 
 // visual
