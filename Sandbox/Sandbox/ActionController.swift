@@ -17,13 +17,13 @@ class ActionController: UITableViewController {
             if indexPath.row == 1 {
                 AppDelegate.reachfive()
                     .login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                    .onSuccess(callback: handleLoginWithPassword)
+                    .onSuccess(callback: handleLoginFlow)
             } else
             // Login with passkey: modal non-persistent
             if indexPath.row == 2 {
                 AppDelegate.reachfive()
                     .login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
-                    .onSuccess(callback: handleLoginWithPassword)
+                    .onSuccess(callback: handleLoginFlow)
             }
         }
 

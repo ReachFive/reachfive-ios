@@ -39,7 +39,7 @@ class LoginWithPasswordController: UIViewController {
             .loginWithPassword(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")
             .onSuccess { resp in
                 self.error.text = nil
-                self.handleLoginWithPassword(flow: resp)
+                self.handleLoginFlow(flow: resp)
             }
             .onFailure { error in
                 self.error.text = error.message()

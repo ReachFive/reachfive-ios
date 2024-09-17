@@ -25,7 +25,7 @@ class LoginPasskeyController: UIViewController {
         
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear"), usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
-            .onSuccess(callback: handleLoginWithPassword)
+            .onSuccess(callback: handleLoginFlow)
             .onFailure { error in
                 
                 self.usernameField.isHidden = false
@@ -77,7 +77,7 @@ class LoginPasskeyController: UIViewController {
         case .none, .some(""):
             // this is optional, but a good way to present a modal with a fallback to QR code for loging using a nearby device
             AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                .onSuccess(callback: handleLoginWithPassword)
+                .onSuccess(callback: handleLoginFlow)
                 .onFailure(callback: onFailure)
             
         case .some(let username):

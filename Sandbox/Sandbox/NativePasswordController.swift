@@ -34,7 +34,7 @@ class NativePasswordController: UIViewController {
         } else {
             fut = AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
         }
-        fut.onSuccess(callback: handleLoginWithPassword)
+        fut.onSuccess(callback: handleLoginFlow)
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                 self.present(alert, animated: true)
@@ -48,7 +48,7 @@ class NativePasswordController: UIViewController {
         
         AppDelegate.reachfive()
             .login(withRequest: NativeLoginRequest(anchor: window, origin: "NativePasswordController.viewDidAppear"), usingModalAuthorizationFor: [.Password], display: .Always)
-            .onSuccess(callback: handleLoginWithPassword)
+            .onSuccess(callback: handleLoginFlow)
             .onFailure { error in
                 switch error {
                 case .AuthCanceled: return

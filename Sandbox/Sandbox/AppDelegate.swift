@@ -169,7 +169,7 @@ extension UIViewController {
         }
     }
 
-    func handleLoginWithPassword(flow: LoginFlow) {
+    func handleLoginFlow(flow: LoginFlow) {
         switch flow {
         case .AchievedLogin(let authToken):
             goToProfile(authToken)

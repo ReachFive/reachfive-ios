@@ -62,7 +62,7 @@ class DemoController: UIViewController {
             mode = .Always
         }
         AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
-            .onSuccess(callback: handleLoginWithPassword)
+            .onSuccess(callback: handleLoginFlow)
             .onFailure { error in
                 
                 self.usernameField.isHidden = false
@@ -162,7 +162,7 @@ class DemoController: UIViewController {
             
             if username.isEmpty {
                 AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                .onSuccess(callback: handleLoginWithPassword)
+                .onSuccess(callback: handleLoginFlow)
                 .onFailure(callback: onFailure)
 
             } else {
@@ -184,7 +184,7 @@ class DemoController: UIViewController {
             fut = AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
         }
         
-        fut.onSuccess(callback: handleLoginWithPassword)
+        fut.onSuccess(callback: handleLoginFlow)
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                 self.present(alert, animated: true)

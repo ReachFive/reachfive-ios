@@ -358,14 +358,10 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                         let pkce = Pkce.generate()
                         self.storage.save(key: "PASSWORDLESS_PKCE", value: pkce)
                         return self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.reachFiveApi.sdkConfig.clientId, redirectUri: self.reachFiveApi.sdkConfig.redirectUri, pkce: pkce, scope: scope, tkn: resp.tkn))
-                            .map { intiationStepUpResponse in
-                                LoginFlow.OngoingStepUp(token: intiationStepUpResponse.token, availableMfaCredentialItemTypes: intiationStepUpResponse.amr)
-                            }
+                            .map { .OngoingStepUp(token: $0.token, availableMfaCredentialItemTypes: $0.amr) }
                     } else {
                         return self.loginCallback(tkn: resp.tkn, scope: scope, origin: self.originR5)
-                            .map { authToken in
-                                .AchievedLogin(authToken: authToken)
-                            }
+                            .map { .AchievedLogin(authToken: $0) }
                     }
                 }
             )
@@ -432,11 +428,11 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             let authenticatorData = credentialAssertion.rawAuthenticatorData.toBase64Url()
             let response = R5AuthenticatorAssertionResponse(authenticatorData: authenticatorData, clientDataJSON: clientDataJSON, signature: signature, userHandle: userID)
 
-            let fut = reachFiveApi.authenticateWithWebAuthn(authenticationPublicKeyCredential: AuthenticationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: response))
+            let callbacked = reachFiveApi.authenticateWithWebAuthn(authenticationPublicKeyCredential: AuthenticationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: response))
                 .flatMap({ self.loginCallback(tkn: $0.tkn, scope: scope, origin: self.originR5) })
             switch requestLoginType {
-                case .WithPassword: promiseWithStepUp.completeWith(fut.map { LoginFlow.AchievedLogin(authToken: $0) })
-                case .WithoutPassword: promiseWithAuthToken.completeWith(fut)
+                case .WithPassword: promiseWithStepUp.completeWith(callbacked.map { .AchievedLogin(authToken: $0) })
+                case .WithoutPassword: promiseWithAuthToken.completeWith(callbacked)
             }
         } else {
             promiseWithAuthToken.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: Received unknown authorization type."))
