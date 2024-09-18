@@ -110,17 +110,23 @@ public enum NonDiscoverableAuthorization: Equatable {
     case Passkey
 }
 
-/// The behavior of the modal sheet when there are no credential available
+/// The behavior of the modal sheet when there are no credential available.
 public enum Mode: Equatable {
-    /// If credentials are available, presents a modal sign-in sheet.
-    /// If there are no locally saved credentials and the authorization is for .Passkey, the system presents a QR code to allow signing in with a passkey from a nearby device.
-    /// If there are no locally saved credentials and the authorization is for .Password, no UI appears.
+    /// If there are no locally saved credentials a modal will generally appear.
+    ///
+    /// Depending on the type of credential:
+    /// - `.Passkey`: the system presents a QR code to allow signing in with a passkey from a nearby device.
+    /// - `.SignInWithApple`: a signup sheet appears.
+    /// - `.Password`: no UI appears.
+    ///
     /// You can start this request in response to a user interaction.
+    ///
     /// Corresponds to `AuthController.performRequests()`
     case Always
-    /// If credentials are available, presents a modal sign-in sheet.
-    /// If there are no locally saved credentials, no UI appears and the call ends in ReachFiveError.AuthCanceled.
-    /// You can start a request automatically early in the view lifecycle (e.g. in viewDidAppear) or at app launch.
+    /// If there are no locally saved credentials, no UI appears and the call ends in `ReachFiveError.AuthCanceled`.
+    ///
+    /// You can start a request automatically early in the view lifecycle (e.g. in `viewDidAppear`) or at app launch.
+    ///
     /// Corresponds to `AuthController.performRequests(options: .preferImmediatelyAvailableCredentials)`
     @available(iOS 16.0, *)
     case IfImmediatelyAvailableCredentials

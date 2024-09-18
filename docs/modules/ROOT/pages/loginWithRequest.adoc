@@ -13,14 +13,13 @@ AppDelegate.reachfive().login(
 
 == Description
 
-Logs the user in using credentials stored in the keychain. 
+Logs the user in using credentials stored in the keychain.
 The system displays all available credentials in a link:https://developer.apple.com/design/human-interface-guidelines/sheets[modal sheet^].
-Credentials can be passwords and/or passkeys.
+Credentials can be any combination of passwords, passkeys and Sign in with Apple.
 
 == Usage
-
-Start this request in response to a user interaction when the display is `.Always` or automatically and/or early in a view lifecycle (e.g., in ``viewDidAppear``).
-Alternatively, start the request during the application launch when the display is `.IfImmediatelyAvailableCredentials`.
+Start this request in response to a user interaction. Setting the parameter `display` to `.Always` works best. +
+Alternatively, start the request automatically early in a view lifecycle (e.g., in ``viewDidAppear``) or during the application launch. Prefer setting `display` to `.IfImmediatelyAvailableCredentials` for this use case.
 
 == Examples
 
