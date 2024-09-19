@@ -1,5 +1,6 @@
 # Changelog
-## Unreleased
+
+## v7.1.0
 ### New features
 - Support for native Sign in with Apple (that is, the system view will open, not a webview)
 
