@@ -15,7 +15,11 @@ class ActionController: UITableViewController {
             if indexPath.row == 1 {
                 AppDelegate.reachfive()
                     .login(withRequest: NativeLoginRequest(anchor: window, origin: "ActionController: Section Native"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
-                    .onComplete { self.handleResult(result: $0) }
+                    .onSuccess(callback: handleLoginFlow)
+                    .onFailure { error in
+                        let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.message())")
+                        self.present(alert, animated: true)
+                   }
             }
         }
 

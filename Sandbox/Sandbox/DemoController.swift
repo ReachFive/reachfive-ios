@@ -54,7 +54,7 @@ class DemoController: UIViewController {
         super.viewDidAppear(animated)
 
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-        var types: [ModalAuthorization] = [.Password]
+        var types: [ModalAuthorization] = [.Password, .SignInWithApple]
         if #available(iOS 16.0, *) {
             types.append(.Passkey)
         }
