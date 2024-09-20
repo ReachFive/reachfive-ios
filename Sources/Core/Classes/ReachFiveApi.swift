@@ -72,7 +72,7 @@ public class ReachFiveApi {
         let defaultParams: [String: String] = [
             "platform": "ios",
             // TODO: read from the version.rb. Either directly or indirectly from Reach5.h, Info.plist...
-            "sdk": "7.0.0",
+            "sdk": "7.1.0",
             "device": deviceInfo,
         ]
 
@@ -144,16 +144,19 @@ public class ReachFiveApi {
     }
 
     public func loginCallback(loginCallback: LoginCallback) -> Future<String, ReachFiveError> {
+        authorize(params: loginCallback.dictionary() as? [String: String])
+    }
+
+    func authorize(params: [String: String?]?) -> Future<String, ReachFiveError> {
         let promise = Promise<String, ReachFiveError>()
 
         AF
             .request(
-                createUrl(path: "/oauth/authorize"),
-                method: .get,
-                parameters: loginCallback.dictionary()
+                createUrl(path: "/oauth/authorize", params: params),
+                method: .get
             )
             .redirect(using: Redirector.doNotFollow)
-            .validate(statusCode: 300 ... 308) // TODO: pas de 305/306
+            .validate(statusCode: 300...308) //TODO pas de 305/306
             .response { responseData in
                 let callbackURL = responseData.response?.allHeaderFields["Location"] as? String
                 guard let callbackURL else {

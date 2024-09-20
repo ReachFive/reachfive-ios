@@ -26,7 +26,7 @@ This includes the following:
 * `redirectUri`: The URL to which the user is redirected.
 This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
 * `tkn`: The one-time use authentication token.
-* `origin`: The domain of the origin. 
+* `origin`: The domain of the origin.
 It must be a valid URL.
 
 You should only use one of `authToken` or `tkn`.
@@ -74,7 +74,7 @@ AppDelegate.reachfive()
 
 Object parameters:
 
-* `anchor`: The view that the credential provider uses if it requires user interaction.
+* `anchor`: The view to which the credential provider attaches its UI if it requires user interaction.
 * `originWebAuthn`: The origin of the webauthn call.
 * `scopes`: The scopes granted to the profile.
 * `origin`: The origin of the call.
@@ -178,7 +178,7 @@ AppDelegate.reachfive()
 // end::CredentialType[]
 
 // tag::updateEmail[]
-|[[updateEmail, updateEmail]]email `string` 
+|[[updateEmail, updateEmail]]email `string`
 | The email address of the profile. The new email address must be different from the old one.
 
 include::docs:ROOT:page$email-address-management.adoc[tag=verifiedUnverified]
@@ -212,7 +212,7 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 // end::friendlyname[]
 
 // tag::name[]
-|[[name,name]] name `string` 
+|[[name,name]] name `string`
 | The name of the provider.
 
 .possible values
@@ -279,7 +279,7 @@ NOTE: This binds the tokens with the client and serves as a token validation par
 
 // tag::usingModalAuthorizationFor[]
 |[[usingModalAuthorizationFor,usingModalAuthorizationFor]] usingModalAuthorizationFor
-|The type of credential, passkey and/or password.
+|An array of types of credential to unlock. Any combination of `.Password`, `.Passkey` and `SignInWithApple`.
 // end::usingModalAuthorizationFor[]
 
 // tag::usingModalAuthorizationForNonDiscoverable[]
@@ -292,13 +292,11 @@ NOTE: This binds the tokens with the client and serves as a token validation par
 |Choice of behaviour when there are no credentials available.
 
 .options
-* `Always`: If credentials are available, presents a modal sign-in sheet.
-If there are no locally saved credentials and the authorization is for ``.Passkey``, the system presents a QR code to allow signing in with a passkey from a nearby device.
-If there are no locally saved credentials and the authorization is for ``.Password``, no UI appears.
-You can start this request in response to a user interaction.
-* `IfImmediatelyAvailableCredentials`: If credentials are available, presents a modal sign-in sheet. 
-If there are no locally saved credentials, no UI appears and the call ends in `ReachFiveError.AuthCanceled`. 
-You can start a request automatically early in the view lifecycle (e.g., in ``viewDidAppear``) or at app launch.
+* `Always`: Depending on the type of credential: +
+- ``.Passkey``: the system presents a QR code to allow signing in with a passkey from a nearby device. +
+- ``.SignInWithApple``: a signup sheet appears. +
+- ``.Password``: no UI appears. +
+* `IfImmediatelyAvailableCredentials`: No UI appears and the call ends in `ReachFiveError.AuthCanceled` which you can intercept and react to (e.g., display other login options).
 // end::display[]
 
 // tag::presentationContextProvider[]
@@ -406,12 +404,12 @@ Both the international format and the national conventions of the account's coun
 [cols="1,3a"]
 !===
 
-! phoneNumber `string` 
+! phoneNumber `string`
 ! The phone number of the profile.
 
 NOTE: Both the international format and the national conventions of the account's country are accepted if configured in account settings.
 
-! verificationCode `string` 
+! verificationCode `string`
 ! *Required* The verification code sent by SMS.
 
 ! email `string`

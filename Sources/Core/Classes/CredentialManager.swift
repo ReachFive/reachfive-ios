@@ -33,6 +33,8 @@ public class CredentialManager: NSObject {
     var scope: String?
     // optional origin for user events
     var originR5: String?
+    // the nonce for Sign In With Apple
+    var nonce: String?
 
     enum PasskeyCreationType {
         case Signup(signupOptions: RegistrationOptions)
@@ -249,7 +251,7 @@ public class CredentialManager: NSObject {
         return promiseWithAuthToken.future
     }
 
-    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) -> Future<LoginFlow, ReachFiveError> {
+    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?) -> Future<LoginFlow, ReachFiveError> {
         if #available(iOS 16.0, *) { authController?.cancel() }
         promiseWithStepUp = Promise()
         authenticationAnchor = request.anchor
@@ -259,7 +261,7 @@ public class CredentialManager: NSObject {
 
         self.requestLoginType = .WithPassword
 
-        signInWith(webAuthnLoginRequest, withMode: mode, authorizing: requestTypes) { authenticationOptions in
+        signInWith(webAuthnLoginRequest, withMode: mode, authorizing: requestTypes, appleProvider: appleProvider) { authenticationOptions in
             guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 15 context
                 return .success(nil)
             }
@@ -268,7 +270,7 @@ public class CredentialManager: NSObject {
         return promiseWithStepUp.future
     }
 
-    private func signInWith(_ webAuthnLoginRequest: WebAuthnLoginRequest, withMode mode: Mode, authorizing requestTypes: [ModalAuthorization], makeAuthorization: @escaping (AuthenticationOptions) -> Result<ASAuthorizationRequest?, ReachFiveError>) -> Void {
+    private func signInWith(_ webAuthnLoginRequest: WebAuthnLoginRequest, withMode mode: Mode, authorizing requestTypes: [ModalAuthorization], appleProvider: ConfiguredAppleProvider? = nil, makeAuthorization: @escaping (AuthenticationOptions) -> Result<ASAuthorizationRequest?, ReachFiveError>) -> Void {
         scope = webAuthnLoginRequest.scope
 
         requestTypes.traverse { type -> Future<ASAuthorizationRequest?, ReachFiveError> in
@@ -278,6 +280,24 @@ public class CredentialManager: NSObject {
                     // Allow the user to use a saved password, if they have one.
                     let passwordRequest = ASAuthorizationPasswordProvider().createRequest()
                     return Future(value: passwordRequest)
+
+                case .SignInWithApple:
+                    // Allow the user to use a Sign In With Apple, if they have one.
+                    let appleIDRequest = ASAuthorizationAppleIDProvider().createRequest()
+                    var appleScopes: [ASAuthorization.Scope] = []
+                    if let scope = appleProvider?.providerConfig.scope {
+                        if scope.contains(where: { s in s == "email"}) {
+                            appleScopes.append(.email)
+                        }
+                        if scope.contains(where: { s in s == "name"}) {
+                            appleScopes.append(.fullName)
+                        }
+                    }
+                    appleIDRequest.requestedScopes = appleScopes
+                    nonce = Pkce.generate().codeChallenge
+                    appleIDRequest.nonce = nonce
+
+                    return Future(value: appleIDRequest)
 
                 case .Passkey:
                     // Allow the user to use a saved passkey, if they have one.
@@ -365,6 +385,37 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                     }
                 }
             )
+        } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+            guard let nonce, let scope else {
+                promiseWithStepUp.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: no scope, no nonce"))
+                return
+            }
+
+            guard let identityToken = appleIDCredential.identityToken else {
+                promiseWithStepUp.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: no id token returned"))
+                return
+            }
+
+            guard let idToken = String(data: identityToken, encoding: .utf8) else {
+                promiseWithStepUp.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: unreadable id token \(identityToken)"))
+                return
+            }
+
+            let pkce = Pkce.generate()
+            promiseWithStepUp.completeWith(reachFiveApi.authorize(params: [
+                "provider": "apple",
+                "client_id": reachFiveApi.sdkConfig.clientId,
+                "id_token": idToken,
+                "response_type": "code",
+                "redirect_uri": reachFiveApi.sdkConfig.scheme,
+                "scope": scope,
+                "code_challenge": pkce.codeChallenge,
+                "code_challenge_method": pkce.codeChallengeMethod,
+                "nonce": nonce,
+                "origin": originR5,
+                "given_name": appleIDCredential.fullName?.givenName,
+                "family_name": appleIDCredential.fullName?.familyName
+            ]).flatMap({ self.authWithCode(code: $0) }).map({.AchievedLogin(authToken: $0)}))
         } else if #available(iOS 16.0, *), let credentialRegistration = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration {
             // A new passkey was registered
             guard let attestationObject = credentialRegistration.rawAttestationObject else {
@@ -489,7 +540,7 @@ extension CredentialManager {
             .flatMap({ self.authWithCode(code: $0, pkce: pkce) })
     }
 
-    func authWithCode(code: String, pkce: Pkce) -> Future<AuthToken, ReachFiveError> {
+    func authWithCode(code: String, pkce: Pkce? = nil) -> Future<AuthToken, ReachFiveError> {
         let authCodeRequest = AuthCodeRequest(
             clientId: reachFiveApi.sdkConfig.clientId,
             code: code,

@@ -2,7 +2,7 @@
 
 There are a few different ways that you can leverage our {company} iOS SDK.
 How you use it depends on your specific requirements and technical ecosystem.
-This page provides an overview of important key terms for our iOS SDK as well as as the primary ways in which you can leverage it.
+This page provides an overview of important key terms for our iOS SDK as well as the primary ways in which you can leverage it.
 
 There are several potential use cases.
 However, there are two core use cases that we would like to cover here, which primarily focus around whether the login is native or web-based.
@@ -19,7 +19,7 @@ Allowing your users to log in natively from your iOS application is of course th
 This is the approach we recommend when it's possible for your setup.
 
 In this scenario, access tokens, refresh tokens, and cookies are handled inside the iOS app.
-You're able to share these with <<WKWebView>> as well if needed.
+The session cookie is automatically shared with your in-app <<WKWebView, WKWebViews>>.
 
 Using the native approach, users authenticates in the native iOS application and navigate through the mobile app.
 They can leverage their native app session on other mobile apps as long as it is synchronised with their Apple account and implemented by the integrator (that's you).
@@ -68,9 +68,10 @@ IMPORTANT: We recommend you do not use <<WKWebView>> unless there are no other o
 ASWebAuthenticationSession is an Apple-provided API that allows apps to perform web-based authentication using the system's default browser (Safari).
 It presents a secure, single sign-on (SSO) experience without requiring users to leave the app.
 
-ASWebAuthenticationSession uses Safari's existing session data to facilitate authentication but keeps the session isolated, meaning Safari's cookies are not accessible to the native app context.
+ASWebAuthenticationSession uses Safari's existing session data to facilitate authentication.
 
-The app receives the necessary tokens (e.g., access and refresh tokens) after the user successfully authenticates, but it does not directly access or manipulate Safari's cookies.
+The app receives the necessary tokens (e.g. access and refresh tokens) after the user successfully authenticates. +
+While the session with Safari is isolated, meaning Safari's cookies are not accessible to the native app context, ReachFive can provide the session cookie necessary to authenticate your webviews if you activate "Include SSO cookie in token endpoint response".
 
 // visual
 [.expand]
@@ -91,7 +92,8 @@ image:flows/flow_ASWebAuthenticationSession.jpeg[role=zoom]
 //     F -->|Yes| G[ReachFive sends cookie and token]
 //     G --> H[App stores token]
 //     G --> I[Safari stores cookie]
-//     H --> J[User granted access]
+//     H --> J[If enabled, App stores cookie]
+//     J --> L[User granted access]
 //     F -->|No| K[Show error message]
 // ----
 ====
@@ -110,8 +112,7 @@ When to use it icon:check-square-o[]::
 When not to use it [.red]#icon:window-close[]#::
 +
 --
-If your users typically authenticate on your website first and use a hybrid mobile app approach to navigate screens, this approach is not recommended.
-This is because the Safari session cookie isn't shared with the app.
+When you want a seamless and integrated experience.
 --
 ====
 
@@ -157,7 +158,8 @@ When to use it icon:check-square-o[]::
 When not to use it [.red]#icon:window-close[]#::
 +
 --
-If your users typically authenticate on your website first and use a hybrid mobile app approach to navigate screens, this approach is not recommended.
+* If your users typically authenticate on your website first and use a hybrid mobile app approach to navigate screens, this approach is not recommended.
+* If you want to adhere to security standards
 --
 ====
 

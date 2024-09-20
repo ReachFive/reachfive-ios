@@ -1,8 +1,14 @@
 # Changelog
+
 ## Unreleased
 ### Breaking changes
 - Allow to initiate an mfa step up when required during a call to `loginWithPassword` and `login(withRequest:usingModalAuthorizationFor:display:)` (when .Password is used). <br>For that the return type of these methods were changed from `AuthToken` to a new type `LoginFlow` to represent the potential new MFA step up introduced.
 - Change the name of `StartStepUp` to `StartStepUp.AuthTokenFlow` and make its authToken parameter mandatory
+
+
+## v7.1.0
+### New features
+- Support for native Sign in with Apple (that is, the system view will open, not a webview)
 
 ## v7.0.0
 ### Breaking changes

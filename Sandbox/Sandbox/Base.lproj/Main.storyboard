@@ -266,10 +266,10 @@
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="providerCell" id="HyK-Am-JUA">
-                                        <rect key="frame" x="0.0" y="50" width="432" height="44"/>
+                                        <rect key="frame" x="0.0" y="50" width="432" height="52"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="HyK-Am-JUA" id="VRc-NK-UUF">
-                                            <rect key="frame" x="0.0" y="0.0" width="432" height="43.666667938232422"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="432" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -365,7 +365,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xnb-I4-CeL">
-                                <rect key="frame" x="120.00000000000001" y="120" width="190.33333333333337" height="35"/>
+                                <rect key="frame" x="120.00000000000001" y="119.99999999999999" width="190.33333333333337" height="40.333333333333329"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Create a new passkey"/>
                                 <connections>
@@ -373,18 +373,18 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Or" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iWT-4W-N9R">
-                                <rect key="frame" x="205.66666666666666" y="195" width="19" height="21"/>
+                                <rect key="frame" x="205.66666666666666" y="200.33333333333334" width="19" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hei-Cc-aWw" userLabel="New Password field">
-                                <rect key="frame" x="20" y="236" width="390" height="34"/>
+                                <rect key="frame" x="20" y="241.33333333333337" width="390" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="new-password"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yTN-Ql-5u8">
-                                <rect key="frame" x="114" y="290" width="202" height="35"/>
+                                <rect key="frame" x="114" y="295.33333333333331" width="202" height="40.333333333333314"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Create a new password"/>
                                 <connections>
@@ -444,7 +444,7 @@
                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="username"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="38k-m4-u0D">
-                                <rect key="frame" x="133" y="225" width="164" height="35"/>
+                                <rect key="frame" x="133" y="225" width="164" height="40.333333333333314"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Send recovery link"/>
                                 <connections>
@@ -496,7 +496,7 @@
                                 <textInputTraits key="textInputTraits" keyboardType="numberPad" textContentType="one-time-code"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TzZ-In-Hng">
-                                <rect key="frame" x="172.66666666666666" y="182" width="84.999999999999972" height="34.333333333333343"/>
+                                <rect key="frame" x="172.66666666666666" y="182" width="84.999999999999972" height="40.333333333333343"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Validate"/>
                                 <connections>
@@ -636,14 +636,14 @@
                             <tableViewSection id="3cu-lG-8Xx" userLabel="Edit profile">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="UmN-oe-eL3" userLabel="Password Update">
-                                        <rect key="frame" x="0.0" y="50" width="430" height="44.333332061767578"/>
+                                        <rect key="frame" x="0.0" y="50" width="430" height="48.333332061767578"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="UmN-oe-eL3" id="ZkO-TG-FVI">
-                                            <rect key="frame" x="0.0" y="0.0" width="430" height="44.333332061767578"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="430" height="48.333332061767578"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="z5Y-X1-37W">
-                                                    <rect key="frame" x="20" y="6.9999999999999982" width="121" height="30.333333333333329"/>
+                                                    <rect key="frame" x="20" y="8.9999999999999982" width="121" height="30.333333333333329"/>
                                                     <state key="normal" title="Update Password"/>
                                                     <connections>
                                                         <segue destination="GDD-43-cxV" kind="show" id="bgL-GS-m04"/>
@@ -688,17 +688,17 @@
                                 </constraints>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ToDisplayCell" id="IEz-c2-YxS">
-                                        <rect key="frame" x="0.0" y="50" width="430" height="44"/>
+                                        <rect key="frame" x="0.0" y="50" width="430" height="52"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="IEz-c2-YxS" id="ugX-BO-dA6">
-                                            <rect key="frame" x="0.0" y="0.0" width="430" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="430" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="60P-2D-hb5">
-                                <rect key="frame" x="162" y="503" width="106" height="35"/>
+                                <rect key="frame" x="162" y="502.99999999999994" width="106" height="40.333333333333314"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="tinted" title="Edit Profile"/>
                                 <connections>
@@ -706,7 +706,7 @@
                                 </connections>
                             </button>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kDa-mS-HRu">
-                                <rect key="frame" x="135.33333333333337" y="553" width="159.66666666666663" height="35"/>
+                                <rect key="frame" x="135.33333333333337" y="558.33333333333337" width="159.66666666666663" height="40.333333333333371"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="tinted" title="Manage passkeys"/>
                                 <connections>
@@ -714,7 +714,7 @@
                                 </connections>
                             </button>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kej-VG-Gqk">
-                                <rect key="frame" x="121.66666666666667" y="603" width="186.66666666666663" height="35"/>
+                                <rect key="frame" x="121.66666666666667" y="613.66666666666663" width="186.66666666666663" height="40.333333333333371"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="tinted" title="Manage MFA devices"/>
                                 <connections>
@@ -722,7 +722,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lsY-vN-hQ5">
-                                <rect key="frame" x="174" y="653" width="82" height="35"/>
+                                <rect key="frame" x="174" y="669" width="82" height="40.333333333333371"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Log out"/>
                                 <connections>
@@ -923,12 +923,29 @@
                                             <segue destination="Dnj-th-wgv" kind="show" id="Btu-wY-LR0"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="nativeSignInWithApple" textLabel="vo8-HT-nYT" style="IBUITableViewCellStyleDefault" id="AAz-Ze-HBu">
+                                        <rect key="frame" x="0.0" y="259.00000381469727" width="430" height="51.666667938232422"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="AAz-Ze-HBu" id="aXX-Gq-db6">
+                                            <rect key="frame" x="0.0" y="0.0" width="430" height="51.666667938232422"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Sign In With Apple" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="vo8-HT-nYT">
+                                                    <rect key="frame" x="20" y="0.0" width="390" height="43.666667938232422"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                             <tableViewSection headerTitle="Passkey" id="b8C-hd-6Dx" userLabel="Passkey">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="signupWithPasskey" textLabel="lLQ-Bw-bBI" style="IBUITableViewCellStyleDefault" id="2TL-BN-Fxk" userLabel="signupWithPasskey">
-                                        <rect key="frame" x="0.0" y="337.00000381469727" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="388.66667175292969" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="2TL-BN-Fxk" id="HGj-Fb-I79">
                                             <rect key="frame" x="0.0" y="0.0" width="399.66666666666669" height="43.666667938232422"/>
@@ -948,7 +965,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="loginWithPasskeyModalSilent" textLabel="8Yd-gR-g5B" style="IBUITableViewCellStyleDefault" id="aey-Mg-aJ1" userLabel="loginWithPasskeyModalSilent">
-                                        <rect key="frame" x="0.0" y="380.66667175292969" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="432.33333969116211" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="aey-Mg-aJ1" id="R09-n7-lQW">
                                             <rect key="frame" x="0.0" y="0.0" width="430" height="43.666667938232422"/>
@@ -965,7 +982,7 @@
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="loginWithPasskeyModal" textLabel="dxd-xg-SkR" style="IBUITableViewCellStyleDefault" id="xOf-US-tNz" userLabel="loginWithPasskeyModal">
-                                        <rect key="frame" x="0.0" y="424.33333969116211" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="476.00000762939453" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xOf-US-tNz" id="wRZ-DX-gxd">
                                             <rect key="frame" x="0.0" y="0.0" width="430" height="43.666667938232422"/>
@@ -982,7 +999,7 @@
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="loginWithPasskeyAutoFill" textLabel="5gR-vr-iZc" style="IBUITableViewCellStyleDefault" id="27m-dm-5Q5" userLabel="loginWithPasskeyAutoFill">
-                                        <rect key="frame" x="0.0" y="468.00000762939453" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="519.66667556762695" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="27m-dm-5Q5" id="bV8-cZ-vmj">
                                             <rect key="frame" x="0.0" y="0.0" width="399.66666666666669" height="43.666667938232422"/>
@@ -1002,7 +1019,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="loginWithPasskeyNonDiscoverable" textLabel="rh7-Kd-reD" style="IBUITableViewCellStyleDefault" id="a0w-jd-IsY" userLabel="loginWithPasskeyNonDiscoverable">
-                                        <rect key="frame" x="0.0" y="511.66667556762695" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="563.33334350585938" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="a0w-jd-IsY" id="i6h-Iz-ODn">
                                             <rect key="frame" x="0.0" y="0.0" width="399.66666666666669" height="43.666667938232422"/>
@@ -1022,7 +1039,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="loginWithPasskeyCombined" textLabel="SgV-hN-g6Z" style="IBUITableViewCellStyleDefault" id="5cq-vu-Hos" userLabel="loginWithPasskeyCombined">
-                                        <rect key="frame" x="0.0" y="555.33334350585938" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="607.0000114440918" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="5cq-vu-Hos" id="g85-Zb-KOs">
                                             <rect key="frame" x="0.0" y="0.0" width="399.66666666666669" height="43.666667938232422"/>
@@ -1046,7 +1063,7 @@
                             <tableViewSection headerTitle="Webviews" id="xgJ-xR-q7F">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="webviewLogin" textLabel="ftw-Vp-P8G" style="IBUITableViewCellStyleDefault" id="cNN-5f-DZX">
-                                        <rect key="frame" x="0.0" y="677.0000114440918" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="728.66667938232422" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="cNN-5f-DZX" id="WlP-3k-8GS">
                                             <rect key="frame" x="0.0" y="0.0" width="430" height="43.666667938232422"/>
@@ -1063,7 +1080,7 @@
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="WKWebview" textLabel="gXe-Fl-eAZ" style="IBUITableViewCellStyleDefault" id="gtf-cP-u7l" userLabel="WKWebview">
-                                        <rect key="frame" x="0.0" y="720.66667938232422" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="772.33334732055664" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="gtf-cP-u7l" id="g73-Sm-KEo">
                                             <rect key="frame" x="0.0" y="0.0" width="399.66666666666669" height="43.666667938232422"/>
@@ -1083,7 +1100,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Custom WKWebview" textLabel="rwa-kI-tU3" style="IBUITableViewCellStyleDefault" id="goM-Sj-ryl" userLabel="Custom WKWebview">
-                                        <rect key="frame" x="0.0" y="764.33334732055664" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="816.00001525878906" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="goM-Sj-ryl" id="xUo-xB-3bU">
                                             <rect key="frame" x="0.0" y="0.0" width="399.66666666666669" height="43.666667938232422"/>
@@ -1107,7 +1124,7 @@
                             <tableViewSection headerTitle="Passwordless" id="Zgf-dT-Jfh">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="loginWithPasswordless" textLabel="p0b-ch-HOO" style="IBUITableViewCellStyleDefault" id="j4J-QU-Hz3">
-                                        <rect key="frame" x="0.0" y="886.00001525878906" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="937.66668319702148" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="j4J-QU-Hz3" id="Y0w-Hy-f0G">
                                             <rect key="frame" x="0.0" y="0.0" width="411.66666666666669" height="43.666667938232422"/>
@@ -1127,13 +1144,13 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="loginWithProviders" textLabel="tqo-VF-eV4" style="IBUITableViewCellStyleDefault" id="pu5-LB-WX8">
-                                        <rect key="frame" x="0.0" y="929.66668319702148" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="981.33335113525391" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="pu5-LB-WX8" id="nqJ-30-4Ye">
                                             <rect key="frame" x="0.0" y="0.0" width="411.66666666666669" height="43.666667938232422"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Login with providers" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="tqo-VF-eV4">
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" text="Login with providers" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="tqo-VF-eV4">
                                                     <rect key="frame" x="8" y="0.0" width="395.66666666666669" height="43.666667938232422"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -1147,7 +1164,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="loginWithRefresh" textLabel="Xwt-4z-xho" style="IBUITableViewCellStyleDefault" id="8ne-t0-YIZ" userLabel="loginWithRefresh">
-                                        <rect key="frame" x="0.0" y="973.33335113525391" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="1025.0000190734863" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="8ne-t0-YIZ" id="9tn-vu-4LS">
                                             <rect key="frame" x="0.0" y="0.0" width="430" height="43.666667938232422"/>
@@ -1168,7 +1185,7 @@
                             <tableViewSection headerTitle="Recovery" id="vxT-DL-gPN" userLabel="Recovery">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Recover Account" textLabel="7v3-6C-fQ8" style="IBUITableViewCellStyleDefault" id="qFg-CJ-and" userLabel="Recover Account">
-                                        <rect key="frame" x="0.0" y="1095.0000190734863" width="430" height="43.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="1146.6666870117188" width="430" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="qFg-CJ-and" id="pYJ-U8-SPH">
                                             <rect key="frame" x="0.0" y="0.0" width="411.66666666666669" height="43.666667938232422"/>
@@ -1302,7 +1319,7 @@
                                 </connections>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fWT-2J-M9y">
-                                <rect key="frame" x="182.33333333333334" y="349" width="65.666666666666657" height="34.333333333333314"/>
+                                <rect key="frame" x="182.33333333333334" y="349" width="65.666666666666657" height="40.333333333333314"/>
                                 <accessibility key="accessibilityConfiguration" identifier="signup"/>
                                 <state key="normal" title="Login"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Login"/>
@@ -1311,7 +1328,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AGk-Ik-CK4" userLabel="Create Account">
-                                <rect key="frame" x="144" y="814.66666666666663" width="142.33333333333337" height="34.333333333333371"/>
+                                <rect key="frame" x="144" y="808.66666666666663" width="142.33333333333337" height="40.333333333333371"/>
                                 <accessibility key="accessibilityConfiguration" identifier="signup"/>
                                 <state key="normal" title="Login"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Create Account"/>
@@ -1551,7 +1568,7 @@
                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" returnKeyType="next" textContentType="username"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xzw-kf-Pwc">
-                                <rect key="frame" x="182.33333333333334" y="479" width="65.666666666666657" height="34.333333333333371"/>
+                                <rect key="frame" x="182.33333333333334" y="479" width="65.666666666666657" height="40.333333333333371"/>
                                 <accessibility key="accessibilityConfiguration" identifier="signup"/>
                                 <state key="normal" title="Login"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Login"/>
@@ -1560,7 +1577,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="b96-ln-GEZ" userLabel="Create Account">
-                                <rect key="frame" x="144" y="814.66666666666663" width="142.33333333333337" height="34.333333333333371"/>
+                                <rect key="frame" x="144" y="808.66666666666663" width="142.33333333333337" height="40.333333333333371"/>
                                 <accessibility key="accessibilityConfiguration" identifier="signup"/>
                                 <state key="normal" title="Login"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Create Account"/>
@@ -1728,7 +1745,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bP6-fJ-u2I">
-                                <rect key="frame" x="20" y="217" width="87" height="34.333333333333343"/>
+                                <rect key="frame" x="20" y="217" width="87" height="40.333333333333314"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Register"/>
                                 <connections>

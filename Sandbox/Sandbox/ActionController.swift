@@ -9,6 +9,16 @@ class ActionController: UITableViewController {
 
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
 
+        // Section Native
+        if indexPath.section == 1 {
+            // Sign in with Apple
+            if indexPath.row == 1 {
+                AppDelegate.reachfive()
+                    .login(withRequest: NativeLoginRequest(anchor: window, origin: "ActionController: Section Native"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+                    .onComplete { self.handleResult(result: $0) }
+            }
+        }
+
         let loginRequest = NativeLoginRequest(anchor: window, origin: "ActionController: Section Passkey")
 
         // Section Passkey
