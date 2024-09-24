@@ -1,6 +1,5 @@
 :fido-ios:
 = Passkeys on iOS
-:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
 == Introduction
 
