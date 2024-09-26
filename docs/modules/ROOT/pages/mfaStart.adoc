@@ -1,4 +1,4 @@
-= {docname}
+= mfaStart(Registering credential)
 :page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
 [.signature]
@@ -12,7 +12,7 @@ AppDelegate.reachfive().{docname}(
 
 == About this command
 
-Starts the MFA email registration flow. 
+Starts the MFA email registration flow.
 When the flow is started, an email or SMS is sent to the user for verification depending on which `Credential` is used.
 
 == Examples

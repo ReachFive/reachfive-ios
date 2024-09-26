@@ -5,7 +5,7 @@ The authentication token.
 
 [cols="1a,2a"]
 |===
-|idToken|The ID token {rfc-7519}[JSON Web Token (JWT)^] that contains the profile's information.
+|idToken|The ID token {rfc-7519}[JSON Web Token (JWT)^] that contains the profile's information. This is only available when the `openid` xref:docs:ROOT:scope.adoc[scope] is requested.
 |accessToken|The authorization credential {rfc-7519}[JSON Web Token (JWT)^] used to access the {company} API.
 |refreshToken
 |The refresh token {rfc-7519}[JSON Web Token (JWT)^] used to obtain new access tokens once they expire. This is only available when the `offline_access` xref:docs:ROOT:scope.adoc[scope] is requested.
@@ -161,8 +161,12 @@ It authenticates the profile with the provider otherwise it returns a `ReachFive
 
 Based on the problem, the `ReachFiveError` will be:
 
-* `RequestError(requestErrors: RequestErrors)` if it's a bad request error.
-+
+* `AuthCanceled`: The user cancelled the request or no credential was available in the keychain.
+* `RequestError(apiError: ApiError)` for a Bad Request (status 400) error.
+* `AuthFailure(reason: String, apiError: ApiError?)` mainly for Unauthorized (status 401) error.
+* `TechnicalError(reason: String, apiError: ApiError?)` if it's an Internal Server Error (status 500) or other internal errors.
+
+==== ApiError
 
 [cols="1,2a"]
 |===
@@ -170,7 +174,7 @@ Based on the problem, the `ReachFiveError` will be:
 |errorId `string`|The identifier of the error.
 |errorUserMsg `string`|The user-friendly error message.
 
-NOTE: This property is translated according to the user's browser settings. Currently supported languages:
+NOTE: This property is translated according to the user's OS and app settings. Currently supported languages:
 
 include::docs::partial$general/r_supported-languages.adoc[tags="all"]
 
@@ -184,11 +188,6 @@ include::docs::partial$general/r_supported-languages.adoc[tags="all"]
 !message `string`!The message error returned for the `field`.
 !code `string`!The code error returned for the `field`.
 !===
-
-* `AuthFailure(reason: String)` if the authentication has failed.
-* `AuthCanceled` if the authentication was cancelled.
-* `TechnicalError(reason: String)` if it's an internal server error.
-
 |===
 
 // end::reachfiveerror[]
@@ -201,10 +200,10 @@ The details of a device credential.
 [cols="2,5a"]
 |===
 
-| friendlyName `string` 
+| friendlyName `string`
 | The name that is displayed by the system when presenting the passkey for login.
 
-| id `string` 
+| id `string`
 | The identifier of the credential.
 
 |===
@@ -216,18 +215,18 @@ The details of a device credential.
 [cols="4,6a"]
 |===
 
-| friendlyName `string` 
+| friendlyName `string`
 | The name that is displayed by the system for the MFA credential item.
 
-| createdAt `string` 
+| createdAt `string`
 | The time when the MFA credential item was created.
 
-| phoneNumber `string` 
+| phoneNumber `string`
 | The phone number for the MFA credential.
 
 This is only applicable for the type `sms`.
 
-| email `string` 
+| email `string`
 | The email for the MFA credential.
 
 This is only applicable for the type `email`.
@@ -280,21 +279,21 @@ credentials: [
 |
 
 |
-| friendlyName `string` 
+| friendlyName `string`
 | The name that is displayed by the system for the MFA credential item.
 
 |
-| createdAt `string` 
+| createdAt `string`
 | The time when the MFA credential item was created.
 
 |
-| phoneNumber `string` 
+| phoneNumber `string`
 | The phone number for the MFA credential.
 
 This is only applicable for the type `sms`.
 
 |
-| email `string` 
+| email `string`
 | The email for the MFA credential.
 
 This is only applicable for the type `email`.
