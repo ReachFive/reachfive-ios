@@ -140,7 +140,7 @@ public extension ReachFive {
     }
     
     func mfaVerify(stepUp request: VerifyStepUp) -> Future<AuthToken, ReachFiveError> {
-        let pkce: Pkce? = storage.take(key: pkceKey)
+        let pkce: Pkce? = storage.get(key: pkceKey)
         guard let pkce else {
             return Future(error: .TechnicalError(reason: "Pkce not found"))
         }
