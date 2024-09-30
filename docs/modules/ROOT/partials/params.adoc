@@ -54,6 +54,7 @@ This includes the following:
 * `challengeId`: The code challenge ID to verify the user.
 * `trustDevice`: _Optional_ boolean to trust the device or not.
 Accepts `true` to mark the device as trusted and `false` to mark the device as not trusted.
+This only applies to xref:docs:ROOT:rba.adoc[].
 
 [source,swift]
 ----
