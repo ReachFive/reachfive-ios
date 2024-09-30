@@ -1,5 +1,9 @@
 # Changelog
 
+## v7.1.1
+### Bug fixes
+- Fix error with PKCE when mfaVerify(stepUp) was called multiple times during a same step up
+
 ## v7.1.0
 ### New features
 - Support for native Sign in with Apple (that is, the system view will open, not a webview)
