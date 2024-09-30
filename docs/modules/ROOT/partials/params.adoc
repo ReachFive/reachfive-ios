@@ -284,7 +284,7 @@ NOTE: This binds the tokens with the client and serves as a token validation par
 
 // tag::usingModalAuthorizationForNonDiscoverable[]
 |[[usingModalAuthorizationForNonDiscoverable,usingModalAuthorizationForNonDiscoverable]] usingModalAuthorizationFor
-|The type of credential, currently only passkey supported.
+|The type of credential, currently only `.Passkey` is supported.
 // end::usingModalAuthorizationForNonDiscoverable[]
 
 // tag::display[]
@@ -298,6 +298,15 @@ NOTE: This binds the tokens with the client and serves as a token validation par
 - ``.Password``: no UI appears. +
 * `IfImmediatelyAvailableCredentials`: No UI appears and the call ends in `ReachFiveError.AuthCanceled` which you can intercept and react to (e.g., display other login options).
 // end::display[]
+
+// tag::displayForNonDiscoverable[]
+|[[displayForNonDiscoverable,displayForNonDiscoverable]] display
+|Choice of behaviour when there are no credentials available.
+
+.options
+* `Always`: the system presents a QR code to allow signing in with a passkey from a nearby device. +
+* `IfImmediatelyAvailableCredentials`: No UI appears and the call ends in `ReachFiveError.AuthCanceled` which you can intercept and react to (e.g., display other login options).
+// end::displayForNonDiscoverable[]
 
 // tag::presentationContextProvider[]
 |[[presentationContextProvider,presentationContextProvider]] presentationContextProvider `string`
