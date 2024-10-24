@@ -1,5 +1,11 @@
 # Changelog
 
+## v7.1.2
+## Notice
+- For the native Sign in with Apple support that was introduced in 7.0.0, this release has a corresponding change in the backend. Please make sure to update from 7.1.x to this version
+### Bug fixes
+- Fix PKCE and nonce handling in native Sign in with Apple 
+
 ## v7.1.1
 ### Bug fixes
 - Fix error with PKCE when mfaVerify(stepUp) was called multiple times during a same step up

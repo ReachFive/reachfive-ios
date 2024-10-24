@@ -28,7 +28,7 @@ public class CredentialManager: NSObject {
     // optional origin for user events
     var originR5: String?
     // the nonce for Sign In With Apple
-    var nonce: String?
+    var nonce: Pkce?
 
     enum PasskeyCreationType {
         case Signup(signupOptions: RegistrationOptions)
@@ -274,8 +274,8 @@ public class CredentialManager: NSObject {
                         }
                     }
                     appleIDRequest.requestedScopes = appleScopes
-                    nonce = Pkce.generate().codeChallenge
-                    appleIDRequest.nonce = nonce
+                    nonce = Pkce.generate()
+                    appleIDRequest.nonce = nonce?.codeChallenge
 
                     return Future(value: appleIDRequest)
 
@@ -379,11 +379,11 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 "scope": scope,
                 "code_challenge": pkce.codeChallenge,
                 "code_challenge_method": pkce.codeChallengeMethod,
-                "nonce": nonce,
+                "nonce": nonce.codeVerifier,
                 "origin": originR5,
                 "given_name": appleIDCredential.fullName?.givenName,
                 "family_name": appleIDCredential.fullName?.familyName
-            ]).flatMap({ self.authWithCode(code: $0) }))
+            ]).flatMap({ self.authWithCode(code: $0, pkce: pkce) }))
         } else if #available(iOS 16.0, *), let credentialRegistration = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration {
             // A new passkey was registered
             guard let attestationObject = credentialRegistration.rawAttestationObject else {
