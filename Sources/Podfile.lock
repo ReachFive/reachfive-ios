@@ -1,9 +1,9 @@
 PODS:
-  - Alamofire (5.9.1)
+  - Alamofire (5.10.1)
   - BrightFutures (8.2.0)
   - CryptoSwift (1.8.3)
   - DeviceKit (5.5.0)
-  - Reach5 (7.1.1):
+  - Reach5 (7.1.2):
     - Alamofire (~> 5.8)
     - BrightFutures (~> 8.2.0)
     - CryptoSwift (~> 1.8)
@@ -24,11 +24,11 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
+  Alamofire: 840d2a1ad82355b536ec6ba5f97e5bfa54600ca3
   BrightFutures: 67e0e8cd974ab9f6c04650cc64153f7adf1ec489
   CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
   DeviceKit: d83e38ca196a4ebf0cc5f37d6f0316a24b794d5b
-  Reach5: dc62a4d8135f6959c3ecedc47335018cd06503b1
+  Reach5: efa1fad64d00d4fdb934fefdaee0c4b99c4d2d24
 
 PODFILE CHECKSUM: 9a44ddf91ef9134960bddf8567626a150b34c6e4
 
