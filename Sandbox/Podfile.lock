@@ -8,7 +8,7 @@ PODS:
     - AppAuth/Core
   - BrightFutures (8.2.0)
   - CryptoSwift (1.8.3)
-  - DeviceKit (5.4.0)
+  - DeviceKit (5.5.0)
   - FBAEMKit (17.0.3):
     - FBSDKCoreKit_Basics (= 17.0.3)
   - FBSDKCoreKit (17.0.3):
@@ -25,7 +25,7 @@ PODS:
     - AppAuth/Core (~> 1.7)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
-  - Reach5 (7.1.0):
+  - Reach5 (7.1.1):
     - Alamofire (~> 5.8)
     - BrightFutures (~> 8.2.0)
     - CryptoSwift (~> 1.8)
@@ -71,7 +71,7 @@ SPEC CHECKSUMS:
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   BrightFutures: 67e0e8cd974ab9f6c04650cc64153f7adf1ec489
   CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
-  DeviceKit: bd34bb1766d926c3cc5a5f6e3e9a6dd10148b805
+  DeviceKit: d83e38ca196a4ebf0cc5f37d6f0316a24b794d5b
   FBAEMKit: 9900b2edd99a2d21629a6277e6166f14c6215799
   FBSDKCoreKit: 0791f8f68a8630931a4c12aa23a56cc021551596
   FBSDKCoreKit_Basics: 46d6b472c0dd0a5a7e972c025033d1c567f54eb4
@@ -79,7 +79,7 @@ SPEC CHECKSUMS:
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
-  Reach5: d2d279b08a4cf94b195e2f53804d89ebd71711b6
+  Reach5: dc62a4d8135f6959c3ecedc47335018cd06503b1
   Reach5Facebook: b8e92bc1338a148f7753dc949cc5d0a4be49df45
   Reach5Google: 1eb1a19a04d9586b85d34fe197856842bd4a4f3a
 

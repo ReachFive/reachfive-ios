@@ -1,4 +1,4 @@
-= {docname}
+= mfaVerify(Credential)
 :page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
 [.signature]

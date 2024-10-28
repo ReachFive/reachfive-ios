@@ -8,13 +8,13 @@ AppDelegate.reachfive().login(
     <<withNonDiscoverableUserName>>,
     <<forRequest>>,
     <<usingModalAuthorizationForNonDiscoverable,usingModalAuthorizationFor>>,
-    <<display>>
+    <<displayForNonDiscoverable, display>>
 )
 ----
 
 == Description
 
-Logs the user in using credentials stored in the keychain. 
+Logs the user in using credentials stored in the keychain.
 The system only displays the credential associated with the given username in a link:https://developer.apple.com/design/human-interface-guidelines/sheets[modal sheet^].
 
 NOTE: In this case, the user needs to manually enter the username in the username field.
@@ -41,7 +41,7 @@ include::example${docname}.swift[]
 include::partial$params.adoc[tag="withNonDiscoverableUserName"]
 include::partial$params.adoc[tag="forRequest"]
 include::partial$params.adoc[tag="usingModalAuthorizationForNonDiscoverable"]
-include::partial$params.adoc[tag="display"]
+include::partial$params.adoc[tag="displayForNonDiscoverable"]
 
 |===
 

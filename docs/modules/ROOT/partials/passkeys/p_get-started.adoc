@@ -2,12 +2,12 @@
 
 This section describes important terms and concepts as well the steps needed to get started with passkeys for iOS with {company}.
 
-== Relying Party ID 
+== Relying Party ID
 
-The Relying Party ID is the domain to which passkeys are bound. 
+The Relying Party ID is the domain to which passkeys are bound.
 Once bound to a domain, it can be used on subdomains but not other full domains.
 
-Using the Relying Party ID of ``boulangerie.com`` allows the use of credentials on ``help.boulangerie.com`` for example, but not on a different full domain like ``boulangerie.fr``. 
+Using the Relying Party ID of ``boulangerie.com`` allows the use of credentials on ``help.boulangerie.com`` for example, but not on a different full domain like ``boulangerie.fr``.
 
 Also, if the Relying Part ID is bound to a subdomain such as `login.boulangerie.com`, then it cannot be used on the root domain, another full root domain, or another subdomain of `boulangerie.com` such as `help.boulangerie.com`.
 
@@ -25,9 +25,9 @@ See xref:sdk-ios:ROOT:loginWithRequest.adoc[] for more details.
 
 With non-discoverable login, the user must manually enter his or her username before the passkey manager can find a credential.
 
-== apple-app-site-association
+== Associated Domain
 
-You need to host a link:https://developer.apple.com/documentation/xcode/supporting-associated-domains[apple-app-site-association^] file on `\https://<your_domain>/.well-known/apple-app-site-association` to allow the application to register and authenticate with credentials associated with the Relying Party ID `<your_domain>`.
+You need to host an link:https://developer.apple.com/documentation/xcode/supporting-associated-domains[apple-app-site-association^] file on `\https://<your_domain>/.well-known/apple-app-site-association` to allow the application to register and authenticate with credentials associated with the Relying Party ID `<your_domain>`.
 
 .apple-app-site-association example
 [source,json]
@@ -40,7 +40,7 @@ You need to host a link:https://developer.apple.com/documentation/xcode/supporti
 
 // === `assetlinks` response
 
-// The `\https://<RelyingPartyId>/.well-known/assetlinks.json` link must return a `200` HTTP response with a JSON MIME `Content-Type` header. 
+// The `\https://<RelyingPartyId>/.well-known/assetlinks.json` link must return a `200` HTTP response with a JSON MIME `Content-Type` header.
 // Returning a `301` or `302` HTTP redirect or a non-JSON Content-Type causes verification to fail. See link:https://developer.android.com/training/sign-in/passkeys#add-support-dal[Android's docs^] for more details.
 
 === Hosted pages

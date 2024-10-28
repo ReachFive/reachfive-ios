@@ -7,28 +7,29 @@
 
 .Methods
 
-** MFA
-*** xref:mfaStart.adoc[]
-*** xref:mfaStartWithStepUp.adoc[]
-*** xref:mfaVerify.adoc[]
-*** xref:mfaVerifyWithStepUp.adoc[]
-*** xref:mfaListCredentials.adoc[]
-*** xref:mfaDeleteCredential.adoc[]
-** Passkey
-*** xref:beginAutoFillAssistedPasskeyLogin.adoc[]
-*** xref:loginWithRequest.adoc[]
-*** xref:loginWithNonDiscoverableUserName.adoc[]
-*** xref:registerNewPasskey.adoc[]
-*** xref:signupWithRequest.adoc[]
+* Authentication
 ** Password
 *** xref:loginWithPassword.adoc[]
 *** xref:logout.adoc[]
 *** xref:requestPasswordReset.adoc[]
 *** xref:signup.adoc[]
+** Credential Manager
+*** xref:loginWithRequest.adoc[]
+*** xref:signupWithRequest.adoc[]
+*** xref:registerNewPasskey.adoc[]
+*** xref:beginAutoFillAssistedPasskeyLogin.adoc[]
+*** xref:loginWithNonDiscoverableUserName.adoc[]
 ** Passwordless
 *** xref:addPasswordlessCallback.adoc[]
 *** xref:startPasswordless.adoc[]
 *** xref:verifyPasswordlessCode.adoc[]
+** Social
+*** xref:getProvider.adoc[]
+*** xref:getProviders.adoc[]
+** Webview
+*** xref:webviewLogin.adoc[]
+*** xref:loadLoginWebview.adoc[]
+* Other
 ** Profile
 *** xref:getProfile.adoc[]
 *** xref:refreshAccessToken.adoc[]
@@ -37,13 +38,10 @@
 *** xref:updatePhoneNumber.adoc[]
 *** xref:updateProfile.adoc[]
 *** xref:verifyPhoneNumber.adoc[]
-** Social
-*** xref:getProvider.adoc[]
-*** xref:getProviders.adoc[]
-** Webview
-*** xref:loadLoginWebview.adoc[]
-*** xref:webviewLogin.adoc[]
-
-// * xref:listWebAuthnDevices.adoc[]
-// * xref:loginWithWebAuthn.adoc[]
-// * xref:signupWithWebAuthn.adoc[]
+** MFA
+*** xref:mfaStart.adoc[]
+*** xref:mfaStartWithStepUp.adoc[]
+*** xref:mfaVerify.adoc[]
+*** xref:mfaVerifyWithStepUp.adoc[]
+*** xref:mfaListCredentials.adoc[]
+*** xref:mfaDeleteCredential.adoc[]

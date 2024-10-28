@@ -2,6 +2,8 @@
 = Getting Started
 :page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
+{sdk-ios-version-badge}
+
 == Requirements
 
 The minimal iOS version of an application using the {company} iOS SDKs has to be `{min-ios-version}`.
