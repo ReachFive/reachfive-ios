@@ -72,7 +72,7 @@ public class ReachFiveApi {
         let defaultParams: [String: String] = [
             "platform": "ios",
             // TODO: read from the version.rb. Either directly or indirectly from Reach5.h, Info.plist...
-            "sdk": "7.1.2",
+            "sdk": "7.1.3",
             "device": deviceInfo,
         ]
 

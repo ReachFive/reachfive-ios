@@ -15,9 +15,9 @@
     ]
     ```
 
-3. Run `./update.sh` to update the dependencies
+3. Run `./install.sh` to update the dependencies
     ```shell
-    ./update.sh
+    ./install.sh
     ```
 
 4. Update the `CHANGELOG.md` file

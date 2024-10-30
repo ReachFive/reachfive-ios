@@ -1,5 +1,10 @@
 # Changelog
 
+## v7.1.3
+
+### New features
+- Support choosing a variant for Apple
+
 ## v7.1.2
 ## Notice
 - For the native Sign in with Apple support that was introduced in 7.0.0, this release has a corresponding change in the backend. Please make sure to update from 7.1.x to this version.
