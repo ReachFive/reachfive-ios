@@ -2,25 +2,62 @@ import BrightFutures
 import Foundation
 import UIKit
 
-class ConfiguredAppleProvider: NSObject, Provider {
+public class AppleProvider: ProviderCreator {
     public static let NAME = "apple"
-    let name: String = NAME
+    public static let DEFAULT_VARIANT = "default"
+
+    public var name: String = NAME
+    public let variant: String
+
+    public init(variant: String = DEFAULT_VARIANT) {
+        self.variant = variant
+    }
+
+    public func create(
+        sdkConfig: SdkConfig,
+        providerConfig: ProviderConfig,
+        clientConfigResponse: ClientConfigResponse,
+        credentialManager: CredentialManager
+    ) -> Provider {
+        ConfiguredAppleProvider(sdkConfig: sdkConfig,
+                                providerConfig: providerConfig,
+                                clientConfigResponse: clientConfigResponse,
+                                credentialManager: credentialManager,
+                                variant: variant)
+    }
+    
+    public func create(
+        sdkConfig: SdkConfig,
+        providerConfig: ProviderConfig,
+        reachFiveApi: ReachFiveApi,
+        clientConfigResponse: ClientConfigResponse
+    ) -> Provider {
+        fatalError("Do not use")
+    }
+}
+
+class ConfiguredAppleProvider: NSObject, Provider {
+    let name: String = AppleProvider.NAME
 
     let sdkConfig: SdkConfig
     let providerConfig: ProviderConfig
     let clientConfigResponse: ClientConfigResponse
     let credentialManager: CredentialManager
 
+    public let variant: String
+
     public init(
         sdkConfig: SdkConfig,
         providerConfig: ProviderConfig,
         clientConfigResponse: ClientConfigResponse,
-        credentialManager: CredentialManager
+        credentialManager: CredentialManager,
+        variant: String
     ) {
         self.sdkConfig = sdkConfig
         self.providerConfig = providerConfig
         self.clientConfigResponse = clientConfigResponse
         self.credentialManager = credentialManager
+        self.variant = variant
     }
 
     public func login(

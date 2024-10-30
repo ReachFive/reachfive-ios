@@ -29,6 +29,7 @@ public class CredentialManager: NSObject {
     var originR5: String?
     // the nonce for Sign In With Apple
     var nonce: Pkce?
+    var appleProvider: ConfiguredAppleProvider?
 
     enum PasskeyCreationType {
         case Signup(signupOptions: RegistrationOptions)
@@ -276,6 +277,8 @@ public class CredentialManager: NSObject {
                     appleIDRequest.requestedScopes = appleScopes
                     nonce = Pkce.generate()
                     appleIDRequest.nonce = nonce?.codeChallenge
+                    
+                    self.appleProvider = appleProvider
 
                     return Future(value: appleIDRequest)
 
@@ -354,8 +357,8 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 ))
                 .flatMap({ self.loginCallback(tkn: $0.tkn, scope: scope) }))
         } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-            guard let nonce, let scope else {
-                promise.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: no scope, no nonce"))
+            guard let nonce, let scope, let appleProvider else {
+                promise.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: no scope, no nonce, no apple provider"))
                 return
             }
 
@@ -371,7 +374,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
 
             let pkce = Pkce.generate()
             promise.completeWith(reachFiveApi.authorize(params: [
-                "provider": "apple",
+                "provider": "apple:\(appleProvider.variant)",
                 "client_id": reachFiveApi.sdkConfig.clientId,
                 "id_token": idToken,
                 "response_type": "code",

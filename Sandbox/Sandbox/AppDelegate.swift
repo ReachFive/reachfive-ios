@@ -57,7 +57,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     )
 
     #if targetEnvironment(macCatalyst)
-    static let macProviders: [ProviderCreator] = [GoogleProvider(), FacebookProvider()]
+    static let macProviders: [ProviderCreator] = [GoogleProvider(), FacebookProvider(), AppleProvider(variant: "ios")]
     static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: macProviders, storage: storage)
     static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: macProviders, storage: storage)
     let reachfive = macLocal
