@@ -4,28 +4,14 @@ import UIKit
 
 public class AppleProvider: ProviderCreator {
     public static let NAME = "apple"
-    public static let DEFAULT_VARIANT = "default"
 
     public var name: String = NAME
-    public let variant: String
+    public var variant: String?
 
-    public init(variant: String = DEFAULT_VARIANT) {
+    public init(variant: String? = nil) {
         self.variant = variant
     }
 
-    public func create(
-        sdkConfig: SdkConfig,
-        providerConfig: ProviderConfig,
-        clientConfigResponse: ClientConfigResponse,
-        credentialManager: CredentialManager
-    ) -> Provider {
-        ConfiguredAppleProvider(sdkConfig: sdkConfig,
-                                providerConfig: providerConfig,
-                                clientConfigResponse: clientConfigResponse,
-                                credentialManager: credentialManager,
-                                variant: variant)
-    }
-    
     public func create(
         sdkConfig: SdkConfig,
         providerConfig: ProviderConfig,
@@ -44,20 +30,16 @@ class ConfiguredAppleProvider: NSObject, Provider {
     let clientConfigResponse: ClientConfigResponse
     let credentialManager: CredentialManager
 
-    public let variant: String
-
     public init(
         sdkConfig: SdkConfig,
         providerConfig: ProviderConfig,
         clientConfigResponse: ClientConfigResponse,
-        credentialManager: CredentialManager,
-        variant: String
+        credentialManager: CredentialManager
     ) {
         self.sdkConfig = sdkConfig
         self.providerConfig = providerConfig
         self.clientConfigResponse = clientConfigResponse
         self.credentialManager = credentialManager
-        self.variant = variant
     }
 
     public func login(

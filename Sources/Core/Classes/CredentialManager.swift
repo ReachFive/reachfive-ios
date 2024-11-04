@@ -277,7 +277,7 @@ public class CredentialManager: NSObject {
                     appleIDRequest.requestedScopes = appleScopes
                     nonce = Pkce.generate()
                     appleIDRequest.nonce = nonce?.codeChallenge
-                    
+
                     self.appleProvider = appleProvider
 
                     return Future(value: appleIDRequest)
@@ -374,7 +374,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
 
             let pkce = Pkce.generate()
             promise.completeWith(reachFiveApi.authorize(params: [
-                "provider": "apple:\(appleProvider.variant)",
+                "provider": "apple:\(appleProvider.providerConfig.variant)",
                 "client_id": reachFiveApi.sdkConfig.clientId,
                 "id_token": idToken,
                 "response_type": "code",

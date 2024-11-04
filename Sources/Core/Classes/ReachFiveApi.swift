@@ -98,9 +98,9 @@ public class ReachFiveApi {
             .responseJson(type: ClientConfigResponse.self, decoder: decoder)
     }
 
-    public func providersConfigs() -> Future<ProvidersConfigsResult, ReachFiveError> {
+    public func providersConfigs(variants: [String: String?]) -> Future<ProvidersConfigsResult, ReachFiveError> {
         AF
-            .request(createUrl(path: "/api/v1/providers"))
+            .request(createUrl(path: "/api/v1/providers", params: variants))
             .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJson(type: ProvidersConfigsResult.self, decoder: decoder)
