@@ -4,6 +4,14 @@
 ### Breaking changes
 - Allow to initiate an mfa step up when required during a call to `loginWithPassword` and `login(withRequest:usingModalAuthorizationFor:display:)` (when .Password is used). <br>For that the return type of these methods were changed from `AuthToken` to a new type `LoginFlow` to represent the potential new MFA step up introduced.
 - Change the name of `StartStepUp` to `StartStepUp.AuthTokenFlow` and make its authToken parameter mandatory
+
+## v7.1.2
+## Notice
+- For the native Sign in with Apple support that was introduced in 7.0.0, this release has a corresponding change in the backend. Please make sure to update from 7.1.x to this version.
+Also, please consult the documentation on how to set up your variant for iOS: https://developer.reachfive.com/docs/apple.html#connect-reachfive-to-apple
+### Bug fixes
+- Fix PKCE and nonce handling in native Sign in with Apple 
+
 ## v7.1.1
 ### Bug fixes
 - Fix error with PKCE when mfaVerify(stepUp) was called multiple times during a same step up
