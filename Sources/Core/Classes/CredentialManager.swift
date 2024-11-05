@@ -415,7 +415,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 "origin": originR5,
                 "given_name": appleIDCredential.fullName?.givenName,
                 "family_name": appleIDCredential.fullName?.familyName
-            ]).flatMap({ self.authWithCode(code: $0, pkce: pkce) })).map({.AchievedLogin(authToken: $0)}))
+            ]).flatMap({ self.authWithCode(code: $0, pkce: pkce) }).map{.AchievedLogin(authToken: $0)})
         } else if #available(iOS 16.0, *), let credentialRegistration = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration {
             // A new passkey was registered
             guard let attestationObject = credentialRegistration.rawAttestationObject else {

@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (5.9.1)
+  - Alamofire (5.10.1)
   - AppAuth (1.7.5):
     - AppAuth/Core (= 1.7.5)
     - AppAuth/ExternalUserAgent (= 1.7.5)
@@ -67,7 +67,7 @@ EXTERNAL SOURCES:
     :path: "../../reachfive-ios-google/Reach5Google.podspec"
 
 SPEC CHECKSUMS:
-  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
+  Alamofire: 840d2a1ad82355b536ec6ba5f97e5bfa54600ca3
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   BrightFutures: 67e0e8cd974ab9f6c04650cc64153f7adf1ec489
   CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
