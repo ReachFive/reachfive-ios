@@ -8,13 +8,15 @@ public class WebviewLoginRequest {
     public let presentationContextProvider: ASWebAuthenticationPresentationContextProviding
     public let origin: String?
     public let provider: String?
-    
-    public init(state: String? = nil, nonce: String? = nil, scope: [String]? = nil, presentationContextProvider: ASWebAuthenticationPresentationContextProviding, origin: String? = nil, provider: String? = nil) {
+    public let prefersEphemeralWebBrowserSession: Bool
+
+    public init(state: String? = nil, nonce: String? = nil, scope: [String]? = nil, presentationContextProvider: ASWebAuthenticationPresentationContextProviding, origin: String? = nil, provider: String? = nil, prefersEphemeralWebBrowserSession: Bool = false) {
         self.state = state ?? "state"
         self.nonce = nonce ?? "nonce"
         self.scope = scope
         self.presentationContextProvider = presentationContextProvider
         self.origin = origin
         self.provider = provider
+        self.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
     }
 }
