@@ -10,11 +10,13 @@ AppDelegate.reachfive().{docname}(WebviewLoginRequest(
     <<state>>,
     <<nonce>>,
     <<scope>>, <1>
-
+    <<origin>>,
+    <<prefersEphemeralWebBrowserSession>>, <2>
 ))
 ----
-<1> Scope isn't explicitly required. 
-If not provided here, it defaults to the scopes set up in the client configuration which is picked up when you initiliaze the iOS SDK.
+<1> Scope isn't explicitly required.
+If not provided here, it defaults to the scopes set up in the client configuration which is picked up when you initialize the iOS SDK.
+<2> Available starting with version 7.1.3
 
 == Description
 
@@ -64,6 +66,8 @@ include::partial$params.adoc[tag="presentationContextProvider"]
 include::partial$params.adoc[tag="state"]
 include::partial$params.adoc[tag="nonce"]
 include::partial$params.adoc[tag="scope"]
+include::partial$params.adoc[tag="origin"]
+include::partial$params.adoc[tag="prefersEphemeralWebBrowserSession"]
 
 |===
 

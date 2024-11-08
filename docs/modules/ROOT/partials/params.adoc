@@ -317,6 +317,16 @@ TIP: For more, see link:https://developer.apple.com/documentation/authentication
 
 // end::presentationContextProvider[]
 
+// tag::prefersEphemeralWebBrowserSession[]
+|[[prefersEphemeralWebBrowserSession,prefersEphemeralWebBrowserSession]] prefersEphemeralWebBrowserSession `Bool`
+|A Boolean value that indicates whether the session should ask the browser for a private authentication session.
+
+The value of this property is false by default.
+
+TIP: For more, see link:https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession/prefersephemeralwebbrowsersession[here^].
+
+// end::prefersEphemeralWebBrowserSession[]
+
 // tag::state[]
 |[[state,state]] state `string`
 |The OAuth2 state value.

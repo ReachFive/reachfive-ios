@@ -4,6 +4,7 @@
 
 ### New features
 - Support choosing a variant for Apple
+- Add the parameter `prefersEphemeralWebBrowserSession` of `ASWebAuthenticationSession` to be specified through `webviewLogin`
 
 ## v7.1.2
 ## Notice
