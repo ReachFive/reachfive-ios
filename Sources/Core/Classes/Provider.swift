@@ -4,6 +4,8 @@ import BrightFutures
 
 public protocol ProviderCreator {
     var name: String { get }
+    var variant: String? { get }
+
     func create(sdkConfig: SdkConfig, providerConfig: ProviderConfig, reachFiveApi: ReachFiveApi, clientConfigResponse: ClientConfigResponse) -> Provider
 }
 

@@ -72,7 +72,7 @@ public class ReachFiveApi {
         let defaultParams: [String: String] = [
             "platform": "ios",
             // TODO: read from the version.rb. Either directly or indirectly from Reach5.h, Info.plist...
-            "sdk": "7.1.2",
+            "sdk": "7.1.3",
             "device": deviceInfo,
         ]
 
@@ -98,9 +98,9 @@ public class ReachFiveApi {
             .responseJson(type: ClientConfigResponse.self, decoder: decoder)
     }
 
-    public func providersConfigs() -> Future<ProvidersConfigsResult, ReachFiveError> {
+    public func providersConfigs(variants: [String: String?]) -> Future<ProvidersConfigsResult, ReachFiveError> {
         AF
-            .request(createUrl(path: "/api/v1/providers"))
+            .request(createUrl(path: "/api/v1/providers", params: variants))
             .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJson(type: ProvidersConfigsResult.self, decoder: decoder)

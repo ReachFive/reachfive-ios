@@ -2,9 +2,28 @@ import BrightFutures
 import Foundation
 import UIKit
 
-class ConfiguredAppleProvider: NSObject, Provider {
+public class AppleProvider: ProviderCreator {
     public static let NAME = "apple"
-    let name: String = NAME
+
+    public var name: String = NAME
+    public var variant: String?
+
+    public init(variant: String? = nil) {
+        self.variant = variant
+    }
+
+    public func create(
+        sdkConfig: SdkConfig,
+        providerConfig: ProviderConfig,
+        reachFiveApi: ReachFiveApi,
+        clientConfigResponse: ClientConfigResponse
+    ) -> Provider {
+        fatalError("Do not use")
+    }
+}
+
+class ConfiguredAppleProvider: NSObject, Provider {
+    let name: String = AppleProvider.NAME
 
     let sdkConfig: SdkConfig
     let providerConfig: ProviderConfig
