@@ -147,7 +147,7 @@ public class ReachFiveApi {
         authorize(params: loginCallback.dictionary() as? [String: String])
     }
 
-    func authorize(params: [String: String?]?) -> Future<String, ReachFiveError> {
+    public func authorize(params: [String: String?]?) -> Future<String, ReachFiveError> {
         let promise = Promise<String, ReachFiveError>()
 
         AF
@@ -166,7 +166,7 @@ public class ReachFiveApi {
                 let params = URLComponents(string: callbackURL)?.queryItems
                 let code = params?.first(where: { $0.name == "code" })?.value
                 guard let code else {
-                    promise.failure(.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params)))
+                    promise.tryFailure(.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params)))
                     return
                 }
                 promise.success(code)
