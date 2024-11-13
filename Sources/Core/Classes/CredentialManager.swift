@@ -374,7 +374,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
 
             let pkce = Pkce.generate()
             promise.completeWith(reachFiveApi.authorize(params: [
-                "provider": "apple:\(appleProvider.providerConfig.variant)",
+                "provider": appleProvider.providerConfig.providerWithVariant,
                 "client_id": reachFiveApi.sdkConfig.clientId,
                 "id_token": idToken,
                 "response_type": "code",
