@@ -1,11 +1,14 @@
-* Introduction
+* Introduction icon:book[]
 ** xref:index.adoc[]
 ** xref:guides/use-cases.adoc[]
 // ** xref:guides/auth-ios.adoc[]
 ** xref:guides/passkeys.adoc[]
 ** xref:reference/errors.adoc[]
 
-.Methods
+.Configuration icon:cogs[]
+** xref:providersCreators.adoc[]
+
+.Methods icon:code[]
 
 * Authentication
 ** Password

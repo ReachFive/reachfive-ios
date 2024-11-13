@@ -1,0 +1,55 @@
+// tag::GoogleProvider[]
+|[[GoogleProvider,GoogleProvider]]GoogleProvider
+|The object for configuring xref:docs:ROOT:google.adoc[] for our iOS SDK.
+
+Currently takes variant as a parameter.
+
+[source,swift]
+----
+GoogleProvider(variant: "ios") <1>
+----
+<1> If no `variant:` is passed, takes the first variant containing `ios` in its name.
+
+// end::GoogleProvider[]
+
+// tag::FacebookProvider[]
+|[[FacebookProvider,FacebookProvider]]FacebookProvider
+|The object for configuring xref:docs:ROOT:facebook.adoc[] for our iOS SDK.
+
+Currently takes variant as a parameter.
+
+[source,swift]
+----
+FacebookProvider(variant: "ios") <1>
+----
+<1> If no `variant:` is passed, takes the first variant containing `ios` in its name.
+
+// end::FacebookProvider[]
+
+// tag::AppleProvider[]
+|[[AppleProvider,AppleProvider]]AppleProvider
+|The object for configuring xref:docs:ROOT:apple.adoc[] for our iOS SDK.
+
+Currently takes variant as a parameter.
+
+[source,swift]
+----
+AppleProvider(variant: "ios") <1>
+----
+<1> If no `variant:` is passed, takes the first variant containing `ios` in its name.
+
+// end::AppleProvider[]
+
+// tag::WeChat[]
+|[[WeChat,WeChat]]WeChat
+|The object for configuring xref:docs:ROOT:wechat.adoc[] for our iOS SDK.
+
+Currently takes variant as a parameter.
+
+[source,swift]
+----
+WeChat(variant: "ios") <1>
+----
+<1> If no `variant:` is passed, takes the first variant containing `ios` in its name.
+
+// end::WeChat[]
