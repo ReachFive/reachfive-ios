@@ -6,4 +6,6 @@ public class ProviderConfig: Codable {
     public let clientId: String?
     public let universalLink: String?
     public let scope: [String]?
+    
+    public var providerWithVariant: String { provider + ":" + variant }
 }
