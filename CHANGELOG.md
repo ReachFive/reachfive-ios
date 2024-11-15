@@ -1,7 +1,9 @@
 # Changelog
 
+## v7.1.4
+### New features
+- Add a property `providerWithVariant` in `ProviderConfig` to easily access the variant of a provider
 ## v7.1.3
-
 ### New features
 - Support choosing a variant for Apple
 - Add the parameter `prefersEphemeralWebBrowserSession` of `ASWebAuthenticationSession` to be specified through `webviewLogin`

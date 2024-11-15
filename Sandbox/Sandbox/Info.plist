@@ -37,7 +37,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.997770110811-ej532u1vj10tm450p0oge13ahaeoi00e</string>
+				<string>com.googleusercontent.apps.892435640275-rftg7j8u8dcl1obqro3iof844c7kuutr</string>
 			</array>
 		</dict>
 		<dict>
@@ -58,7 +58,7 @@
 	<key>FacebookDisplayName</key>
 	<string>Reach5 SDK Mobile</string>
 	<key>GIDClientID</key>
-	<string>997770110811-ej532u1vj10tm450p0oge13ahaeoi00e.apps.googleusercontent.com</string>
+	<string>892435640275-rftg7j8u8dcl1obqro3iof844c7kuutr.apps.googleusercontent.com</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>weixin</string>

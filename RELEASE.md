@@ -1,13 +1,8 @@
 # Guide for publication
 
-1. Run [update.sh](update.sh) to update the dependencies
-    ```shell
-    ./update.sh
-    ```
+1. Create a branch with the name of the version `x.x.x`
 
-2. Create a branch with the name of the version `x.x.x`
-
-3. Change the version in [version.rb](version.rb) file and in [ReachFiveApi.swift](Sources/Core/Classes/ReachFiveApi.swift)
+2. Change the version in [version.rb](version.rb) file and in [ReachFiveApi.swift](Sources/Core/Classes/ReachFiveApi.swift)
     ```ruby
     $VERSION = 'x.x.x'
     ```
@@ -20,19 +15,18 @@
     ]
     ```
 
-4. Run [install.sh](install.sh) to install the new version of this library
+3. Run [update.sh](update.sh) to install the new version of this library and update the dependencies
     ```shell
-    ./install.sh
+    ./update.sh
     ```
 
-    NB: CocoaPods seems to not be able to run `pod update` when in a branch named `x.x.x`. This is why `pod update` is run before creating the branch.
-
-5. Update to latest package versions for SPM in XCode or with this command
+4. Update to latest package versions for SPM in XCode or with this command
     ```shell
     swift package update
     ```
 
-6. Update the [CHANGELOG.md](CHANGELOG.md) file
+5. Update the [CHANGELOG.md](CHANGELOG.md) file
+6. Test the modifications on the SPM project DemoSharedCredentials. SPM tends to be stricter than Cocoapods when validating dependencies and code visibility.
 
 7. Submit and merge the pull request
 
