@@ -17,11 +17,11 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
 
         providers.append(contentsOf: AppDelegate.reachfive().getProviders())
         providersTableView.reloadData()
-                if providers.contains(where: { p in p.name == FacebookProvider.NAME }) {
-                    ATTrackingManager.requestTrackingAuthorization { status in
-                        print("ATTrackingManager.requestTrackingAuthorization \(status)")
-                    }
-                }
+        if providers.contains(where: { p in p.name == FacebookProvider.NAME }) {
+            ATTrackingManager.requestTrackingAuthorization { status in
+                print("ATTrackingManager.requestTrackingAuthorization \(status)")
+            }
+        }
     }
 
     public func reloadProvidersData(providers: [Provider]) {
