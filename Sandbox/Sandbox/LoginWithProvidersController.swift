@@ -19,7 +19,15 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
         providersTableView.reloadData()
         if providers.contains(where: { p in p.name == FacebookProvider.NAME }) {
             ATTrackingManager.requestTrackingAuthorization { status in
-                print("ATTrackingManager.requestTrackingAuthorization \(status)")
+                let statut = switch status {
+                case ATTrackingManager.AuthorizationStatus.notDetermined: "notDetermined"
+                case ATTrackingManager.AuthorizationStatus.restricted:    "restricted"
+                case ATTrackingManager.AuthorizationStatus.denied:        "denied"
+                case ATTrackingManager.AuthorizationStatus.authorized:    "authorized"
+                @unknown default:                                         "unkown"
+                }
+
+                print("ATTrackingManager.requestTrackingAuthorization \(statut)")
             }
         }
     }
