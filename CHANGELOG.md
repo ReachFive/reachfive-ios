@@ -1,5 +1,10 @@
 # Changelog
 
+## v7.1.5
+### Fixes
+- Make an internal method visible to providers
+- Better error message in technical errors
+
 ## v7.1.4
 ### New features
 - Add a property `providerWithVariant` in `ProviderConfig` to easily access the variant of a provider
