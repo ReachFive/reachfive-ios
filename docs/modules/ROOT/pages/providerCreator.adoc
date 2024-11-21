@@ -1,0 +1,37 @@
+= ProviderCreator
+:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
+
+[.signature]
+[subs="normal"]
+
+== Description
+
+`ProviderCreator` is a protocol that defines specific social login providers (e.g., Google, Facebook, Apple) available in our iOS SDK. Those specific providers use native calls or external libraries to authenticate users.
+
+All providers except Apple that you configure in the console for which you don't use a specific provider creator will authenticate through an `ASWebAuthenticationSession`.
+
+You should define and configure these providers when you xref:index.adoc#initialize-ios-sdk[initialize the iOS SDK].
+
+== Examples
+
+[source,swift]
+----
+include::example${docname}.swift[]
+----
+
+== Available provider creators
+
+[.options]
+
+The providers who have a variant parameter have the following algorithm to choose a variant configured on the console:
+
+- if no variant is provided, then the first variant containing `ios` in its name, irrespective of case, if any, is chosen. Otherwise, the default variant is chosen.
+- if a variant is provided, then the variant with the exact name, irrespective of case, if chosen. If no variant match then the algorithm chooses the variant as if no variant was provided.
+
+[cols="3m,7a"]
+|===
+|Name |Description
+
+include::partial$config/params.adoc[tags="GoogleProvider,FacebookProvider,AppleProvider,WeChat"]
+
+|===

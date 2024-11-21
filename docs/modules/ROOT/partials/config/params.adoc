@@ -1,55 +1,62 @@
 // tag::GoogleProvider[]
 |[[GoogleProvider,GoogleProvider]]GoogleProvider
-|The object for configuring xref:docs:ROOT:google.adoc[] for our iOS SDK.
+|The object for configuring xref:index.adoc#google-native-provider[Google native provider] for our iOS SDK.
 
-Currently takes variant as a parameter.
+Optionally takes a variant parameter.
 
 [source,swift]
 ----
-GoogleProvider(variant: "ios") <1>
+GoogleProvider(variant: "native") <1>
 ----
-<1> If no `variant:` is passed, takes the first variant containing `ios` in its name.
+
+<1> available starting `Reach5Google` 7.1.0
 
 // end::GoogleProvider[]
 
 // tag::FacebookProvider[]
 |[[FacebookProvider,FacebookProvider]]FacebookProvider
-|The object for configuring xref:docs:ROOT:facebook.adoc[] for our iOS SDK.
+|The object for configuring xref:docs:ROOT:facebook-native-provider[Facebook native provider] for our iOS SDK.
 
-Currently takes variant as a parameter.
+Optionally takes two parameters:
+
+- variant `string`: the provider variant to use
+- prefersLoginTracking `FBSDKLoginKit.LoginTracking`: Indicates to the Facebook SDK preference for limited or classic login. Facebook SDK is ultimately responsible for the decision.
 
 [source,swift]
 ----
-FacebookProvider(variant: "ios") <1>
+FacebookProvider(
+    variant: "ios", <1>
+    prefersLoginTracking: .limited <2>
+)
 ----
-<1> If no `variant:` is passed, takes the first variant containing `ios` in its name.
+<1> available starting `Reach5Facebook` 7.1.0
+<2> available starting `Reach5Facebook` 7.2.0
 
 // end::FacebookProvider[]
 
 // tag::AppleProvider[]
-|[[AppleProvider,AppleProvider]]AppleProvider
-|The object for configuring xref:docs:ROOT:apple.adoc[] for our iOS SDK.
+|[[AppleProvider,AppleProvider]]AppleProvider|
 
-Currently takes variant as a parameter.
+Optionally takes a variant parameter.
+Not specifying `AppleProvider` at all in the providerCreators array is equivalent specifying `AppleProvider` with no variant.
 
 [source,swift]
 ----
-AppleProvider(variant: "ios") <1>
+AppleProvider(variant: "native") <1>
 ----
-<1> If no `variant:` is passed, takes the first variant containing `ios` in its name.
+<1> available starting `Reach5` 7.1.3
 
 // end::AppleProvider[]
 
 // tag::WeChat[]
 |[[WeChat,WeChat]]WeChat
-|The object for configuring xref:docs:ROOT:wechat.adoc[] for our iOS SDK.
+|The object for configuring xref:docs:ROOT:wechat-connect[WeChat Connect] for our iOS SDK.
 
-Currently takes variant as a parameter.
+No parameter
 
 [source,swift]
 ----
-WeChat(variant: "ios") <1>
+WeChat()
 ----
-<1> If no `variant:` is passed, takes the first variant containing `ios` in its name.
 
 // end::WeChat[]
