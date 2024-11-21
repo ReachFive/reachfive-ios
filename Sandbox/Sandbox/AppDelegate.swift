@@ -56,13 +56,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         clientId: "9DKRdQyDLpaJqQQQAR9K"
     )
 
+    static let providers: [ProviderCreator] = [GoogleProvider(variant: "one_tap"), FacebookProvider(), AppleProvider(variant: "natif")]
     #if targetEnvironment(macCatalyst)
-    static let macProviders: [ProviderCreator] = [GoogleProvider(variant: "one_tap"), FacebookProvider(variant: "variant_1"), AppleProvider(variant: "natif")]
-    static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: macProviders, storage: storage)
-    static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: macProviders, storage: storage)
+    static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
+    static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
     let reachfive = macLocal
     #else
-    static let providers: [ProviderCreator] = [GoogleProvider(), FacebookProvider(), AppleProvider(variant: "natif")]
     static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
     static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
     #if targetEnvironment(simulator)
