@@ -1,5 +1,4 @@
 = providerCreator
-:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
 `{docname}` is a protocol that defines specific social login providers (e.g., Google, Facebook, Apple) available in our {page-component-title}. 
 These specific providers use native calls or external libraries to authenticate users.

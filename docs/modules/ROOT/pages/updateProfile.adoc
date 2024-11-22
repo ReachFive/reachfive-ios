@@ -1,5 +1,4 @@
 = updateProfile
-:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
 [.signature]
 [subs="normal"]
