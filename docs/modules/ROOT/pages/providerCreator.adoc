@@ -5,7 +5,7 @@ These specific providers use native calls or external libraries to authenticate 
 
 All providers except xref:docs:ROOT:apple.adoc[Apple] that you configure in the {cc} for which you don't use a specific provider creator will authenticate through an `ASWebAuthenticationSession`.
 
-You should define and configure these providers when you xref:index.adoc#initialize-ios-sdk[initialize the iOS SDK].
+You should define and configure these providers when you xref:index.adoc#configuration-5[configure the iOS SDK].
 
 == Examples
 
