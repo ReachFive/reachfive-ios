@@ -6,7 +6,7 @@
 ** xref:reference/errors.adoc[]
 
 .Configuration icon:cogs[]
-** xref:provideCreator.adoc[]
+** xref:providerCreator.adoc[]
 
 .Methods icon:code[]
 

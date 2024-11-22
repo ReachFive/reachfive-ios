@@ -1,6 +1,6 @@
 name: sdk-ios
-version: "7.1.0"
 title: iOS SDK
+version: "7.1.0"
 start_page: index.adoc
 nav:
 - modules/ROOT/nav.adoc

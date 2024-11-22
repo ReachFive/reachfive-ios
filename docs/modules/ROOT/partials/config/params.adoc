@@ -1,6 +1,6 @@
 // tag::GoogleProvider[]
 |[[GoogleProvider,GoogleProvider]]GoogleProvider
-|The object for configuring xref:index.adoc#google-native-provider[Google native provider] for our iOS SDK.
+|The object for configuring xref:index.adoc#google-native-provider[Google native provider] for our {page-component-title}.
 
 Optionally takes a variant parameter.
 
@@ -8,19 +8,19 @@ Optionally takes a variant parameter.
 ----
 GoogleProvider(variant: "native") <1>
 ----
-
-<1> available starting `Reach5Google` 7.1.0
+<1> Available from `Reach5Google` 7.1.0.
 
 // end::GoogleProvider[]
 
 // tag::FacebookProvider[]
 |[[FacebookProvider,FacebookProvider]]FacebookProvider
-|The object for configuring xref:docs:ROOT:facebook-native-provider[Facebook native provider] for our iOS SDK.
+|The object for configuring xref:index.adoc#facebook-native-provider[Facebook native provider] for our {page-component-title}.
 
-Optionally takes two parameters:
+This provider takes two optional parameters:
 
-- variant `string`: the provider variant to use
-- prefersLoginTracking `FBSDKLoginKit.LoginTracking`: Indicates to the Facebook SDK preference for limited or classic login. Facebook SDK is ultimately responsible for the decision.
+* variant `string`: the provider variant to use.
+* prefersLoginTracking `FBSDKLoginKit.LoginTracking`: Indicates preference to the Facebook SDK for the limited or classic login. 
+Facebook SDK is ultimately responsible for the decision.
 
 [source,swift]
 ----
@@ -29,34 +29,33 @@ FacebookProvider(
     prefersLoginTracking: .limited <2>
 )
 ----
-<1> available starting `Reach5Facebook` 7.1.0
-<2> available starting `Reach5Facebook` 7.2.0
+<1> Available from `Reach5Facebook` 7.1.0.
+<2> Available from `Reach5Facebook` 7.2.0.
 
 // end::FacebookProvider[]
 
 // tag::AppleProvider[]
-|[[AppleProvider,AppleProvider]]AppleProvider|
+|[[AppleProvider,AppleProvider]]AppleProvider
+|Optionally takes a variant parameter.
 
-Optionally takes a variant parameter.
-Not specifying `AppleProvider` at all in the providerCreators array is equivalent specifying `AppleProvider` with no variant.
+NOTE: Not specifying `AppleProvider` at all in the `providerCreators` array is equivalent to specifying `AppleProvider` with no variant.
 
 [source,swift]
 ----
 AppleProvider(variant: "native") <1>
 ----
-<1> available starting `Reach5` 7.1.3
+<1> Available from `{company}` 7.1.3.
 
 // end::AppleProvider[]
 
 // tag::WeChat[]
 |[[WeChat,WeChat]]WeChat
-|The object for configuring xref:docs:ROOT:wechat-connect[WeChat Connect] for our iOS SDK.
-
-No parameter
+|The object for configuring xref:index.adoc#wechat-connect[WeChat Connect] for our iOS SDK.
 
 [source,swift]
 ----
-WeChat()
+WeChat() <1>
 ----
+<1> WeChat takes no parameters.
 
 // end::WeChat[]
