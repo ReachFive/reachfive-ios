@@ -1,6 +1,5 @@
 :mobile-sdk:
 = Getting Started
-:page-aliases: master@sdk-ios:ROOT:{page-relative-src-path}
 
 {sdk-ios-version-badge}
 
