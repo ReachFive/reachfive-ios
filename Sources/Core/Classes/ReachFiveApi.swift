@@ -262,6 +262,22 @@ public class ReachFiveApi {
             .responseJson(type: Profile.self, decoder: decoder)
     }
 
+    public func updateProfile(
+        authToken: AuthToken,
+        profileUpdate: ProfileUpdate
+    ) -> Future<Profile, ReachFiveError> {
+        AF
+            .request(
+                createUrl(path: "/identity/v1/update-profile"),
+                method: .post,
+                parameters: profileUpdate.dictionary(),
+                encoding: JSONEncoding.default,
+                headers: tokenHeader(authToken)
+            )
+            .validate(contentType: ["application/json"])
+            .responseJson(type: Profile.self, decoder: decoder)
+    }
+
     public func updatePassword(
         authToken: AuthToken?,
         updatePasswordRequest: UpdatePasswordRequest
@@ -557,7 +573,7 @@ public class ReachFiveApi {
     }
 
     func tokenHeader(_ authToken: AuthToken) -> HTTPHeaders {
-        ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
+       ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
     }
 
     public func buildAuthorizeURL(queryParams: [String: String?]) -> URL {
