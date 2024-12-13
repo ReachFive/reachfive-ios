@@ -127,7 +127,7 @@ extension ProfileController: UITableViewDataSource {
             }
             children.append(updatePhone)
             if field.value != nil {
-                let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "phone.badge.plus.fill")) { action in
+                let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "minus.circle.fill")) { action in
                     self.updateProfileField(titre: "Delete Phone number", authToken: token, update: ProfileUpdate(phoneNumber: .Delete))
                 }
                 children.append(deleteAction)
@@ -144,7 +144,7 @@ extension ProfileController: UITableViewDataSource {
                 }
                 children.append(updateAction)
                 if field.value != nil {
-                    let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: icon)) { action in
+                    let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "minus.circle.fill")) { action in
                         self.updateProfileField(titre: "Delete \(name)", authToken: token, update: updater(.Delete))
                     }
                     children.append(deleteAction)
@@ -154,7 +154,7 @@ extension ProfileController: UITableViewDataSource {
 
         if field.name == "Email" {
             if field.value == nil {
-                let updateAction = UIAction(title: "Add", image: UIImage(systemName: "phone.badge.plus.fill")) { action in
+                let updateAction = UIAction(title: "Add", image: UIImage(systemName: "at.badge.plus")) { action in
                     self.popupUpdateProfileField(fieldName: "Email", authToken: token) {
                         ProfileUpdate(email: .Update($0))
                     }
@@ -163,15 +163,15 @@ extension ProfileController: UITableViewDataSource {
             }
         }
         
-        updateAndDeleteField(name: "Custom Identifier", icon: "phone.badge.plus.fill") {
+        updateAndDeleteField(name: "Custom Identifier", icon: "person.fill.badge.plus") {
             ProfileUpdate(customIdentifier: $0)
         }
         
-        updateAndDeleteField(name: "Given Name", icon: "phone.badge.plus.fill") {
+        updateAndDeleteField(name: "Given Name", icon: "person.text.rectangle.fill") {
             ProfileUpdate(givenName: $0)
         }
         
-        updateAndDeleteField(name: "Family Name", icon: "phone.badge.plus.fill") {
+        updateAndDeleteField(name: "Family Name", icon: "person.text.rectangle.fill") {
             ProfileUpdate(familyName: $0)
         }
         
