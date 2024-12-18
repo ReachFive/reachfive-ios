@@ -390,7 +390,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             )
         } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard let nonce, let scope, let appleProvider else {
-                promise.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: no scope, no nonce, no apple provider"))
+                promiseWithStepUp.tryFailure(.TechnicalError(reason: "didCompleteWithAuthorization: no scope, no nonce, no apple provider"))
                 return
             }
 
