@@ -10,6 +10,7 @@
 		2A0305102C04DBE500A92524 /* ResetOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A03050F2C04DBE500A92524 /* ResetOptions.swift */; };
 		2A0305122C04F07900A92524 /* ResetPasskeyRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0305112C04F07900A92524 /* ResetPasskeyRequest.swift */; };
 		2A0305142C063DEA00A92524 /* ResetPublicKeyCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0305132C063DEA00A92524 /* ResetPublicKeyCredential.swift */; };
+		2A310F482C87794D0037A8FB /* TknMfa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A310F472C87794D0037A8FB /* TknMfa.swift */; };
 		2A624FDA2B2BDBC400BF33A7 /* DefaultProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */; };
 		2AB29A0B2C1225F500D0C5C8 /* ReachFiveApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB29A0A2C1225F500D0C5C8 /* ReachFiveApplication.swift */; };
 		2ADFF84F2BFE661300A659FE /* RequestAccountRecoveryRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */; };
@@ -98,6 +99,7 @@
 		2A0305112C04F07900A92524 /* ResetPasskeyRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasskeyRequest.swift; sourceTree = "<group>"; };
 		2A0305132C063DEA00A92524 /* ResetPublicKeyCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPublicKeyCredential.swift; sourceTree = "<group>"; };
 		2A2D5B102BA4C59300245439 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2A310F472C87794D0037A8FB /* TknMfa.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TknMfa.swift; sourceTree = "<group>"; };
 		2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultProvider.swift; sourceTree = "<group>"; };
 		2AB29A0A2C1225F500D0C5C8 /* ReachFiveApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveApplication.swift; sourceTree = "<group>"; };
 		2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestAccountRecoveryRequest.swift; sourceTree = "<group>"; };
@@ -347,6 +349,7 @@
 		8496EB2F25DEB021005098DD /* responses */ = {
 			isa = PBXGroup;
 			children = (
+				2A310F472C87794D0037A8FB /* TknMfa.swift */,
 				9958690A2C32DDC0005CD5C4 /* trustedDevices */,
 				8496EB3025DEB033005098DD /* webAuthn */,
 			);
@@ -544,6 +547,7 @@
 				2AE533062994629400EF97E0 /* StringUtils.swift in Sources */,
 				8496EB2525DEAFCF005098DD /* AuthenticationPublicKeyCredential.swift in Sources */,
 				34DD31FF22F3286400279E54 /* CustomField.swift in Sources */,
+				2A310F482C87794D0037A8FB /* TknMfa.swift in Sources */,
 				2A0305122C04F07900A92524 /* ResetPasskeyRequest.swift in Sources */,
 				34BDDA3A22E5BF1C00D16DAE /* Consent.swift in Sources */,
 				34689A9522CDFB39002970F9 /* OpenIdUser.swift in Sources */,

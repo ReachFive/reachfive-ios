@@ -19,21 +19,14 @@ public enum Credential {
     }
 }
 
-public struct StartStepUp {
-    var redirectUri: String?
-    var authToken: AuthToken?
-    var tkn: String?
-    var scope: [String]?
-    var origin: String?
-    public var authType: MfaCredentialItemType
-    
-    public init(authType: MfaCredentialItemType, authToken: AuthToken? = nil, redirectUri: String? = nil, tkn: String? = nil, scope: [String]? = nil, origin: String? = nil) {
-        self.redirectUri = redirectUri
-        self.authToken = authToken
-        self.tkn = tkn
-        self.scope = scope
-        self.origin = origin
-        self.authType = authType
+public enum StartStepUp {
+    case AuthTokenFlow(authType: MfaCredentialItemType, authToken: AuthToken, redirectUri: String? = nil, scope: [String]? = nil, origin: String? = nil)
+    case LoginFlow(authType: MfaCredentialItemType, stepUpToken: String, redirectUri: String? = nil, origin: String? = nil)
+    public var authType: MfaCredentialItemType {
+        switch self {
+        case let .AuthTokenFlow(authType, _, _, _, _): return authType
+        case let .LoginFlow(authType, _, _, _): return authType
+        }
     }
 }
 
@@ -122,21 +115,22 @@ public extension ReachFive {
     }
     
     func mfaStart(stepUp request: StartStepUp) -> Future<ContinueStepUp, ReachFiveError> {
-        let redirectUri = request.redirectUri ?? sdkConfig.redirectUri
-        let pkce = Pkce.generate()
-        storage.save(key: pkceKey, value: pkce)
-        return reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId,
-                                                                 redirectUri: redirectUri,
-                                                                 codeChallenge: pkce.codeChallenge,
-                                                                 codeChallengeMethod: pkce.codeChallengeMethod,
-                                                                 scope: (request.scope ?? scope).joined(separator: " "),
-                                                                 tkn: request.tkn),
-                                           authToken: request.authToken)
-            .flatMap { result in
-                self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: request.authType, origin: request.origin))
+        switch request {
+        case let .LoginFlow(authType, stepUpToken, redirectUri, origin):
+            return reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin))
+                .map { response in
+                    ContinueStepUp(challengeId: response.challengeId, reachFive: self)
+                }
+        case let .AuthTokenFlow(authType, authToken, redirectUri, overwrittenScope, origin):
+            let pkce = Pkce.generate()
+            storage.save(key: pkceKey, value: pkce)
+            let stepUp = StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: redirectUri ?? sdkConfig.redirectUri, pkce: pkce, scope: (overwrittenScope ?? scope).joined(separator: " "))
+            return reachFiveApi.startMfaStepUp(stepUp, authToken: authToken).flatMap { result in
+                self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? self.sdkConfig.redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: authType, origin: origin))
             }.map { response in
                 ContinueStepUp(challengeId: response.challengeId, reachFive: self)
             }
+        }
     }
     
     func mfaVerify(stepUp request: VerifyStepUp) -> Future<AuthToken, ReachFiveError> {
@@ -165,7 +159,7 @@ public extension ReachFive {
     func mfaListTrustedDevices(authToken: AuthToken) -> Future<[TrustedDevice], ReachFiveError> {
         return reachFiveApi
             .listMfaTrustedDevices(authToken: authToken)
-            .map{ res in res.trustedDevices }
+            .map { res in res.trustedDevices }
     }
     
     func mfaDelete(trustedDeviceId deviceId: String, authToken: AuthToken) -> Future<Void, ReachFiveError> {
