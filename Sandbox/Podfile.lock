@@ -25,7 +25,7 @@ PODS:
     - AppAuth/Core (~> 1.7)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
-  - Reach5 (7.1.5):
+  - Reach5 (7.2.0):
     - Alamofire (~> 5.8)
     - BrightFutures (~> 8.2.0)
     - CryptoSwift (~> 1.8)
@@ -33,10 +33,10 @@ PODS:
   - Reach5Facebook (7.2.0):
     - FBSDKCoreKit (~> 17.4.0)
     - FBSDKLoginKit (~> 17.4.0)
-    - Reach5 (~> 7.1.5)
+    - Reach5 (>= 7.1.5)
   - Reach5Google (7.1.1):
     - GoogleSignIn (~> 7)
-    - Reach5 (~> 7.1.4)
+    - Reach5 (>= 7.1.4)
 
 DEPENDENCIES:
   - Reach5 (from `../Reach5.podspec`)
@@ -79,9 +79,9 @@ SPEC CHECKSUMS:
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
-  Reach5: c2789236aac1fe19e98ff6bf037d6e987fc65409
-  Reach5Facebook: d34c971fff4c092437be63ace65cb15a53e1344c
-  Reach5Google: 0c0501c23c2745938d4b675b1568c16ba371b810
+  Reach5: d4184a8360d63e3b6a8367ee14a6e285d134ebda
+  Reach5Facebook: e89b979129d4a302863b7d9a81740f66f50595bf
+  Reach5Google: 5d5e3c828d1164bc63df7ceb3a7b877686ebfc28
 
 PODFILE CHECKSUM: d9a60d02a850d62859602414096b80b721aba150
 
