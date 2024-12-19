@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Breaking changes
+- Some method will see their returned error type change from `.TechnicalError` to `.AuthFailure` or `.RequestError`, and will now come with an `ApiError` containing the details of the error.
+
 ## v7.1.5
 ### Fixes
 - Make an internal method visible to providers
