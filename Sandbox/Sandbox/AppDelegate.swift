@@ -1,8 +1,10 @@
-import UIKit
 import AuthenticationServices
+import BrightFutures
+import Foundation
 import Reach5
 import Reach5Google
 import Reach5Facebook
+import UIKit
 
 #if targetEnvironment(macCatalyst)
 // we don't add WeChat by default in order to be able to launch the app on mac Catalyst in order to test on local (more easily than with a simulator)
@@ -12,7 +14,7 @@ import Reach5Facebook
 // Peut-être qu'un jour je serai capable de modifier les dépendance cocoapods par plateforme
 // https://betterprogramming.pub/why-dont-my-pods-compile-with-mac-catalyst-and-how-can-i-solve-it-ffc3fbec824e
 // Ce lien suggère une solution mais je ne vois pas les même choses dans Build Phases, je ne vois pas les dépendances Facebook et WeChat
-//import Reach5WeChat
+// import Reach5WeChat
 #endif
 
 //TODO
@@ -166,7 +168,6 @@ extension AppDelegate {
 }
 
 extension UIViewController {
-
     func goToProfile(_ authToken: AuthToken) {
         AppDelegate.storage.setToken(authToken)
 
@@ -178,10 +179,80 @@ extension UIViewController {
 
     func showToast(message: String, seconds: Double) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        self.present(alert, animated: true)
+        present(alert, animated: true)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + seconds) {
             alert.dismiss(animated: true)
         }
+    }
+
+    func handleLoginFlow(flow: LoginFlow) {
+        switch flow {
+        case .AchievedLogin(let authToken):
+            goToProfile(authToken)
+        case .OngoingStepUp(let token, let availableMfaCredentialItemTypes):
+            let selectMfaAuthTypeAlert = UIAlertController(title: "Select MFA", message: "Select MFA auth type", preferredStyle: UIAlertController.Style.alert)
+            var lastAction: UIAlertAction? = nil
+            for type in availableMfaCredentialItemTypes {
+                let action = createSelectMfaAuthTypeAction(type: type, stepUpToken: token)
+                selectMfaAuthTypeAlert.addAction(action)
+                lastAction = action
+            }
+            selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            selectMfaAuthTypeAlert.preferredAction = lastAction
+            present(selectMfaAuthTypeAlert, animated: true)
+        }
+    }
+
+    private func createSelectMfaAuthTypeAction(type: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
+        return UIAlertAction(title: type.rawValue, style: .default) { _ in
+            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken)).onSuccess { resp in
+                self.handleStartVerificationCode(resp, authType: type)
+                    .onSuccess { authToken in
+                        self.goToProfile(authToken)
+                    }
+            }
+        }
+    }
+
+    private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) -> Future<AuthToken, ReachFiveError> {
+        let promise: Promise<AuthToken, ReachFiveError> = Promise()
+
+        let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.placeholder = "Verification code"
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            promise.failure(.AuthCanceled)
+        }
+        func submitVerificationCode(withTrustDevice trustDevice: Bool?) -> Void {
+            guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
+                print("verification code cannot be empty")
+                promise.failure(.AuthFailure(reason: "no verification code"))
+                return
+            }
+            let future = resp.verify(code: verificationCode, trustDevice: trustDevice)
+                .onFailure { error in
+                    let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
+                    self.present(alert, animated: true)
+                }
+            promise.completeWith(future)
+        }
+
+        let submitVerificationTrustDevice = UIAlertAction(title: "Trust device", style: .default) { _ in
+            submitVerificationCode(withTrustDevice: true)
+        }
+        let submitVerificationNoTrustDevice = UIAlertAction(title: "Don't trust device", style: .default) { _ in
+            submitVerificationCode(withTrustDevice: false)
+        }
+        let submitVerificationWithoutRba = UIAlertAction(title: "Ignore RBA", style: .default) { _ in
+            submitVerificationCode(withTrustDevice: nil)
+        }
+        alert.addAction(cancelAction)
+        alert.addAction(submitVerificationTrustDevice)
+        alert.addAction(submitVerificationNoTrustDevice)
+        alert.addAction(submitVerificationWithoutRba)
+        present(alert, animated: true)
+        return promise.future
     }
 }
 

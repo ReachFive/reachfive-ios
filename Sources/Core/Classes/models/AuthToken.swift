@@ -1,5 +1,5 @@
-import Foundation
 import BrightFutures
+import Foundation
 
 public class AuthToken: Codable {
     public let idToken: String?
@@ -58,12 +58,12 @@ public class AuthToken: Codable {
         let parts = idToken.components(separatedBy: ".")
         if parts.count == 3 {
             let data = parts[1].decodeBase64Url()
-            let user = Result.init(catching: {
+            let user = Result(catching: {
                 try decoder.decode(OpenIdUser.CodingData.self, from: data!).openIdUser
             })
-            return user.mapError({ error in
+            return user.mapError { error in
                 .TechnicalError(reason: error.localizedDescription)
-            })
+            }
         } else {
             return .failure(.TechnicalError(reason: "idToken invalid"))
         }
