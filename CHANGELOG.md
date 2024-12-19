@@ -1,5 +1,8 @@
 # Changelog
 
+## v7.2.0
+- Add a new method `updateProfile(authToken:profileUpdate:)` to be able to update and delete fields from the user profile
+
 ## v7.1.5
 ### Fixes
 - Make an internal method visible to providers
