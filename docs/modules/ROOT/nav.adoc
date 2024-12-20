@@ -39,6 +39,7 @@
 ** xref:updatePassword.adoc[]
 ** xref:updatePhoneNumber.adoc[]
 ** xref:updateProfile.adoc[]
+** xref:updateProfile_withDelete.adoc[]
 ** xref:verifyPhoneNumber.adoc[]
 ** xref:listWebAuthnCredentials.adoc[]
 ** xref:deleteWebAuthnRegistration.adoc[]

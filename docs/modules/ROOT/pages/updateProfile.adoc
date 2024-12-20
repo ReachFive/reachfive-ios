@@ -8,7 +8,7 @@ AppDelegate.reachfive().updateProfile(<<authToken>>, <<profile>>)
 
 == Description
 
-Update the information of the profile.
+Update a user profile.
 
 [NOTE]
 ====
