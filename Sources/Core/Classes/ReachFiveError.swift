@@ -32,7 +32,11 @@ public enum ReachFiveError: Error, CustomStringConvertible {
     private func createMessage(reason: String, apiError: ApiError? = nil) -> String {
         let allMessages: String? = apiError.flatMap { error in
             let topLevelMessage = error.errorUserMsg ?? error.errorDescription
-            var fieldMessages = error.errorDetails.flatMap { fieldErrors in fieldErrors.compactMap { $0.message } } ?? []
+            var fieldMessages = error.errorDetails.flatMap { fieldErrors -> [String] in fieldErrors.compactMap { fieldError in
+                guard let field = fieldError.field, let message = fieldError.message else {
+                    return  nil
+                }
+                return .some("\(field): \(message)") } } ?? []
 
             if let topLevelMessage {
                 fieldMessages.insert(topLevelMessage, at: 0)

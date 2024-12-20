@@ -72,7 +72,7 @@ public class ReachFiveApi {
         let defaultParams: [String: String] = [
             "platform": "ios",
             // TODO: read from the version.rb. Either directly or indirectly from Reach5.h, Info.plist...
-            "sdk": "7.1.5",
+            "sdk": "7.2.0",
             "device": deviceInfo,
         ]
 
@@ -258,6 +258,22 @@ public class ReachFiveApi {
                 headers: tokenHeader(authToken)
             )
             .validate(statusCode: 200..<300)
+            .validate(contentType: ["application/json"])
+            .responseJson(type: Profile.self, decoder: decoder)
+    }
+
+    public func updateProfile(
+        authToken: AuthToken,
+        profileUpdate: ProfileUpdate
+    ) -> Future<Profile, ReachFiveError> {
+        AF
+            .request(
+                createUrl(path: "/identity/v1/update-profile"),
+                method: .post,
+                parameters: profileUpdate.dictionary(),
+                encoding: JSONEncoding.default,
+                headers: tokenHeader(authToken)
+            )
             .validate(contentType: ["application/json"])
             .responseJson(type: Profile.self, decoder: decoder)
     }
@@ -557,7 +573,7 @@ public class ReachFiveApi {
     }
 
     func tokenHeader(_ authToken: AuthToken) -> HTTPHeaders {
-        ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
+       ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
     }
 
     public func buildAuthorizeURL(queryParams: [String: String?]) -> URL {

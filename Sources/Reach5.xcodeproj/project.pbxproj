@@ -13,6 +13,7 @@
 		2A310F482C87794D0037A8FB /* TknMfa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A310F472C87794D0037A8FB /* TknMfa.swift */; };
 		2A624FDA2B2BDBC400BF33A7 /* DefaultProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */; };
 		2AB29A0B2C1225F500D0C5C8 /* ReachFiveApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB29A0A2C1225F500D0C5C8 /* ReachFiveApplication.swift */; };
+		2AD4CC482D08A8B300761E63 /* ProfileUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD4CC472D08A8A800761E63 /* ProfileUpdate.swift */; };
 		2ADFF84F2BFE661300A659FE /* RequestAccountRecoveryRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */; };
 		2AE040E42C88E33900162014 /* AppleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE040E32C88E33900162014 /* AppleProvider.swift */; };
 		2AE18CDB29FC1DAF00258D2B /* LoginWKWebview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE18CDA29FC1DAF00258D2B /* LoginWKWebview.swift */; };
@@ -102,6 +103,7 @@
 		2A310F472C87794D0037A8FB /* TknMfa.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TknMfa.swift; sourceTree = "<group>"; };
 		2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultProvider.swift; sourceTree = "<group>"; };
 		2AB29A0A2C1225F500D0C5C8 /* ReachFiveApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveApplication.swift; sourceTree = "<group>"; };
+		2AD4CC472D08A8A800761E63 /* ProfileUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUpdate.swift; sourceTree = "<group>"; };
 		2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestAccountRecoveryRequest.swift; sourceTree = "<group>"; };
 		2AE040E32C88E33900162014 /* AppleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleProvider.swift; sourceTree = "<group>"; };
 		2AE18CDA29FC1DAF00258D2B /* LoginWKWebview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWKWebview.swift; sourceTree = "<group>"; };
@@ -305,6 +307,7 @@
 				34BDDA3722E5BE8C00D16DAE /* LoginSummary.swift */,
 				34689A9422CDFB39002970F9 /* OpenIdUser.swift */,
 				34689A9022CDFAE4002970F9 /* Profile.swift */,
+				2AD4CC472D08A8A800761E63 /* ProfileUpdate.swift */,
 				34BDDA3522E5BE6000D16DAE /* ProfileAddress.swift */,
 				347FDB68229C04C200660687 /* ProviderConfig.swift */,
 				34F7D3E522A54ADE003A7BC0 /* ProvidersConfigsResult.swift */,
@@ -514,6 +517,7 @@
 				2AE533162994632F00EF97E0 /* LoginCallback.swift in Sources */,
 				8496EB4525DEB141005098DD /* R5PublicKeyCredentialUserEntity.swift in Sources */,
 				2AE040E42C88E33900162014 /* AppleProvider.swift in Sources */,
+				2AD4CC482D08A8B300761E63 /* ProfileUpdate.swift in Sources */,
 				34689A9122CDFAE4002970F9 /* Profile.swift in Sources */,
 				3442C21E230EC48A009F8874 /* VerifyAuthCodeRequest.swift in Sources */,
 				34BDDA4222E5D87E00D16DAE /* ReachFivePassword.swift in Sources */,
