@@ -9,22 +9,22 @@ public class StartMfaStepUpRequest: Codable, DictionaryEncodable {
     public let scope: String?
     public let tkn: String?
 
-    public init(clientId: String, redirectUri: String, codeChallenge: String, codeChallengeMethod: String, scope: String?, tkn: String?) {
+    public init(clientId: String, redirectUri: String, pkce: Pkce, scope: String? = nil, tkn: String? = nil) {
         self.clientId = clientId
         self.responseType = "code"
         self.redirectUri = redirectUri
-        self.codeChallenge = codeChallenge
-        self.codeChallengeMethod = codeChallengeMethod
+        self.codeChallenge = pkce.codeChallenge
+        self.codeChallengeMethod = pkce.codeChallengeMethod
         self.scope = scope
         self.tkn = tkn
     }
 }
 
 public class StartMfaStepUpResponse: Codable, DictionaryEncodable {
-    public let amr: [String]?
+    public let amr: [MfaCredentialItemType]
     public let token: String
 
-    public init(amr: [String]?, token: String) {
+    public init(amr: [MfaCredentialItemType], token: String) {
         self.amr = amr
         self.token = token
     }
