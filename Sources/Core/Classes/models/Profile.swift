@@ -30,7 +30,7 @@ public class Profile: Codable, DictionaryEncodable {
     public let updatedAt: String?
     public let company: String?
     public let liteOnly: Bool?
-    
+
     public required init(
         uid: String? = nil,
         givenName: String? = nil,
@@ -91,5 +91,25 @@ public class Profile: Codable, DictionaryEncodable {
         self.updatedAt = updatedAt
         self.company = company
         self.liteOnly = liteOnly
+    }
+
+    public func asUpdate() -> ProfileUpdate {
+        ProfileUpdate(
+            givenName: Diff(self.givenName),
+            middleName: Diff(self.middleName),
+            familyName: Diff(self.familyName),
+            name: Diff(self.name),
+            nickname: Diff(self.nickname),
+            birthdate: Diff(self.birthdate),
+            picture: Diff(self.picture),
+            externalId: Diff(self.externalId),
+            username: Diff(self.username),
+            gender: Diff(self.gender),
+            email: Diff(self.email),
+            phoneNumber: Diff(self.phoneNumber),
+            customIdentifier: Diff(self.customIdentifier),
+            locale: Diff(self.locale),
+            company: Diff(self.company)
+        )
     }
 }

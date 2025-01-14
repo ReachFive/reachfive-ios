@@ -1,0 +1,51 @@
+= updateProfile with delete
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().updateProfile(<<authToken>>, <<ProfileUpdate>>)
+----
+
+== Description
+
+Update a user profile including removing a field.
+
+IMPORTANT: This method allows you to remove a field from the user profile, whereas the xref:updateProfile.adoc[] method only lets you update fields.
+
+[NOTE]
+====
+* The profile must have been granted the `full_write` scope at the last authentication.
+* The `email` and the `password` fields of the profile can't be updated with this method, except if the profile has no email address (usually when it is not provided by the social provider).
+Instead, use the xref:updateEmail.adoc[] method.
+* The `phoneNumber` field of the profile can't be updated if the SMS feature is activated on the account settings.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="authtoken"]
+include::partial$params.adoc[tags="Diff,ProfileUpdate"]
+
+|===
+
+== Response
+
+Type: `<<<Profile>>, <<ReachFiveError>>>`
+
+Return the profile with the updated data.
+If parameters are not valid or if the `full_write` scope is missing, the promise will be rejected and will return a `ReachFiveError`.
+
+include::partial$models.adoc[tag=profile]
+
+include::partial$models.adoc[tag=reachfiveerror]
+
