@@ -1,8 +1,8 @@
 # Changelog
 
 
-## Unreleased
-### Breaking changes
+## v8.0.0
+### New features
 - Allow to initiate an mfa step up when required during a call to `loginWithPassword` and `login(withRequest:usingModalAuthorizationFor:display:)` (when .Password is used). <br>For that the return type of these methods were changed from `AuthToken` to a new type `LoginFlow` to represent the potential new MFA step up introduced.
 - Change the name of `StartStepUp` to `StartStepUp.AuthTokenFlow` and make its authToken parameter mandatory
 - Some method will see their returned error type change from `.TechnicalError` to `.AuthFailure` or `.RequestError`, and will now come with an `ApiError` containing the details of the error.
