@@ -345,8 +345,96 @@ NOTE: This is a random string sent to the auth server. The auth server sends the
 // end::customIdentifier[]
 
 // tag::profile[]
-|[[profile,profile]] profile `Profile` | The profile with the new data. Only the provided fields will be updated.
+|[[profile,profile]] profile `Profile`
+| The profile with the new data.
+
+Only the provided fields are updated.
 // end::profile[]
+
+// tag::Diff[]
+|[[Diff,Diff]] Diff `Data`
+|
+
+[cols="3m,7a"]
+!===
+!Field !Description
+
+!Update(newValue) 
+!Update the field with the given new value.
+
+!Delete 
+!Delete the value of the field.
+
+!NoOp (the default) 
+!Don't change the field.
+
+!===
+
+// end::Diff[]
+
+// tag::ProfileUpdate[]
+|[[ProfileUpdate,ProfileUpdate]] ProfileUpdate `ProfileUpdate`
+| The profile with the new data.
+Each field is a <<Diff>>.
+
+[cols="4a,6a"]
+!===
+!Field !Description
+
+! givenName `<<Diff>><string>`
+! The given name of the profile.
+
+! middleName `<<Diff>><string>`
+! The middle name of the profile.
+
+! familyName `<<Diff>><string>`
+! The family name of the profile.
+
+! name `<<Diff>><string>`
+! The full name of the profile.
+
+! nickname `<<Diff>><string>`
+! The nickname of the profile.
+
+! birthdate `<<Diff>><string>`
+! The birthdate of the profile, represented as an {iso-8601}[ISO 8601^] `YYYY-MM-DD` format.
+
+! picture `<<Diff>><string>`
+! The URL of one of the profile picture.
+This URL refers to an image file (PNG, JPEG, or GIF image file).
+
+! username `<<Diff>><string>`
+! The username of the profile (the login's name).
+
+! gender `<<Diff>><string>`
+! The gender of the profile.
+
+Allowed values are `female`, `male` and `other`.
+
+! email `<<Diff>><string>`
+! The primary email address of the profile.
+
+! phoneNumber `<<Diff>><string>`
+! The primary phone number of the profile.
+
+Both the international format and the national conventions of the account's country are accepted if configured in account settings.
+
+! customIdentifier `<<Diff>><string>`
+! A string that allows users to authenticate with something other than an `email` or `phone_number`.
+
+Each `custom_identifier` value must be unique.
+The `custom_identifier` must be between _4-80_ characters.
+
+! locale `<<Diff>><string>`
+! The profile's language code in lowercase and country code in uppercase, separated by a dash (e.g. `en`, `fr-FR` ...).
+
+! company `<<Diff>><string>`
+! The company associated with the profile.
+
+!===
+
+// end::ProfileUpdate[]
+
 
 // tag::profilesignuprequest[]
 |[[profileSignupRequest, ProfileSignupRequest]] profile `ProfileSignupRequest` | The data of the profile.

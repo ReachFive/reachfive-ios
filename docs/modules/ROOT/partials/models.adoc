@@ -94,7 +94,7 @@ Allowed values: `delivery` or `billing`.
 
 This value can't be an empty string.
 
-!addressComplement | A complementary address field which can contain additional information about the address.
+!addressComplement ! A complementary address field which can contain additional information about the address.
 !locality `string`!The name of the city.
 !region `string`!The name of the region.
 !postalCode `string`!The zip code.
@@ -255,6 +255,7 @@ credentials: [
     {"createdAt": "createdAtDate", "friendlyName": "friendlyName", "email": "joe@example.com", "type": CredentialType}
 ] <1>
 ----
+
 <1> Contains array of `MfaCredentialItem` objects.
 --
 Phone number::
@@ -266,10 +267,10 @@ credentials: [
     {"createdAt": "createdAtDate", "friendlyName": "friendlyName", "phoneNumber": "+35312345678", "type": CredentialType}
 ] <1>
 ----
+
 <1> Contains array of `MfaCredentialItem` objects.
 --
 ====
-
 
 [cols="20%s,35%,55%a"]
 |===

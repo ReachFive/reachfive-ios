@@ -93,7 +93,6 @@ public class ReachFiveApi {
     public func clientConfig() -> Future<ClientConfigResponse, ReachFiveError> {
         AF
             .request(createUrl(path: "/identity/v1/config", params: ["client_id": sdkConfig.clientId]))
-            .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJson(type: ClientConfigResponse.self, decoder: decoder)
     }
@@ -101,7 +100,6 @@ public class ReachFiveApi {
     public func providersConfigs(variants: [String: String?]) -> Future<ProvidersConfigsResult, ReachFiveError> {
         AF
             .request(createUrl(path: "/api/v1/providers", params: variants))
-            .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJson(type: ProvidersConfigsResult.self, decoder: decoder)
     }
@@ -111,10 +109,9 @@ public class ReachFiveApi {
     ) -> Future<AccessTokenResponse, ReachFiveError> {
         AF
             .request(createUrl(path: "/identity/v1/oauth/provider/token"),
-                     method: .post,
-                     parameters: loginProviderRequest.dictionary(),
-                     encoding: JSONEncoding.default)
-            .validate(statusCode: 200..<300)
+                method: .post,
+                parameters: loginProviderRequest.dictionary(),
+                encoding: JSONEncoding.default)
             .validate(contentType: ["application/json"])
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
@@ -182,7 +179,6 @@ public class ReachFiveApi {
                 parameters: authCodeRequest.dictionary(),
                 encoding: JSONEncoding.default
             )
-            .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
@@ -195,7 +191,6 @@ public class ReachFiveApi {
                 parameters: refreshRequest.dictionary(),
                 encoding: JSONEncoding.default
             )
-            .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
@@ -207,7 +202,6 @@ public class ReachFiveApi {
                 method: .get,
                 headers: tokenHeader(authToken)
             )
-            .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJson(type: Profile.self, decoder: decoder)
     }
@@ -240,7 +234,6 @@ public class ReachFiveApi {
                 encoding: JSONEncoding.default,
                 headers: tokenHeader(authToken)
             )
-            .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJson(type: Profile.self, decoder: decoder)
     }
@@ -257,7 +250,6 @@ public class ReachFiveApi {
                 encoding: JSONEncoding.default,
                 headers: tokenHeader(authToken)
             )
-            .validate(statusCode: 200..<300)
             .validate(contentType: ["application/json"])
             .responseJson(type: Profile.self, decoder: decoder)
     }
@@ -535,7 +527,6 @@ public class ReachFiveApi {
                 parameters: startPasswordlessRequest.dictionary(),
                 encoding: JSONEncoding.default
             )
-            .validate(statusCode: 200..<300)
             .responseJson(decoder: decoder)
     }
 
@@ -546,7 +537,6 @@ public class ReachFiveApi {
                 method: .post,
                 parameters: verifyPasswordlessRequest.dictionary()
             )
-            .validate(statusCode: 200..<300)
             .responseJson(type: PasswordlessVerifyResponse.self, decoder: decoder)
     }
 
@@ -558,7 +548,6 @@ public class ReachFiveApi {
                 parameters: verifyAuthCodeRequest.dictionary(),
                 encoding: JSONEncoding.default
             )
-            .validate(statusCode: 200..<300)
             .responseJson(decoder: decoder)
     }
 
@@ -568,7 +557,6 @@ public class ReachFiveApi {
                 createUrl(path: "/identity/v1/logout"),
                 method: .get
             )
-            .validate(statusCode: 200..<300)
             .responseJson(decoder: decoder)
     }
 
