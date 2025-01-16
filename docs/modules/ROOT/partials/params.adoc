@@ -1,5 +1,7 @@
 // tag::authtoken[]
-|[[authToken, authToken]]authToken `AuthToken`|Authorization token of the profile retrieved from login.
+|[[authToken, authToken]]authToken `AuthToken`
+|Authorization token of the profile retrieved from login.
+
 [cols="1,3a"]
 !===
 ! idToken `string` ! The ID token {rfc-7519}[JSON Web Token (JWT)^] that contains the profile's information.
@@ -11,6 +13,7 @@
 If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 
 ! user `OpenIdUser` ! The user's information contained in the ID token.
+
 !===
 // end::authtoken[]
 
@@ -534,3 +537,10 @@ NOTE: Both the international format and the national conventions of the account'
 // tag::viewcontroller[]
 |[[viewController,viewController]] viewController `string` | An object that manages a view hierarchy for your UIKit app.
 // end::viewcontroller[]
+
+// tag::trustedDeviceId[]
+
+|[[trustedDeviceId, trustedDeviceId]] trustedDeviceId `string`
+|The ID of the trusted device.
+
+// end::trustedDeviceId[]

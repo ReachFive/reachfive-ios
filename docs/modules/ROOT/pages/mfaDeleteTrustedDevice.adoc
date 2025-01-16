@@ -1,0 +1,38 @@
+= {docname}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().mfaDelete(<<trustedDeviceId, trustedDeviceId>>, <<authToken, authToken>>)
+----
+
+== About this command
+
+Removes an MFA trusted device for a user.
+
+== Examples
+
+[source, kotlin]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[.options]
+[cols="1,3a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tags="trustedDeviceId"]
+include::partial$params.adoc[tags="authtoken"]
+
+|===
+
+== Response
+
+`Future<Void, ReachFiveError>`
+
+=== Error response
+
+include::partial$models.adoc[tag=reachfiveerror]

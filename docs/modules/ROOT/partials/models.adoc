@@ -309,3 +309,31 @@ This is only applicable for the type `email`.
 |===
 
 // end::MfaCredentialsListResponse[]
+
+// tag::MfaTrustedDevice[]
+[cols="3,7a"]
+|===
+|Field |Description
+
+|id `string` 
+|The trusted device ID.
+
+|userId `string` 
+|The user ID.
+
+|createdAt `string`
+|The date and time when the device was trusted.
+
+|metaData `object`
+|The metadata associated with the trusted device.
+
+This includes:
+
+* ``ip``: The IP of the trusted device.
+* ``operatingSystemAgent``: The Operating System such as iOS.
+* ``userAgent``: The User Agent information.
+* ``deviceClass``: The device class such as mobile.
+* ``deviceName``: The device name such as "My Mobile".
+
+|===
+// end::MfaTrustedDevice[]

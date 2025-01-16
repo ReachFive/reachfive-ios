@@ -44,9 +44,11 @@
 ** xref:listWebAuthnCredentials.adoc[]
 ** xref:deleteWebAuthnRegistration.adoc[]
 * MFA
+** xref:mfaDeleteCredential.adoc[]
+** xref:mfaDeleteTrustedDevice.adoc[]
+** xref:mfaListCredentials.adoc[]
+** xref:mfaListTrustedDevices.adoc[]
 ** xref:mfaStart.adoc[]
 ** xref:mfaStartWithStepUp.adoc[]
 ** xref:mfaVerify.adoc[]
 ** xref:mfaVerifyWithStepUp.adoc[]
-** xref:mfaListCredentials.adoc[]
-** xref:mfaDeleteCredential.adoc[]
