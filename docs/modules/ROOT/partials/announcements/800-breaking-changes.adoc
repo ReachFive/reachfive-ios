@@ -1,0 +1,24 @@
+= Breaking changes for `iOS 8.0.0`
+
+There are several updates with the `iOS 8.0.0` release which are considered breaking.
+Read the following for an overview of the changes.
+
+[discrete]
+== xref:mfaStartWithStepUp.adoc[] is now an `enum`
+
+* You must specify the type (`AuthTokenFlow` or `LoginFlow`).
+* The `AuthToken` parameter in `AuthTokenFlow` is now mandatory.
+
+[discrete]
+== LoginFlow response for xref:loginWithPassword.adoc[] and xref:loginWithRequest.adoc[]
+
+You should be able to handle both `AchievedLogin` (success) and `OngoingStepUp` (step-up required).
+
+When the response is `OngoingStepUp`, you must call xref:mfaStart.adoc[] and xref:mfaVerify.adoc[] to complete the step-up flow.
+
+[discrete]
+== Implications for integration
+
+* *Update Your Code:* Adjust your function calls and ensure your app logic handles the new `LoginFlow` `enum` response.
+* *Prepare for MFA:* Implement any necessary handlers for `OngoingStepUp` to manage the step-up authentication flows.
+* *Review AuthToken Handling:* Since `AuthToken` is now mandatory for certain flows, ensure your code retrieves and manages it appropriately.

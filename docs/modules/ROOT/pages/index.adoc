@@ -3,6 +3,15 @@
 
 {sdk-ios-version-badge}
 
+[.expand]
+icon:warning[] Breaking changes for `8.0.0`, please read.
+
+[.expand-content]
+====
+[discrete]
+include::partial$announcements/800-breaking-changes.adoc[leveloffset=+1]
+====
+
 == Requirements
 
 The minimal iOS version of an application using the {company} iOS SDKs has to be `{min-ios-version}`.

@@ -21,29 +21,52 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 |[[startStepUp,startStepup]] stepUp
 |Contains the necessary fields to begin the step up process.
 
-This includes the following:
-
-* `authType`: The authorization type. This is `email` or `sms`.
-* `authToken`: The authorization token.
+[tabs]
+====
+`AuthTokenFlow`::
++
+--
+* `authType`: The authorization type. This is `email` or `sms`. *required*
+* `authToken`: The authorization token. *required*
 * `scope`: The defined scope such as `openid`, `email`, or `phone_number`.
 * `redirectUri`: The URL to which the user is redirected.
 This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
-* `tkn`: The one-time use authentication token.
 * `origin`: The domain of the origin.
 It must be a valid URL.
 
-You should only use one of `authToken` or `tkn`.
+[source,swift]
+----
+AppDelegate.reachfive()
+    .mfaStart(stepUp: StartStepUp.AuthTokenFlow(
+        authType: "email",
+        scope: scope,
+        redirectUri: "https://example.com/callback",
+        authToken: profileAuthToken
+    ))
+----
+--
+`LoginFlow`::
++
+--
+* `authType`: The authorization type. This is `email` or `sms`. *required*
+* `stepUpToken`: A new token generated during the login process. *required*
+* `redirectUri`: The URL to which the user is redirected.
+This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
+* `origin`: The domain of the origin.
+It must be a valid URL.
 
 [source,swift]
 ----
-...
 AppDelegate.reachfive()
-  .mfaStart(stepUp(
+    .mfaStart(stepUp: StartStepUp.LoginFlow(
         authType: "email",
-        scope: scope,
-        authToken: profileAuthToken))
-...
+        stepUpToken: "stepUpToken123",
+        redirectUri: "https://example.com/callback",
+        origin: "ios-app"
+    ))
 ----
+--
+====
 
 // end::startStepUp[]
 

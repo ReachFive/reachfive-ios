@@ -1,5 +1,14 @@
 = login(withRequest)
 
+[.expand]
+icon:warning[] Breaking changes for `8.0.0`, please read.
+
+[.expand-content]
+====
+[discrete]
+include::partial$announcements/800-breaking-changes.adoc[leveloffset=+1]
+====
+
 [.signature]
 [subs="normal"]
 ----
@@ -15,6 +24,8 @@ AppDelegate.reachfive().login(
 Logs the user in using credentials stored in the keychain.
 The system displays all available credentials in a link:https://developer.apple.com/design/human-interface-guidelines/sheets[modal sheet^].
 Credentials can be any combination of passwords, passkeys, or Sign in with Apple.
+
+In the case where step-up authentication is required, `{docname}` returns <<Response, an `OngoingStepUp` response>>.
 
 == Usage
 
@@ -45,8 +56,14 @@ include::partial$params.adoc[tag="display"]
 
 == Response
 
-Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+Type: `Future<LoginFlow.<<AchievedLogin>> | <<OngoingStepUp>>, <<ReachFiveError>>>`
 
-include::partial$models.adoc[tag=authtoken]
+If the credentials are valid, the promise returns the profile's authentication token or continues the step-up process depending on the flow. 
+Otherwise it is rejected and returns a `ReachFiveError`.
+
+include::partial$models.adoc[tag=AchievedLogin]
+
+include::partial$models.adoc[tag=OngoingStepUp]
 
 include::partial$models.adoc[tag=reachfiveerror]
+

@@ -1,26 +1,55 @@
 = mfaStart(WithStepUp)
 
+[.expand]
+icon:warning[] Breaking changes for `8.0.0`, please read.
+
+[.expand-content]
+====
+[discrete]
+include::partial$announcements/800-breaking-changes.adoc[leveloffset=+1]
+====
+
 [.signature]
-[subs="normal"]
+[subs="normal,callouts"]
 ----
 AppDelegate.reachfive().mfaStart(
-    <<startStepUp,stepUp>>
+    <<startStepUp,stepUp>>: StartStepUp.<AuthTokenFlow | LoginFlow> <1>
 )
 ----
+<1> Depending on your <<About this command, requirements>>, this will either be `AuthTokenFlow` or `LoginFlow`.
 
 == About this command
 
-Retrieves the stepup token needed for the MFA flow.
+Starts the step-up process for the MFA flow.
+This method handles two cases:
+
+* `AuthTokenFlow`: for the traditional step-up flow which requires an auth token.
+* `LoginFlow`: for initiating the step-up flow using xref:loginWithPassword.adoc[].
 
 IMPORTANT: The presence of an active session cookie is required. 
 It is automatically retrieved by the function.
 
 == Examples
 
+[tabs]
+====
+`AuthTokenFlow`::
++
+--
 [source, kotlin]
 ----
 include::example${docname}.swift[]
 ----
+--
+`LoginFlow`::
++
+--
+[source, kotlin]
+----
+include::example${docname}LoginFlow.swift[]
+----
+--
+====
 
 == Parameters
 
@@ -36,10 +65,9 @@ include::partial$params.adoc[tags="startStepUp"]
 
 `Future<ContinueStepUp, ReachFiveError>`
 
-`ContinueStepUp` contains the `challengeId`.
+// `ContinueStepUp` contains the `challengeId`.
 
 === Error response
 
 include::partial$models.adoc[tag=reachfiveerror]
 
-DELETE ** Maybe saying the ContinueStepUp has a challengeId **
