@@ -1,0 +1,64 @@
+= {docname}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().{docname}(
+    <<email>>,
+    <<phoneNumber>>,
+    <<redirectUrl>>,
+    // Optional arguments
+    <<origin>>
+)
+----
+
+== Description
+
+Request an account recovery reset for a profile. 
+It sends an email if the email address is provided and an SMS if the phone number is given.
+
+You must configure and enable the xref:docs:ROOT:email-templates.adoc#account-recovery[icon:envelope-o[] Email Account Recovery] and/or the xref:docs:ROOT:sms-templates.adoc#account-recovery[icon:phone-square[] SMS Account Recovery] templates in your {company} account settings.
+
+== Examples
+
+[tabs]
+====
+With Email icon:envelope-o[]::
++
+--
+[source, swift]
+----
+include::example${docname}WithEmail.swift[]
+----
+--
+With Phone Number icon:phone-square[]::
++
+--
+[source, swift]
+----
+include::example${docname}WithPhoneNumber.swift[]
+----
+--
+====
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="email"]
+include::partial$params.adoc[tag="phoneNumber"]
+include::partial$params.adoc[tag="origin"]
+include::partial$params.adoc[tag="redirecturl"]
+
+|===
+
+== Response
+
+Type: `Future<(), <<ReachFiveError>>>`
+
+The profile receives an email or an SMS depending if you pass an email or mobile phone number.
+If the identifier is invalid or if the templates are incomplete, the promise is rejected and returns a `ReachFiveError`.
+
+include::partial$models.adoc[tag=reachfiveerror]

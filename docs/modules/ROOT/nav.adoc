@@ -14,14 +14,13 @@
 ** Password
 *** xref:loginWithPassword.adoc[]
 *** xref:logout.adoc[]
-*** xref:requestPasswordReset.adoc[]
 *** xref:signup.adoc[]
 ** Credential Manager
+*** xref:beginAutoFillAssistedPasskeyLogin.adoc[]
+*** xref:loginWithNonDiscoverableUserName.adoc[]
 *** xref:loginWithRequest.adoc[]
 *** xref:signupWithRequest.adoc[]
 *** xref:registerNewPasskey.adoc[]
-*** xref:beginAutoFillAssistedPasskeyLogin.adoc[]
-*** xref:loginWithNonDiscoverableUserName.adoc[]
 ** Passwordless
 *** xref:addPasswordlessCallback.adoc[]
 *** xref:startPasswordless.adoc[]
@@ -33,6 +32,9 @@
 *** xref:webviewLogin.adoc[]
 *** xref:loadLoginWebview.adoc[]
 * Profile
+** Account Recovery
+*** xref:requestAccountRecovery.adoc[]
+*** xref:requestPasswordReset.adoc[]
 ** xref:getProfile.adoc[]
 ** xref:refreshAccessToken.adoc[]
 ** xref:updateEmail.adoc[]
