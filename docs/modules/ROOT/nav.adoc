@@ -2,8 +2,11 @@
 ** xref:index.adoc[]
 ** xref:guides/use-cases.adoc[]
 // ** xref:guides/auth-ios.adoc[]
-** xref:guides/passkeys.adoc[]
 ** xref:reference/errors.adoc[]
+
+.Guides icon:book[]
+** xref:guides/account-recovery.adoc[]
+** xref:guides/passkeys.adoc[]
 
 .Configuration icon:cogs[]
 ** xref:providerCreator.adoc[]
@@ -21,6 +24,7 @@
 *** xref:loginWithRequest.adoc[]
 *** xref:signupWithRequest.adoc[]
 *** xref:registerNewPasskey.adoc[]
+*** xref:resetPasskeys.adoc[]
 ** Passwordless
 *** xref:addPasswordlessCallback.adoc[]
 *** xref:startPasswordless.adoc[]
