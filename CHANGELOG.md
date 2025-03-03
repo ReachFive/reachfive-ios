@@ -3,6 +3,10 @@
 
 ## Unreleased
 
+## v8.1.0
+### New features
+- Support retrieving nested custom fields when using `getProfile`
+
 ## v8.0.0
 ### New features
 ### Breaking changes
