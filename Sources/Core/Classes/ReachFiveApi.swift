@@ -198,7 +198,7 @@ public class ReachFiveApi {
     public func getProfile(authToken: AuthToken) -> Future<Profile, ReachFiveError> {
         AF
             .request(
-                createUrl(path: "/identity/v1/userinfo", params: ["fields": profile_fields.joined(separator: ",")]),
+                createUrl(path: "/identity/v1/userinfo", params: ["fields": profile_fields.joined(separator: ","), "flatcf": "true"]),
                 method: .get,
                 headers: tokenHeader(authToken)
             )
