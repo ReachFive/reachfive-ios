@@ -111,7 +111,12 @@ This value can't be an empty string.
 
 | bio `string` | The biography of the profile.
 
-| customFields `Map<string, any>` | The custom fields of the profile.
+| customFields `Map<string, any>`
+| The custom fields of the profile.
+
+xref:docs:ROOT:custom-fields.adoc[Structured custom fields] are only available using the full key for the field (e.g., `full.custom_field.key`).
+They are not supported as nested objects.
+
 | consents `Map<string, Consent>` | The consents granted to the profile. It is a map of string keys with the associated consent object.
 
 !===
