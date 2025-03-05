@@ -2,7 +2,7 @@ AppDelegate
     .reachfive()
     .requestAccountRecovery(
         email: "john.doe@gmail.com",
-        redirectUrl: "https://example-password-reset.com"
+        redirectUrl: "reachfive-clientId://account-recovery",
     )
     .onSuccess { _ in
         // Do something

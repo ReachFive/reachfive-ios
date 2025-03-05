@@ -149,6 +149,21 @@ Object parameters:
 This helps categorize inbound traffic.
 // end::NewPasskeyRequest[]
 
+// tag::ResetPasskeyRequest[]
+|[[ResetPasskeyRequest,ResetPasskeyRequest]] withRequest `ResetPasskeyRequest`
+|Object containing parameters to send along with the request to reset a passkey.
+
+Object parameters:
+
+* `email`: The user's email.
+* `phoneNumber`: The user's phone number.
+* `verificationCode`: The verification code that confirms the user.
+* `originWebAuthn`: The origin of the webauthn call.
+* `origin`: The origin of the call.
+* `friendlyName`: The name that will be displayed by the system when presenting the passkey for login
+* `anchor`: The view that the credential provider uses if it requires user interaction.
+// end::ResetPasskeyRequest[]
+
 // tag::requestTypes[]
 |[[requestTypes,requestTypes]] `requestTypes`
 |Enum choice between password and/or passkey.

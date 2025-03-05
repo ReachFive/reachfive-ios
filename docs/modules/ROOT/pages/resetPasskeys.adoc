@@ -1,0 +1,37 @@
+= {docname}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().{docname}(
+    <<ResetPasskeyRequest,withRequest>>
+)
+----
+
+== Description
+
+Resets the passkey for a user.
+This method is the end of the flow for xref:guides/account-recovery.adoc[Account recovery].
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="ResetPasskeyRequest"]
+
+|===
+
+== Response
+
+Type: `Future<(), <<ReachFiveError>>>`
+
+include::partial$models.adoc[tag=reachfiveerror]

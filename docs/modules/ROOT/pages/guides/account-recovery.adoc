@@ -1,0 +1,77 @@
+= Account recovery
+
+You can initiate account recovery with the xref:requestAccountRecovery.adoc[] or xref:requestPasswordReset.adoc[] method, depending on your implementation of our SDK.
+In any case, account recovery is a multi-step account recovery process, which enables your users to regain access to their accounts by updating their password or resetting passkeys. 
+
+This guide outlines the steps required to implement the full flow, from triggering the recovery request to completing the action with a verification code. 
+
+Integrators must handle each step, including optional callback mechanisms, to ensure a seamless experience.
+
+// add visual here
+
+
+== Initiate the recovery request
+
+// process visual here
+
+First, you need to:
+
+. Call xref:requestAccountRecovery.adoc[] or xref:requestPasswordReset.adoc[] with the user's identifier (e.g., email or phone number).
+. Our SDK sends a verification code to the user via the configured channel (e.g., email/SMS).
++
+[tabs]
+====
+requestAccountRecovery::
++
+--
+.Email example
+[source, swift]
+----
+include::example$requestAccountRecoveryWithEmail.swift[]
+----
+--
+requestPasswordReset::
++
+--
+.Email example
+[source,swift]
+----
+include::example$requestPasswordResetWithEmail.swift[]
+----
+--
+====
+
+== Capture the verification code
+
+// second step visual here
+
+*Optionally*, implement `<<addAccountRecoveryCallback>>` to automatically receive the verification code (e.g., via deep link) if supported.
+Alternatively, provide a UI for manual verification code entry if callback isn't used.
+
+icon:warning[] You should store the code securely to <<Complete the recovery process, complete the recovery process>>.
+
+=== addAccountRecoveryCallback
+
+`addAccountRecoveryCallback` allows you to register a closure that automatically receives the verification code.
+This is typically delivered via a deep link after the user interacts with the recovery email or SMS.
+
+This optional approach eliminates the need for manual code entry by capturing the code directly in the app.
+Once set, the closure is triggered by our iOS SDK with the verification code, which can then be passed to <<Complete the recovery process, updatePassword>> or <<Complete the recovery process, resetPasskeys>> to complete the recovery process.
+
+You should set up `addAccountRecoveryCallback` when you xref:index.adoc#initialize-ios-sdk[initialize] the {company} iOS SDK.
+
+== Complete the recovery process
+
+// final step visual here
+
+To complete the recovery process, use the verification code to finalize recovery:
+
+. Call xref:updatePassword.adoc[] with the code and new password to update the user's password.
++
+This is common for account recovery or password reset flows.
+
+. Alternatively, call xref:resetPasskeys.adoc[] with the code to reset passkeys (specific to account recovery).
++
+This applies only to the account recovery flow.
+
+. Be sure to handle both success (e.g., “Recovery complete”) and errors (e.g., invalid/expired code).
