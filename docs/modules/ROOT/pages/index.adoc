@@ -286,11 +286,12 @@ See <<Info.plist reference>> for a comprehensive look at the file.
 </dict>
 </array>
 ----
-<1> The URL Scheme is the reversed Google Client ID (not {company}'s xref:docs:ROOT:clients.adoc[clientID]), which is your Google Client ID with the order of the dot-delimited fields reversed. 
+<1> The URL Scheme is the reversed Google Client ID (not {company}'s xref:docs:ROOT:clients.adoc[clientID]), which is your Google Client ID with the order of the dot-delimited fields reversed.
 For example, `com.googleusercontent.apps.abcdefg-1234567890`.
 +
 See <<Info.plist reference>> for a comprehensive look at the file.
 
+[#wechat-connect]
 === WeChat Connect
 
 As of {localdate}, WeChat is not yet available for our iOS SDK version {page-component-version}.

@@ -1,0 +1,35 @@
+= application(_:continue:restorationHandler:)
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().application(<<application, application>>, continue: <<applicationUserActivity, userActivity>>, restorationHandler: <<applicationRestorationHandler, restorationHandler>>)
+----
+
+== Description
+
+Call this method in response to the equivalent UIKit method `application(_:continue:restorationHandler:)`.
+
+Allows ReachFive to handle universal links. Currently only used by xref:index.adoc#wechat-connect[WeChat].
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Further reading
+See Apple Reference for
+link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:continue:restorationhandler:)[application(_:continue:restorationHandler:)]
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="application"]
+include::partial$params.adoc[tag="applicationUserActivity"]
+include::partial$params.adoc[tag="applicationRestorationHandler"]
+|===
