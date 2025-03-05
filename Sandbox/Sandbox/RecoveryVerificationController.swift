@@ -9,10 +9,7 @@ class RecoveryVerificationController: UIViewController {
     override func viewDidLoad() {
         AppDelegate.reachfive().addAccountRecoveryCallback { result in
             switch result {
-//            case .success(let AccountRecoveryResponse(verificationCode, email)):
             case .success(let resp):
-                let eemail = resp.email
-                let verificationCode = resp.verificationCode
                 if let recoveryEndController = self.storyboard?.instantiateViewController(withIdentifier: "AccountRecoveryEnd") as? RecoveryEndController {
                     recoveryEndController.verificationCode = resp.verificationCode
                     recoveryEndController.email = resp.email
