@@ -10,6 +10,7 @@
 
 .Configuration icon:cogs[]
 ** xref:applicationOpenUrl.adoc[]
+** xref:applicationDidFinishLaunchingWithOptions.adoc[]
 ** xref:providerCreator.adoc[]
 
 .Methods icon:code[]

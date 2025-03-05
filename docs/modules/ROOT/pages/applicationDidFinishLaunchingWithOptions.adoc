@@ -1,0 +1,34 @@
+= application(_:didFinishLaunchingWithOptions:)
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().application(<<application, application>>, didFinishLaunchingWithOptions: <<applicationLaunchOptions, launchOptions>>)
+----
+
+== Description
+
+Call this method in response to the equivalent UIKit method `application(_:didFinishLaunchingWithOptions:)`.
+
+Allows ReachFive to initialize the SDK, by fetching information from the server about the client (default scopes, enabled features) and initializing the configured providers, if any.
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Further reading
+See Apple Reference for
+link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:didfinishlaunchingwithoptions:)[application(_:didFinishLaunchingWithOptions:)]
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="application"]
+include::partial$params.adoc[tag="applicationLaunchOptions"]
+|===

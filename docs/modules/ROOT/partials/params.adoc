@@ -605,10 +605,14 @@ NOTE: Both the international format and the national conventions of the account'
 // end::application[]
 
 // tag::applicationOpenUrl[]
-|[[applicationOpenUrl,url]] open `URL` | The URL resource to open.
+|[[applicationOpenUrl,url]] url `URL` | The URL resource to open.
 // end::applicationOpenUrl[]
 
 // tag::applicationOptions[]
 |[[applicationOptions,options]] options `[UIApplication.OpenURLOptionsKey : Any]` | A dictionary of URL handling options. See link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:open:options:)[Apple Reference^].
 // end::applicationOptions[]
+
+// tag::applicationLaunchOptions[]
+|[[applicationLaunchOptions,launchOptions]] launchOptions `[UIApplication.LaunchOptionsKey: Any]?` | A dictionary indicating the reason the app was launched (if any).
+// end::applicationLaunchOptions[]
 
