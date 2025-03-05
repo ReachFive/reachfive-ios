@@ -1,9 +1,9 @@
 = Account recovery
 
 You can initiate account recovery with the xref:requestAccountRecovery.adoc[] or xref:requestPasswordReset.adoc[] method, depending on your implementation of our SDK.
-In any case, account recovery is a multi-step account recovery process, which enables your users to regain access to their accounts by updating their password or resetting passkeys. 
+In any case, account recovery is a multi-step account recovery process, which enables your users to regain access to their accounts by updating their password or resetting passkeys.
 
-This guide outlines the steps required to implement the full flow, from triggering the recovery request to completing the action with a verification code. 
+This guide outlines the steps required to implement the full flow, from triggering the recovery request to completing the action with a verification code.
 
 Integrators must handle each step, including optional callback mechanisms, to ensure a seamless experience.
 
@@ -58,7 +58,7 @@ This is typically delivered via a deep link after the user interacts with the re
 This optional approach eliminates the need for manual code entry by capturing the code directly in the app.
 Once set, the closure is triggered by our iOS SDK with the verification code, which can then be passed to <<Complete the recovery process, updatePassword>> or <<Complete the recovery process, resetPasskeys>> to complete the recovery process.
 
-You should set up `addAccountRecoveryCallback` when you xref:index.adoc#initialize-ios-sdk[initialize] the {company} iOS SDK.
+Refer to xref:addAccountRecoveryCallback.adoc[] for further details.
 
 == Complete the recovery process
 

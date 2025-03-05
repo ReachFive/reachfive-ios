@@ -9,6 +9,7 @@
 ** xref:guides/passkeys.adoc[]
 
 .Configuration icon:cogs[]
+** xref:applicationOpenUrl.adoc[]
 ** xref:providerCreator.adoc[]
 
 .Methods icon:code[]
@@ -37,6 +38,7 @@
 *** xref:loadLoginWebview.adoc[]
 * Profile
 ** Account Recovery
+*** xref:addAccountRecoveryCallback.adoc[]
 *** xref:requestAccountRecovery.adoc[]
 *** xref:requestPasswordReset.adoc[]
 ** xref:getProfile.adoc[]

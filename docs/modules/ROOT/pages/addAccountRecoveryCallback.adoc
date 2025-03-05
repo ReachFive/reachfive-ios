@@ -1,0 +1,32 @@
+= {docname}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().addAccountRecoveryCallback(<<recoveryCallback>>)
+----
+
+== Setup ==
+Before using this method, you need to setup deep link interception by using xref:applicationOpenUrl.adoc[].
+
+== About this command
+
+Add the callback that will be executed when the account recovery url is intercepted.
+Parse the link and extract the verification code.
+
+== Examples
+You would typically call this method in the controller handling the UI for manually entering the verification code:
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="recoveryCallback"]
+
+|===

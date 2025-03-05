@@ -287,7 +287,24 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 
 // tag::passwordlesscallback[]
 |[[passwordlessCallback,passwordlessCallback]] passwordlessCallback `PasswordlessCallback` | The callback that will be executed when the magic link is intercepted.
+The callback takes a `Result` with either an `AuthToken` or a `ReachFiveError`.
+!===
+! `AuthToken`! When the code exchange succeed and the user is authenticated.
+! `ReachFiveError`! When an error occured.
+!===
+
 // end::passwordlesscallback[]
+
+// tag::recoveryCallback[]
+|[[recoveryCallback,recoveryCallback]] recoveryCallback `AccountRecoveryCallback` | The callback that will be executed when the account recovery link is intercepted.
+The callback takes a `Result` with either an `AccountRecoveryResponse` or a `ReachFiveError`.
+
+!===
+! `AccountRecoveryResponse`! When the url is properly parsed and the verification code is present. Contains the profile email `string` and the verification code `string`.
+! `ReachFiveError`! When an error occured.
+!===
+
+// end::recoveryCallback[]
 
 // tag::passwordlessrequest[]
 include::partial$params.adoc[tag="email"]
@@ -400,13 +417,13 @@ Only the provided fields are updated.
 !===
 !Field !Description
 
-!Update(newValue) 
+!Update(newValue)
 !Update the field with the given new value.
 
-!Delete 
+!Delete
 !Delete the value of the field.
 
-!NoOp (the default) 
+!NoOp (the default)
 !Don't change the field.
 
 !===
@@ -582,3 +599,16 @@ NOTE: Both the international format and the national conventions of the account'
 |The ID of the trusted device.
 
 // end::trustedDeviceId[]
+
+// tag::application[]
+|[[application,application]] application `UIApplication` | The UIKit Application instance. See link:https://developer.apple.com/documentation/uikit/uiapplication[Apple Reference^].
+// end::application[]
+
+// tag::applicationOpenUrl[]
+|[[applicationOpenUrl,url]] open `URL` | The URL resource to open.
+// end::applicationOpenUrl[]
+
+// tag::applicationOptions[]
+|[[applicationOptions,options]] options `[UIApplication.OpenURLOptionsKey : Any]` | A dictionary of URL handling options. See link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:open:options:)[Apple Reference^].
+// end::applicationOptions[]
+
