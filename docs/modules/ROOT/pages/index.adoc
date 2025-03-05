@@ -112,6 +112,7 @@ Configure your application's `Info.plist` file with the following XML snippet:
 
 TIP: See <<Info.plist reference>> for a comprehensive look at the file.
 
+[#facebook-native-provider]
 === Facebook native provider
 
 This module uses the Facebook native SDK to provide a better user experience.

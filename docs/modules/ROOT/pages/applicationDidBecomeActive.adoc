@@ -1,0 +1,29 @@
+= applicationDidBecomeActive(_:)
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().applicationDidBecomeActive(<<application, application>>)
+----
+
+== Description
+
+Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/applicationdidbecomeactive(_:)[`applicationDidBecomeActive(_:)`].
+
+Used by xref:index.adoc#facebook-native-provider[Facebook].
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="application"]
+|===
