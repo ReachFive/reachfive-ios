@@ -72,7 +72,7 @@ public class ReachFiveApi {
         let defaultParams: [String: String] = [
             "platform": "ios",
             // TODO: read from the version.rb. Either directly or indirectly from Reach5.h, Info.plist...
-            "sdk": "8.0.0",
+            "sdk": "8.1.0",
             "device": deviceInfo,
         ]
 
@@ -198,7 +198,7 @@ public class ReachFiveApi {
     public func getProfile(authToken: AuthToken) -> Future<Profile, ReachFiveError> {
         AF
             .request(
-                createUrl(path: "/identity/v1/userinfo", params: ["fields": profile_fields.joined(separator: ",")]),
+                createUrl(path: "/identity/v1/userinfo", params: ["fields": profile_fields.joined(separator: ","), "flatcf": "true"]),
                 method: .get,
                 headers: tokenHeader(authToken)
             )
