@@ -601,26 +601,38 @@ NOTE: Both the international format and the national conventions of the account'
 // end::trustedDeviceId[]
 
 // tag::application[]
-|[[application,application]] application `UIApplication` | The UIKit Application instance. See link:https://developer.apple.com/documentation/uikit/uiapplication[Apple Reference^].
+|[[application,application]] application `UIApplication` 
+| The UIKit Application instance. 
+
+For more details, see link:https://developer.apple.com/documentation/uikit/uiapplication[Apple: UIApplication^].
+
 // end::application[]
 
 // tag::applicationOpenUrl[]
-|[[applicationOpenUrl,url]] url `URL` | The URL resource to open.
+|[[applicationOpenUrl,url]] url `URL` 
+| The URL resource to open.
 // end::applicationOpenUrl[]
 
 // tag::applicationOptions[]
-|[[applicationOptions,options]] options `[UIApplication.OpenURLOptionsKey : Any]` | A dictionary of URL handling options. See link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:open:options:)[Apple Reference^].
+|[[applicationOptions,options]] options `[UIApplication.OpenURLOptionsKey : Any]` 
+| A dictionary of URL handling options. 
+
+For more details, see link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:open:options:)[Apple: _:open:options:^].
+
 // end::applicationOptions[]
 
 // tag::applicationLaunchOptions[]
-|[[applicationLaunchOptions,launchOptions]] launchOptions `[UIApplication.LaunchOptionsKey: Any]?` | A dictionary indicating the reason the app was launched (if any).
+|[[applicationLaunchOptions,launchOptions]] launchOptions `[UIApplication.LaunchOptionsKey: Any]?` 
+| A dictionary indicating the reason the app was launched (if any).
 // end::applicationLaunchOptions[]
 
 // tag::applicationUserActivity[]
-|[[applicationUserActivity,userActivity]] userActivity `NSUserActivity` | The activity object containing the data associated with the task the user was performing.
+|[[applicationUserActivity,userActivity]] userActivity `NSUserActivity` 
+| The activity object containing the data associated with the task the user was performing.
 // end::applicationUserActivity[]
 
 // tag::applicationRestorationHandler[]
-|[[applicationRestorationHandler,restorationHandler]] restorationHandler `([UIUserActivityRestoring]?) -> Void` | A block to execute if your app creates objects to perform the task the user was performing.
+|[[applicationRestorationHandler,restorationHandler]] restorationHandler `([UIUserActivityRestoring]?) -> Void` 
+| A block to execute if your app creates objects to perform the task the user was performing.
 // end::applicationRestorationHandler[]
 

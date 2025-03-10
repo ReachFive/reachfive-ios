@@ -43,7 +43,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 If using another UI framework, you may not initialize provider configuration.
 <2> Your {company} domain such as `integ-sandbox.reach5.dev`.
 <3> The {company} client such as `zhU43...51nvOM`;
-<4> Initializing the {company} client.
+<4> Initializes the iOS SDK by fetching information from the server about the client.
+For more details, see xref:application/applicationDidFinishLaunchingWithOptions.adoc[].
 
 --
 Full configuration::
@@ -74,7 +75,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return app.reachfive
     }
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool { <2>
         reachfive.addPasswordlessCallback { result in
             // Check result and extract the authToken if the callback was successful, then continue your flow (for example redirect to the profile page)
         }
@@ -84,22 +85,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        reachfive.application(application, continue: userActivity, restorationHandler: restorationHandler) <2>
+        reachfive.application(application, continue: userActivity, restorationHandler: restorationHandler) <3>
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        reachfive.application(app, open: url, options: options) <3>
+        reachfive.application(app, open: url, options: options) <4>
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        reachfive.applicationDidBecomeActive(application) <4>
+        reachfive.applicationDidBecomeActive(application) <5>
     }
 }
 ----
 <1> An example of how to access the {company} object from within the app.
-<2> This method is used to handle universal links which are used by providers.
-<3> This method is used to handle callback schemes which are used by passwordless, MFA and account recovery, as well as providers.
-<4> This method is used to provide functionality to the providers.
+<2> Initializes the iOS SDK by fetching information from the server about the client.
+For more details, see xref:application/applicationDidFinishLaunchingWithOptions.adoc[].
+<3> This method is used to handle universal links which are used by providers.
+For more details, see xref:application/applicationContinueUserActivity.adoc[].
+<4> This method is used to handle callback schemes which are used by passwordless, MFA and account recovery, as well as providers.
+For more details, see xref:application/applicationOpenUrl.adoc[].
+<5> This method is used to provide functionality to the providers.
+For more details, see xref:application/applicationDidBecomeActive.adoc[].
 
 --
 ====

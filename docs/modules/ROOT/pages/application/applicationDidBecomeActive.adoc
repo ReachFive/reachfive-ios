@@ -8,6 +8,9 @@ AppDelegate.reachfive().applicationDidBecomeActive(<<application, application>>)
 
 == Description
 
+This method finalises SDK activation after launch or when resuming from the background. 
+It ensures the SDK is ready for user interaction.
+
 Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/applicationdidbecomeactive(_:)[`applicationDidBecomeActive(_:)`].
 
 Used by xref:index.adoc#facebook-native-provider[Facebook].
@@ -26,4 +29,5 @@ include::example${docname}.swift[]
 |Parameter |Description
 
 include::partial$params.adoc[tag="application"]
+
 |===

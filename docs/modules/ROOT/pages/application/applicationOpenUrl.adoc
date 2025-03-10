@@ -8,9 +8,13 @@ AppDelegate.reachfive().application(<<application, application>>, open: <<applic
 
 == Description
 
-Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:open:options:)[`application(_:open:options)`].
+Allows {company} to handle URLs in the following format:
 
-Allows ReachFive to handle URL of the form `reachfive-clientId://`, and any configured provider to handle their own native links.
+* `reachfive-clientId://`
+
+Additionally, the method allows configured providers to handle their own native links.
+
+Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:open:options:)[`application(_:open:options)`^].
 
 == Examples
 

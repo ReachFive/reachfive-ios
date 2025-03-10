@@ -9,10 +9,11 @@
 ** xref:guides/passkeys.adoc[]
 
 .Configuration icon:cogs[]
-** xref:applicationContinueUserActivity.adoc[]
-** xref:applicationDidFinishLaunchingWithOptions.adoc[]
-** xref:applicationOpenUrl.adoc[]
-** xref:applicationDidBecomeActive.adoc[]
+** `application`()
+*** xref:application/applicationDidFinishLaunchingWithOptions.adoc[_:didFinishLaunching]
+*** xref:application/applicationContinueUserActivity.adoc[_:continue:restorationHandler]
+*** xref:application/applicationOpenUrl.adoc[_:open:options]
+*** xref:application/applicationDidBecomeActive.adoc[DidBecomeActive]
 ** xref:providerCreator.adoc[]
 
 .Methods icon:code[]
