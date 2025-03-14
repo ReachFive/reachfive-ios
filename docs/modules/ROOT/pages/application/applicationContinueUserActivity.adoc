@@ -13,7 +13,7 @@ Currently, this method is only used by xref:index.adoc#wechat-connect[WeChat].
 
 Call this to enable the SDK to process activities passed to the app, such as restoring state from another device.
 
-Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:continue:restorationhandler:)[`application(_:continue:restorationHandler:)`^].
+Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/[`application(_:continue:restorationHandler:)`^].
 
 == Examples
 

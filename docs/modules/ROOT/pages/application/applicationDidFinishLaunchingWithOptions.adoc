@@ -10,7 +10,7 @@ AppDelegate.reachfive().application(<<application, application>>, didFinishLaunc
 
 Allows {company} to initialize the iOS SDK, by fetching information from the server about the client (e.g., default scopes, enabled features) and initializing any configured providers.
 
-Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:didfinishlaunchingwithoptions:)[`application(_:didFinishLaunchingWithOptions:)`^].
+Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/[`application(_:didFinishLaunchingWithOptions:)`^].
 
 == Examples
 
