@@ -89,6 +89,8 @@
 		8496EB4425DEB141005098DD /* R5PublicKeyCredentialRpEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496EB3A25DEB141005098DD /* R5PublicKeyCredentialRpEntity.swift */; };
 		8496EB4525DEB141005098DD /* R5PublicKeyCredentialUserEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496EB3B25DEB141005098DD /* R5PublicKeyCredentialUserEntity.swift */; };
 		93EFD59B741E0376303462D9 /* Pods_Reach5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBD028BD86E6BB22BBAD012C /* Pods_Reach5.framework */; };
+		990AF3422DD2146800D31780 /* VerifyEmailRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990AF3412DD2145900D31780 /* VerifyEmailRequest.swift */; };
+		990AF3442DD2154B00D31780 /* VerifyEmailResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990AF3432DD2153200D31780 /* VerifyEmailResponse.swift */; };
 		991296BF2BDBBCAF00DCEDC1 /* MfaStepUpRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991296BE2BDBBCAF00DCEDC1 /* MfaStepUpRequest.swift */; };
 		9943B0852B6953C5007AD120 /* ReachFiveMfa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9943B0842B6953C5007AD120 /* ReachFiveMfa.swift */; };
 		9943B0872B6954F1007AD120 /* MfaCredentialsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9943B0862B6954F1007AD120 /* MfaCredentialsRequest.swift */; };
@@ -181,6 +183,8 @@
 		8496EB3925DEB141005098DD /* AuthenticationToken.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationToken.swift; sourceTree = "<group>"; };
 		8496EB3A25DEB141005098DD /* R5PublicKeyCredentialRpEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = R5PublicKeyCredentialRpEntity.swift; sourceTree = "<group>"; };
 		8496EB3B25DEB141005098DD /* R5PublicKeyCredentialUserEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = R5PublicKeyCredentialUserEntity.swift; sourceTree = "<group>"; };
+		990AF3412DD2145900D31780 /* VerifyEmailRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyEmailRequest.swift; sourceTree = "<group>"; };
+		990AF3432DD2153200D31780 /* VerifyEmailResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyEmailResponse.swift; sourceTree = "<group>"; };
 		991296BE2BDBBCAF00DCEDC1 /* MfaStepUpRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MfaStepUpRequest.swift; sourceTree = "<group>"; };
 		9943B0842B6953C5007AD120 /* ReachFiveMfa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveMfa.swift; sourceTree = "<group>"; };
 		9943B0862B6954F1007AD120 /* MfaCredentialsRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MfaCredentialsRequest.swift; sourceTree = "<group>"; };
@@ -244,6 +248,7 @@
 		34689A9F22CE5CF9002970F9 /* requests */ = {
 			isa = PBXGroup;
 			children = (
+				990AF3412DD2145900D31780 /* VerifyEmailRequest.swift */,
 				3404A40B22CBA6DD002FFEDB /* AuthCodeRequest.swift */,
 				2AE533142994632F00EF97E0 /* LoginCallback.swift */,
 				34689A9822CDFC24002970F9 /* LoginProviderRequest.swift */,
@@ -352,6 +357,7 @@
 		8496EB2F25DEB021005098DD /* responses */ = {
 			isa = PBXGroup;
 			children = (
+				990AF3432DD2153200D31780 /* VerifyEmailResponse.swift */,
 				2A310F472C87794D0037A8FB /* TknMfa.swift */,
 				9958690A2C32DDC0005CD5C4 /* trustedDevices */,
 				8496EB3025DEB033005098DD /* webAuthn */,
@@ -533,6 +539,7 @@
 				2ADFF84F2BFE661300A659FE /* RequestAccountRecoveryRequest.swift in Sources */,
 				2AE5330B299462DD00EF97E0 /* ReachFiveWebviewLogin.swift in Sources */,
 				2AE5330D299462DD00EF97E0 /* CredentialManager.swift in Sources */,
+				990AF3442DD2154B00D31780 /* VerifyEmailResponse.swift in Sources */,
 				8496EB4025DEB141005098DD /* R5PublicKeyCredentialCreationOptions.swift in Sources */,
 				34E18B8A22A6985C00952EBD /* SignupRequest.swift in Sources */,
 				3417FF6622F8435F0009EC84 /* UpdatePhoneNumberRequest.swift in Sources */,
@@ -540,6 +547,7 @@
 				34F7D3E422A54AA2003A7BC0 /* ReachFiveApi.swift in Sources */,
 				8496EB2625DEAFCF005098DD /* RegistrationPublicKeyCredential.swift in Sources */,
 				8496EB2C25DEAFCF005098DD /* WebauthnSignupCredential.swift in Sources */,
+				990AF3422DD2146800D31780 /* VerifyEmailRequest.swift in Sources */,
 				34F7D3E622A54ADE003A7BC0 /* ProvidersConfigsResult.swift in Sources */,
 				34E508B222F19F7700BF9BAF /* DataRequest.swift in Sources */,
 				340AF1F9232AA32F00AA114D /* UpdatePasswordRequest.swift in Sources */,

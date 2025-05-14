@@ -206,6 +206,38 @@ public class ReachFiveApi {
             .responseJson(type: Profile.self, decoder: decoder)
     }
 
+    public func sendEmailVerification(
+        authToken: AuthToken,
+        sendEmailVerificationRequest: SendEmailVerificationRequest
+    ) -> Future<SendEmailVerificationResponse, ReachFiveError> {
+        AF
+            .request(
+                createUrl(path: "/identity/v1/send-email-verification"),
+                method: .post,
+                parameters: sendEmailVerificationRequest.dictionary(),
+                encoding: JSONEncoding.default,
+                headers: tokenHeader(authToken)
+            )
+            .validate(contentType: ["application/json"])
+            .responseJson(type: SendEmailVerificationResponse.self, decoder: decoder)
+    }
+    
+    public func verifyEmail(
+        authToken: AuthToken,
+        verifyEmailRequest: VerifyEmailRequest
+    ) -> Future<Void, ReachFiveError> {
+        AF
+            .request(
+                createUrl(path: "/identity/v1/verify-email"),
+                method: .post,
+                parameters: verifyEmailRequest.dictionary(),
+                encoding: JSONEncoding.default,
+                headers: tokenHeader(authToken)
+            )
+            .validate(contentType: ["application/json"])
+            .responseJson(decoder: decoder)
+    }
+    
     public func verifyPhoneNumber(
         authToken: AuthToken,
         verifyPhoneNumberRequest: VerifyPhoneNumberRequest

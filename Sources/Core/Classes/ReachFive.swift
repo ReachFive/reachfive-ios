@@ -11,6 +11,8 @@ public typealias MfaCredentialRegistrationCallback = (_ result: Result<(), Reach
 
 public typealias AccountRecoveryCallback = (_ result: Result<AccountRecoveryResponse, ReachFiveError>) -> Void
 
+public typealias EmailVerificationCallback = (_ result: Result<(), ReachFiveError>) -> Void
+
 //TODO
 // Tester One-tap account upgrade : https://developer.apple.com/videos/play/wwdc2020/10666/
 // Tester le MFA avec "Securing Logins with iCloud Keychain Verification Codes" https://developer.apple.com/documentation/authenticationservices/securing_logins_with_icloud_keychain_verification_codes
@@ -20,6 +22,7 @@ public class ReachFive: NSObject {
     var passwordlessCallback: PasswordlessCallback? = nil
     var mfaCredentialRegistrationCallback: MfaCredentialRegistrationCallback? = nil
     var accountRecoveryCallback: AccountRecoveryCallback? = nil
+    var emailVerificationCallback: EmailVerificationCallback? = nil
     var state: State = .NotInitialized
     public let sdkConfig: SdkConfig
     let providersCreators: Array<ProviderCreator>
@@ -53,17 +56,20 @@ public class ReachFive: NSObject {
         let recovery = URLComponents(string: sdkConfig.accountRecoveryUri)
         let mfa = URLComponents(string: sdkConfig.mfaUri)
         let passwordless = URLComponents(string: sdkConfig.redirectUri)
+        let emailVerification = URLComponents(string: sdkConfig.emailVerificationUri)
         
         switch (receivedUrl?.host, receivedUrl?.path) {
         
         case (recovery?.host, recovery?.path): interceptAccountRecovery(url)
         case (mfa?.host, mfa?.path): interceptVerifyMfaCredential(url)
         case (passwordless?.host, passwordless?.path): interceptPasswordless(url)
+        case (emailVerification?.host, emailVerification?.path): interceptEmailVerification(url)
             
             // fallback to old way of doing things if url components are not properly extracted
         case ("account-recovery", _): interceptAccountRecovery(url)
         case ("mfa", _): interceptVerifyMfaCredential(url)
         case ("callback", _): interceptPasswordless(url)
+        case ("verify-email", _): interceptEmailVerification(url)
         
         default: interceptPasswordless(url)
         }

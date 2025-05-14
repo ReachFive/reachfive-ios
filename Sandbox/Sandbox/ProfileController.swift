@@ -33,7 +33,8 @@ class ProfileController: UIViewController {
     var clearTokenObserver: NSObjectProtocol?
     var setTokenObserver: NSObjectProtocol?
     
-    var emailVerifyNotification: NSObjectProtocol?
+    var emailMfaVerifyNotification: NSObjectProtocol?
+    var emailVerificationNotification: NSObjectProtocol?
     
     var propertiesToDisplay: [Field] = []
     let mfaRegistrationAvailable = ["Email", "Phone Number"]
@@ -49,7 +50,7 @@ class ProfileController: UIViewController {
     override func viewDidLoad() {
         print("ProfileController.viewDidLoad")
         super.viewDidLoad()
-        emailVerifyNotification = NotificationCenter.default.addObserver(forName: .DidReceiveMfaVerifyEmail, object: nil, queue: nil) {
+        emailMfaVerifyNotification = NotificationCenter.default.addObserver(forName: .DidReceiveMfaVerifyEmail, object: nil, queue: nil) {
             (note) in
             if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
                 self.dismiss(animated: true)
@@ -60,6 +61,21 @@ class ProfileController: UIViewController {
                     self.fetchProfile()
                 case .failure(let error):
                     let alert = AppDelegate.createAlert(title: "Email mfa registering failed", message: "Error: \(error.message())")
+                    self.present(alert, animated: true)
+                }
+            }
+        }
+        emailVerificationNotification = NotificationCenter.default.addObserver(forName: .DidReceiveEmailVerificationCallback, object: nil, queue: nil) {
+            (note) in
+            if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
+                self.dismiss(animated: true)
+                switch result {
+                case .success():
+                    let alert = AppDelegate.createAlert(title: "Email validation success", message: "Email validation success")
+                    self.present(alert, animated: true)
+                    self.fetchProfile()
+                case .failure(let error):
+                    let alert = AppDelegate.createAlert(title: "Email validation failed", message: "Error: \(error.message())")
                     self.present(alert, animated: true)
                 }
             }

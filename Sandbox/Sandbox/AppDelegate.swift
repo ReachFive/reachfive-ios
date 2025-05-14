@@ -89,7 +89,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("addMfaCredentialRegistrationCallback \(result)")
             NotificationCenter.default.post(name: .DidReceiveMfaVerifyEmail, object: nil, userInfo: ["result": result])
         }
-
+        reachfive.addEmailVerificationCallback { result in
+            print("addEmailVerificationCallback \(result)")
+            NotificationCenter.default.post(name: .DidReceiveEmailVerificationCallback, object: nil, userInfo: ["result": result])
+        }
+        
         let appleIDProvider = ASAuthorizationAppleIDProvider()
         // Ceci est l'id tel que renvoyé par Apple dans idToken.sub ou AppleIDCredential.user
         appleIDProvider.getCredentialState(forUserID: "000707.3cc381460bce4bcc96e6fd5abdc1f121.1742") { (credentialState, error) in
@@ -259,4 +263,5 @@ extension UIViewController {
 extension NSNotification.Name {
     static let DidReceiveLoginCallback = Notification.Name("DidReceiveLoginCallback")
     static let DidReceiveMfaVerifyEmail = Notification.Name("DidReceiveMfaVerifyEmail")
+    static let DidReceiveEmailVerificationCallback = Notification.Name("DidReceiveEmailVerificationCallback")
 }

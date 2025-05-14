@@ -22,6 +22,48 @@ extension ProfileController {
         return dateFormatter.string(from: lastLogin)
     }
 
+    func emailVerificationCode(authToken: AuthToken) {
+        AppDelegate.reachfive()
+            .sendEmailVerification(authToken: authToken)
+            .onFailure { error in
+                self.present(AppDelegate.createAlert(title: "Email verification", message: "Error: \(error.message())"), animated: true)
+            }
+            .onSuccess{ emailVerificationResponse in
+                switch emailVerificationResponse {
+                case EmailVerificationResponse.Success:
+                    let alert = AppDelegate.createAlert(title: "Verify Email", message: "Success")
+                    self.present(alert, animated: true)
+                    self.fetchProfile()
+                case let EmailVerificationResponse.VerificationNeeded(continueEmailVerification):
+                    let alert = UIAlertController(title: "Email verification", message: "Please enter the code you received by Email", preferredStyle: .alert)
+                    alert.addTextField { textField in
+                        textField.placeholder = "Verification code"
+                    }
+                    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+                    let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
+                        guard let verificationCode = alert.textFields?[0].text else {
+                            print("VerificationCode cannot be empty")
+                            return
+                        }
+                        continueEmailVerification.verify(code: verificationCode)
+                            .onSuccess { succ in
+                                let alert = AppDelegate.createAlert(title: "Verify Email", message: "Success")
+                                self.present(alert, animated: true)
+                                self.fetchProfile()
+                            }
+                            .onFailure { error in
+                                let alert = AppDelegate.createAlert(title: "Email verification failure", message: "Error: \(error.message())")
+                                self.present(alert, animated: true)
+                            }
+                    }
+                    alert.addAction(cancelAction)
+                    alert.addAction(submitVerificationCode)
+                    alert.preferredAction = submitVerificationCode
+                    self.present(alert, animated: true)
+                }
+            }
+    }
+    
     //TODO return a future like mfaStart or directly update the profile info here
     func addPhoneNumber(shouldReplaceExisting: Bool, authToken: AuthToken) {
         let titre = if shouldReplaceExisting { "Updated phone number" } else { "New Phone Number" }
@@ -181,6 +223,17 @@ extension ProfileController: UITableViewDataSource {
             }
             children.append(copy)
 
+            
+            if(field.name == "Email") {
+                if(field.value != nil && field.value!.contains(" ✘")) {
+                    let emailVerification = UIAction(title: "Verify Email", image: UIImage(systemName: "lock")) { action in
+                        self.emailVerificationCode(authToken: token)
+                    }
+                    children.append(emailVerification)
+                }
+                
+            }
+            
             // MFA registering button
             if (self.mfaRegistrationAvailable.contains(field.name)) {
                 let credential: Credential = switch field.name {

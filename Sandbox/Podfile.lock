@@ -8,7 +8,7 @@ PODS:
     - AppAuth/Core
   - BrightFutures (8.2.0)
   - CryptoSwift (1.8.4)
-  - DeviceKit (5.5.0)
+  - DeviceKit (5.6.0)
   - FBAEMKit (17.4.0):
     - FBSDKCoreKit_Basics (= 17.4.0)
   - FBSDKCoreKit (17.4.0):
@@ -71,7 +71,7 @@ SPEC CHECKSUMS:
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   BrightFutures: 67e0e8cd974ab9f6c04650cc64153f7adf1ec489
   CryptoSwift: e64e11850ede528a02a0f3e768cec8e9d92ecb90
-  DeviceKit: d83e38ca196a4ebf0cc5f37d6f0316a24b794d5b
+  DeviceKit: 9f2e0b68984a384f864b0f4e40a54bae43636bd8
   FBAEMKit: 58cb5f302cdd715a56d4c1d0dfdd2e423ac1421a
   FBSDKCoreKit: 94d7461d0cecf441b1ba7c41acfff41daa8ccd41
   FBSDKCoreKit_Basics: 151b43db8b834d3f0e02f95d36a44ffd36265e45
@@ -85,4 +85,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: d9a60d02a850d62859602414096b80b721aba150
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2
