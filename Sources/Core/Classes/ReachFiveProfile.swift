@@ -30,9 +30,9 @@ public extension ReachFive {
     }
     
     func sendEmailVerification(authToken: AuthToken, redirectUrl: String? = nil) -> Future<EmailVerificationResponse, ReachFiveError>{
-        let sendEmailVerificationRequest = SendEmailVerificationRequest(redirectUrl: redirectUrl)
+        let sendEmailVerificationRequest = SendEmailVerificationRequest(redirectUrl: redirectUrl ?? sdkConfig.emailVerificationUri)
         guard let email = authToken.user?.email else {
-            fatalError("The email is not present in authToken")
+            return Future(error: .TechnicalError(reason: "The email is not present in authToken"))
         }
         
         return reachFiveApi

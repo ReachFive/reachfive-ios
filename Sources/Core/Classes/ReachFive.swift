@@ -69,7 +69,6 @@ public class ReachFive: NSObject {
         case ("account-recovery", _): interceptAccountRecovery(url)
         case ("mfa", _): interceptVerifyMfaCredential(url)
         case ("callback", _): interceptPasswordless(url)
-        case ("verify-email", _): interceptEmailVerification(url)
         
         default: interceptPasswordless(url)
         }
