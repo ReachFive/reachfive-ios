@@ -4,17 +4,15 @@ import BrightFutures
 public class ContinueEmailVerification {
     private let reachfive: ReachFive
     private let authToken: AuthToken
-    private let email: String
     
-    fileprivate init(reachFive: ReachFive, authToken: AuthToken, email: String) {
+    fileprivate init(reachFive: ReachFive, authToken: AuthToken) {
         self.authToken = authToken
         self.reachfive = reachFive
-        self.email = email
     }
     
-    public func verify(code: String, freshAuthToken: AuthToken? = nil) -> Future<Void, ReachFiveError> {
+    public func verify(code: String, email: String, freshAuthToken: AuthToken? = nil) -> Future<Void, ReachFiveError> {
         let userAuthToken = freshAuthToken ?? self.authToken
-        let verifyEmailRequest = VerifyEmailRequest(email: self.email, verificationCode: code)
+        let verifyEmailRequest = VerifyEmailRequest(email: email, verificationCode: code)
         return self.reachfive.reachFiveApi.verifyEmail(authToken: userAuthToken, verifyEmailRequest: verifyEmailRequest)
     }
 }
@@ -31,16 +29,13 @@ public extension ReachFive {
     
     func sendEmailVerification(authToken: AuthToken, redirectUrl: String? = nil) -> Future<EmailVerificationResponse, ReachFiveError>{
         let sendEmailVerificationRequest = SendEmailVerificationRequest(redirectUrl: redirectUrl ?? sdkConfig.emailVerificationUri)
-        guard let email = authToken.user?.email else {
-            return Future(error: .TechnicalError(reason: "The email is not present in authToken"))
-        }
         
         return reachFiveApi
             .sendEmailVerification(authToken: authToken, sendEmailVerificationRequest: sendEmailVerificationRequest)
             .map { resp in
                 switch resp.verificationEmailSent {
                 case false: .Success
-                case true : .VerificationNeeded(ContinueEmailVerification(reachFive: self, authToken: authToken, email: email))
+                case true : .VerificationNeeded(ContinueEmailVerification(reachFive: self, authToken: authToken))
                 }
             }
     }

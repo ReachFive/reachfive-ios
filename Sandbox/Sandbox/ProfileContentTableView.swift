@@ -22,7 +22,7 @@ extension ProfileController {
         return dateFormatter.string(from: lastLogin)
     }
 
-    func emailVerificationCode(authToken: AuthToken) {
+    func emailVerificationCode(authToken: AuthToken, email: String) {
         AppDelegate.reachfive()
             .sendEmailVerification(authToken: authToken)
             .onFailure { error in
@@ -45,7 +45,7 @@ extension ProfileController {
                             print("VerificationCode cannot be empty")
                             return
                         }
-                        continueEmailVerification.verify(code: verificationCode)
+                        continueEmailVerification.verify(code: verificationCode, email: email)
                             .onSuccess { succ in
                                 let alert = AppDelegate.createAlert(title: "Verify Email", message: "Success")
                                 self.present(alert, animated: true)
@@ -226,8 +226,9 @@ extension ProfileController: UITableViewDataSource {
             
             if(field.name == "Email") {
                 if(field.value != nil && field.value!.contains(" ✘")) {
+                    let email = field.value!.split(separator: " ").first
                     let emailVerification = UIAction(title: "Verify Email", image: UIImage(systemName: "lock")) { action in
-                        self.emailVerificationCode(authToken: token)
+                        self.emailVerificationCode(authToken: token, email: email!.base)
                     }
                     children.append(emailVerification)
                 }
