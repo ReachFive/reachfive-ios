@@ -235,7 +235,8 @@ TIP: For more, see our xref:docs:ROOT:email-address-management.adoc#changing-ema
 // end::updateEmail[]
 
 // tag::email[]
-|[[email,email]] email `string` | The email address of the profile.
+|[[email,email]] email `string` | 
+The email address of the profile.
 // end::email[]
 
 // tag::freshauthtoken[]
@@ -533,9 +534,24 @@ Allowed values are `female`, `male` and `other`.
 // end::origin[]
 
 // tag::redirecturl[]
-|[[redirectUrl,redirectUrl]] redirectUrl `string` | The URL to which the user is redirected.
 
-NOTE: This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
+ifeval::["{docname}" != "sendEmailVerification"]
+
+|[[redirectUrl,redirectUrl]] redirectUrl `string` 
+| The URL to which the user is redirected.
+
+This URL must be whitelisted in the `Allowed Callback URLs` field of your {company} client settings.
+
+endif::[]
+
+ifeval::["{docname}" == "sendEmailVerification"]
+
+|[[redirectUrl,redirectUrl]] redirectUrl `string` 
+| *optional* The URL to which the user will be redirected after clicking the verification link in the email. 
+
+This URL must be whitelisted in the `Allowed Callback URLs` field of your {company} client settings.
+
+endif::[]
 
 // end::redirecturl[]
 
@@ -562,11 +578,15 @@ Both the international format and the national conventions of the account's coun
 // end::username[]
 
 // tag::verificationcode[]
-|[[verificationCode{sdk-code-anchor}]]verificationCode `string` | The verification code sent by email or SMS.
+
+|[[verificationCode{sdk-code-anchor}]]verificationCode `string` 
+| The verification code sent by email or SMS.
+
 // end::verificationcode[]
 
 // tag::code[]
-|[[code,code]]code `string` | The verification code sent by email or SMS.
+|[[code,code]]code `string` 
+| The verification code sent to the user.
 // end::code[]
 
 // tag::verifyauthcoderequest[]

@@ -1,0 +1,54 @@
+= verifyEmail
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().verifyEmail(<<authToken>>, <<code>>, <<email>>)
+----
+
+== Description
+
+Confirms the user's email address using the provided verification code. 
+This method is called after the user receives the verification email and inputs the code.
+
+If successful, the email is marked as verified in the user's profile.
+
+[NOTE]
+====
+* The profile must have been granted the `full_write` scope at the last authentication.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+:sdk-fresh-at-desc: authToken
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="authtoken"]
+include::partial$params.adoc[tag="code"]
+include::partial$params.adoc[tag="email"]
+
+|===
+
+== Response
+
+Type: `Future<Void, ReachFiveError>`
+
+If verified, the response indicates "Successfully verified email".
+If the email is already verified, the response indicates "Email already verified".
+
+The promise is rejected and returns a `ReachFiveError` if:
+
+* The parameters are invalid.
+* The verification code is incorrect or expired.
+
+include::partial$models.adoc[tag=reachfiveerror]

@@ -1,0 +1,58 @@
+= {docname}
+
+[.signature]
+[subs="normal,callouts"]
+----
+AppDelegate.reachfive().{docname}(<<authToken>>, <<redirectUrl>>) <1>
+----
+<1> `redirectUrl` is optional.
+
+== Description
+
+Initiates the email verification process by sending a verification email to the user's registered email address. 
+The email contains a unique verification code required to confirm the email address.
+
+This method requires the user to be authenticated and is typically used after signup or an email update.
+
+[NOTE]
+====
+* You should configure and enable the xref:docs:ROOT:email-templates.adoc#verify-email[Verify email] template in the account's settings.
+====
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="authtoken"]
+include::partial$params.adoc[tag="redirecturl"]
+
+|===
+
+== Response
+
+Type: `Future<EmailVerificationResponse, ReachFiveError>`
+
+The response is an `EmailVerificationResponse` enum with two cases:
+
+* `.Success`: Indicates the email verification process completed without requiring further action.
+* `.VerificationNeeded(ContinueEmailVerification)`: Indicates a verification email was sent, and further action (e.g., entering a verification code) is required to <<Completing the flow icon:random[], complete the process>>. 
+
+The promise is rejected and returns a `ReachFiveError` if:
+
+* The parameters are invalid.
+* The email template is incomplete.
+
+include::partial$models.adoc[tag=reachfiveerror]
+
+=== Completing the flow icon:random[]
+
+Use `continueEmailVerification.verify(code: String, email: String, freshAuthToken: AuthToken? = nil)` or xref:verifyEmail.adoc[] to complete the verification.
