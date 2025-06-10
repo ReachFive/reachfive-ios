@@ -3,6 +3,10 @@
 
 ## Unreleased
 
+## v8.2.0
+### New features
+- Add method `sendEmailVerification` and `verifyEmail` to verify email identifier
+
 ## v8.1.0
 ### New features
 - Support retrieving nested custom fields when using `getProfile`
