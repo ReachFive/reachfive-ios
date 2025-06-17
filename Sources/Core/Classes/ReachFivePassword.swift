@@ -7,7 +7,7 @@ public enum LoginFlow {
 }
 
 public extension ReachFive {
-    func signup(profile: ProfileSignupRequest, redirectUrl: String? = nil, scope: [String]? = nil, origin: String? = nil) -> Future<AuthToken, ReachFiveError> {
+    func signup(profile: ProfileSignupRequest, redirectUrl: String? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> AuthToken {
         let signupRequest = SignupRequest(
             clientId: sdkConfig.clientId,
             data: profile,
@@ -15,9 +15,9 @@ public extension ReachFive {
             redirectUrl: redirectUrl,
             origin: origin
         )
-        return reachFiveApi
+        let token = try await reachFiveApi
             .signupWithPassword(signupRequest: signupRequest)
-            .flatMap { AuthToken.fromOpenIdTokenResponseFuture($0) }
+        return try AuthToken.fromOpenIdTokenResponse(openIdTokenResponse: token).get()
     }
 
     func loginWithPassword(
@@ -56,5 +56,37 @@ public extension ReachFive {
                         }
                 }
             }
+    }
+
+    //TODO Avec le Reach5 version X qui sera pur async/await, livrer un Reach5FutureBridge (un fork de reachfive-ios) qui ajoutera aussi les méthodes actuelles avec les Future et qui utilisera de manière sous-jacente les version async/await
+    // On ne garde pas de différentes branches dans Reach5, mais le legacy sera géré dans Reach5FutureBridge.
+    // Pas de nouvelle version de la sandbox, migrer la sandbox actuelle pour utiliser les fonctions async/await. La version Future sera dans Reach5FutureBridge.
+    func loginWithPasswordAsync(
+        email: String? = nil,
+        phoneNumber: String? = nil,
+        customIdentifier: String? = nil,
+        password: String,
+        scope: [String]? = nil,
+        origin: String? = nil
+    ) async throws -> LoginFlow {
+        let strScope = (scope ?? self.scope).joined(separator: " ")
+        let loginRequest = LoginRequest(
+            email: email,
+            phoneNumber: phoneNumber,
+            customIdentifier: customIdentifier,
+            password: password,
+            grantType: "password",
+            clientId: sdkConfig.clientId,
+            scope: strScope,
+            origin: origin
+        )
+        print("async loginWithPassword")
+        let resp = try await reachFiveApi.loginWithPasswordAsync(loginRequest: loginRequest)
+        if resp.mfaRequired == true {
+            throw ReachFiveError.AuthFailure(reason: "MfaRequired", apiError: nil)
+        } else {
+            let res = try await self.loginCallbackAsync(tkn: resp.tkn, scopes: scope, origin: origin)
+            return .AchievedLogin(authToken: res)
+        }
     }
 }

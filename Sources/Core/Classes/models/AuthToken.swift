@@ -31,7 +31,7 @@ public class AuthToken: Codable {
         Future(result: AuthToken.fromOpenIdTokenResponse(openIdTokenResponse: openIdTokenResponse))
     }
     
-    static func fromOpenIdTokenResponse(openIdTokenResponse: AccessTokenResponse) -> Result<AuthToken, ReachFiveError> {
+    public static func fromOpenIdTokenResponse(openIdTokenResponse: AccessTokenResponse) -> Result<AuthToken, ReachFiveError> {
         if let token = openIdTokenResponse.idToken {
             return fromIdToken(token).flatMap { user in
                 .success(withUser(openIdTokenResponse, user))

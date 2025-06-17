@@ -83,4 +83,35 @@ extension DataRequest {
         
         return promise.future
     }
+    
+//    func responseJsonAsync1<T: Decodable>(type: T.Type, decoder: JSONDecoder) async throws -> T {
+//        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<T, Error>) in
+//            responseJson(decoder: decoder)
+//                .onSuccess { <#()#> in
+//                    <#code#>
+//                }
+//        }
+//    }
+//
+    func responseJsonAsync<T: Decodable>(type: T.Type, decoder: JSONDecoder) async throws -> T {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<T, Error>) in
+            responseData { responseData in
+                switch responseData.result {
+                case let .failure(error):
+                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
+                    
+                case let .success(data):
+                    let status = responseData.response?.statusCode
+                    if self.isSuccess(status) {
+                        continuation.resume(with: self.parseJson(json: data, type: T.self, decoder: decoder))
+                    } else {
+                        switch self.parseJson(json: data, type: ApiError.self, decoder: decoder) {
+                        case .success(let value): continuation.resume(throwing: self.handleResponseStatus(status: status, apiError: value))
+                        case .failure(let error): continuation.resume(throwing: error)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -30,19 +30,26 @@ class LoginWithPasswordController: UIViewController {
     }
     
     @IBAction func login(_ sender: Any) {
-        let email = emailInput.text
-        let phoneNumber = phoneNumberInput.text
-        let customIdentifier = customIdentifierInput.text
-        let password = passwordInput.text ?? ""
-        
-        AppDelegate.reachfive()
-            .loginWithPassword(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")
-            .onSuccess { resp in
+        Task { @MainActor in
+            let email = emailInput.text
+            let phoneNumber = phoneNumberInput.text
+            let customIdentifier = customIdentifierInput.text
+            let password = passwordInput.text ?? ""
+            
+            print("async loginWithPassword")
+            do {
+                let resp = try await AppDelegate.reachfive()
+                    .loginWithPasswordAsync(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")
                 self.error.text = nil
-                self.handleLoginFlow(flow: resp)
+                handleLoginFlow(flow: resp)
+            } catch {
+                switch error {
+                case let rfe as ReachFiveError:
+                    self.error.text = rfe.message()
+                default:
+                    self.error.text = error.localizedDescription
+                }
             }
-            .onFailure { error in
-                self.error.text = error.message()
-            }
+        }
     }
 }

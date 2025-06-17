@@ -116,8 +116,8 @@ public class ReachFiveApi {
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
 
-    public func signupWithPassword(signupRequest: SignupRequest) -> Future<AccessTokenResponse, ReachFiveError> {
-        AF
+    public func signupWithPassword(signupRequest: SignupRequest) async throws -> AccessTokenResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/signup-token"),
                 method: .post,
@@ -125,7 +125,7 @@ public class ReachFiveApi {
                 encoding: JSONEncoding.default
             )
             .validate(contentType: ["application/json"])
-            .responseJson(type: AccessTokenResponse.self, decoder: decoder)
+            .responseJsonAsync(type: AccessTokenResponse.self, decoder: decoder)
     }
 
     public func loginWithPassword(loginRequest: LoginRequest) -> Future<TknMfa, ReachFiveError> {
@@ -140,8 +140,24 @@ public class ReachFiveApi {
             .responseJson(type: TknMfa.self, decoder: decoder)
     }
 
+    public func loginWithPasswordAsync(loginRequest: LoginRequest) async throws -> TknMfa {
+        try await AF
+            .request(
+                createUrl(path: "/identity/v1/password/login"),
+                method: .post,
+                parameters: loginRequest.dictionary(),
+                encoding: JSONEncoding.default
+            )
+            .validate(contentType: ["application/json"])
+            .responseJsonAsync(type: TknMfa.self, decoder: decoder)
+    }
+
     public func loginCallback(loginCallback: LoginCallback) -> Future<String, ReachFiveError> {
         authorize(params: loginCallback.dictionary() as? [String: String])
+    }
+
+    public func loginCallbackAsync(loginCallback: LoginCallback) async throws -> String {
+        return try await authorizeAsync(params: loginCallback.dictionary() as? [String: String])
     }
 
     public func authorize(params: [String: String?]?) -> Future<String, ReachFiveError> {
@@ -171,6 +187,32 @@ public class ReachFiveApi {
         return promise.future
     }
 
+    public func authorizeAsync(params: [String: String?]?) async throws -> String {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
+            AF
+                .request(
+                    createUrl(path: "/oauth/authorize", params: params),
+                    method: .get
+                )
+                .redirect(using: Redirector.doNotFollow)
+                .validate(statusCode: 300...308) //TODO pas de 305/306
+                .response { responseData in
+                    let callbackURL = responseData.response?.allHeaderFields["Location"] as? String
+                    guard let callbackURL else {
+                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No location"))
+                        return
+                    }
+                    let params = URLComponents(string: callbackURL)?.queryItems
+                    let code = params?.first(where: { $0.name == "code" })?.value
+                    guard let code else {
+                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params)))
+                        return
+                    }
+                    continuation.resume(returning: code)
+                }
+        }
+    }
+
     public func authWithCode(authCodeRequest: AuthCodeRequest) -> Future<AccessTokenResponse, ReachFiveError> {
         AF
             .request(
@@ -182,7 +224,16 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
-
+    
+    public func authWithCodeAsync(authCodeRequest: AuthCodeRequest) async throws -> AccessTokenResponse {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<AccessTokenResponse, Error>) in
+            authWithCode(authCodeRequest: authCodeRequest)
+                .onComplete { (res: Result<AccessTokenResponse, ReachFiveError>) in
+                    continuation.resume(with: res)
+                }
+        }
+    }
+    
     public func refreshAccessToken(_ refreshRequest: RefreshRequest) -> Future<AccessTokenResponse, ReachFiveError> {
         AF
             .request(
