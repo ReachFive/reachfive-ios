@@ -16,7 +16,7 @@ public extension ReachFive {
 
     /// Signup with a passkey
     @available(iOS 16.0, *)
-    func signup(withRequest request: PasskeySignupRequest) -> Future<AuthToken, ReachFiveError> {
+    func signup(withRequest request: PasskeySignupRequest) -> Result<AuthToken, ReachFiveError> {
         let domain = sdkConfig.domain
         let signupOptions = SignupOptions(
             origin: request.originWebAuthn ?? "https://\(domain)",
@@ -37,7 +37,7 @@ public extension ReachFive {
     /// - Returns: an AuthToken when the user was successfully logged in, or a ReachFiveError
     @available(macCatalyst, unavailable)
     @available(iOS 16.0, *)
-    func beginAutoFillAssistedPasskeyLogin(withRequest request: NativeLoginRequest) -> Future<AuthToken, ReachFiveError> {
+    func beginAutoFillAssistedPasskeyLogin(withRequest request: NativeLoginRequest) -> Result<AuthToken, ReachFiveError> {
         credentialManager.beginAutoFillAssistedPasskeySignIn(request: adapt(request))
     }
 
@@ -47,7 +47,7 @@ public extension ReachFive {
     ///   - requestTypes: choose between Password and/or Passkey
     ///   - mode: choose the behavior when there are no credentials available
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
-    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) -> Future<LoginFlow, ReachFiveError> {
+    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) -> Result<LoginFlow, ReachFiveError> {
         let appleProvider = providers.first { $0.name == AppleProvider.NAME } as? ConfiguredAppleProvider
         return credentialManager.login(withRequest: adapt(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider)
     }
@@ -59,7 +59,7 @@ public extension ReachFive {
     ///   - requestTypes: only passkey are supported for now
     ///   - mode: choose the behavior when there are no credentials available
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
-    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) -> Future<AuthToken, ReachFiveError> {
+    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) -> Result<AuthToken, ReachFiveError> {
         credentialManager.login(withNonDiscoverableUsername: username, forRequest: adapt(request), usingModalAuthorizationFor: requestTypes, display: mode)
     }
 
@@ -69,7 +69,7 @@ public extension ReachFive {
     ///   - authToken: the token for the currently logged-in user
     /// - Returns: A ReachFiveError, or nothing when the Registration was successfull.
     @available(iOS 16.0, *)
-    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) -> Future<(), ReachFiveError> {
+    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) -> Result<(), ReachFiveError> {
         let domain = sdkConfig.domain
         let originWebAuthn = request.originWebAuthn ?? "https://\(domain)"
         //TODO supprimer l'ancienne passkey du server
@@ -77,7 +77,7 @@ public extension ReachFive {
     }
 
     @available(iOS 16.0, *)
-    func resetPasskeys(withRequest request: ResetPasskeyRequest) -> Future<(), ReachFiveError> {
+    func resetPasskeys(withRequest request: ResetPasskeyRequest) -> Result<(), ReachFiveError> {
         let domain = sdkConfig.domain
         let originWebAuthn = request.originWebAuthn ?? "https://\(domain)"
         return credentialManager.resetPasskeys(withRequest: ResetPasskeyRequest(verificationCode: request.verificationCode, friendlyName: request.friendlyName, anchor: request.anchor, email: request.email, phoneNumber: request.phoneNumber, originWebAuthn: originWebAuthn, origin: request.origin))

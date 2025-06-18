@@ -45,7 +45,7 @@ class ConfiguredAppleProvider: NSObject, Provider {
         scope: [String]?,
         origin: String,
         viewController: UIViewController?
-    ) -> Future<AuthToken, ReachFiveError> {
+    ) -> Result<AuthToken, ReachFiveError> {
         guard let window = viewController?.view.window else { fatalError("The view was not in the app's view hierarchy!") }
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
         return credentialManager.login(withRequest: NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin), usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self).map { LoginFlow in
@@ -72,7 +72,7 @@ class ConfiguredAppleProvider: NSObject, Provider {
         true
     }
 
-    public func logout() -> Future<(), ReachFiveError> {
+    public func logout() -> Result<(), ReachFiveError> {
         Future(value: ())
     }
 

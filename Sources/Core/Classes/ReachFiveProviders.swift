@@ -10,8 +10,8 @@ public extension ReachFive {
         providers
     }
 
-    func reinitialize() -> Future<[Provider], ReachFiveError> {
-        reachFiveApi.clientConfig().flatMap({ clientConfig -> Future<[Provider], ReachFiveError> in
+    func reinitialize() -> Result<[Provider], ReachFiveError> {
+        reachFiveApi.clientConfig().flatMap({ clientConfig -> Result<[Provider], ReachFiveError> in
             self.clientConfig = clientConfig
             self.scope = clientConfig.scope.components(separatedBy: " ")
             let variants = Dictionary(uniqueKeysWithValues: self.providersCreators.map { ($0.name, $0.variant) })
@@ -24,7 +24,7 @@ public extension ReachFive {
         })
     }
 
-    func initialize() -> Future<[Provider], ReachFiveError> {
+    func initialize() -> Result<[Provider], ReachFiveError> {
         switch state {
         case .NotInitialized:
             return reinitialize()

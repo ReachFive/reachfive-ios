@@ -12,7 +12,7 @@ public extension ReachFive {
         self.passwordlessCallback = passwordlessCallback
     }
 
-    func startPasswordless(_ request: PasswordLessRequest) -> Future<(), ReachFiveError> {
+    func startPasswordless(_ request: PasswordLessRequest) -> Result<(), ReachFiveError> {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
         switch request {
@@ -41,7 +41,7 @@ public extension ReachFive {
         }
     }
 
-    func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) -> Future<AuthToken, ReachFiveError> {
+    func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) -> Result<AuthToken, ReachFiveError> {
         let pkce: Pkce? = storage.take(key: pkceKey)
         guard let pkce else {
             return Future(error: .TechnicalError(reason: "Pkce not found"))

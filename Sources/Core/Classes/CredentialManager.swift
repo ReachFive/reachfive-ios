@@ -60,7 +60,7 @@ public class CredentialManager: NSObject {
 
     // MARK: - Signup
     @available(iOS 16.0, *)
-    func signUp(withRequest request: SignupOptions, anchor: ASPresentationAnchor, originR5: String? = nil) -> Future<AuthToken, ReachFiveError> {
+    func signUp(withRequest request: SignupOptions, anchor: ASPresentationAnchor, originR5: String? = nil) -> Result<AuthToken, ReachFiveError> {
         authController?.cancel()
         promiseWithAuthToken = Promise()
         authenticationAnchor = anchor
@@ -98,7 +98,7 @@ public class CredentialManager: NSObject {
 
     // MARK: - Register
     @available(iOS 16.0, *)
-    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) -> Future<(), ReachFiveError> {
+    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) -> Result<(), ReachFiveError> {
         // Here it is very important to cancel a running auti-fill request, otherwise it will fail like other modal requests
         // so can't separate this method from the rest of the class
         authController?.cancel()
@@ -137,7 +137,7 @@ public class CredentialManager: NSObject {
 
     // MARK: - Reset
     @available(iOS 16.0, *)
-    func resetPasskeys(withRequest request: ResetPasskeyRequest) -> Future<(), ReachFiveError> {
+    func resetPasskeys(withRequest request: ResetPasskeyRequest) -> Result<(), ReachFiveError> {
         // Here it is very important to cancel a running auti-fill request, otherwise it will fail like other modal requests
         // so can't separate this method from the rest of the class
         authController?.cancel()
@@ -178,7 +178,7 @@ public class CredentialManager: NSObject {
     // MARK: - Auto-fill
     @available(macCatalyst, unavailable)
     @available(iOS 16.0, *)
-    func beginAutoFillAssistedPasskeySignIn(request: NativeLoginRequest) -> Future<AuthToken, ReachFiveError> {
+    func beginAutoFillAssistedPasskeySignIn(request: NativeLoginRequest) -> Result<AuthToken, ReachFiveError> {
         authController?.cancel()
         promiseWithAuthToken = Promise()
         authenticationAnchor = request.anchor
@@ -206,7 +206,7 @@ public class CredentialManager: NSObject {
     }
 
     // MARK: - Modal
-    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) -> Future<AuthToken, ReachFiveError> {
+    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) -> Result<AuthToken, ReachFiveError> {
         if #available(iOS 16.0, *) { authController?.cancel() }
         promiseWithAuthToken = Promise()
         authenticationAnchor = request.anchor
@@ -252,7 +252,7 @@ public class CredentialManager: NSObject {
         return promiseWithAuthToken.future
     }
 
-    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?) -> Future<LoginFlow, ReachFiveError> {
+    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?) -> Result<LoginFlow, ReachFiveError> {
         if #available(iOS 16.0, *) { authController?.cancel() }
         promiseWithStepUp = Promise()
         authenticationAnchor = request.anchor
@@ -274,7 +274,7 @@ public class CredentialManager: NSObject {
     private func signInWith(_ webAuthnLoginRequest: WebAuthnLoginRequest, withMode mode: Mode, authorizing requestTypes: [ModalAuthorization], appleProvider: ConfiguredAppleProvider? = nil, makeAuthorization: @escaping (AuthenticationOptions) -> Result<ASAuthorizationRequest?, ReachFiveError>) -> Void {
         scope = webAuthnLoginRequest.scope
 
-        requestTypes.traverse { type -> Future<ASAuthorizationRequest?, ReachFiveError> in
+        requestTypes.traverse { type -> Result<ASAuthorizationRequest?, ReachFiveError> in
                 switch type {
 
                 case .Password:
@@ -536,14 +536,14 @@ extension CredentialManager {
         return nil
     }
 
-    func loginCallback(tkn: String, scope: String, origin: String? = nil) -> Future<AuthToken, ReachFiveError> {
+    func loginCallback(tkn: String, scope: String, origin: String? = nil) -> Result<AuthToken, ReachFiveError> {
         let pkce = Pkce.generate()
 
         return reachFiveApi.loginCallback(loginCallback: LoginCallback(sdkConfig: reachFiveApi.sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
             .flatMap({ self.authWithCode(code: $0, pkce: pkce) })
     }
 
-    func authWithCode(code: String, pkce: Pkce? = nil) -> Future<AuthToken, ReachFiveError> {
+    func authWithCode(code: String, pkce: Pkce? = nil) -> Result<AuthToken, ReachFiveError> {
         let authCodeRequest = AuthCodeRequest(
             clientId: reachFiveApi.sdkConfig.clientId,
             code: code,

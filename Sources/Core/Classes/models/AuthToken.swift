@@ -26,7 +26,7 @@ public class AuthToken: Codable {
 
     public static func fromOpenIdTokenResponseFuture(
         _ openIdTokenResponse: AccessTokenResponse
-    ) -> Future<AuthToken, ReachFiveError> {
+    ) -> Result<AuthToken, ReachFiveError> {
         Future(result: AuthToken.fromOpenIdTokenResponse(openIdTokenResponse: openIdTokenResponse))
     }
 

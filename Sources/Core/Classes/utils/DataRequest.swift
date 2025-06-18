@@ -38,7 +38,7 @@ extension DataRequest {
         )
     }
 
-    func responseJson(decoder: JSONDecoder) -> Future<(), ReachFiveError> {
+    func responseJson(decoder: JSONDecoder) -> Result<(), ReachFiveError> {
         let promise = Promise<(), ReachFiveError>()
         responseData { responseData in
             switch responseData.result {
@@ -60,7 +60,7 @@ extension DataRequest {
         return promise.future
     }
 
-    func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) -> Future<T, ReachFiveError> {
+    func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) -> Result<T, ReachFiveError> {
         let promise = Promise<T, ReachFiveError>()
 
         responseData { responseData in

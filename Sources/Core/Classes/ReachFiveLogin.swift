@@ -3,14 +3,14 @@ import Foundation
 
 public extension ReachFive {
 
-    func logout() -> Future<(), ReachFiveError> {
+    func logout() -> Result<(), ReachFiveError> {
         providers
             .map { $0.logout() }
             .sequence()
             .flatMap { _ in self.reachFiveApi.logout() }
     }
 
-    func refreshAccessToken(authToken: AuthToken) -> Future<AuthToken, ReachFiveError> {
+    func refreshAccessToken(authToken: AuthToken) -> Result<AuthToken, ReachFiveError> {
         let refreshRequest = RefreshRequest(
             clientId: sdkConfig.clientId,
             refreshToken: authToken.refreshToken ?? "",
@@ -21,7 +21,7 @@ public extension ReachFive {
             .flatMap({ AuthToken.fromOpenIdTokenResponseFuture($0) })
     }
 
-    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) -> Future<AuthToken, ReachFiveError> {
+    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) -> Result<AuthToken, ReachFiveError> {
         let pkce = Pkce.generate()
         let scope = (scopes ?? scope).joined(separator: " ")
 
@@ -55,7 +55,7 @@ public extension ReachFive {
         return reachFiveApi.buildAuthorizeURL(queryParams: options)
     }
 
-    func authWithCode(code: String, pkce: Pkce) -> Future<AuthToken, ReachFiveError> {
+    func authWithCode(code: String, pkce: Pkce) -> Result<AuthToken, ReachFiveError> {
         let authCodeRequest = AuthCodeRequest(
             clientId: sdkConfig.clientId,
             code: code,

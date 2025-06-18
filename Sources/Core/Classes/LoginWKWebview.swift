@@ -13,7 +13,7 @@ public class LoginWKWebview: UIView {
         super.init(coder: coder)
     }
 
-    public func loadLoginWebview(reachfive: ReachFive, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil) -> Future<AuthToken, ReachFiveError> {
+    public func loadLoginWebview(reachfive: ReachFive, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil) -> Result<AuthToken, ReachFiveError> {
         let pkce = Pkce.generate()
         self.reachfive = reachfive
         let promise = Promise<AuthToken, ReachFiveError>()

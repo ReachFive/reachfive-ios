@@ -4,7 +4,7 @@ import AuthenticationServices
 
 public extension ReachFive {
 
-    func webviewLogin(_ request: WebviewLoginRequest) -> Future<AuthToken, ReachFiveError> {
+    func webviewLogin(_ request: WebviewLoginRequest) -> Result<AuthToken, ReachFiveError> {
 
         let promise = Promise<AuthToken, ReachFiveError>()
 

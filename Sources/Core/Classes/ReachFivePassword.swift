@@ -28,7 +28,7 @@ public extension ReachFive {
         password: String,
         scope: [String]? = nil,
         origin: String? = nil
-    ) -> Future<LoginFlow, ReachFiveError> {
+    ) -> Result<LoginFlow, ReachFiveError> {
         let strScope = (scope ?? self.scope).joined(separator: " ")
         let loginRequest = LoginRequest(
             email: email,

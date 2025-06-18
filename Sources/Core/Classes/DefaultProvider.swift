@@ -18,7 +18,7 @@ class DefaultProvider: NSObject, Provider {
         scope: [String]?,
         origin: String,
         viewController: UIViewController?
-    ) -> Future<AuthToken, ReachFiveError> {
+    ) -> Result<AuthToken, ReachFiveError> {
 
         guard let presentationContextProvider = viewController as? ASWebAuthenticationPresentationContextProviding else {
             return Future(error: .TechnicalError(reason: "No presenting viewController"))
@@ -48,7 +48,7 @@ extension DefaultProvider {
     public func applicationDidBecomeActive(_ application: UIApplication) {
     }
 
-    public func logout() -> Future<(), ReachFiveError> {
+    public func logout() -> Result<(), ReachFiveError> {
         Future(value: ())
     }
 }
