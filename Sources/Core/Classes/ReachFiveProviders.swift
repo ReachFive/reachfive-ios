@@ -30,7 +30,7 @@ public extension ReachFive {
             return reinitialize()
 
         case .Initialized:
-            return Future(value: providers)
+            return .success(providers)
         }
     }
 

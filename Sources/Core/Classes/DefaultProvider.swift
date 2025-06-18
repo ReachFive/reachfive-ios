@@ -49,6 +49,6 @@ extension DefaultProvider {
     }
 
     public func logout() -> Result<(), ReachFiveError> {
-        Future(value: ())
+        .success(())
     }
 }

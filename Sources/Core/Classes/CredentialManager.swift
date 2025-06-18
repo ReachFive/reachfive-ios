@@ -280,7 +280,7 @@ public class CredentialManager: NSObject {
                 case .Password:
                     // Allow the user to use a saved password, if they have one.
                     let passwordRequest = ASAuthorizationPasswordProvider().createRequest()
-                    return Future(value: passwordRequest)
+                    return .success(passwordRequest)
 
                 case .SignInWithApple:
                     // Allow the user to use a Sign In With Apple, if they have one.
@@ -300,14 +300,14 @@ public class CredentialManager: NSObject {
 
                     self.appleProvider = appleProvider
 
-                    return Future(value: appleIDRequest)
+                    return .success(appleIDRequest)
 
                 case .Passkey:
                     // Allow the user to use a saved passkey, if they have one.
                     return reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
                         .flatMap { makeAuthorization($0) }
                         // if there are other types of requests, do not block auth if passkey fails
-                        .recoverWith { requestTypes.count != 1 ? Future(value: nil) : Future(error: $0) }
+                        .recoverWith { requestTypes.count != 1 ? .success(nil) : Future(error: $0) }
                 }
             }
             .onSuccess { requests in

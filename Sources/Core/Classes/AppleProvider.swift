@@ -73,7 +73,7 @@ class ConfiguredAppleProvider: NSObject, Provider {
     }
 
     public func logout() -> Result<(), ReachFiveError> {
-        Future(value: ())
+        .success(())
     }
 
     override var description: String {
