@@ -18,7 +18,7 @@ public extension ReachFive {
         )
         return reachFiveApi
             .refreshAccessToken(refreshRequest)
-            .flatMap({ AuthToken.fromOpenIdTokenResponseFuture($0) })
+            .flatMap({ AuthToken.fromOpenIdTokenResponse($0) })
     }
 
     func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) -> Result<AuthToken, ReachFiveError> {
@@ -63,7 +63,7 @@ public extension ReachFive {
             pkce: pkce)
         return reachFiveApi
             .authWithCode(authCodeRequest: authCodeRequest)
-            .flatMap({ AuthToken.fromOpenIdTokenResponseFuture($0) })
+            .flatMap({ AuthToken.fromOpenIdTokenResponse($0) })
     }
 
     func authWithCodeAsync(code: String, pkce: Pkce) async throws -> AuthToken {

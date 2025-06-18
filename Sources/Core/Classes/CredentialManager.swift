@@ -552,6 +552,6 @@ extension CredentialManager {
         )
         return reachFiveApi
             .authWithCode(authCodeRequest: authCodeRequest)
-            .flatMap({ AuthToken.fromOpenIdTokenResponseFuture($0) })
+            .flatMap({ AuthToken.fromOpenIdTokenResponse($0) })
     }
 }

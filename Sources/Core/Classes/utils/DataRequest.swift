@@ -38,53 +38,29 @@ extension DataRequest {
         )
     }
 
-    func responseJson(decoder: JSONDecoder) -> Result<(), ReachFiveError> {
-        let promise = Promise<(), ReachFiveError>()
-        responseData { responseData in
-            switch responseData.result {
-            case let .failure(error):
-                promise.failure(.TechnicalError(reason: error.localizedDescription))
-
-            case let .success(data):
-                let status = responseData.response?.statusCode
-                if self.isSuccess(status) {
-                    promise.success(())
-                } else {
-                    switch self.parseJson(json: data, type: ApiError.self, decoder: decoder) {
-                    case .success(let value): promise.failure(self.handleResponseStatus(status: status, apiError: value))
-                    case .failure(let error): promise.failure(error)
+    func responseJson(decoder: JSONDecoder) async -> Result<(), ReachFiveError> {
+        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<Void, ReachFiveError>, Never>) in
+            responseData { responseData in
+                switch responseData.result {
+                case let .failure(error):
+                    continuation.resume(returning: .failure(.TechnicalError(reason: error.localizedDescription)))
+                    
+                case let .success(data):
+                    let status = responseData.response?.statusCode
+                    if self.isSuccess(status) {
+                        continuation.resume(returning: .success(()))
+                    } else {
+                        switch self.parseJson(json: data, type: ApiError.self, decoder: decoder) {
+                        case .success(let value): continuation.resume(returning: .failure(self.handleResponseStatus(status: status, apiError: value)))
+                        case .failure(let error): continuation.resume(returning: .failure(error))
+                        }
                     }
                 }
             }
         }
-        return promise.future
     }
 
-    func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) -> Result<T, ReachFiveError> {
-        let promise = Promise<T, ReachFiveError>()
-
-        responseData { responseData in
-            switch responseData.result {
-            case let .failure(error):
-                promise.failure(.TechnicalError(reason: error.localizedDescription))
-
-            case let .success(data):
-                let status = responseData.response?.statusCode
-                if self.isSuccess(status) {
-                    promise.tryComplete(self.parseJson(json: data, type: T.self, decoder: decoder))
-                } else {
-                    switch self.parseJson(json: data, type: ApiError.self, decoder: decoder) {
-                    case .success(let value): promise.failure(self.handleResponseStatus(status: status, apiError: value))
-                    case .failure(let error): promise.failure(error)
-                    }
-                }
-            }
-        }
-
-        return promise.future
-    }
-
-    func responseJsonAsync<T: Decodable>(type: T.Type, decoder: JSONDecoder) async -> Result<T, ReachFiveError> {
+    func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) async -> Result<T, ReachFiveError> {
         return await withCheckedContinuation { (continuation: CheckedContinuation<Result<T, ReachFiveError>, Never>) in
             responseData { responseData in
                 switch responseData.result {
