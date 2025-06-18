@@ -307,7 +307,7 @@ public class CredentialManager: NSObject {
                     return reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
                         .flatMap { makeAuthorization($0) }
                         // if there are other types of requests, do not block auth if passkey fails
-                        .recoverWith { requestTypes.count != 1 ? .success(nil) : Future(error: $0) }
+                        .recoverWith { requestTypes.count != 1 ? .success(nil) : .failure($0) }
                 }
             }
             .onSuccess { requests in

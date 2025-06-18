@@ -136,13 +136,13 @@ public extension ReachFive {
     func mfaVerify(stepUp request: VerifyStepUp) -> Result<AuthToken, ReachFiveError> {
         let pkce: Pkce? = storage.get(key: pkceKey)
         guard let pkce else {
-            return Future(error: .TechnicalError(reason: "Pkce not found"))
+            return .failure(.TechnicalError(reason: "Pkce not found"))
         }
         return reachFiveApi
             .verifyPasswordless(mfa: VerifyMfaPasswordlessRequest(challengeId: request.challengeId, verificationCode: request.verificationCode, trustDevice: request.trustDevice))
             .flatMap { response in
                 guard let code = response.code else {
-                    return Future(error: .TechnicalError(reason: "No authorization code"))
+                    return .failure(.TechnicalError(reason: "No authorization code"))
                 }
                 return self.authWithCode(code: code, pkce: pkce)
             }

@@ -44,7 +44,7 @@ public extension ReachFive {
     func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) -> Result<AuthToken, ReachFiveError> {
         let pkce: Pkce? = storage.take(key: pkceKey)
         guard let pkce else {
-            return Future(error: .TechnicalError(reason: "Pkce not found"))
+            return .failure(.TechnicalError(reason: "Pkce not found"))
         }
         return reachFiveApi
             .verifyAuthCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
@@ -63,7 +63,7 @@ public extension ReachFive {
                     .flatMap { response in
 
                         guard let code = response.code else {
-                            return Future(error: .TechnicalError(reason: "No authorization code"))
+                            return .failure(.TechnicalError(reason: "No authorization code"))
                         }
 
                         return self.authWithCode(code: code, pkce: pkce)
