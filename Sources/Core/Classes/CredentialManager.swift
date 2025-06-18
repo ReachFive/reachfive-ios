@@ -1,6 +1,6 @@
 import Foundation
 import AuthenticationServices
-import BrightFutures
+
 
 public class CredentialManager: NSObject {
     let reachFiveApi: ReachFiveApi

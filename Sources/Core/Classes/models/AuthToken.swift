@@ -1,4 +1,3 @@
-import BrightFutures
 import Foundation
 
 public class AuthToken: Codable {
@@ -8,7 +7,7 @@ public class AuthToken: Codable {
     public let tokenType: String?
     public let expiresIn: Int?
     public let user: OpenIdUser?
-    
+
     public init(
         idToken: String?,
         accessToken: String,
@@ -24,13 +23,13 @@ public class AuthToken: Codable {
         self.expiresIn = expiresIn
         self.user = user
     }
-    
+
     public static func fromOpenIdTokenResponseFuture(
         _ openIdTokenResponse: AccessTokenResponse
     ) -> Future<AuthToken, ReachFiveError> {
         Future(result: AuthToken.fromOpenIdTokenResponse(openIdTokenResponse: openIdTokenResponse))
     }
-    
+
     public static func fromOpenIdTokenResponse(openIdTokenResponse: AccessTokenResponse) -> Result<AuthToken, ReachFiveError> {
         if let token = openIdTokenResponse.idToken {
             return fromIdToken(token).flatMap { user in
@@ -40,7 +39,7 @@ public class AuthToken: Codable {
             return .success(withUser(openIdTokenResponse, nil))
         }
     }
-    
+
     static func withUser(_ accessTokenResponse: AccessTokenResponse, _ user: OpenIdUser?) -> AuthToken {
         AuthToken(
             idToken: accessTokenResponse.idToken,
@@ -51,7 +50,7 @@ public class AuthToken: Codable {
             user: user
         )
     }
-    
+
     static func fromIdToken(_ idToken: String) -> Result<OpenIdUser, ReachFiveError> {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase

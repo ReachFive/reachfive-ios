@@ -22,7 +22,6 @@ let package = Package(
                 .product(name: "Alamofire", package: "Alamofire"),
                 .product(name: "CryptoSwift", package: "CryptoSwift"),
                 .product(name: "DeviceKit", package: "DeviceKit"),
-                .product(name: "BrightFutures", package: "BrightFutures"),
             ],
             resources: [.copy("Core/PrivacyInfo.xcprivacy")]
         )

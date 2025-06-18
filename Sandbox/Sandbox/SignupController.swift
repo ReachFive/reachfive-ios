@@ -26,10 +26,11 @@ class SignupController: UIViewController {
                 email: email,
                 name: name
             )
-            do {
-                let authToken = try await AppDelegate.reachfive().signup(profile: profile, origin: origin)
-                goToProfile(authToken)
-            } catch {
+                let authToken = await AppDelegate.reachfive().signup(profile: profile, origin: origin)
+                authToken.flatMap { AuthToken in
+                    goToProfile(AuthToken)
+                }
+                
                 let message: String
                 switch error {
                 case let rfe as ReachFiveError: message = rfe.message()
@@ -41,5 +42,4 @@ class SignupController: UIViewController {
                 self.present(alert, animated: true)
             }
         }
-    }
 }

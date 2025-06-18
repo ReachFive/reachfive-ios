@@ -1,5 +1,5 @@
 import Alamofire
-import BrightFutures
+
 import DeviceKit
 import Foundation
 
@@ -116,8 +116,8 @@ public class ReachFiveApi {
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
 
-    public func signupWithPassword(signupRequest: SignupRequest) async throws -> AccessTokenResponse {
-        try await AF
+    public func signupWithPassword(signupRequest: SignupRequest) async -> Result<AccessTokenResponse, ReachFiveError> {
+        await AF
             .request(
                 createUrl(path: "/identity/v1/signup-token"),
                 method: .post,
@@ -140,8 +140,8 @@ public class ReachFiveApi {
             .responseJson(type: TknMfa.self, decoder: decoder)
     }
 
-    public func loginWithPasswordAsync(loginRequest: LoginRequest) async throws -> TknMfa {
-        try await AF
+    public func loginWithPasswordAsync(loginRequest: LoginRequest) async -> Result<TknMfa, ReachFiveError> {
+        await AF
             .request(
                 createUrl(path: "/identity/v1/password/login"),
                 method: .post,
@@ -224,7 +224,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
-    
+
     public func authWithCodeAsync(authCodeRequest: AuthCodeRequest) async throws -> AccessTokenResponse {
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<AccessTokenResponse, Error>) in
             authWithCode(authCodeRequest: authCodeRequest)
@@ -233,7 +233,7 @@ public class ReachFiveApi {
                 }
         }
     }
-    
+
     public func refreshAccessToken(_ refreshRequest: RefreshRequest) -> Future<AccessTokenResponse, ReachFiveError> {
         AF
             .request(
@@ -272,7 +272,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(type: SendEmailVerificationResponse.self, decoder: decoder)
     }
-    
+
     public func verifyEmail(
         authToken: AuthToken,
         verifyEmailRequest: VerifyEmailRequest
@@ -288,7 +288,7 @@ public class ReachFiveApi {
             .validate(contentType: ["application/json"])
             .responseJson(decoder: decoder)
     }
-    
+
     public func verifyPhoneNumber(
         authToken: AuthToken,
         verifyPhoneNumberRequest: VerifyPhoneNumberRequest

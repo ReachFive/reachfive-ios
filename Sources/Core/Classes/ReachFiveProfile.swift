@@ -1,15 +1,15 @@
 import Foundation
-import BrightFutures
+
 
 public class ContinueEmailVerification {
     private let reachfive: ReachFive
     private let authToken: AuthToken
-    
+
     fileprivate init(reachFive: ReachFive, authToken: AuthToken) {
         self.authToken = authToken
         self.reachfive = reachFive
     }
-    
+
     public func verify(code: String, email: String, freshAuthToken: AuthToken? = nil) -> Future<Void, ReachFiveError> {
         let userAuthToken = freshAuthToken ?? self.authToken
         let verifyEmailRequest = VerifyEmailRequest(email: email, verificationCode: code)
@@ -26,10 +26,10 @@ public extension ReachFive {
     func getProfile(authToken: AuthToken) -> Future<Profile, ReachFiveError> {
         reachFiveApi.getProfile(authToken: authToken)
     }
-    
+
     func sendEmailVerification(authToken: AuthToken, redirectUrl: String? = nil) -> Future<EmailVerificationResponse, ReachFiveError>{
         let sendEmailVerificationRequest = SendEmailVerificationRequest(redirectUrl: redirectUrl ?? sdkConfig.emailVerificationUri)
-        
+
         return reachFiveApi
             .sendEmailVerification(authToken: authToken, sendEmailVerificationRequest: sendEmailVerificationRequest)
             .map { resp in
@@ -42,10 +42,10 @@ public extension ReachFive {
 
     func verifyEmail(authToken: AuthToken, code: String, email: String) -> Future<Void, ReachFiveError> {
         let verifyEmailRequest = VerifyEmailRequest(email: email, verificationCode: code)
-        
+
         return reachFiveApi.verifyEmail(authToken: authToken, verifyEmailRequest: verifyEmailRequest)
     }
-    
+
     func verifyPhoneNumber(
         authToken: AuthToken,
         phoneNumber: String,
@@ -152,11 +152,11 @@ public extension ReachFive {
     func addAccountRecoveryCallback(accountRecoveryCallback: @escaping AccountRecoveryCallback) {
         self.accountRecoveryCallback = accountRecoveryCallback
     }
-    
+
     func addEmailVerificationCallback(emailVerificationCallback: @escaping EmailVerificationCallback) {
         self.emailVerificationCallback = emailVerificationCallback
     }
-    
+
     func interceptEmailVerification(_ url: URL) {
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
         if let error = params?.first(where: { $0.name == "error" })?.value {

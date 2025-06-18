@@ -1,16 +1,16 @@
 import Foundation
 import Alamofire
-import BrightFutures
+
 
 extension DataRequest {
-    
+
     private func isSuccess(_ status: Int?) -> Bool {
         guard let status else {
             return false
         }
         return status >= 200 && status < 300
     }
-    
+
     private func parseJson<T: Decodable>(json: Data, type: T.Type, decoder: JSONDecoder) -> Result<T, ReachFiveError> {
         do {
             let value = try decoder.decode(type, from: json)
@@ -19,7 +19,7 @@ extension DataRequest {
             return .failure(.TechnicalError(reason: error.localizedDescription))
         }
     }
-    
+
     private func handleResponseStatus(status: Int?, apiError: ApiError) -> ReachFiveError {
         guard let status else {
             return .TechnicalError(
@@ -37,14 +37,14 @@ extension DataRequest {
             apiError: apiError
         )
     }
-    
+
     func responseJson(decoder: JSONDecoder) -> Future<(), ReachFiveError> {
         let promise = Promise<(), ReachFiveError>()
         responseData { responseData in
             switch responseData.result {
             case let .failure(error):
                 promise.failure(.TechnicalError(reason: error.localizedDescription))
-            
+
             case let .success(data):
                 let status = responseData.response?.statusCode
                 if self.isSuccess(status) {
@@ -59,15 +59,15 @@ extension DataRequest {
         }
         return promise.future
     }
-    
+
     func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) -> Future<T, ReachFiveError> {
         let promise = Promise<T, ReachFiveError>()
-        
+
         responseData { responseData in
             switch responseData.result {
             case let .failure(error):
                 promise.failure(.TechnicalError(reason: error.localizedDescription))
-            
+
             case let .success(data):
                 let status = responseData.response?.statusCode
                 if self.isSuccess(status) {
@@ -80,34 +80,25 @@ extension DataRequest {
                 }
             }
         }
-        
+
         return promise.future
     }
-    
-//    func responseJsonAsync1<T: Decodable>(type: T.Type, decoder: JSONDecoder) async throws -> T {
-//        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<T, Error>) in
-//            responseJson(decoder: decoder)
-//                .onSuccess { <#()#> in
-//                    <#code#>
-//                }
-//        }
-//    }
-//
-    func responseJsonAsync<T: Decodable>(type: T.Type, decoder: JSONDecoder) async throws -> T {
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<T, Error>) in
+
+    func responseJsonAsync<T: Decodable>(type: T.Type, decoder: JSONDecoder) async -> Result<T, ReachFiveError> {
+        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<T, ReachFiveError>, Never>) in
             responseData { responseData in
                 switch responseData.result {
                 case let .failure(error):
-                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
-                    
+                    continuation.resume(returning: .failure(.TechnicalError(reason: error.localizedDescription)))
+
                 case let .success(data):
                     let status = responseData.response?.statusCode
                     if self.isSuccess(status) {
-                        continuation.resume(with: self.parseJson(json: data, type: T.self, decoder: decoder))
+                        continuation.resume(returning: self.parseJson(json: data, type: T.self, decoder: decoder))
                     } else {
                         switch self.parseJson(json: data, type: ApiError.self, decoder: decoder) {
-                        case .success(let value): continuation.resume(throwing: self.handleResponseStatus(status: status, apiError: value))
-                        case .failure(let error): continuation.resume(throwing: error)
+                        case .success(let value): continuation.resume(returning: .failure(self.handleResponseStatus(status: status, apiError: value)))
+                        case .failure(let error): continuation.resume(returning: .failure(error))
                         }
                     }
                 }

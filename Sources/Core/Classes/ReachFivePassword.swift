@@ -1,4 +1,4 @@
-import BrightFutures
+
 import Foundation
 
 public enum LoginFlow {
@@ -7,7 +7,7 @@ public enum LoginFlow {
 }
 
 public extension ReachFive {
-    func signup(profile: ProfileSignupRequest, redirectUrl: String? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> AuthToken {
+    func signup(profile: ProfileSignupRequest, redirectUrl: String? = nil, scope: [String]? = nil, origin: String? = nil) async -> Result<AuthToken, ReachFiveError> {
         let signupRequest = SignupRequest(
             clientId: sdkConfig.clientId,
             data: profile,
@@ -15,9 +15,10 @@ public extension ReachFive {
             redirectUrl: redirectUrl,
             origin: origin
         )
-        let token = try await reachFiveApi
-            .signupWithPassword(signupRequest: signupRequest)
-        return try AuthToken.fromOpenIdTokenResponse(openIdTokenResponse: token).get()
+        let token = await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
+        return token.flatMap {
+            AuthToken.fromOpenIdTokenResponse(openIdTokenResponse: $0)
+        }
     }
 
     func loginWithPassword(
