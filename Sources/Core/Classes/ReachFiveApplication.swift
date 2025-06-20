@@ -3,7 +3,9 @@ import UIKit
 
 public extension ReachFive {
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
-        interceptUrl(url)
+        Task {
+            await interceptUrl(url)
+        }
         for provider in providers {
             let _ = provider.application(app, open: url, options: options)
         }
@@ -24,7 +26,7 @@ public extension ReachFive {
     
     func applicationDidBecomeActive(_ application: UIApplication) {
         for provider in providers {
-            let _ = provider.applicationDidBecomeActive(application)
+            provider.applicationDidBecomeActive(application)
         }
     }
     

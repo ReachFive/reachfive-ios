@@ -18,13 +18,13 @@ class DefaultProvider: NSObject, Provider {
         scope: [String]?,
         origin: String,
         viewController: UIViewController?
-    ) -> Result<AuthToken, ReachFiveError> {
+    ) async -> Result<AuthToken, ReachFiveError> {
 
         guard let presentationContextProvider = viewController as? ASWebAuthenticationPresentationContextProviding else {
             return .failure(.TechnicalError(reason: "No presenting viewController"))
         }
 
-        return reachfive.webviewLogin(WebviewLoginRequest(scope: scope, presentationContextProvider: presentationContextProvider, origin: origin, provider: providerConfig.provider))
+        return await reachfive.webviewLogin(WebviewLoginRequest(scope: scope, presentationContextProvider: presentationContextProvider, origin: origin, provider: providerConfig.provider))
     }
 
     override var description: String {
@@ -48,7 +48,7 @@ extension DefaultProvider {
     public func applicationDidBecomeActive(_ application: UIApplication) {
     }
 
-    public func logout() -> Result<(), ReachFiveError> {
+    public func logout() async -> Result<(), ReachFiveError> {
         .success(())
     }
 }

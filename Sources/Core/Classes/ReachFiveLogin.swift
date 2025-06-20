@@ -3,11 +3,11 @@ import Foundation
 
 public extension ReachFive {
 
-    func logout() -> Result<(), ReachFiveError> {
-        providers
-            .map { $0.logout() }
-            .sequence()
-            .flatMap { _ in self.reachFiveApi.logout() }
+    func logout() async -> Result<(), ReachFiveError> {
+        //TODO: déconnecter les providers en parallèle ?
+        await providers
+            .traverse { await $0.logout() }
+            .flatMapAsync { _ in await self.reachFiveApi.logout() }
     }
 
     func refreshAccessToken(authToken: AuthToken) async -> Result<AuthToken, ReachFiveError> {

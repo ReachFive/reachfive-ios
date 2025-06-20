@@ -50,7 +50,7 @@ public class ReachFive: NSObject {
         """
     }
         
-    public func interceptUrl(_ url: URL) -> () {
+    public func interceptUrl(_ url: URL) async -> () {
         let receivedUrl = URLComponents(url: url, resolvingAgainstBaseURL: true)
         
         let recovery = URLComponents(string: sdkConfig.accountRecoveryUri)
@@ -62,15 +62,15 @@ public class ReachFive: NSObject {
         
         case (recovery?.host, recovery?.path): interceptAccountRecovery(url)
         case (mfa?.host, mfa?.path): interceptVerifyMfaCredential(url)
-        case (passwordless?.host, passwordless?.path): interceptPasswordless(url)
+        case (passwordless?.host, passwordless?.path): await interceptPasswordless(url)
         case (emailVerification?.host, emailVerification?.path): interceptEmailVerification(url)
             
             // fallback to old way of doing things if url components are not properly extracted
         case ("account-recovery", _): interceptAccountRecovery(url)
         case ("mfa", _): interceptVerifyMfaCredential(url)
-        case ("callback", _): interceptPasswordless(url)
+        case ("callback", _): await interceptPasswordless(url)
         
-        default: interceptPasswordless(url)
+        default: await interceptPasswordless(url)
         }
     }
 }

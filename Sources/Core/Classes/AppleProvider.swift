@@ -45,15 +45,15 @@ class ConfiguredAppleProvider: NSObject, Provider {
         scope: [String]?,
         origin: String,
         viewController: UIViewController?
-    ) -> Result<AuthToken, ReachFiveError> {
-        guard let window = viewController?.view.window else { fatalError("The view was not in the app's view hierarchy!") }
+    ) async -> Result<AuthToken, ReachFiveError> {
+        guard let window = await viewController?.view.window else { fatalError("The view was not in the app's view hierarchy!") }
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
-        return credentialManager.login(withRequest: NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin), usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self).map { LoginFlow in
-            switch LoginFlow {
-            case let .AchievedLogin(authToken): return authToken
-            case .OngoingStepUp:
-                fatalError("Not a password flow")
-            }
+        return await credentialManager.login(withRequest: NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin), usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self)
+            .flatMap { flow in
+                switch flow {
+                case .AchievedLogin(let authToken): .success(authToken)
+                case .OngoingStepUp:                .failure(.TechnicalError(reason: "MFA Step Up in a Sign In with Apple flow"))
+                }
         }
     }
 

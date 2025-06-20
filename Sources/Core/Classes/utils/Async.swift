@@ -25,13 +25,6 @@ extension Result {
 //    }
 }
 
-extension AsyncSequence {
-    func collect() async rethrows -> [Element] {
-        try await reduce(into: [Element]()) { $0.append($1) }
-    }
-}
-
-// Extension to allow traversing a sequence with an async operation that returns a Result<U, E>
 extension Sequence {
     func traverse<NewElement, E>(_ transform: @escaping (Element) async -> Result<NewElement, E>) async -> Result<[NewElement], E> where E: Error {
         var results = [NewElement]()
@@ -47,5 +40,3 @@ extension Sequence {
         return .success(results)
     }
 }
-
-
