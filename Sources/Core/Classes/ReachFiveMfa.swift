@@ -39,8 +39,8 @@ public class ContinueStepUp {
         self.reachfive = reachFive
     }
 
-    public func verify(code: String, trustDevice: Bool? = nil) -> Result<AuthToken, ReachFiveError> {
-        reachfive.mfaVerify(stepUp: VerifyStepUp(challengeId: challengeId, verificationCode: code, trustDevice: trustDevice))
+    public func verify(code: String, trustDevice: Bool? = nil) async -> Result<AuthToken, ReachFiveError> {
+        await reachfive.mfaVerify(stepUp: VerifyStepUp(challengeId: challengeId, verificationCode: code, trustDevice: trustDevice))
     }
 }
 
@@ -67,8 +67,8 @@ public class ContinueRegistration {
         self.reachfive = reachfive
     }
 
-    public func verify(code: String, freshAuthToken: AuthToken? = nil) -> Result<MfaCredentialItem, ReachFiveError> {
-        reachfive.mfaVerify(credentialType, code: code, authToken: freshAuthToken ?? authToken)
+    public func verify(code: String, freshAuthToken: AuthToken? = nil) async -> Result<MfaCredentialItem, ReachFiveError> {
+        await reachfive.mfaVerify(credentialType, code: code, authToken: freshAuthToken ?? authToken)
     }
 }
 
@@ -82,13 +82,13 @@ public extension ReachFive {
         self.mfaCredentialRegistrationCallback = mfaCredentialRegistrationCallback
     }
 
-    func mfaStart(registering credential: Credential, authToken: AuthToken) -> Result<MfaStartRegistrationResponse, ReachFiveError> {
+    func mfaStart(registering credential: Credential, authToken: AuthToken) async -> Result<MfaStartRegistrationResponse, ReachFiveError> {
         let registration =
             switch credential {
             case let .Email(redirectUrl):
-                reachFiveApi.startMfaEmailRegistration(MfaStartEmailRegistrationRequest(redirectUrl: redirectUrl ?? sdkConfig.mfaUri), authToken: authToken)
+                await reachFiveApi.startMfaEmailRegistration(MfaStartEmailRegistrationRequest(redirectUrl: redirectUrl ?? sdkConfig.mfaUri), authToken: authToken)
             case let .PhoneNumber(phoneNumber):
-                reachFiveApi.startMfaPhoneRegistration(MfaStartPhoneRegistrationRequest(phoneNumber: phoneNumber), authToken: authToken)
+                await reachFiveApi.startMfaPhoneRegistration(MfaStartPhoneRegistrationRequest(phoneNumber: phoneNumber), authToken: authToken)
             }
 
         return registration.map { resp in
@@ -99,25 +99,25 @@ public extension ReachFive {
         }
     }
 
-    func mfaVerify(_ credentialType: CredentialType, code: String, authToken: AuthToken) -> Result<MfaCredentialItem, ReachFiveError> {
+    func mfaVerify(_ credentialType: CredentialType, code: String, authToken: AuthToken) async -> Result<MfaCredentialItem, ReachFiveError> {
         switch credentialType {
         case .Email:
             let request = MfaVerifyEmailRegistrationPostRequest(code)
-            return reachFiveApi.verifyMfaEmailRegistrationPost(request, authToken: authToken)
+            return await reachFiveApi.verifyMfaEmailRegistrationPost(request, authToken: authToken)
         case .PhoneNumber:
             let request = MfaVerifyPhoneRegistrationRequest(code)
-            return reachFiveApi.verifyMfaPhoneRegistration(request, authToken: authToken)
+            return await reachFiveApi.verifyMfaPhoneRegistration(request, authToken: authToken)
         }
     }
 
-    func mfaListCredentials(authToken: AuthToken) -> Result<MfaCredentialsListResponse, ReachFiveError> {
-        return reachFiveApi.mfaListCredentials(authToken: authToken)
+    func mfaListCredentials(authToken: AuthToken) async -> Result<MfaCredentialsListResponse, ReachFiveError> {
+        await reachFiveApi.mfaListCredentials(authToken: authToken)
     }
 
-    func mfaStart(stepUp request: StartStepUp) -> Result<ContinueStepUp, ReachFiveError> {
+    func mfaStart(stepUp request: StartStepUp) async -> Result<ContinueStepUp, ReachFiveError> {
         switch request {
         case let .LoginFlow(authType, stepUpToken, redirectUri, origin):
-            return reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin))
+            return await reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin))
                 .map { response in
                     ContinueStepUp(challengeId: response.challengeId, reachFive: self)
                 }
@@ -125,45 +125,45 @@ public extension ReachFive {
             let pkce = Pkce.generate()
             storage.save(key: pkceKey, value: pkce)
             let stepUp = StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: redirectUri ?? sdkConfig.redirectUri, pkce: pkce, scope: (overwrittenScope ?? scope).joined(separator: " "))
-            return reachFiveApi.startMfaStepUp(stepUp, authToken: authToken).flatMap { result in
-                self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? self.sdkConfig.redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: authType, origin: origin))
+            return await reachFiveApi.startMfaStepUp(stepUp, authToken: authToken).flatMapAsync { result in
+                await self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? self.sdkConfig.redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: authType, origin: origin))
             }.map { response in
                 ContinueStepUp(challengeId: response.challengeId, reachFive: self)
             }
         }
     }
 
-    func mfaVerify(stepUp request: VerifyStepUp) -> Result<AuthToken, ReachFiveError> {
+    func mfaVerify(stepUp request: VerifyStepUp) async -> Result<AuthToken, ReachFiveError> {
         let pkce: Pkce? = storage.get(key: pkceKey)
         guard let pkce else {
             return .failure(.TechnicalError(reason: "Pkce not found"))
         }
-        return reachFiveApi
+        return await reachFiveApi
             .verifyPasswordless(mfa: VerifyMfaPasswordlessRequest(challengeId: request.challengeId, verificationCode: request.verificationCode, trustDevice: request.trustDevice))
-            .flatMap { response in
+            .flatMapAsync { response in
                 guard let code = response.code else {
                     return .failure(.TechnicalError(reason: "No authorization code"))
                 }
-                return self.authWithCode(code: code, pkce: pkce)
+                return await self.authWithCode(code: code, pkce: pkce)
             }
     }
 
-    func mfaDeleteCredential(_ phoneNumber: String? = nil, authToken: AuthToken) -> Result<Void, ReachFiveError> {
+    func mfaDeleteCredential(_ phoneNumber: String? = nil, authToken: AuthToken) async -> Result<Void, ReachFiveError> {
         guard let phoneNumber else {
-            return reachFiveApi.deleteMfaEmailCredential(authToken: authToken)
+            return await reachFiveApi.deleteMfaEmailCredential(authToken: authToken)
         }
-        return reachFiveApi
+        return await reachFiveApi
             .deleteMfaPhoneNumberCredential(phoneNumber: phoneNumber, authToken: authToken)
     }
 
-    func mfaListTrustedDevices(authToken: AuthToken) -> Result<[TrustedDevice], ReachFiveError> {
-        return reachFiveApi
+    func mfaListTrustedDevices(authToken: AuthToken) async -> Result<[TrustedDevice], ReachFiveError> {
+        await reachFiveApi
             .listMfaTrustedDevices(authToken: authToken)
             .map { res in res.trustedDevices }
     }
 
-    func mfaDelete(trustedDeviceId deviceId: String, authToken: AuthToken) -> Result<Void, ReachFiveError> {
-        return reachFiveApi.deleteMfaTrustedDevice(deviceId: deviceId, authToken: authToken)
+    func mfaDelete(trustedDeviceId deviceId: String, authToken: AuthToken) async -> Result<Void, ReachFiveError> {
+        await reachFiveApi.deleteMfaTrustedDevice(deviceId: deviceId, authToken: authToken)
     }
 
     internal func interceptVerifyMfaCredential(_ url: URL) {

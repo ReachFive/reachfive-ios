@@ -12,12 +12,12 @@ public extension ReachFive {
         self.passwordlessCallback = passwordlessCallback
     }
 
-    func startPasswordless(_ request: PasswordLessRequest) -> Result<(), ReachFiveError> {
+    func startPasswordless(_ request: PasswordLessRequest) async -> Result<(), ReachFiveError> {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
-        switch request {
+        let startPasswordlessRequest = switch request {
         case let .Email(email, redirectUri, origin):
-            let startPasswordlessRequest = StartPasswordlessRequest(
+            StartPasswordlessRequest(
                 clientId: sdkConfig.clientId,
                 email: email,
                 authType: .MagicLink,
@@ -26,9 +26,8 @@ public extension ReachFive {
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin
             )
-            return reachFiveApi.startPasswordless(startPasswordlessRequest)
         case let .PhoneNumber(phoneNumber, redirectUri, origin):
-            let startPasswordlessRequest = StartPasswordlessRequest(
+            StartPasswordlessRequest(
                 clientId: sdkConfig.clientId,
                 phoneNumber: phoneNumber,
                 authType: .SMS,
@@ -37,18 +36,18 @@ public extension ReachFive {
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin
             )
-            return reachFiveApi.startPasswordless(startPasswordlessRequest)
         }
+        return await reachFiveApi.startPasswordless(startPasswordlessRequest)
     }
 
-    func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) -> Result<AuthToken, ReachFiveError> {
+    func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async -> Result<AuthToken, ReachFiveError> {
         let pkce: Pkce? = storage.take(key: pkceKey)
         guard let pkce else {
             return .failure(.TechnicalError(reason: "Pkce not found"))
         }
-        return reachFiveApi
+        return await reachFiveApi
             .verifyAuthCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
-            .flatMap { _ in
+            .flatMapAsync { _ in
                 let verifyPasswordlessRequest = VerifyPasswordlessRequest(
                     email: verifyAuthCodeRequest.email,
                     phoneNumber: verifyAuthCodeRequest.phoneNumber,
@@ -58,20 +57,20 @@ public extension ReachFive {
                     responseType: "code",
                     origin: verifyAuthCodeRequest.origin
                 )
-                return self.reachFiveApi
+                return await self.reachFiveApi
                     .verifyPasswordless(verifyPasswordlessRequest: verifyPasswordlessRequest)
-                    .flatMap { response in
+                    .flatMapAsync { response in
 
                         guard let code = response.code else {
                             return .failure(.TechnicalError(reason: "No authorization code"))
                         }
 
-                        return self.authWithCode(code: code, pkce: pkce)
+                        return await self.authWithCode(code: code, pkce: pkce)
                     }
             }
     }
 
-    internal func interceptPasswordless(_ url: URL) {
+    internal func interceptPasswordless(_ url: URL) async {
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
 
         let pkce: Pkce? = storage.take(key: pkceKey)
@@ -84,9 +83,6 @@ public extension ReachFive {
             return
         }
 
-        authWithCode(code: code, pkce: pkce)
-            .onComplete { result in
-                self.passwordlessCallback?(result)
-            }
+        self.passwordlessCallback?(await authWithCode(code: code, pkce: pkce))
     }
 }

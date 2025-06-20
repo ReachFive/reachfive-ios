@@ -17,7 +17,7 @@ public extension ReachFive {
         )
         let token = await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
         return token.flatMap {
-            AuthToken.fromOpenIdTokenResponse(openIdTokenResponse: $0)
+            AuthToken.fromOpenIdTokenResponse($0)
         }
     }
 
@@ -28,7 +28,7 @@ public extension ReachFive {
         password: String,
         scope: [String]? = nil,
         origin: String? = nil
-    ) -> Result<LoginFlow, ReachFiveError> {
+    ) async -> Result<LoginFlow, ReachFiveError> {
         let strScope = (scope ?? self.scope).joined(separator: " ")
         let loginRequest = LoginRequest(
             email: email,
@@ -40,18 +40,18 @@ public extension ReachFive {
             scope: strScope,
             origin: origin
         )
-        return reachFiveApi
+        return await reachFiveApi
             .loginWithPassword(loginRequest: loginRequest)
-            .flatMap { resp in
+            .flatMapAsync { resp in
                 if resp.mfaRequired == true {
                     let pkce = Pkce.generate()
                     self.storage.save(key: self.pkceKey, value: pkce)
-                    return self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
+                    return await self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
                         .map { intiationStepUpResponse in
                             LoginFlow.OngoingStepUp(token: intiationStepUpResponse.token, availableMfaCredentialItemTypes: intiationStepUpResponse.amr)
                         }
                 } else {
-                    return self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
+                    return await self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
                         .map { res in
                             .AchievedLogin(authToken: res)
                         }
@@ -59,35 +59,7 @@ public extension ReachFive {
             }
     }
 
-    //TODO Avec le Reach5 version X qui sera pur async/await, livrer un Reach5FutureBridge (un fork de reachfive-ios) qui ajoutera aussi les méthodes actuelles avec les Future et qui utilisera de manière sous-jacente les version async/await
+    //TODO: Avec le Reach5 version X qui sera pur async/await, livrer un Reach5FutureBridge (un fork de reachfive-ios) qui ajoutera aussi les méthodes actuelles avec les Future et qui utilisera de manière sous-jacente les version async/await
     // On ne garde pas de différentes branches dans Reach5, mais le legacy sera géré dans Reach5FutureBridge.
     // Pas de nouvelle version de la sandbox, migrer la sandbox actuelle pour utiliser les fonctions async/await. La version Future sera dans Reach5FutureBridge.
-    func loginWithPasswordAsync(
-        email: String? = nil,
-        phoneNumber: String? = nil,
-        customIdentifier: String? = nil,
-        password: String,
-        scope: [String]? = nil,
-        origin: String? = nil
-    ) async throws -> LoginFlow {
-        let strScope = (scope ?? self.scope).joined(separator: " ")
-        let loginRequest = LoginRequest(
-            email: email,
-            phoneNumber: phoneNumber,
-            customIdentifier: customIdentifier,
-            password: password,
-            grantType: "password",
-            clientId: sdkConfig.clientId,
-            scope: strScope,
-            origin: origin
-        )
-        print("async loginWithPassword")
-        let resp = try await reachFiveApi.loginWithPasswordAsync(loginRequest: loginRequest)
-        if resp.mfaRequired == true {
-            throw ReachFiveError.AuthFailure(reason: "MfaRequired", apiError: nil)
-        } else {
-            let res = try await self.loginCallbackAsync(tkn: resp.tkn, scopes: scope, origin: origin)
-            return .AchievedLogin(authToken: res)
-        }
-    }
 }
