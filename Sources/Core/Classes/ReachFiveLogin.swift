@@ -10,31 +10,23 @@ public extension ReachFive {
             .flatMap { _ in self.reachFiveApi.logout() }
     }
 
-    func refreshAccessToken(authToken: AuthToken) -> Result<AuthToken, ReachFiveError> {
+    func refreshAccessToken(authToken: AuthToken) async -> Result<AuthToken, ReachFiveError> {
         let refreshRequest = RefreshRequest(
             clientId: sdkConfig.clientId,
             refreshToken: authToken.refreshToken ?? "",
             redirectUri: sdkConfig.scheme
         )
-        return reachFiveApi
+        return await reachFiveApi
             .refreshAccessToken(refreshRequest)
             .flatMap({ AuthToken.fromOpenIdTokenResponse($0) })
     }
 
-    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) -> Result<AuthToken, ReachFiveError> {
+    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async -> Result<AuthToken, ReachFiveError> {
         let pkce = Pkce.generate()
         let scope = (scopes ?? scope).joined(separator: " ")
 
-        return reachFiveApi.loginCallback(loginCallback: LoginCallback(sdkConfig: sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
-            .flatMap({ self.authWithCode(code: $0, pkce: pkce) })
-    }
-
-    func loginCallbackAsync(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {
-        let pkce = Pkce.generate()
-        let scope = (scopes ?? scope).joined(separator: " ")
-
-        let code = try await reachFiveApi.loginCallbackAsync(loginCallback: LoginCallback(sdkConfig: sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
-        return try await self.authWithCodeAsync(code: code, pkce: pkce)
+        return await reachFiveApi.loginCallback(loginCallback: LoginCallback(sdkConfig: sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
+            .flatMapAsync({ await self.authWithCode(code: $0, pkce: pkce) })
     }
 
     func buildAuthorizeURL(pkce: Pkce, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil, provider: String? = nil) -> URL {
@@ -55,27 +47,14 @@ public extension ReachFive {
         return reachFiveApi.buildAuthorizeURL(queryParams: options)
     }
 
-    func authWithCode(code: String, pkce: Pkce) -> Result<AuthToken, ReachFiveError> {
+    func authWithCode(code: String, pkce: Pkce) async -> Result<AuthToken, ReachFiveError> {
         let authCodeRequest = AuthCodeRequest(
             clientId: sdkConfig.clientId,
             code: code,
             redirectUri: sdkConfig.scheme,
             pkce: pkce)
-        return reachFiveApi
+        return await reachFiveApi
             .authWithCode(authCodeRequest: authCodeRequest)
             .flatMap({ AuthToken.fromOpenIdTokenResponse($0) })
-    }
-
-    func authWithCodeAsync(code: String, pkce: Pkce) async throws -> AuthToken {
-        let authCodeRequest = AuthCodeRequest(
-            clientId: sdkConfig.clientId,
-            code: code,
-            redirectUri: sdkConfig.scheme,
-            pkce: pkce)
-
-        let openIdTokenResponse = try await reachFiveApi
-            .authWithCodeAsync(authCodeRequest: authCodeRequest)
-
-        return try AuthToken.fromOpenIdTokenResponse(openIdTokenResponse: openIdTokenResponse).get()
     }
 }
