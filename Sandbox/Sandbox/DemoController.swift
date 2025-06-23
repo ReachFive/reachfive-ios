@@ -1,5 +1,5 @@
 import AuthenticationServices
-import BrightFutures
+
 import Reach5
 import UIKit
 
@@ -180,7 +180,7 @@ class DemoController: UIViewController {
         guard let pass = passwordField.text, !pass.isEmpty, let user = usernameField.text, !user.isEmpty else { return }
         let origin = "DemoController.loginWithPassword"
 
-        let fut: Future<LoginFlow, ReachFiveError>
+        let fut: Result<LoginFlow, ReachFiveError>
         if user.contains("@") {
             fut = AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
         } else {

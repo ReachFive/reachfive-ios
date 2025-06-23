@@ -1,38 +1,38 @@
 import UIKit
 import Reach5
-import BrightFutures
+
 
 @available(iOS 16.0, *)
 class LoginPasskeyController: UIViewController {
-    
+
     @IBOutlet weak var usernameField: UITextField!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var loginButton: UIButton!
     @IBOutlet weak var createAccountButton: UIButton!
-    
+
     override func viewWillAppear(_ animated: Bool) {
         usernameField.isHidden = true
         usernameLabel.isHidden = true
         loginButton.isHidden = true
         createAccountButton.isHidden = true
-        
+
         super.viewWillAppear(animated)
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         print("viewDidAppear")
-        
+
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear"), usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
             .onSuccess(callback: handleLoginFlow)
             .onFailure { error in
-                
+
                 self.usernameField.isHidden = false
                 self.usernameLabel.isHidden = false
                 self.loginButton.isHidden = false
                 self.createAccountButton.isHidden = false
-                
+
                 switch error {
                 case .AuthCanceled:
                     #if targetEnvironment(macCatalyst)
@@ -51,7 +51,7 @@ class LoginPasskeyController: UIViewController {
                 }
             }
     }
-    
+
     @IBAction func nonDiscoverableLogin(_ sender: Any) {
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         let request = NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.nonDiscoverableLogin")
@@ -79,20 +79,20 @@ class LoginPasskeyController: UIViewController {
             AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                 .onSuccess(callback: handleLoginFlow)
                 .onFailure(callback: onFailure)
-            
+
         case .some(let username):
             AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                 .onSuccess(callback: goToProfile)
                 .onFailure(callback: onFailure)
         }
     }
-    
+
     @IBAction func usernameEditingDidBegin(_ sender: Any) {
         print("usernameEditingDidBegin")
         usernameField.backgroundColor = .systemBackground
         usernameField.placeholder = ""
     }
-    
+
     @IBAction func createAccount(_ sender: Any) {
         guard let username = usernameField.text, !username.isEmpty else {
             print("No username provided")
@@ -106,7 +106,7 @@ class LoginPasskeyController: UIViewController {
         } else {
             profile = ProfilePasskeySignupRequest(phoneNumber: username)
         }
-        
+
         let window: UIWindow = view.window!
         AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "LoginPasskeyController.createAccount"))
             .onSuccess(callback: goToProfile)
@@ -115,7 +115,7 @@ class LoginPasskeyController: UIViewController {
                 self.present(alert, animated: true)
             }
     }
-    
+
     /// tap anywhere to dismiss the keyboard and access the login and create account buttons
     @IBAction func tappedBackground(_ sender: Any) {
         print("tappedBackground")

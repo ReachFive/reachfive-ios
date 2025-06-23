@@ -10,6 +10,33 @@ extension Result {
             return .failure(error)
         }
     }
+    
+    public consuming func flatMapErrorAsync<NewFailure>(_ transform: (Failure) async -> Result<Success, NewFailure>) async -> Result<Success, NewFailure> where NewFailure : Error {
+        switch self {
+        case .success(let value):
+            return .success(value)
+        case .failure(let error):
+            return await transform(error)
+        }
+    }
+    
+    @discardableResult
+    public func onSuccess(callback: @escaping (Success) -> Void) -> Self {
+        if case .success(let value) = self {
+            callback(value)
+        }
+        return self
+    }
+    
+
+    @discardableResult
+    public func onFailure(callback: @escaping (Failure) -> Void) -> Self {
+        if case .failure(let value) = self {
+            callback(value)
+        }
+        return self
+    }
+    
 
 // Si je dois les reprendre, peut-être les nommer mapAsync. Mais voir TODO ci-dessus
 //    func map<NewSuccess>(_ transform: (Success) async -> NewSuccess) async -> Result<NewSuccess, Failure> {

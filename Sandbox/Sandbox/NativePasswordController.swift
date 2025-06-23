@@ -1,4 +1,4 @@
-import BrightFutures
+
 import Foundation
 import Reach5
 import UIKit
@@ -23,16 +23,16 @@ class NativePasswordController: UIViewController {
             }
         }
     }
-    
+
     @IBAction func passwordEditingDidEnd(_ sender: Any) {
         guard let pass = password.text, !pass.isEmpty, let user = username.text, !user.isEmpty else { return }
         let origin = "NativePasswordController.passwordEditingDidEnd"
-        
-        let fut: Future<LoginFlow, ReachFiveError>
+
+        let fut: Result<LoginFlow, ReachFiveError>
         if user.contains("@") {
-            fut = AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
+            fut = await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
         } else {
-            fut = AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
+            fut = await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
         }
         fut.onSuccess(callback: handleLoginFlow)
             .onFailure { error in
@@ -40,12 +40,12 @@ class NativePasswordController: UIViewController {
                 self.present(alert, animated: true)
             }
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-        
+
         AppDelegate.reachfive()
             .login(withRequest: NativeLoginRequest(anchor: window, origin: "NativePasswordController.viewDidAppear"), usingModalAuthorizationFor: [.Password], display: .Always)
             .onSuccess(callback: handleLoginFlow)

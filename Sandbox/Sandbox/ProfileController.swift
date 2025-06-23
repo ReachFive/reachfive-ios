@@ -1,6 +1,6 @@
 import UIKit
 import Reach5
-import BrightFutures
+
 
 //TODO
 //      - déplacer le bouton login with refresh ici pour que, même logué, on puisse afficher les passkey (qui sont expirées)
@@ -29,24 +29,24 @@ class ProfileController: UIViewController {
             ]
         }
     }
-    
+
     var clearTokenObserver: NSObjectProtocol?
     var setTokenObserver: NSObjectProtocol?
-    
+
     var emailMfaVerifyNotification: NSObjectProtocol?
     var emailVerificationNotification: NSObjectProtocol?
-    
+
     var propertiesToDisplay: [Field] = []
     let mfaRegistrationAvailable = ["Email", "Phone Number"]
-    
+
     @IBOutlet weak var otherOptions: UITableView!
-    
+
     @IBOutlet weak var profileTabBarItem: UITabBarItem!
     @IBOutlet var profileData: UITableView!
     @IBOutlet weak var mfaButton: UIButton!
     @IBOutlet weak var passkeyButton: UIButton!
     @IBOutlet weak var editProfileButton: UIButton!
-    
+
     override func viewDidLoad() {
         print("ProfileController.viewDidLoad")
         super.viewDidLoad()
@@ -80,34 +80,34 @@ class ProfileController: UIViewController {
                 }
             }
         }
-        
+
         //TODO: mieux gérer les notifications pour ne pas en avoir plusieurs qui se déclenche pour le même évènement
         clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { _ in
             self.didLogout()
         }
-        
+
         setTokenObserver = NotificationCenter.default.addObserver(forName: .DidSetAuthToken, object: nil, queue: nil) { _ in
             self.didLogin()
         }
-        
+
         authToken = AppDelegate.storage.getToken()
         if authToken != nil {
             profileTabBarItem.image = SandboxTabBarController.tokenPresent
             profileTabBarItem.selectedImage = profileTabBarItem.image
         }
-        
+
         self.profileData.delegate = self
         self.profileData.dataSource = self
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         print("ProfileController.viewWillAppear")
         fetchProfile()
     }
-    
+
     func fetchProfile() {
         print("ProfileController.fetchProfile")
-        
+
         authToken = AppDelegate.storage.getToken()
         guard let authToken else {
             print("not logged in")
@@ -136,7 +136,7 @@ class ProfileController: UIViewController {
                 print("getProfile error = \(error.message())")
             }
     }
-    
+
     private func setStatusImage(authToken: AuthToken) {
         // Use listWebAuthnCredentials to test if token is fresh
         // A fresh token is also needed for updating the profile and registering MFA credentials
@@ -151,12 +151,12 @@ class ProfileController: UIViewController {
                 self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
             }
     }
-    
+
     func didLogin() {
         print("ProfileController.didLogin")
         authToken = AppDelegate.storage.getToken()
     }
-    
+
     func didLogout() {
         print("ProfileController.didLogout")
         authToken = nil
@@ -166,7 +166,7 @@ class ProfileController: UIViewController {
         editProfileButton.isHidden = true
         self.profileData.reloadData()
     }
-    
+
     @IBAction func logoutAction(_ sender: Any) {
         AppDelegate.reachfive().logout()
             .onComplete { result in
@@ -174,7 +174,7 @@ class ProfileController: UIViewController {
                 self.navigationController?.popViewController(animated: true)
             }
     }
-    
+
     internal static func username(profile: Profile) -> String {
         let username: String
         // here the priority for phone number over email follows the backend rule

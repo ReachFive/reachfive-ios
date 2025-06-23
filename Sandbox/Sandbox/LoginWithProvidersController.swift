@@ -1,6 +1,6 @@
 import UIKit
 import Reach5
-import Reach5Facebook
+//import Reach5Facebook
 import AppTrackingTransparency
 import AuthenticationServices
 
@@ -17,19 +17,19 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
 
         providers.append(contentsOf: AppDelegate.reachfive().getProviders())
         providersTableView.reloadData()
-        if providers.contains(where: { p in p.name == FacebookProvider.NAME }) {
-            ATTrackingManager.requestTrackingAuthorization { status in
-                let statut = switch status {
-                case ATTrackingManager.AuthorizationStatus.notDetermined: "notDetermined"
-                case ATTrackingManager.AuthorizationStatus.restricted:    "restricted"
-                case ATTrackingManager.AuthorizationStatus.denied:        "denied"
-                case ATTrackingManager.AuthorizationStatus.authorized:    "authorized"
-                @unknown default:                                         "unkown"
-                }
-
-                print("ATTrackingManager.requestTrackingAuthorization \(statut)")
-            }
-        }
+//        if providers.contains(where: { p in p.name == FacebookProvider.NAME }) {
+//            ATTrackingManager.requestTrackingAuthorization { status in
+//                let statut = switch status {
+//                case ATTrackingManager.AuthorizationStatus.notDetermined: "notDetermined"
+//                case ATTrackingManager.AuthorizationStatus.restricted:    "restricted"
+//                case ATTrackingManager.AuthorizationStatus.denied:        "denied"
+//                case ATTrackingManager.AuthorizationStatus.authorized:    "authorized"
+//                @unknown default:                                         "unkown"
+//                }
+//
+//                print("ATTrackingManager.requestTrackingAuthorization \(statut)")
+//            }
+//        }
     }
 
     public func reloadProvidersData(providers: [Provider]) {

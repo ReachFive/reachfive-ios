@@ -1,9 +1,9 @@
 import Reach5
 import UIKit
-import BrightFutures
+
 
 class PasskeyCredentialController: UIViewController {
-    
+
     var devices: [DeviceCredential] = [] {
         didSet {
             print("devices \(devices)")
@@ -16,19 +16,19 @@ class PasskeyCredentialController: UIViewController {
             }
         }
     }
-    
+
     @IBOutlet weak var listPasskeyLabel: UILabel!
     @IBOutlet weak var credentialTableview: UITableView!
     @IBOutlet weak var registerPasskeyButton: UIButton!
-    
+
     override func viewDidLoad() {
         print("PasskeyCredentialController.viewDidLoad")
         super.viewDidLoad()
-        
+
         credentialTableview.delegate = self
         credentialTableview.dataSource = self
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         print("PasskeyCredentialController.viewWillAppear")
         super.viewWillAppear(animated)
@@ -36,12 +36,12 @@ class PasskeyCredentialController: UIViewController {
             self.reloadCredentials(authToken: authToken)
         }
     }
-    
+
     private func reloadCredentials(authToken: AuthToken) {
         // Beware that a valid token for profile might not be fresh enough to retrieve the credentials
         AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken).onSuccess { listCredentials in
                 self.devices = listCredentials
-                
+
                 //TODO comprendre pourquoi on fait un async. En a-t-on vraiment besoin ?
                 DispatchQueue.main.async {
                     self.credentialTableview.reloadData()
@@ -52,7 +52,7 @@ class PasskeyCredentialController: UIViewController {
                 print("getCredentials error = \(error.message())")
             }
     }
-    
+
     @available(iOS 16.0, *)
     @IBAction func registerNewPasskey(_ sender: Any) {
         print("registerNewPasskey")
@@ -65,7 +65,7 @@ class PasskeyCredentialController: UIViewController {
             .getProfile(authToken: authToken)
             .onSuccess { profile in
                 let friendlyName = ProfileController.username(profile: profile)
-                
+
                 let alert = UIAlertController(
                     title: "Register New Passkey",
                     message: "Name the passkey",
@@ -78,7 +78,7 @@ class PasskeyCredentialController: UIViewController {
                 alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
                 let registerAction = UIAlertAction(title: "Add", style: .default) { [unowned alert] (_) in
                     let textField = alert.textFields?[0]
-                    
+
                     AppDelegate.reachfive().registerNewPasskey(withRequest: NewPasskeyRequest(anchor: window, friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey"), authToken: authToken)
                         .onSuccess { _ in
                             self.reloadCredentials(authToken: authToken)
@@ -113,19 +113,19 @@ extension PasskeyCredentialController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         devices.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = credentialTableview.dequeueReusableCell(withIdentifier: "credentialCell") else {
             fatalError("No credentialCell cell")
         }
-        
+
         let friendlyName = devices[indexPath.row].friendlyName
         var content = cell.defaultContentConfiguration()
         content.text = friendlyName
         cell.contentConfiguration = content
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             guard let authToken = AppDelegate.storage.getToken() else { return }
