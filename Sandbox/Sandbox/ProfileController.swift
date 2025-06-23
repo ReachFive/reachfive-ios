@@ -52,31 +52,35 @@ class ProfileController: UIViewController {
         super.viewDidLoad()
         emailMfaVerifyNotification = NotificationCenter.default.addObserver(forName: .DidReceiveMfaVerifyEmail, object: nil, queue: nil) {
             (note) in
-            if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
-                self.dismiss(animated: true)
-                switch result {
-                case .success():
-                    let alert = AppDelegate.createAlert(title: "Email mfa registering success", message: "Email mfa registering success")
-                    self.present(alert, animated: true)
-                    self.fetchProfile()
-                case .failure(let error):
-                    let alert = AppDelegate.createAlert(title: "Email mfa registering failed", message: "Error: \(error.message())")
-                    self.present(alert, animated: true)
+            Task { @MainActor in
+                if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
+                    self.dismiss(animated: true)
+                    switch result {
+                    case .success():
+                        let alert = AppDelegate.createAlert(title: "Email mfa registering success", message: "Email mfa registering success")
+                        self.present(alert, animated: true)
+                        await self.fetchProfile()
+                    case .failure(let error):
+                        let alert = AppDelegate.createAlert(title: "Email mfa registering failed", message: "Error: \(error.message())")
+                        self.present(alert, animated: true)
+                    }
                 }
             }
         }
         emailVerificationNotification = NotificationCenter.default.addObserver(forName: .DidReceiveEmailVerificationCallback, object: nil, queue: nil) {
             (note) in
-            if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
-                self.dismiss(animated: true)
-                switch result {
-                case .success():
-                    let alert = AppDelegate.createAlert(title: "Email validation success", message: "Email validation success")
-                    self.present(alert, animated: true)
-                    self.fetchProfile()
-                case .failure(let error):
-                    let alert = AppDelegate.createAlert(title: "Email validation failed", message: "Error: \(error.message())")
-                    self.present(alert, animated: true)
+            Task { @MainActor in
+                if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
+                    self.dismiss(animated: true)
+                    switch result {
+                    case .success():
+                        let alert = AppDelegate.createAlert(title: "Email validation success", message: "Email validation success")
+                        self.present(alert, animated: true)
+                        await self.fetchProfile()
+                    case .failure(let error):
+                        let alert = AppDelegate.createAlert(title: "Email validation failed", message: "Error: \(error.message())")
+                        self.present(alert, animated: true)
+                    }
                 }
             }
         }
@@ -101,11 +105,13 @@ class ProfileController: UIViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        print("ProfileController.viewWillAppear")
-        fetchProfile()
+        Task { @MainActor in
+            print("ProfileController.viewWillAppear")
+            await fetchProfile()
+        }
     }
 
-    func fetchProfile() {
+    func fetchProfile() async {
         print("ProfileController.fetchProfile")
 
         authToken = AppDelegate.storage.getToken()
@@ -113,12 +119,12 @@ class ProfileController: UIViewController {
             print("not logged in")
             return
         }
-        AppDelegate.reachfive()
+        await AppDelegate.reachfive()
             .getProfile(authToken: authToken)
             .onSuccess { profile in
                 self.profile = profile
                 self.profileData.reloadData()
-                self.setStatusImage(authToken: authToken)
+                await self.setStatusImage(authToken: authToken)
                 self.mfaButton.isHidden = false
                 self.editProfileButton.isHidden = false
                 self.passkeyButton.isHidden = false
@@ -137,19 +143,19 @@ class ProfileController: UIViewController {
             }
     }
 
-    private func setStatusImage(authToken: AuthToken) {
+    private func setStatusImage(authToken: AuthToken) async {
         // Use listWebAuthnCredentials to test if token is fresh
         // A fresh token is also needed for updating the profile and registering MFA credentials
-        AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken).onSuccess { _ in
-                self.passkeyButton.isEnabled = true
-                self.profileTabBarItem.image = SandboxTabBarController.loggedIn
-                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
-            }
-            .onFailure { error in
-                self.passkeyButton.isEnabled = false
-                self.profileTabBarItem.image = SandboxTabBarController.loggedInButNotFresh
-                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
-            }
+        await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken).onSuccess { _ in
+            self.passkeyButton.isEnabled = true
+            self.profileTabBarItem.image = SandboxTabBarController.loggedIn
+            self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+        }
+        .onFailure { error in
+            self.passkeyButton.isEnabled = false
+            self.profileTabBarItem.image = SandboxTabBarController.loggedInButNotFresh
+            self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+        }
     }
 
     func didLogin() {
@@ -168,11 +174,13 @@ class ProfileController: UIViewController {
     }
 
     @IBAction func logoutAction(_ sender: Any) {
-        AppDelegate.reachfive().logout()
-            .onComplete { result in
-                AppDelegate.storage.removeToken()
-                self.navigationController?.popViewController(animated: true)
-            }
+        Task { @MainActor in
+            await AppDelegate.reachfive().logout()
+                .onComplete { result in
+                    AppDelegate.storage.removeToken()
+                    self.navigationController?.popViewController(animated: true)
+                }
+        }
     }
 
     internal static func username(profile: Profile) -> String {

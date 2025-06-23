@@ -43,24 +43,24 @@ class MfaController: UIViewController {
 
     var tokenNotification: NSObjectProtocol?
 
-    private func fetchMfaCredentials() {
+    private func fetchMfaCredentials() async {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
             return
         }
-        AppDelegate.reachfive()
+        await AppDelegate.reachfive()
             .mfaListCredentials(authToken: authToken)
             .onSuccess { response in
                 self.mfaCredentialsToDisplay = response.credentials.map { MfaCredential.convert(from: $0) }
             }
     }
 
-    private func fetchTrustedDevices() {
+    private func fetchTrustedDevices() async {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
             return
         }
-        AppDelegate.reachfive()
+        await AppDelegate.reachfive()
             .mfaListTrustedDevices(authToken: authToken)
             .onSuccess { response in
                 self.mfaTrustedDevicesToDisplay = response
@@ -86,8 +86,10 @@ class MfaController: UIViewController {
 
         configureHierarchy()
         configureDataSource()
-        fetchMfaCredentials()
-        fetchTrustedDevices()
+        Task { @MainActor in
+            await fetchMfaCredentials()
+            await fetchTrustedDevices()
+        }
     }
 
     @IBAction func startStepUp(_ sender: UIButton) {
@@ -105,9 +107,11 @@ class MfaController: UIViewController {
         }
         let mfaAction = MfaAction(presentationAnchor: self)
 
-        mfaAction.mfaStart(stepUp: StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"]), authToken: authToken).onSuccess { freshToken in
-            AppDelegate.storage.setToken(freshToken)
-            self.fetchTrustedDevices()
+        Task { @MainActor in
+            await mfaAction.mfaStart(stepUp: StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"]), authToken: authToken).onSuccess { freshToken in
+                AppDelegate.storage.setToken(freshToken)
+                await self.fetchTrustedDevices()
+            }
         }
     }
 
@@ -123,8 +127,10 @@ class MfaController: UIViewController {
         }
 
         let mfaAction = MfaAction(presentationAnchor: self)
-        mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken).onSuccess { _ in
-            self.fetchMfaCredentials()
+        Task { @MainActor in
+            await mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken).onSuccess { _ in
+                await self.fetchMfaCredentials()
+            }
         }
     }
 }
@@ -137,26 +143,26 @@ class MfaAction {
     }
 
     func mfaStart(registering credential: Credential, authToken: AuthToken) async -> Result<MfaCredentialItem, ReachFiveError> {
-        let future = AppDelegate.reachfive()
+        let future = await AppDelegate.reachfive()
             .mfaStart(registering: credential, authToken: authToken)
-            .recoverWith { error in
+            .flatMapErrorAsync { error in
                 guard case let .AuthFailure(reason: _, apiError: apiError) = error,
                       let key = apiError?.errorMessageKey,
                       key == "error.accessToken.freshness"
                 else {
-                    return Future(error: error)
+                    return .failure(error)
                 }
 
                 // Automatically refresh the token if it is stale
-                return AppDelegate.reachfive()
-                    .refreshAccessToken(authToken: authToken).flatMap { (freshToken: AuthToken) in
+                return await AppDelegate.reachfive()
+                    .refreshAccessToken(authToken: authToken).flatMapAsync { (freshToken: AuthToken) in
                         AppDelegate.storage.setToken(freshToken)
-                        return AppDelegate.reachfive()
+                        return await AppDelegate.reachfive()
                             .mfaStart(registering: credential, authToken: freshToken)
                     }
             }
-            .flatMap { resp in
-                self.handleStartVerificationCode(resp)
+            .flatMapAsync { resp in
+                await self.handleStartVerificationCode(resp)
             }
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Start MFA \(credential.credentialType) Registration", message: "Error: \(error.message())")
@@ -167,25 +173,25 @@ class MfaAction {
     }
 
     func mfaStart(stepUp startStepUp: StartStepUp, authToken: AuthToken) async -> Result<AuthToken, ReachFiveError> {
-        return AppDelegate.reachfive()
+        return await AppDelegate.reachfive()
             .mfaStart(stepUp: startStepUp)
-            .recoverWith { error in
+            .flatMapErrorAsync { error in
                 guard case let .AuthFailure(reason: _, apiError: apiError) = error,
                       let key = apiError?.errorMessageKey,
                       key == "error.accessToken.freshness"
                 else {
-                    return Future(error: error)
+                    return .failure(error)
                 }
 
-                return AppDelegate.reachfive()
-                    .refreshAccessToken(authToken: authToken).flatMap { (freshToken: AuthToken) in
+                return await AppDelegate.reachfive()
+                    .refreshAccessToken(authToken: authToken).flatMapAsync { (freshToken: AuthToken) in
                         AppDelegate.storage.setToken(freshToken)
-                        return AppDelegate.reachfive()
+                        return await AppDelegate.reachfive()
                             .mfaStart(stepUp: startStepUp)
                     }
             }
-            .flatMap { resp in
-                self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
+            .flatMapAsync { resp in
+                await self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
             }
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.message())")
@@ -194,87 +200,94 @@ class MfaAction {
     }
 
     private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) async -> Result<AuthToken, ReachFiveError> {
-        let promise: Promise<AuthToken, ReachFiveError> = Promise()
-        let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
-        alert.addTextField { textField in
-            textField.placeholder = "Verification code"
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-            promise.failure(.AuthCanceled)
-        }
-
-        let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
-            guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
-                print("verification code cannot be empty")
-                promise.failure(.AuthFailure(reason: "no verification code"))
-                return
+        return await withCheckedContinuation { continuation in
+            Task { @MainActor in
+                let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
+                alert.addTextField { textField in
+                    textField.placeholder = "Verification code"
+                }
+                let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                    continuation.resume(returning: .failure(.AuthCanceled))
+                }
+                
+                let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
+                    guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
+                        print("verification code cannot be empty")
+                        continuation.resume(returning: .failure(.AuthFailure(reason: "no verification code")))
+                        return
+                    }
+                    
+                    Task { @MainActor in
+                        let future = await resp.verify(code: verificationCode)
+                            .onSuccess { _ in
+                                let alert = AppDelegate.createAlert(title: "Step Up", message: "Success")
+                                self.presentationAnchor.present(alert, animated: true)
+                            }
+                            .onFailure { error in
+                                let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
+                                self.presentationAnchor.present(alert, animated: true)
+                            }
+                        continuation.resume(returning: future)
+                    }
+                }
+                alert.addAction(cancelAction)
+                alert.addAction(submitVerificationCode)
+                alert.preferredAction = submitVerificationCode
+                presentationAnchor.present(alert, animated: true)
             }
-            let future = resp.verify(code: verificationCode)
-            promise.completeWith(future)
-            future
-                .onSuccess { _ in
-                    let alert = AppDelegate.createAlert(title: "Step Up", message: "Success")
-                    self.presentationAnchor.present(alert, animated: true)
-                }
-                .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
-                    self.presentationAnchor.present(alert, animated: true)
-                }
         }
-        alert.addAction(cancelAction)
-        alert.addAction(submitVerificationCode)
-        alert.preferredAction = submitVerificationCode
-        presentationAnchor.present(alert, animated: true)
-        return promise.future
     }
 
     private func handleStartVerificationCode(_ resp: MfaStartRegistrationResponse) async -> Result<MfaCredentialItem, ReachFiveError> {
-        let promise: Promise<MfaCredentialItem, ReachFiveError> = Promise()
-        switch resp {
-        case let .Success(registeredCredential):
-            let alert = AppDelegate.createAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
-            presentationAnchor.present(alert, animated: true)
-            promise.success(registeredCredential)
-
-        case let .VerificationNeeded(continueRegistration):
-            let canal =
-                switch continueRegistration.credentialType {
-                case .Email: "Email"
-                case .PhoneNumber: "SMS"
-                }
-
-            let alert = UIAlertController(title: "Verification Code", message: "Please enter the verification Code you got by \(canal)", preferredStyle: .alert)
-            alert.addTextField { textField in
-                textField.placeholder = "Verification code"
-            }
-            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-                promise.failure(.AuthCanceled)
-            }
-
-            let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
-                guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
-                    print("verification code cannot be empty")
-                    promise.failure(.AuthFailure(reason: "no verification code"))
-                    return
-                }
-                let future = continueRegistration.verify(code: verificationCode)
-                promise.completeWith(future)
-                future
-                    .onSuccess { succ in
-                        let alert = AppDelegate.createAlert(title: "Verify MFA \(succ.type) registration", message: "Success")
-                        self.presentationAnchor.present(alert, animated: true)
+        return await withCheckedContinuation { continuation in
+            Task { @MainActor in
+                switch resp {
+                case let .Success(registeredCredential):
+                    let alert = AppDelegate.createAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
+                    presentationAnchor.present(alert, animated: true)
+                    continuation.resume(returning: .success(registeredCredential))
+                    
+                case let .VerificationNeeded(continueRegistration):
+                    let canal =
+                    switch continueRegistration.credentialType {
+                    case .Email: "Email"
+                    case .PhoneNumber: "SMS"
                     }
-                    .onFailure { error in
-                        let alert = AppDelegate.createAlert(title: "MFA \(continueRegistration.credentialType) failure", message: "Error: \(error.message())")
-                        self.presentationAnchor.present(alert, animated: true)
+                    
+                    let alert = UIAlertController(title: "Verification Code", message: "Please enter the verification Code you got by \(canal)", preferredStyle: .alert)
+                    alert.addTextField { textField in
+                        textField.placeholder = "Verification code"
                     }
+                    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                        continuation.resume(returning: .failure(.AuthCanceled))
+                    }
+                    
+                    let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
+                        guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
+                            print("verification code cannot be empty")
+                            continuation.resume(returning: .failure(.AuthFailure(reason: "no verification code")))
+                            return
+                        }
+                        Task { @MainActor in
+                            let future = await continueRegistration.verify(code: verificationCode)
+                                .onSuccess { succ in
+                                    let alert = AppDelegate.createAlert(title: "Verify MFA \(succ.type) registration", message: "Success")
+                                    self.presentationAnchor.present(alert, animated: true)
+                                }
+                                .onFailure { error in
+                                    let alert = AppDelegate.createAlert(title: "MFA \(continueRegistration.credentialType) failure", message: "Error: \(error.message())")
+                                    self.presentationAnchor.present(alert, animated: true)
+                                }
+                            continuation.resume(returning: future)
+                        }
+                    }
+                    alert.addAction(cancelAction)
+                    alert.addAction(submitVerificationCode)
+                    alert.preferredAction = submitVerificationCode
+                    presentationAnchor.present(alert, animated: true)
+                }
             }
-            alert.addAction(cancelAction)
-            alert.addAction(submitVerificationCode)
-            alert.preferredAction = submitVerificationCode
-            presentationAnchor.present(alert, animated: true)
         }
-        return promise.future
     }
 }
 
@@ -496,10 +509,12 @@ extension TrustedDeviceCollectionViewCell {
         let cancelAction = UIAlertAction(title: "No", style: .cancel) { _ in
         }
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
-            AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
-                .onSuccess { _ in
-                    self.contentView.removeFromSuperview()
-                }
+            Task { @MainActor in
+                await AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
+                    .onSuccess { _ in
+                        self.contentView.removeFromSuperview()
+                    }
+            }
         }
         alert.addAction(cancelAction)
         alert.addAction(approveRemove)
@@ -574,17 +589,20 @@ extension CredentialCollectionViewCell {
         let cancelAction = UIAlertAction(title: "No", style: .cancel) { _ in
         }
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
-            if identifier.contains("@") {
-                AppDelegate.reachfive().mfaDeleteCredential(authToken: authToken)
-                    .onSuccess { _ in
-                        self.contentView.removeFromSuperview()
-                    }
-            } else {
-                AppDelegate.reachfive()
-                    .mfaDeleteCredential(identifier, authToken: authToken)
-                    .onSuccess { _ in
-                        self.contentView.removeFromSuperview()
-                    }
+            Task { @MainActor in
+                if identifier.contains("@") {
+                    await AppDelegate.reachfive()
+                        .mfaDeleteCredential(authToken: authToken)
+                        .onSuccess { _ in
+                            self.contentView.removeFromSuperview()
+                        }
+                } else {
+                    await AppDelegate.reachfive()
+                        .mfaDeleteCredential(identifier, authToken: authToken)
+                        .onSuccess { _ in
+                            self.contentView.removeFromSuperview()
+                        }
+                }
             }
         }
         alert.addAction(cancelAction)

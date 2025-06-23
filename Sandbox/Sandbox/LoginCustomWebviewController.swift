@@ -5,7 +5,7 @@ import Reach5
 import Alamofire
 
 class LoginCustomWebviewController: UIViewController {
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let pkce = Pkce.generate()
@@ -27,15 +27,15 @@ extension LoginCustomWebviewController: WKNavigationDelegate {
             decisionHandler(.allow)
             return
         }
-        
+
         decisionHandler(.cancel)
-        
+
         let useScheme = true
         // two choices
         // 1. Let the SDK read the callback URL by opening the app with the URL Scheme and listening to the passwordless callback
         if (useScheme) {
             app.open(url)
-            
+
             // create a one-time notification by removing the observer from within the observation block
             let center = NotificationCenter.default
             var token: NSObjectProtocol?
@@ -46,15 +46,17 @@ extension LoginCustomWebviewController: WKNavigationDelegate {
                 }
             }
         } else {
-            // 2. read the code yourself and call authWithCode
-            let pkce: Pkce? = AppDelegate.storage.take(key: reachfive.pkceKey)
-            guard let pkce else {
-                print("Pkce not found")
-                return
-            }
-            let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
-            if let code = params?.first(where: { $0.name == "code" })?.value {
-                reachfive.authWithCode(code: code, pkce: pkce).onComplete { self.handleResult(result: $0) }
+            Task { @MainActor in
+                // 2. read the code yourself and call authWithCode
+                let pkce: Pkce? = AppDelegate.storage.take(key: reachfive.pkceKey)
+                guard let pkce else {
+                    print("Pkce not found")
+                    return
+                }
+                let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
+                if let code = params?.first(where: { $0.name == "code" })?.value {
+                    await reachfive.authWithCode(code: code, pkce: pkce).onComplete { self.handleResult(result: $0) }
+                }
             }
         }
     }

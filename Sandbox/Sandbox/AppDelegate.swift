@@ -207,54 +207,58 @@ extension UIViewController {
 
     private func createSelectMfaAuthTypeAction(type: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
         return UIAlertAction(title: type.rawValue, style: .default) { _ in
-            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken)).onSuccess { resp in
-                self.handleStartVerificationCode(resp, authType: type)
-                    .onSuccess { authToken in
-                        self.goToProfile(authToken)
-                    }
+            Task { @MainActor in
+                await AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken)).onSuccess { resp in
+                    await self.handleStartVerificationCode(resp, authType: type)
+                        .onSuccess { authToken in
+                            self.goToProfile(authToken)
+                        }
+                }
             }
         }
     }
 
     private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) async -> Result<AuthToken, ReachFiveError> {
-        let promise: Promise<AuthToken, ReachFiveError> = Promise()
+        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<AuthToken, ReachFiveError>, Never>) in
 
-        let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
-        alert.addTextField { textField in
-            textField.placeholder = "Verification code"
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-            promise.failure(.AuthCanceled)
-        }
-        func submitVerificationCode(withTrustDevice trustDevice: Bool?) -> Void {
-            guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
-                print("verification code cannot be empty")
-                promise.failure(.AuthFailure(reason: "no verification code"))
-                return
+            let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
+            alert.addTextField { textField in
+                textField.placeholder = "Verification code"
             }
-            let future = resp.verify(code: verificationCode, trustDevice: trustDevice)
-                .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
-                    self.present(alert, animated: true)
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                continuation.resume(returning: .failure(.AuthCanceled))
+            }
+            func submitVerificationCode(withTrustDevice trustDevice: Bool?) -> Void {
+                Task { @MainActor in
+                    guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
+                        print("verification code cannot be empty")
+                        continuation.resume(returning: .failure(.AuthFailure(reason: "no verification code")))
+                        return
+                    }
+                    let future = await resp.verify(code: verificationCode, trustDevice: trustDevice)
+                        .onFailure { error in
+                            let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
+                            self.present(alert, animated: true)
+                        }
+                    continuation.resume(returning: future)
                 }
-            promise.completeWith(future)
-        }
+            }
 
-        let submitVerificationTrustDevice = UIAlertAction(title: "Trust device", style: .default) { _ in
-            submitVerificationCode(withTrustDevice: true)
+            let submitVerificationTrustDevice = UIAlertAction(title: "Trust device", style: .default) { _ in
+                submitVerificationCode(withTrustDevice: true)
+            }
+            let submitVerificationNoTrustDevice = UIAlertAction(title: "Don't trust device", style: .default) { _ in
+                submitVerificationCode(withTrustDevice: false)
+            }
+            let submitVerificationWithoutRba = UIAlertAction(title: "Ignore RBA", style: .default) { _ in
+                submitVerificationCode(withTrustDevice: nil)
+            }
+            alert.addAction(cancelAction)
+            alert.addAction(submitVerificationTrustDevice)
+            alert.addAction(submitVerificationNoTrustDevice)
+            alert.addAction(submitVerificationWithoutRba)
+            present(alert, animated: true)
         }
-        let submitVerificationNoTrustDevice = UIAlertAction(title: "Don't trust device", style: .default) { _ in
-            submitVerificationCode(withTrustDevice: false)
-        }
-        let submitVerificationWithoutRba = UIAlertAction(title: "Ignore RBA", style: .default) { _ in
-            submitVerificationCode(withTrustDevice: nil)
-        }
-        alert.addAction(cancelAction)
-        alert.addAction(submitVerificationTrustDevice)
-        alert.addAction(submitVerificationNoTrustDevice)
-        alert.addAction(submitVerificationWithoutRba)
-        present(alert, animated: true)
-        return promise.future
     }
 }
 

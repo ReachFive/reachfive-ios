@@ -1,6 +1,6 @@
 import Foundation
 
-extension Result {
+public extension Result {
     //TODO: revenir à la fin quand le SDK compile et voir si je peux renommer cette méthode en « flatMap »
     func flatMapAsync<NewSuccess>(_ transform: (Success) async -> Result<NewSuccess, Failure>) async -> Result<NewSuccess, Failure> where NewSuccess : ~Copyable {
         switch self {
@@ -11,7 +11,7 @@ extension Result {
         }
     }
     
-    public consuming func flatMapErrorAsync<NewFailure>(_ transform: (Failure) async -> Result<Success, NewFailure>) async -> Result<Success, NewFailure> where NewFailure : Error {
+    consuming func flatMapErrorAsync<NewFailure>(_ transform: (Failure) async -> Result<Success, NewFailure>) async -> Result<Success, NewFailure> where NewFailure : Error {
         switch self {
         case .success(let value):
             return .success(value)
@@ -21,19 +21,25 @@ extension Result {
     }
     
     @discardableResult
-    public func onSuccess(callback: @escaping (Success) -> Void) -> Self {
+    func onSuccess(callback: @escaping (Success) async -> Void) async -> Self {
         if case .success(let value) = self {
-            callback(value)
+            await callback(value)
         }
         return self
     }
     
 
     @discardableResult
-    public func onFailure(callback: @escaping (Failure) -> Void) -> Self {
+    func onFailure(callback: @escaping (Failure) async -> Void) async -> Self {
         if case .failure(let value) = self {
-            callback(value)
+            await callback(value)
         }
+        return self
+    }
+
+    @discardableResult
+    func onComplete(callback: @escaping (Self) async -> Void) async -> Self {
+        await callback(self)
         return self
     }
     
@@ -52,7 +58,7 @@ extension Result {
 //    }
 }
 
-extension Sequence {
+public extension Sequence {
     func traverse<NewElement, E>(_ transform: @escaping (Element) async -> Result<NewElement, E>) async -> Result<[NewElement], E> where E: Error {
         var results = [NewElement]()
         for try element in self {

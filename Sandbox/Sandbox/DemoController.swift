@@ -64,34 +64,36 @@ class DemoController: UIViewController {
         } else {
             mode = .Always
         }
-        AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
-            .onSuccess(callback: handleLoginFlow)
-            .onFailure { error in
-
-                self.usernameField.isHidden = false
-                self.usernameLabel.isHidden = false
-                self.loginButton.isHidden = false
-                self.createAccountButton.isHidden = false
-                self.passwordField.isHidden = false
-                self.passwordLabel.isHidden = false
-                self.loginProviderStackView.isHidden = false
-
-                switch error {
-                case .AuthCanceled:
-                    #if targetEnvironment(macCatalyst)
+        Task { @MainActor in
+            await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
+                .onSuccess(callback: handleLoginFlow)
+                .onFailure { error in
+                    
+                    self.usernameField.isHidden = false
+                    self.usernameLabel.isHidden = false
+                    self.loginButton.isHidden = false
+                    self.createAccountButton.isHidden = false
+                    self.passwordField.isHidden = false
+                    self.passwordLabel.isHidden = false
+                    self.loginProviderStackView.isHidden = false
+                    
+                    switch error {
+                    case .AuthCanceled:
+#if targetEnvironment(macCatalyst)
                         return
-                    #else
+#else
                         if #available(iOS 16.0, *) {
-                            AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
+                            await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
                                 .onSuccess(callback: self.goToProfile)
                                 .onFailure { error in
                                     print("error: \(error) \(error.message())")
                                 }
                         }
-                    #endif
-                default: return
+#endif
+                    default: return
+                    }
                 }
-            }
+        }
     }
 
     @IBAction func createAccount(_ sender: Any) {
@@ -114,16 +116,18 @@ class DemoController: UIViewController {
                 profile = ProfilePasskeySignupRequest(phoneNumber: username)
             }
 
-            AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
-                .onSuccess(callback: goToProfile)
-                .onFailure { error in
-                    switch error {
-                    case .AuthCanceled: goToSignup()
-                    default:
-                        let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.message())")
-                        self.present(alert, animated: true)
+            Task { @MainActor in
+                await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
+                    .onSuccess(callback: goToProfile)
+                    .onFailure { error in
+                        switch error {
+                        case .AuthCanceled: goToSignup()
+                        default:
+                            let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.message())")
+                            self.present(alert, animated: true)
+                        }
                     }
-                }
+            }
         } else {
             goToSignup()
         }
@@ -139,7 +143,9 @@ class DemoController: UIViewController {
         guard let pass = passwordField.text, let username = usernameField.text else { return }
 
         if !pass.isEmpty {
-            loginWithPassword()
+            Task { @MainActor in
+                await loginWithPassword()
+            }
             return
         }
 
@@ -151,7 +157,7 @@ class DemoController: UIViewController {
                     #if targetEnvironment(macCatalyst)
                         return
                     #else
-                        AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
+                        await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
                             .onSuccess(callback: self.goToProfile)
                             .onFailure { error in
                                 print("error: \(error) \(error.message())")
@@ -163,31 +169,33 @@ class DemoController: UIViewController {
                 }
             }
 
-            if username.isEmpty {
-                AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                .onSuccess(callback: handleLoginFlow)
-                .onFailure(callback: onFailure)
-
-            } else {
-                AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                .onSuccess(callback: goToProfile)
-                .onFailure(callback: onFailure)
+            Task { @MainActor in
+                if username.isEmpty {
+                    await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                        .onSuccess(callback: handleLoginFlow)
+                        .onFailure(callback: onFailure)
+                    
+                } else {
+                    await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                        .onSuccess(callback: goToProfile)
+                        .onFailure(callback: onFailure)
+                }
             }
         }
     }
 
-    func loginWithPassword() {
+    func loginWithPassword() async {
         guard let pass = passwordField.text, !pass.isEmpty, let user = usernameField.text, !user.isEmpty else { return }
         let origin = "DemoController.loginWithPassword"
 
         let fut: Result<LoginFlow, ReachFiveError>
         if user.contains("@") {
-            fut = AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
+            fut = await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
         } else {
-            fut = AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
+            fut = await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
         }
 
-        fut.onSuccess(callback: handleLoginFlow)
+        await fut.onSuccess(callback: handleLoginFlow)
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                 self.present(alert, animated: true)
@@ -200,10 +208,10 @@ class DemoController: UIViewController {
         loginProviderStackView.addArrangedSubview(authorizationButton)
     }
 
-    @objc func handleAuthorizationAppleIDButtonPress() {
+    @objc func handleAuthorizationAppleIDButtonPress() async {
         print("handleAuthorizationAppleIDButtonPress")
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-        AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+        await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
             .onSuccess(callback: handleLoginFlow)
             .onFailure { error in
                 switch error {
@@ -228,7 +236,9 @@ extension DemoController: UITextFieldDelegate {
         } else {
             // the password field was focused, defocus it and login
             textField.resignFirstResponder()
-            loginWithPassword()
+            Task { @MainActor in
+                await loginWithPassword()
+            }
         }
         return false
     }

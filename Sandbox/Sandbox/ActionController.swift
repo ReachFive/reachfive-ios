@@ -5,66 +5,68 @@ import AuthenticationServices
 
 class ActionController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-
-        guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-
-        // Section Native
-        if indexPath.section == 1 {
-            // Sign in with Apple
-            if indexPath.row == 1 {
-                AppDelegate.reachfive()
-                    .login(withRequest: NativeLoginRequest(anchor: window, origin: "ActionController: Section Native"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
-                    .onSuccess(callback: handleLoginFlow)
-                    .onFailure { error in
-                        let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.message())")
-                        self.present(alert, animated: true)
-                   }
-            }
-        }
-
-        let loginRequest = NativeLoginRequest(anchor: window, origin: "ActionController: Section Passkey")
-
-        // Section Passkey
-        if #available(iOS 16.0, *), indexPath.section == 2 {
-            // Login with passkey: modal persistent
-            if indexPath.row == 1 {
-                AppDelegate.reachfive()
-                    .login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                    .onSuccess(callback: handleLoginFlow)
-            } else
-            // Login with passkey: modal non-persistent
-            if indexPath.row == 2 {
-                AppDelegate.reachfive()
-                    .login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
-                    .onSuccess(callback: handleLoginFlow)
-            }
-        }
-
-        // Section Webview
-        if indexPath.section == 3 {
-            // standard webview
-            if indexPath.row == 0 {
-                AppDelegate.reachfive()
-                    .webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin"))
-                    .onComplete { self.handleResult(result: $0) }
-            }
-        }
-
-        // Section Others
-        if indexPath.section == 4 {
-            // Login with refresh
-            if indexPath.row == 2 {
-                guard let token = AppDelegate.storage.getToken() else {
-                    return
+        Task { @MainActor in
+            tableView.deselectRow(at: indexPath, animated: true)
+            
+            guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
+            
+            // Section Native
+            if indexPath.section == 1 {
+                // Sign in with Apple
+                if indexPath.row == 1 {
+                    await AppDelegate.reachfive()
+                        .login(withRequest: NativeLoginRequest(anchor: window, origin: "ActionController: Section Native"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+                        .onSuccess(callback: handleLoginFlow)
+                        .onFailure { error in
+                            let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.message())")
+                            self.present(alert, animated: true)
+                        }
                 }
-                AppDelegate.reachfive()
-                    .refreshAccessToken(authToken: token)
-                    .onSuccess(callback: goToProfile)
-                    .onFailure { error in
-                        print("refresh error \(error)")
-                        AppDelegate.storage.removeToken()
+            }
+            
+            let loginRequest = NativeLoginRequest(anchor: window, origin: "ActionController: Section Passkey")
+            
+            // Section Passkey
+            if #available(iOS 16.0, *), indexPath.section == 2 {
+                // Login with passkey: modal persistent
+                if indexPath.row == 1 {
+                    await AppDelegate.reachfive()
+                        .login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                        .onSuccess(callback: handleLoginFlow)
+                } else
+                // Login with passkey: modal non-persistent
+                if indexPath.row == 2 {
+                    await AppDelegate.reachfive()
+                        .login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
+                        .onSuccess(callback: handleLoginFlow)
+                }
+            }
+            
+            // Section Webview
+            if indexPath.section == 3 {
+                // standard webview
+                if indexPath.row == 0 {
+                    await AppDelegate.reachfive()
+                        .webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin"))
+                        .onComplete { self.handleResult(result: $0) }
+                }
+            }
+            
+            // Section Others
+            if indexPath.section == 4 {
+                // Login with refresh
+                if indexPath.row == 2 {
+                    guard let token = AppDelegate.storage.getToken() else {
+                        return
                     }
+                    await AppDelegate.reachfive()
+                        .refreshAccessToken(authToken: token)
+                        .onSuccess(callback: goToProfile)
+                        .onFailure { error in
+                            print("refresh error \(error)")
+                            AppDelegate.storage.removeToken()
+                        }
+                }
             }
         }
     }
