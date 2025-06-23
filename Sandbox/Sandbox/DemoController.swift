@@ -157,11 +157,13 @@ class DemoController: UIViewController {
                     #if targetEnvironment(macCatalyst)
                         return
                     #else
+                    Task { @MainActor in
                         await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
                             .onSuccess(callback: self.goToProfile)
                             .onFailure { error in
                                 print("error: \(error) \(error.message())")
                             }
+                    }
                     #endif
                 default:
                     let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
