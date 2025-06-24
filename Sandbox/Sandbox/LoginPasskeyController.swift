@@ -28,24 +28,24 @@ class LoginPasskeyController: UIViewController {
             await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear"), usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
                 .onSuccess(callback: handleLoginFlow)
                 .onFailure { error in
-                    
+
                     self.usernameField.isHidden = false
                     self.usernameLabel.isHidden = false
                     self.loginButton.isHidden = false
                     self.createAccountButton.isHidden = false
-                    
+
                     switch error {
                     case .AuthCanceled:
-#if targetEnvironment(macCatalyst)
+                    #if targetEnvironment(macCatalyst)
                         return
-#else
+                    #else
                         await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear.AuthCanceled"))
                             .onSuccess(callback: self.goToProfile)
                             .onFailure { error in
                                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                                 self.present(alert, animated: true)
                             }
-#endif
+                    #endif
                     default:
                         let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                         self.present(alert, animated: true)
@@ -84,7 +84,7 @@ class LoginPasskeyController: UIViewController {
                 await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                     .onSuccess(callback: handleLoginFlow)
                     .onFailure(callback: onFailure)
-                
+
             case .some(let username):
                 await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                     .onSuccess(callback: goToProfile)

@@ -68,7 +68,7 @@ class DemoController: UIViewController {
             await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
                 .onSuccess(callback: handleLoginFlow)
                 .onFailure { error in
-                    
+
                     self.usernameField.isHidden = false
                     self.usernameLabel.isHidden = false
                     self.loginButton.isHidden = false
@@ -76,12 +76,12 @@ class DemoController: UIViewController {
                     self.passwordField.isHidden = false
                     self.passwordLabel.isHidden = false
                     self.loginProviderStackView.isHidden = false
-                    
+
                     switch error {
                     case .AuthCanceled:
-#if targetEnvironment(macCatalyst)
+                    #if targetEnvironment(macCatalyst)
                         return
-#else
+                    #else
                         if #available(iOS 16.0, *) {
                             await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
                                 .onSuccess(callback: self.goToProfile)
@@ -89,7 +89,7 @@ class DemoController: UIViewController {
                                     print("error: \(error) \(error.message())")
                                 }
                         }
-#endif
+                    #endif
                     default: return
                     }
                 }
@@ -154,17 +154,17 @@ class DemoController: UIViewController {
             func onFailure(error: ReachFiveError) -> Void {
                 switch error {
                 case .AuthCanceled:
-                    #if targetEnvironment(macCatalyst)
-                        return
-                    #else
-                    Task { @MainActor in
-                        await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
-                            .onSuccess(callback: self.goToProfile)
-                            .onFailure { error in
-                                print("error: \(error) \(error.message())")
-                            }
-                    }
-                    #endif
+                #if targetEnvironment(macCatalyst)
+                    return
+                #else
+                Task { @MainActor in
+                    await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
+                        .onSuccess(callback: self.goToProfile)
+                        .onFailure { error in
+                            print("error: \(error) \(error.message())")
+                        }
+                }
+                #endif
                 default:
                     let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                     self.present(alert, animated: true)
@@ -176,7 +176,7 @@ class DemoController: UIViewController {
                     await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                         .onSuccess(callback: handleLoginFlow)
                         .onFailure(callback: onFailure)
-                    
+
                 } else {
                     await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                         .onSuccess(callback: goToProfile)
