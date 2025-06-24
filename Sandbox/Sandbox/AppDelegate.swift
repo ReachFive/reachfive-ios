@@ -173,9 +173,11 @@ extension UIViewController {
     func goToProfile(_ authToken: AuthToken) {
         AppDelegate.storage.setToken(authToken)
 
-        if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "Tabs") as? UITabBarController {
-            tabBarController.selectedIndex = 2 // profile is third from left
-            navigationController?.pushViewController(tabBarController, animated: true)
+        Task { @MainActor in
+            if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "Tabs") as? UITabBarController {
+                tabBarController.selectedIndex = 2 // profile is third from left
+                navigationController?.pushViewController(tabBarController, animated: true)
+            }
         }
     }
 
