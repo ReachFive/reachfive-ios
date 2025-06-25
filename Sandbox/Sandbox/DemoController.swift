@@ -210,19 +210,21 @@ class DemoController: UIViewController {
         loginProviderStackView.addArrangedSubview(authorizationButton)
     }
 
-    @objc func handleAuthorizationAppleIDButtonPress() async {
+    @objc func handleAuthorizationAppleIDButtonPress() {
         print("handleAuthorizationAppleIDButtonPress")
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-        await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
-            .onSuccess(callback: handleLoginFlow)
-            .onFailure { error in
-                switch error {
-                case .AuthCanceled: return
-                default:
-                    let alert = AppDelegate.createAlert(title: "Signup with Apple", message: "Error: \(error.message())")
-                    self.present(alert, animated: true, completion: nil)
+        Task {
+            await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+                .onSuccess(callback: handleLoginFlow)
+                .onFailure { error in
+                    switch error {
+                    case .AuthCanceled: return
+                    default:
+                        let alert = AppDelegate.createAlert(title: "Signup with Apple", message: "Error: \(error.message())")
+                        self.present(alert, animated: true, completion: nil)
+                    }
                 }
-            }
+        }
     }
 }
 
