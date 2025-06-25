@@ -347,13 +347,13 @@ extension CredentialManager: ASAuthorizationControllerPresentationContextProvidi
 extension CredentialManager: ASAuthorizationControllerDelegate {
 
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        defer {
-            continuationWithAuthToken = nil
-            continuationRegistration = nil
-            continuationWithStepUp = nil
-        }
-
         Task {
+            defer {
+                continuationWithAuthToken = nil
+                continuationRegistration = nil
+                continuationWithStepUp = nil
+            }
+
             if let passwordCredential = authorization.credential as? ASPasswordCredential {
                 guard let scope else {
                     continuationWithStepUp?.resume(returning: .failure(.TechnicalError(reason: "didCompleteWithAuthorization: no scope")))
