@@ -32,11 +32,9 @@ public class LoginWKWebview: UIView {
 
 extension LoginWKWebview: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
-        defer {
-            continuation = nil
-        }
         guard let reachfive,
               let pkce,
+              let continuation,
               let url = navigationAction.request.url,
               url.scheme == reachfive.sdkConfig.baseScheme.lowercased()
         else {
@@ -45,10 +43,11 @@ extension LoginWKWebview: WKNavigationDelegate {
 
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
         if let params, let code = params.first(where: { $0.name == "code" })?.value {
-            continuation?.resume(returning: await reachfive.authWithCode(code: code, pkce: pkce))
+            continuation.resume(returning: await reachfive.authWithCode(code: code, pkce: pkce))
         } else {
-            continuation?.resume(returning: .failure(.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))))
+            continuation.resume(returning: .failure(.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))))
         }
+        self.continuation = nil
         return .cancel
     }
 }
