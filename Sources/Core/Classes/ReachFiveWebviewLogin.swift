@@ -48,7 +48,9 @@ public extension ReachFive {
             
             // Start the Authentication Flow
             // if the result of this method is false then the error will already have been processed and the promise failed in the callback
-            session.start()
+            Task { @MainActor in
+                session.start()
+            }
         }
     }
 }
