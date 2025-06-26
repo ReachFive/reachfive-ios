@@ -6,7 +6,7 @@ class PasskeyAutoFillControler: UIViewController {
     #if !targetEnvironment(macCatalyst)
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
-            print("viewDidAppear")
+            print("PasskeyAutoFillControler.viewDidAppear")
 
             if #available(iOS 16.0, *) {
                 Task { @MainActor in
