@@ -58,8 +58,4 @@ public extension ReachFive {
                 }
             }
     }
-
-    //TODO: Avec le Reach5 version X qui sera pur async/await, livrer un Reach5FutureBridge (un fork de reachfive-ios) qui ajoutera aussi les méthodes actuelles avec les Future et qui utilisera de manière sous-jacente les version async/await
-    // On ne garde pas de différentes branches dans Reach5, mais le legacy sera géré dans Reach5FutureBridge.
-    // Pas de nouvelle version de la sandbox, migrer la sandbox actuelle pour utiliser les fonctions async/await. La version Future sera dans Reach5FutureBridge.
 }
