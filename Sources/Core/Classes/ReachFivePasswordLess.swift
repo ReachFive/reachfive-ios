@@ -45,29 +45,23 @@ public extension ReachFive {
         guard let pkce else {
             throw ReachFiveError.TechnicalError(reason: "Pkce not found")
         }
-        return try await reachFiveApi
-            .verifyAuthCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
-            .flatMapAsync { _ in
-                let verifyPasswordlessRequest = VerifyPasswordlessRequest(
-                    email: verifyAuthCodeRequest.email,
-                    phoneNumber: verifyAuthCodeRequest.phoneNumber,
-                    verificationCode: verifyAuthCodeRequest.verificationCode,
-                    state: "passwordless",
-                    clientId: self.sdkConfig.clientId,
-                    responseType: "code",
-                    origin: verifyAuthCodeRequest.origin
-                )
-                return try await self.reachFiveApi
-                    .verifyPasswordless(verifyPasswordlessRequest: verifyPasswordlessRequest)
-                    .flatMapAsync { response in
-
-                        guard let code = response.code else {
-                            throw ReachFiveError.TechnicalError(reason: "No authorization code")
-                        }
-
-                        return try await self.authWithCode(code: code, pkce: pkce)
-                    }
-            }
+        //TODO: c'est quoi ces appels qui s'enchainent sans dépendre l'un de l'autre ?
+        try await reachFiveApi.verifyAuthCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
+        let verifyPasswordlessRequest = VerifyPasswordlessRequest(
+            email: verifyAuthCodeRequest.email,
+            phoneNumber: verifyAuthCodeRequest.phoneNumber,
+            verificationCode: verifyAuthCodeRequest.verificationCode,
+            state: "passwordless",
+            clientId: self.sdkConfig.clientId,
+            responseType: "code",
+            origin: verifyAuthCodeRequest.origin
+        )
+        let response = try await self.reachFiveApi.verifyPasswordless(verifyPasswordlessRequest: verifyPasswordlessRequest)
+        guard let code = response.code else {
+            throw ReachFiveError.TechnicalError(reason: "No authorization code")
+        }
+        
+        return try await self.authWithCode(code: code, pkce: pkce)
     }
 
     internal func interceptPasswordless(_ url: URL) async {
