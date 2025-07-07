@@ -23,7 +23,7 @@ class DemoController: UIViewController {
                 case let .success(authToken):
                     self.goToProfile(authToken)
                 case let .failure(error):
-                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
             }
@@ -86,7 +86,7 @@ class DemoController: UIViewController {
                             try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
                                 .onSuccess(callback: self.goToProfile)
                                 .onFailure { error in
-                                    print("error: \(error) \(error.message())")
+                                    print("error: \(error) \(error.localizedDescription)")
                                 }
                         }
                     #endif
@@ -123,7 +123,7 @@ class DemoController: UIViewController {
                         switch error {
                         case .AuthCanceled: goToSignup()
                         default:
-                            let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.message())")
+                            let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.localizedDescription)")
                             self.present(alert, animated: true)
                         }
                     }
@@ -161,12 +161,12 @@ class DemoController: UIViewController {
                     try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
                         .onSuccess(callback: self.goToProfile)
                         .onFailure { error in
-                            print("error: \(error) \(error.message())")
+                            print("error: \(error) \(error.localizedDescription)")
                         }
                 }
                 #endif
                 default:
-                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
             }
@@ -199,7 +199,7 @@ class DemoController: UIViewController {
 
         try await fut.onSuccess(callback: handleLoginFlow)
             .onFailure { error in
-                let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
+                let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
                 self.present(alert, animated: true)
             }
     }
@@ -220,7 +220,7 @@ class DemoController: UIViewController {
                     switch error {
                     case .AuthCanceled: return
                     default:
-                        let alert = AppDelegate.createAlert(title: "Signup with Apple", message: "Error: \(error.message())")
+                        let alert = AppDelegate.createAlert(title: "Signup with Apple", message: "Error: \(error.localizedDescription)")
                         self.present(alert, animated: true, completion: nil)
                     }
                 }

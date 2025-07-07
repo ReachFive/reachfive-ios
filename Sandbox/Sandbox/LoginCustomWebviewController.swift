@@ -70,7 +70,7 @@ extension LoginCustomWebviewController {
         case .success(let authToken):
             goToProfile(authToken)
         case .failure(let error):
-            let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.message())")
+            let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.localizedDescription)")
             present(alert, animated: true)
         }
     }

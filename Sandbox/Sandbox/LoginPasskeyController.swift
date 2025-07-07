@@ -42,12 +42,12 @@ class LoginPasskeyController: UIViewController {
                         try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear.AuthCanceled"))
                             .onSuccess(callback: self.goToProfile)
                             .onFailure { error in
-                                let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
+                                let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
                                 self.present(alert, animated: true)
                             }
                     #endif
                     default:
-                        let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
+                        let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
                         self.present(alert, animated: true)
                     }
                 }
@@ -67,13 +67,13 @@ class LoginPasskeyController: UIViewController {
                     try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.nonDiscoverableLogin.AuthCanceled"))
                         .onSuccess(callback: self.goToProfile)
                         .onFailure { error in
-                            let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
+                            let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
                             self.present(alert, animated: true)
                         }
                 }
                 #endif
             default:
-                let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
+                let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
                 self.present(alert, animated: true)
             }
         }
@@ -118,7 +118,7 @@ class LoginPasskeyController: UIViewController {
             try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "LoginPasskeyController.createAccount"))
                 .onSuccess(callback: goToProfile)
                 .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
         }

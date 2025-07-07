@@ -18,7 +18,7 @@ class ActionController: UITableViewController {
                         .login(withRequest: NativeLoginRequest(anchor: window, origin: "ActionController: Section Native"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
                         .onSuccess(callback: handleLoginFlow)
                         .onFailure { error in
-                            let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.message())")
+                            let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.localizedDescription)")
                             self.present(alert, animated: true)
                         }
                 }
@@ -94,7 +94,7 @@ class ActionController: UITableViewController {
         case .success(let authToken):
             goToProfile(authToken)
         case .failure(let error):
-            let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.message())")
+            let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.localizedDescription)")
             present(alert, animated: true)
         }
     }

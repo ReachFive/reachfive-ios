@@ -34,7 +34,7 @@ class UpdatePasswordController: UIViewController {
                         self.present(alert, animated: true)
                     }
                     .onFailure { error in
-                        let alert = AppDelegate.createAlert(title: "Update Password", message: "Error: \(error.message())")
+                        let alert = AppDelegate.createAlert(title: "Update Password", message: "Error: \(error.localizedDescription)")
                         self.present(alert, animated: true)
                     }
             }

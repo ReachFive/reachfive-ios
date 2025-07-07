@@ -30,7 +30,7 @@ class PasskeyNonDiscoverableController: UIViewController {
                 case .AuthCanceled:
                     return
                 default:
-                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
             }

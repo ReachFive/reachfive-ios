@@ -61,7 +61,7 @@ class ProfileController: UIViewController {
                         self.present(alert, animated: true)
                         try await self.fetchProfile()
                     case .failure(let error):
-                        let alert = AppDelegate.createAlert(title: "Email mfa registering failed", message: "Error: \(error.message())")
+                        let alert = AppDelegate.createAlert(title: "Email mfa registering failed", message: "Error: \(error.localizedDescription)")
                         self.present(alert, animated: true)
                     }
                 }
@@ -78,7 +78,7 @@ class ProfileController: UIViewController {
                         self.present(alert, animated: true)
                         try await self.fetchProfile()
                     case .failure(let error):
-                        let alert = AppDelegate.createAlert(title: "Email validation failed", message: "Error: \(error.message())")
+                        let alert = AppDelegate.createAlert(title: "Email validation failed", message: "Error: \(error.localizedDescription)")
                         self.present(alert, animated: true)
                     }
                 }
@@ -139,7 +139,7 @@ class ProfileController: UIViewController {
                     self.profileTabBarItem.image = SandboxTabBarController.loggedOut
                     self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
                 }
-                print("getProfile error = \(error.message())")
+                print("getProfile error = \(error.localizedDescription)")
             }
     }
 

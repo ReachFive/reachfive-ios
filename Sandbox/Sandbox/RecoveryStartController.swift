@@ -25,7 +25,7 @@ class RecoveryStartController: UIViewController {
                     }
                 }
                 .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
         }

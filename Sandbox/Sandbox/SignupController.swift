@@ -29,7 +29,7 @@ class SignupController: UIViewController {
             try await AppDelegate.reachfive().signup(profile: profile, origin: origin)
                 .onSuccess(callback: goToProfile)
                 .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
         }

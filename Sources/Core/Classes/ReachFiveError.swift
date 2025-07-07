@@ -28,6 +28,10 @@ public enum ReachFiveError: Error, CustomStringConvertible {
             return createMessage(reason: reason, apiError: apiError)
         }
     }
+    
+    var localizedDescription: String {
+        return message()
+    }
 
     private func createMessage(reason: String, apiError: ApiError? = nil) -> String {
         let allMessages: String? = apiError.flatMap { error in

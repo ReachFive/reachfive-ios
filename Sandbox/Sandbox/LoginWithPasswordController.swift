@@ -22,7 +22,7 @@ class LoginWithPasswordController: UIViewController {
                 case let .success(authToken):
                     self.goToProfile(authToken)
                 case let .failure(error):
-                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
             }
@@ -43,7 +43,7 @@ class LoginWithPasswordController: UIViewController {
                     self.handleLoginFlow(flow: resp)
                 }
                 .onFailure { error in
-                    self.error.text = error.message()
+                    self.error.text = error.localizedDescription
                 }
         }
     }

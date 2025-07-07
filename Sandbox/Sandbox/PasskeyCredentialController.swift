@@ -47,7 +47,7 @@ class PasskeyCredentialController: UIViewController {
             }
             .onFailure { error in
                 self.devices = []
-                print("getCredentials error = \(error.message())")
+                print("getCredentials error = \(error.localizedDescription)")
             }
     }
 
@@ -86,7 +86,7 @@ class PasskeyCredentialController: UIViewController {
                                     switch error {
                                     case .AuthCanceled: return
                                     default:
-                                        let alert = AppDelegate.createAlert(title: "Register New Passkey", message: "Error: \(error.message())")
+                                        let alert = AppDelegate.createAlert(title: "Register New Passkey", message: "Error: \(error.localizedDescription)")
                                         self.present(alert, animated: true)
                                     }
                                 }
@@ -97,7 +97,7 @@ class PasskeyCredentialController: UIViewController {
                     self.present(alert, animated: true)
                 }
                 .onFailure { error in
-                    print("getProfile error = \(error.message())")
+                    print("getProfile error = \(error.localizedDescription)")
                 }
         }
     }
@@ -138,7 +138,7 @@ extension PasskeyCredentialController: UITableViewDataSource {
                         print("did remove passkey \(element.friendlyName)")
                         tableView.deleteRows(at: [indexPath], with: .fade)
                     }
-                    .onFailure { error in print(error.message()) }
+                    .onFailure { error in print(error.localizedDescription) }
             }
         }
     }

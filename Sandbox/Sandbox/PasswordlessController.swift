@@ -19,7 +19,7 @@ class PasswordlessController: UIViewController {
                 case .success(let authToken):
                     self.goToProfile(authToken)
                 case .failure(let error):
-                    let alert = AppDelegate.createAlert(title: "Passwordless failed", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Passwordless failed", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
             }
@@ -41,7 +41,7 @@ class PasswordlessController: UIViewController {
                     self.present(alert, animated: true)
                 }
                 .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "Login with email", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Login with email", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
                 .onComplete { result in
@@ -65,7 +65,7 @@ class PasswordlessController: UIViewController {
                     self.present(alert, animated: true)
                 }
                 .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "Login with phone number", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Login with phone number", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
                 .onComplete { result in
@@ -86,7 +86,7 @@ class PasswordlessController: UIViewController {
                 .verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
                 .onSuccess(callback: goToProfile)
                 .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "Verify code", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Verify code", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
         }

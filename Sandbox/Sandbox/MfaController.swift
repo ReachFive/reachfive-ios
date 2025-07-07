@@ -78,7 +78,7 @@ class MfaController: UIViewController {
                     let alert = AppDelegate.createAlert(title: "Step up", message: "Success")
                     self.present(alert, animated: true)
                 case let .failure(error):
-                    let alert = AppDelegate.createAlert(title: "Step failed", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Step failed", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
             }
@@ -165,7 +165,7 @@ class MfaAction {
                 try await self.handleStartVerificationCode(resp)
             }
             .onFailure { error in
-                let alert = AppDelegate.createAlert(title: "Start MFA \(credential.credentialType) Registration", message: "Error: \(error.message())")
+                let alert = AppDelegate.createAlert(title: "Start MFA \(credential.credentialType) Registration", message: "Error: \(error.localizedDescription)")
                 self.presentationAnchor.present(alert, animated: true)
             }
 
@@ -194,7 +194,7 @@ class MfaAction {
                 try await self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
             }
             .onFailure { error in
-                let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.message())")
+                let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.localizedDescription)")
                 self.presentationAnchor.present(alert, animated: true)
             }
     }
@@ -224,7 +224,7 @@ class MfaAction {
                                 self.presentationAnchor.present(alert, animated: true)
                             }
                             .onFailure { error in
-                                let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
+                                let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.localizedDescription)")
                                 self.presentationAnchor.present(alert, animated: true)
                             }
                         continuation.resume(returning: future)
@@ -275,7 +275,7 @@ class MfaAction {
                                     self.presentationAnchor.present(alert, animated: true)
                                 }
                                 .onFailure { error in
-                                    let alert = AppDelegate.createAlert(title: "MFA \(continueRegistration.credentialType) failure", message: "Error: \(error.message())")
+                                    let alert = AppDelegate.createAlert(title: "MFA \(continueRegistration.credentialType) failure", message: "Error: \(error.localizedDescription)")
                                     self.presentationAnchor.present(alert, animated: true)
                                 }
                             continuation.resume(returning: future)
