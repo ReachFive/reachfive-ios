@@ -16,9 +16,8 @@ public extension ReachFive {
             origin: origin
         )
         let token = try await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
-        return token.flatMap {
-            AuthToken.fromOpenIdTokenResponse($0)
-        }
+        return try AuthToken.fromOpenIdTokenResponse(token)
+        
     }
 
     func loginWithPassword(
@@ -40,22 +39,16 @@ public extension ReachFive {
             scope: strScope,
             origin: origin
         )
-        return try await reachFiveApi
-            .loginWithPassword(loginRequest: loginRequest)
-            .flatMapAsync { resp in
-                if resp.mfaRequired == true {
-                    let pkce = Pkce.generate()
-                    self.storage.save(key: self.pkceKey, value: pkce)
-                    return try await self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
-                        .map { intiationStepUpResponse in
-                            LoginFlow.OngoingStepUp(token: intiationStepUpResponse.token, availableMfaCredentialItemTypes: intiationStepUpResponse.amr)
-                        }
-                } else {
-                    return try await self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
-                        .map { res in
-                            .AchievedLogin(authToken: res)
-                        }
-                }
-            }
+        let resp = try await reachFiveApi.loginWithPassword(loginRequest: loginRequest)
+        
+        if resp.mfaRequired != true {
+            let res = try await self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
+            return .AchievedLogin(authToken: res)
+        }
+        
+        let pkce = Pkce.generate()
+        self.storage.save(key: self.pkceKey, value: pkce)
+        let stepUpResponse = try await self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
+        return LoginFlow.OngoingStepUp(token: stepUpResponse.token, availableMfaCredentialItemTypes: stepUpResponse.amr)
     }
 }
