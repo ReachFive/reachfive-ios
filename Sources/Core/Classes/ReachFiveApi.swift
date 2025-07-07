@@ -90,15 +90,15 @@ public class ReachFiveApi {
         params.compactMapValues { $0 }
     }
 
-    public func clientConfig() async -> Result<ClientConfigResponse, ReachFiveError> {
-        await AF
+    public func clientConfig() async throws -> ClientConfigResponse {
+        try await AF
             .request(createUrl(path: "/identity/v1/config", params: ["client_id": sdkConfig.clientId]))
             .validate(contentType: ["application/json"])
             .responseJson(type: ClientConfigResponse.self, decoder: decoder)
     }
 
-    public func providersConfigs(variants: [String: String?]) async -> Result<ProvidersConfigsResult, ReachFiveError> {
-        await AF
+    public func providersConfigs(variants: [String: String?]) async throws -> ProvidersConfigsResult {
+        try await AF
             .request(createUrl(path: "/api/v1/providers", params: variants))
             .validate(contentType: ["application/json"])
             .responseJson(type: ProvidersConfigsResult.self, decoder: decoder)
@@ -106,8 +106,8 @@ public class ReachFiveApi {
 
     public func loginWithProvider(
         loginProviderRequest: LoginProviderRequest
-    ) async -> Result<AccessTokenResponse, ReachFiveError> {
-        await AF
+    ) async throws -> AccessTokenResponse {
+        try await AF
             .request(createUrl(path: "/identity/v1/oauth/provider/token"),
                 method: .post,
                 parameters: loginProviderRequest.dictionary(),
@@ -116,8 +116,8 @@ public class ReachFiveApi {
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
 
-    public func signupWithPassword(signupRequest: SignupRequest) async -> Result<AccessTokenResponse, ReachFiveError> {
-        await AF
+    public func signupWithPassword(signupRequest: SignupRequest) async throws -> AccessTokenResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/signup-token"),
                 method: .post,
@@ -128,8 +128,8 @@ public class ReachFiveApi {
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
 
-    public func loginWithPassword(loginRequest: LoginRequest) async -> Result<TknMfa, ReachFiveError> {
-        await AF
+    public func loginWithPassword(loginRequest: LoginRequest) async throws -> TknMfa {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/password/login"),
                 method: .post,
@@ -140,8 +140,8 @@ public class ReachFiveApi {
             .responseJson(type: TknMfa.self, decoder: decoder)
     }
 
-    public func loginWithPasswordAsync(loginRequest: LoginRequest) async -> Result<TknMfa, ReachFiveError> {
-        await AF
+    public func loginWithPasswordAsync(loginRequest: LoginRequest) async throws -> TknMfa {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/password/login"),
                 method: .post,
@@ -152,12 +152,12 @@ public class ReachFiveApi {
             .responseJson(type: TknMfa.self, decoder: decoder)
     }
 
-    public func loginCallback(loginCallback: LoginCallback) async -> Result<String, ReachFiveError> {
-        await authorize(params: loginCallback.dictionary() as? [String: String])
+    public func loginCallback(loginCallback: LoginCallback) async throws -> String {
+        try await authorize(params: loginCallback.dictionary() as? [String: String])
     }
 
-    public func authorize(params: [String: String?]?) async -> Result<String, ReachFiveError> {
-        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<String, ReachFiveError>, Never>) in
+    public func authorize(params: [String: String?]?) async throws -> String {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
             AF
                 .request(
                     createUrl(path: "/oauth/authorize", params: params),
@@ -168,22 +168,22 @@ public class ReachFiveApi {
                 .response { responseData in
                     let callbackURL = responseData.response?.allHeaderFields["Location"] as? String
                     guard let callbackURL else {
-                        continuation.resume(returning: .failure(ReachFiveError.TechnicalError(reason: "No location")))
+                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No location"))
                         return
                     }
                     let params = URLComponents(string: callbackURL)?.queryItems
                     let code = params?.first(where: { $0.name == "code" })?.value
                     guard let code else {
-                        continuation.resume(returning: .failure(ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))))
+                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params)))
                         return
                     }
-                    continuation.resume(returning: .success(code))
+                    continuation.resume(returning: code)
                 }
         }
     }
 
-    public func authWithCode(authCodeRequest: AuthCodeRequest) async -> Result<AccessTokenResponse, ReachFiveError> {
-        await AF
+    public func authWithCode(authCodeRequest: AuthCodeRequest) async throws -> AccessTokenResponse {
+        try await AF
             .request(
                 createUrl(path: "/oauth/token"),
                 method: .post,
@@ -194,8 +194,8 @@ public class ReachFiveApi {
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
 
-    public func refreshAccessToken(_ refreshRequest: RefreshRequest) async -> Result<AccessTokenResponse, ReachFiveError> {
-        await AF
+    public func refreshAccessToken(_ refreshRequest: RefreshRequest) async throws -> AccessTokenResponse {
+        try await AF
             .request(
                 createUrl(path: "/oauth/token"),
                 method: .post,
@@ -206,8 +206,8 @@ public class ReachFiveApi {
             .responseJson(type: AccessTokenResponse.self, decoder: decoder)
     }
 
-    public func getProfile(authToken: AuthToken) async -> Result<Profile, ReachFiveError> {
-        await AF
+    public func getProfile(authToken: AuthToken) async throws -> Profile {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/userinfo", params: ["fields": profile_fields.joined(separator: ","), "flatcf": "true"]),
                 method: .get,
@@ -220,8 +220,8 @@ public class ReachFiveApi {
     public func sendEmailVerification(
         authToken: AuthToken,
         sendEmailVerificationRequest: SendEmailVerificationRequest
-    ) async -> Result<SendEmailVerificationResponse, ReachFiveError> {
-        await AF
+    ) async throws -> SendEmailVerificationResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/send-email-verification"),
                 method: .post,
@@ -236,8 +236,8 @@ public class ReachFiveApi {
     public func verifyEmail(
         authToken: AuthToken,
         verifyEmailRequest: VerifyEmailRequest
-    ) async -> Result<Void, ReachFiveError> {
-        await AF
+    ) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/verify-email"),
                 method: .post,
@@ -252,8 +252,8 @@ public class ReachFiveApi {
     public func verifyPhoneNumber(
         authToken: AuthToken,
         verifyPhoneNumberRequest: VerifyPhoneNumberRequest
-    ) async -> Result<Void, ReachFiveError> {
-        await AF
+    ) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/verify-phone-number"),
                 method: .post,
@@ -268,8 +268,8 @@ public class ReachFiveApi {
     public func updateEmail(
         authToken: AuthToken,
         updateEmailRequest: UpdateEmailRequest
-    ) async -> Result<Profile, ReachFiveError> {
-        await AF
+    ) async throws -> Profile {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/update-email"),
                 method: .post,
@@ -284,8 +284,8 @@ public class ReachFiveApi {
     public func updateProfile(
         authToken: AuthToken,
         profile: Profile
-    ) async -> Result<Profile, ReachFiveError> {
-        await AF
+    ) async throws -> Profile {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/update-profile"),
                 method: .post,
@@ -300,8 +300,8 @@ public class ReachFiveApi {
     public func updateProfile(
         authToken: AuthToken,
         profileUpdate: ProfileUpdate
-    ) async -> Result<Profile, ReachFiveError> {
-        await AF
+    ) async throws -> Profile {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/update-profile"),
                 method: .post,
@@ -316,9 +316,9 @@ public class ReachFiveApi {
     public func updatePassword(
         authToken: AuthToken?,
         updatePasswordRequest: UpdatePasswordRequest
-    ) async -> Result<Void, ReachFiveError> {
+    ) async throws -> Void {
         let headers: HTTPHeaders = authToken != nil ? tokenHeader(authToken!) : [:]
-        return await AF
+        return try await AF
             .request(
                 createUrl(path: "/identity/v1/update-password"),
                 method: .post,
@@ -333,8 +333,8 @@ public class ReachFiveApi {
     public func updatePhoneNumber(
         authToken: AuthToken,
         updatePhoneNumberRequest: UpdatePhoneNumberRequest
-    ) async -> Result<Profile, ReachFiveError> {
-        await AF
+    ) async throws -> Profile {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/update-phone-number"),
                 method: .post,
@@ -349,8 +349,8 @@ public class ReachFiveApi {
     public func startMfaPhoneRegistration(
         _ mfaStartPhoneRegistrationRequest: MfaStartPhoneRegistrationRequest,
         authToken: AuthToken
-    ) async -> Result<MfaStartCredentialRegistrationResponse, ReachFiveError> {
-        await AF
+    ) async throws -> MfaStartCredentialRegistrationResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/credentials/phone-numbers"),
                 method: .post,
@@ -365,8 +365,8 @@ public class ReachFiveApi {
     public func startMfaEmailRegistration(
         _ mfaStartEmailRegistrationRequest: MfaStartEmailRegistrationRequest,
         authToken: AuthToken
-    ) async -> Result<MfaStartCredentialRegistrationResponse, ReachFiveError> {
-        await AF
+    ) async throws -> MfaStartCredentialRegistrationResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/credentials/emails"),
                 method: .post,
@@ -381,8 +381,8 @@ public class ReachFiveApi {
     public func verifyMfaEmailRegistrationPost(
         _ mfaVerifyEmailRegistrationRequest: MfaVerifyEmailRegistrationPostRequest,
         authToken: AuthToken
-    ) async -> Result<MfaCredentialItem, ReachFiveError> {
-        await AF
+    ) async throws -> MfaCredentialItem {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/credentials/emails/verify"),
                 method: .post,
@@ -396,8 +396,8 @@ public class ReachFiveApi {
 
     public func verifyMfaEmailRegistrationGet(
         _ request: MfaVerifyEmailRegistrationGetRequest
-    ) async -> Result<Void, ReachFiveError> {
-        await AF
+    ) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/credentials/emails/verify"),
                 method: .post,
@@ -411,8 +411,8 @@ public class ReachFiveApi {
     public func verifyMfaPhoneRegistration(
         _ mfaVerifyPhoneRegistrationRequest: MfaVerifyPhoneRegistrationRequest,
         authToken: AuthToken
-    ) async -> Result<MfaCredentialItem, ReachFiveError> {
-        await AF
+    ) async throws -> MfaCredentialItem {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/credentials/phone-numbers/verify"),
                 method: .post,
@@ -427,8 +427,8 @@ public class ReachFiveApi {
     public func deleteMfaPhoneNumberCredential(
         phoneNumber: String,
         authToken: AuthToken
-    ) async -> Result<Void, ReachFiveError> {
-        await AF
+    ) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/credentials/phone-numbers"),
                 method: .delete,
@@ -442,8 +442,8 @@ public class ReachFiveApi {
 
     public func deleteMfaEmailCredential(
         authToken: AuthToken
-    ) async -> Result<Void, ReachFiveError> {
-        await AF
+    ) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/credentials/emails"),
                 method: .delete,
@@ -456,8 +456,8 @@ public class ReachFiveApi {
 
     public func listMfaTrustedDevices(
         authToken: AuthToken
-    ) async -> Result<MfaListTrustedDevices, ReachFiveError> {
-        await AF
+    ) async throws -> MfaListTrustedDevices {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/trusteddevices"),
                 method: .get,
@@ -471,8 +471,8 @@ public class ReachFiveApi {
     public func deleteMfaTrustedDevice(
         deviceId: String,
         authToken: AuthToken
-    ) async -> Result<Void, ReachFiveError> {
-        await AF
+    ) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/trusteddevices/\(deviceId)"),
                 method: .delete,
@@ -485,8 +485,8 @@ public class ReachFiveApi {
 
     public func mfaListCredentials(
         authToken: AuthToken
-    ) async -> Result<MfaCredentialsListResponse, ReachFiveError> {
-        await AF
+    ) async throws -> MfaCredentialsListResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/credentials"),
                 method: .get,
@@ -499,8 +499,8 @@ public class ReachFiveApi {
     public func startMfaStepUp(
         _ request: StartMfaStepUpRequest,
         authToken: AuthToken? = nil
-    ) async -> Result<StartMfaStepUpResponse, ReachFiveError> {
-        await AF
+    ) async throws -> StartMfaStepUpResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/mfa/stepup"),
                 method: .post,
@@ -512,8 +512,8 @@ public class ReachFiveApi {
             .responseJson(type: StartMfaStepUpResponse.self, decoder: decoder)
     }
 
-    public func startPasswordless(mfa request: StartMfaPasswordlessRequest) async -> Result<StartMfaPasswordlessResponse, ReachFiveError> {
-        await AF
+    public func startPasswordless(mfa request: StartMfaPasswordlessRequest) async throws -> StartMfaPasswordlessResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/passwordless/start"),
                 method: .post,
@@ -524,8 +524,8 @@ public class ReachFiveApi {
             .responseJson(type: StartMfaPasswordlessResponse.self, decoder: decoder)
     }
 
-    public func verifyPasswordless(mfa request: VerifyMfaPasswordlessRequest) async -> Result<PasswordlessVerifyResponse, ReachFiveError> {
-        await AF
+    public func verifyPasswordless(mfa request: VerifyMfaPasswordlessRequest) async throws -> PasswordlessVerifyResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/passwordless/verify"),
                 method: .post,
@@ -538,8 +538,8 @@ public class ReachFiveApi {
 
     public func requestPasswordReset(
         requestPasswordResetRequest: RequestPasswordResetRequest
-    ) async -> Result<Void, ReachFiveError> {
-        await AF
+    ) async throws -> Void {
+        try await AF
             .request(createUrl(
                 path: "/identity/v1/forgot-password"),
             method: .post,
@@ -551,8 +551,8 @@ public class ReachFiveApi {
 
     public func requestAccountRecovery(
         _ requestAccountRecoveryRequest: RequestAccountRecoveryRequest
-    ) async -> Result<Void, ReachFiveError> {
-        await AF
+    ) async throws -> Void {
+        try await AF
             .request(createUrl(
                 path: "/identity/v1/account-recovery"),
             method: .post,
@@ -562,8 +562,8 @@ public class ReachFiveApi {
             .responseJson(decoder: decoder)
     }
 
-    public func startPasswordless(_ startPasswordlessRequest: StartPasswordlessRequest) async -> Result<Void, ReachFiveError> {
-        await AF
+    public func startPasswordless(_ startPasswordlessRequest: StartPasswordlessRequest) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/passwordless/start"),
                 method: .post,
@@ -573,8 +573,8 @@ public class ReachFiveApi {
             .responseJson(decoder: decoder)
     }
 
-    public func verifyPasswordless(verifyPasswordlessRequest: VerifyPasswordlessRequest) async -> Result<PasswordlessVerifyResponse, ReachFiveError> {
-        await AF
+    public func verifyPasswordless(verifyPasswordlessRequest: VerifyPasswordlessRequest) async throws -> PasswordlessVerifyResponse {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/passwordless/verify"),
                 method: .post,
@@ -583,8 +583,8 @@ public class ReachFiveApi {
             .responseJson(type: PasswordlessVerifyResponse.self, decoder: decoder)
     }
 
-    public func verifyAuthCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async -> Result<Void, ReachFiveError> {
-        await AF
+    public func verifyAuthCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/verify-auth-code"),
                 method: .post,
@@ -594,8 +594,8 @@ public class ReachFiveApi {
             .responseJson(decoder: decoder)
     }
 
-    public func logout() async -> Result<Void, ReachFiveError> {
-        await AF
+    public func logout() async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/logout"),
                 method: .get
@@ -611,8 +611,8 @@ public class ReachFiveApi {
         createUrl(path: "/oauth/authorize", params: queryParams)
     }
 
-    public func createWebAuthnSignupOptions(webAuthnSignupOptions: SignupOptions) async -> Result<RegistrationOptions, ReachFiveError> {
-        await AF
+    public func createWebAuthnSignupOptions(webAuthnSignupOptions: SignupOptions) async throws -> RegistrationOptions {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/signup-options"),
                 method: .post,
@@ -623,8 +623,8 @@ public class ReachFiveApi {
             .responseJson(type: RegistrationOptions.self, decoder: decoder)
     }
 
-    public func signupWithWebAuthn(webauthnSignupCredential: WebauthnSignupCredential, originR5: String? = nil) async -> Result<AuthenticationToken, ReachFiveError> {
-        await AF
+    public func signupWithWebAuthn(webauthnSignupCredential: WebauthnSignupCredential, originR5: String? = nil) async throws -> AuthenticationToken {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/signup", params: ["origin": originR5]),
                 method: .post,
@@ -635,8 +635,8 @@ public class ReachFiveApi {
             .responseJson(type: AuthenticationToken.self, decoder: decoder)
     }
 
-    public func createWebAuthnAuthenticationOptions(webAuthnLoginRequest: WebAuthnLoginRequest) async -> Result<AuthenticationOptions, ReachFiveError> {
-        await AF
+    public func createWebAuthnAuthenticationOptions(webAuthnLoginRequest: WebAuthnLoginRequest) async throws -> AuthenticationOptions {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/authentication-options"),
                 method: .post,
@@ -647,8 +647,8 @@ public class ReachFiveApi {
             .responseJson(type: AuthenticationOptions.self, decoder: decoder)
     }
 
-    public func authenticateWithWebAuthn(authenticationPublicKeyCredential: AuthenticationPublicKeyCredential) async -> Result<AuthenticationToken, ReachFiveError> {
-        await AF
+    public func authenticateWithWebAuthn(authenticationPublicKeyCredential: AuthenticationPublicKeyCredential) async throws -> AuthenticationToken {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/authentication"),
                 method: .post,
@@ -659,8 +659,8 @@ public class ReachFiveApi {
             .responseJson(type: AuthenticationToken.self, decoder: decoder)
     }
 
-    public func createWebAuthnRegistrationOptions(authToken: AuthToken, registrationRequest: RegistrationRequest) async -> Result<RegistrationOptions, ReachFiveError> {
-        await AF
+    public func createWebAuthnRegistrationOptions(authToken: AuthToken, registrationRequest: RegistrationRequest) async throws -> RegistrationOptions {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/registration-options"),
                 method: .post,
@@ -672,8 +672,8 @@ public class ReachFiveApi {
             .responseJson(type: RegistrationOptions.self, decoder: decoder)
     }
 
-    public func registerWithWebAuthn(authToken: AuthToken, publicKeyCredential: RegistrationPublicKeyCredential, originR5: String? = nil) async -> Result<Void, ReachFiveError> {
-        await AF
+    public func registerWithWebAuthn(authToken: AuthToken, publicKeyCredential: RegistrationPublicKeyCredential, originR5: String? = nil) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/registration", params: ["origin": originR5]),
                 method: .post,
@@ -685,8 +685,8 @@ public class ReachFiveApi {
             .responseJson(decoder: decoder)
     }
 
-    public func createWebAuthnResetOptions(resetOptions: ResetOptions) async -> Result<RegistrationOptions, ReachFiveError> {
-        await AF
+    public func createWebAuthnResetOptions(resetOptions: ResetOptions) async throws -> RegistrationOptions {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/reset-options"),
                 method: .post,
@@ -697,8 +697,8 @@ public class ReachFiveApi {
             .responseJson(type: RegistrationOptions.self, decoder: decoder)
     }
 
-    public func resetWebAuthn(resetPublicKeyCredential: ResetPublicKeyCredential, originR5: String? = nil) async -> Result<Void, ReachFiveError> {
-        await AF
+    public func resetWebAuthn(resetPublicKeyCredential: ResetPublicKeyCredential, originR5: String? = nil) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/reset", params: ["origin": originR5]),
                 method: .post,
@@ -709,8 +709,8 @@ public class ReachFiveApi {
             .responseJson(decoder: decoder)
     }
 
-    public func getWebAuthnRegistrations(authToken: AuthToken) async -> Result<[DeviceCredential], ReachFiveError> {
-        await AF
+    public func getWebAuthnRegistrations(authToken: AuthToken) async throws -> [DeviceCredential] {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/registration"),
                 method: .get,
@@ -721,8 +721,8 @@ public class ReachFiveApi {
             .responseJson(type: [DeviceCredential].self, decoder: decoder)
     }
 
-    public func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async -> Result<Void, ReachFiveError> {
-        await AF
+    public func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async throws -> Void {
+        try await AF
             .request(
                 createUrl(path: "/identity/v1/webauthn/registration/\(id)"),
                 method: .delete,

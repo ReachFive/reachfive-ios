@@ -38,21 +38,21 @@ extension DataRequest {
         )
     }
 
-    func responseJson(decoder: JSONDecoder) async -> Result<(), ReachFiveError> {
-        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<Void, ReachFiveError>, Never>) in
+    func responseJson(decoder: JSONDecoder) async throws -> Void {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             responseData { responseData in
                 switch responseData.result {
                 case let .failure(error):
-                    continuation.resume(returning: .failure(.TechnicalError(reason: error.localizedDescription)))
-                    
+                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
+
                 case let .success(data):
                     let status = responseData.response?.statusCode
                     if self.isSuccess(status) {
-                        continuation.resume(returning: .success(()))
+                        continuation.resume(returning: ())
                     } else {
                         switch self.parseJson(json: data, type: ApiError.self, decoder: decoder) {
-                        case .success(let value): continuation.resume(returning: .failure(self.handleResponseStatus(status: status, apiError: value)))
-                        case .failure(let error): continuation.resume(returning: .failure(error))
+                        case .success(let value): continuation.resume(throwing: self.handleResponseStatus(status: status, apiError: value))
+                        case .failure(let error): continuation.resume(throwing: error)
                         }
                     }
                 }
@@ -60,21 +60,21 @@ extension DataRequest {
         }
     }
 
-    func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) async -> Result<T, ReachFiveError> {
-        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<T, ReachFiveError>, Never>) in
+    func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) async throws -> T {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<T, Error>) in
             responseData { responseData in
                 switch responseData.result {
                 case let .failure(error):
-                    continuation.resume(returning: .failure(.TechnicalError(reason: error.localizedDescription)))
+                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
 
                 case let .success(data):
                     let status = responseData.response?.statusCode
                     if self.isSuccess(status) {
-                        continuation.resume(returning: self.parseJson(json: data, type: T.self, decoder: decoder))
+                        continuation.resume(with: self.parseJson(json: data, type: T.self, decoder: decoder))
                     } else {
                         switch self.parseJson(json: data, type: ApiError.self, decoder: decoder) {
-                        case .success(let value): continuation.resume(returning: .failure(self.handleResponseStatus(status: status, apiError: value)))
-                        case .failure(let error): continuation.resume(returning: .failure(error))
+                        case .success(let value): continuation.resume(throwing: self.handleResponseStatus(status: status, apiError: value))
+                        case .failure(let error): continuation.resume(throwing: error)
                         }
                     }
                 }
