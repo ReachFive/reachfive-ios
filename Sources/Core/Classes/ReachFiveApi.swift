@@ -157,7 +157,7 @@ public class ReachFiveApi {
     }
 
     public func authorize(params: [String: String?]?) async throws -> String {
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
+        return try await withCheckedThrowingContinuation { continuation in
             AF
                 .request(
                     createUrl(path: "/oauth/authorize", params: params),

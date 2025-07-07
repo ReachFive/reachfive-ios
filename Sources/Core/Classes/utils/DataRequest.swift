@@ -3,14 +3,14 @@ import Alamofire
 
 
 extension DataRequest {
-    
+
     private func isSuccess(_ status: Int?) -> Bool {
         guard let status else {
             return false
         }
         return status >= 200 && status < 300
     }
-    
+
     private func parseJson<T: Decodable>(json: Data, type: T.Type, decoder: JSONDecoder) throws -> T {
         do {
             return try decoder.decode(type, from: json)
@@ -18,7 +18,7 @@ extension DataRequest {
             throw ReachFiveError.TechnicalError(reason: error.localizedDescription)
         }
     }
-    
+
     private func handleResponseStatus(status: Int?, apiError: ApiError) -> ReachFiveError {
         guard let status else {
             return .TechnicalError(
@@ -36,14 +36,14 @@ extension DataRequest {
             apiError: apiError
         )
     }
-    
+
     func responseJson(decoder: JSONDecoder) async throws -> Void {
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+        return try await withCheckedThrowingContinuation { continuation in
             responseData { responseData in
                 switch responseData.result {
                 case let .failure(error):
                     continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
-                    
+
                 case let .success(data):
                     let status = responseData.response?.statusCode
                     if self.isSuccess(status) {
@@ -60,14 +60,14 @@ extension DataRequest {
             }
         }
     }
-    
+
     func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) async throws -> T {
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<T, Error>) in
+        return try await withCheckedThrowingContinuation { continuation in
             responseData { responseData in
                 switch responseData.result {
                 case let .failure(error):
                     continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
-                    
+
                 case let .success(data):
                     let status = responseData.response?.statusCode
                     do {
@@ -85,4 +85,4 @@ extension DataRequest {
         }
     }
 }
-    
+
