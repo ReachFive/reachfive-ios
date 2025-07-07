@@ -10,7 +10,7 @@ public extension ReachFive {
         let scope = (request.scope ?? scope)
         let authURL = buildAuthorizeURL(pkce: pkce, state: request.state, nonce: request.nonce, scope: scope, origin: request.origin, provider: request.provider)
 
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<AuthToken, Error>) in
+        return try await withCheckedThrowingContinuation { continuation in
             // Initialize the session.
             let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: reachFiveApi.sdkConfig.baseScheme) { callbackURL, error in
                 if let error {
@@ -38,11 +38,9 @@ public extension ReachFive {
                 }
 
                 Task {
-                    do {
-                        continuation.resume(returning: try await self.authWithCode(code: code, pkce: pkce))
-                    } catch {
-                        continuation.resume(throwing: error)
-                    }
+                    await continuation.resume(with: Result {
+                        try await self.authWithCode(code: code, pkce: pkce)
+                    })
                 }
             }
 
