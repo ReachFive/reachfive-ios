@@ -24,13 +24,12 @@ public class AuthToken: Codable {
         self.user = user
     }
 
-    public static func fromOpenIdTokenResponse(_ openIdTokenResponse: AccessTokenResponse) -> Result<AuthToken, ReachFiveError> {
+    public static func fromOpenIdTokenResponse(_ openIdTokenResponse: AccessTokenResponse) throws -> AuthToken {
         if let token = openIdTokenResponse.idToken {
-            return fromIdToken(token).flatMap { user in
-                .success(withUser(openIdTokenResponse, user))
-            }
+            let user = try fromIdToken(token)
+            return withUser(openIdTokenResponse, user)
         } else {
-            return .success(withUser(openIdTokenResponse, nil))
+            return withUser(openIdTokenResponse, nil)
         }
     }
 
@@ -45,20 +44,19 @@ public class AuthToken: Codable {
         )
     }
 
-    static func fromIdToken(_ idToken: String) -> Result<OpenIdUser, ReachFiveError> {
+    static func fromIdToken(_ idToken: String) throws -> OpenIdUser {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         let parts = idToken.components(separatedBy: ".")
         if parts.count == 3 {
             let data = parts[1].decodeBase64Url()
-            let user = Result(catching: {
-                try decoder.decode(OpenIdUser.CodingData.self, from: data!).openIdUser
-            })
-            return user.mapError { error in
-                .TechnicalError(reason: error.localizedDescription)
+            do {
+                return try decoder.decode(OpenIdUser.CodingData.self, from: data!).openIdUser
+            } catch {
+                throw ReachFiveError.TechnicalError(reason: error.localizedDescription)
             }
         } else {
-            return .failure(.TechnicalError(reason: "idToken invalid"))
+            throw ReachFiveError.TechnicalError(reason: "idToken invalid")
         }
     }
 }
