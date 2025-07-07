@@ -50,7 +50,7 @@ public extension ReachFive {
         authToken: AuthToken,
         phoneNumber: String,
         verificationCode: String
-    ) async -> Result<(), ReachFiveError> {
+    ) async throws -> Void {
         let verifyPhoneNumberRequest = VerifyPhoneNumberRequest(
             phoneNumber: phoneNumber,
             verificationCode: verificationCode
@@ -96,7 +96,7 @@ public extension ReachFive {
         await reachFiveApi.updateProfile(authToken: authToken, profileUpdate: profileUpdate)
     }
 
-    func updatePassword(_ updatePasswordParams: UpdatePasswordParams) async -> Result<(), ReachFiveError> {
+    func updatePassword(_ updatePasswordParams: UpdatePasswordParams) async throws -> Void {
         let authToken = updatePasswordParams.getAuthToken()
         return await reachFiveApi.updatePassword(
             authToken: authToken,
@@ -111,7 +111,7 @@ public extension ReachFive {
         email: String? = nil,
         phoneNumber: String? = nil,
         redirectUrl: String? = nil
-    ) async -> Result<(), ReachFiveError> {
+    ) async throws -> Void {
         let requestPasswordResetRequest = RequestPasswordResetRequest(
             clientId: sdkConfig.clientId,
             email: email,
@@ -128,7 +128,7 @@ public extension ReachFive {
         phoneNumber: String? = nil,
         redirectUrl: String? = nil,
         origin: String? = nil
-    ) async -> Result<(), ReachFiveError> {
+    ) async throws -> Void {
         let requestAccountRecoveryRequest = RequestAccountRecoveryRequest(
             clientId: sdkConfig.clientId,
             email: email,
@@ -145,7 +145,7 @@ public extension ReachFive {
     }
 
     /// Deletes a passkey the user has registered
-    func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async -> Result<(), ReachFiveError> {
+    func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async throws -> Void {
         await reachFiveApi.deleteWebAuthnRegistration(id: id, authToken: authToken)
     }
 

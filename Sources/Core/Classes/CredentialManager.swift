@@ -95,7 +95,7 @@ public class CredentialManager: NSObject {
 
     // MARK: - Register
     @available(iOS 16.0, *)
-    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async -> Result<(), ReachFiveError> {
+    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws -> Void {
         // Here it is very important to cancel a running auti-fill request, otherwise it will fail like other modal requests
         // so can't separate this method from the rest of the class
         authController?.cancel()
@@ -133,7 +133,7 @@ public class CredentialManager: NSObject {
 
     // MARK: - Reset
     @available(iOS 16.0, *)
-    func resetPasskeys(withRequest request: ResetPasskeyRequest) async -> Result<(), ReachFiveError> {
+    func resetPasskeys(withRequest request: ResetPasskeyRequest) async throws -> Void {
         // Here it is very important to cancel a running auti-fill request, otherwise it will fail like other modal requests
         // so can't separate this method from the rest of the class
         authController?.cancel()

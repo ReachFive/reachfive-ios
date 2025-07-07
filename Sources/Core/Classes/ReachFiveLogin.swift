@@ -3,7 +3,7 @@ import Foundation
 
 public extension ReachFive {
 
-    func logout() async -> Result<(), ReachFiveError> {
+    func logout() async throws -> Void {
         //TODO: déconnecter les providers en parallèle ?
         await providers
             .traverse { await $0.logout() }

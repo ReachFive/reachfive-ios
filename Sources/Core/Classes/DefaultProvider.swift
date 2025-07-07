@@ -48,7 +48,7 @@ extension DefaultProvider {
     public func applicationDidBecomeActive(_ application: UIApplication) {
     }
 
-    public func logout() async -> Result<(), ReachFiveError> {
+    public func logout() async throws -> Void {
         .success(())
     }
 }

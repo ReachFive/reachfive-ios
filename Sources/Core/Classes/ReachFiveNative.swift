@@ -69,7 +69,7 @@ public extension ReachFive {
     ///   - authToken: the token for the currently logged-in user
     /// - Returns: A ReachFiveError, or nothing when the Registration was successfull.
     @available(iOS 16.0, *)
-    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async -> Result<(), ReachFiveError> {
+    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws -> Void {
         let domain = sdkConfig.domain
         let originWebAuthn = request.originWebAuthn ?? "https://\(domain)"
         //TODO supprimer l'ancienne passkey du server
@@ -77,7 +77,7 @@ public extension ReachFive {
     }
 
     @available(iOS 16.0, *)
-    func resetPasskeys(withRequest request: ResetPasskeyRequest) async -> Result<(), ReachFiveError> {
+    func resetPasskeys(withRequest request: ResetPasskeyRequest) async throws -> Void {
         let domain = sdkConfig.domain
         let originWebAuthn = request.originWebAuthn ?? "https://\(domain)"
         return await credentialManager.resetPasskeys(withRequest: ResetPasskeyRequest(verificationCode: request.verificationCode, friendlyName: request.friendlyName, anchor: request.anchor, email: request.email, phoneNumber: request.phoneNumber, originWebAuthn: originWebAuthn, origin: request.origin))
