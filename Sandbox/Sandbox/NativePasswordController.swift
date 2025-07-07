@@ -17,7 +17,7 @@ class NativePasswordController: UIViewController {
                 case let .success(authToken):
                     self.goToProfile(authToken)
                 case let .failure(error):
-                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.message())")
+                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
             }
@@ -29,17 +29,18 @@ class NativePasswordController: UIViewController {
             guard let pass = password.text, !pass.isEmpty, let user = username.text, !user.isEmpty else { return }
             let origin = "NativePasswordController.passwordEditingDidEnd"
 
-            let fut: Result<LoginFlow, ReachFiveError>
-            if user.contains("@") {
-                fut = try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
-            } else {
-                fut = try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
-            }
-            try await fut.onSuccess(callback: handleLoginFlow)
-                .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
-                    self.present(alert, animated: true)
+            do {
+                let flow =
+                if user.contains("@") {
+                    try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
+                } else {
+                    try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
                 }
+                handleLoginFlow(flow: flow)
+            } catch {
+                let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
+                self.present(alert, animated: true)
+            }
         }
     }
 
@@ -49,17 +50,18 @@ class NativePasswordController: UIViewController {
 
             guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
 
-            try await AppDelegate.reachfive()
-                .login(withRequest: NativeLoginRequest(anchor: window, origin: "NativePasswordController.viewDidAppear"), usingModalAuthorizationFor: [.Password], display: .Always)
-                .onSuccess(callback: handleLoginFlow)
-                .onFailure { error in
-                    switch error {
-                    case .AuthCanceled: return
-                    default:
-                        let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
-                        self.present(alert, animated: true)
-                    }
+            let request = NativeLoginRequest(anchor: window, origin: "NativePasswordController.viewDidAppear")
+            do {
+                let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Password], display: .Always)
+                handleLoginFlow(flow: flow)
+            } catch {
+                switch error {
+                case ReachFiveError.AuthCanceled: return
+                default:
+                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
+                    self.present(alert, animated: true)
                 }
+            }
         }
     }
 }
