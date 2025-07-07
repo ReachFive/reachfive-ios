@@ -14,10 +14,8 @@ public extension ReachFive {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         Task {
-            try await initialize().map { providers in
-                for provider in providers {
-                    let _ = provider.application(application, didFinishLaunchingWithOptions: launchOptions)
-                }
+            for provider in try await initialize() {
+                let _ = provider.application(application, didFinishLaunchingWithOptions: launchOptions)
             }
         }
 
