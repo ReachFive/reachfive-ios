@@ -29,15 +29,12 @@ public extension ReachFive {
 
     func sendEmailVerification(authToken: AuthToken, redirectUrl: String? = nil) async throws -> EmailVerificationResponse{
         let sendEmailVerificationRequest = SendEmailVerificationRequest(redirectUrl: redirectUrl ?? sdkConfig.emailVerificationUri)
-
-        return try await reachFiveApi
-            .sendEmailVerification(authToken: authToken, sendEmailVerificationRequest: sendEmailVerificationRequest)
-            .map { resp in
-                switch resp.verificationEmailSent {
-                case false: .Success
-                case true : .VerificationNeeded(ContinueEmailVerification(reachFive: self, authToken: authToken))
-                }
-            }
+        
+        let resp = try await reachFiveApi.sendEmailVerification(authToken: authToken, sendEmailVerificationRequest: sendEmailVerificationRequest)
+        return switch resp.verificationEmailSent {
+        case false: EmailVerificationResponse.Success
+        case true : EmailVerificationResponse.VerificationNeeded(ContinueEmailVerification(reachFive: self, authToken: authToken))
+        }
     }
 
     func verifyEmail(authToken: AuthToken, code: String, email: String) async throws -> Void {
