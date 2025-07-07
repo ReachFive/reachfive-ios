@@ -7,7 +7,7 @@ public enum LoginFlow {
 }
 
 public extension ReachFive {
-    func signup(profile: ProfileSignupRequest, redirectUrl: String? = nil, scope: [String]? = nil, origin: String? = nil) async -> Result<AuthToken, ReachFiveError> {
+    func signup(profile: ProfileSignupRequest, redirectUrl: String? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> AuthToken {
         let signupRequest = SignupRequest(
             clientId: sdkConfig.clientId,
             data: profile,
@@ -28,7 +28,7 @@ public extension ReachFive {
         password: String,
         scope: [String]? = nil,
         origin: String? = nil
-    ) async -> Result<LoginFlow, ReachFiveError> {
+    ) async throws -> LoginFlow {
         let strScope = (scope ?? self.scope).joined(separator: " ")
         let loginRequest = LoginRequest(
             email: email,

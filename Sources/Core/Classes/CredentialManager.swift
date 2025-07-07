@@ -57,7 +57,7 @@ public class CredentialManager: NSObject {
 
     // MARK: - Signup
     @available(iOS 16.0, *)
-    func signUp(withRequest request: SignupOptions, anchor: ASPresentationAnchor, originR5: String? = nil) async -> Result<AuthToken, ReachFiveError> {
+    func signUp(withRequest request: SignupOptions, anchor: ASPresentationAnchor, originR5: String? = nil) async throws -> AuthToken {
         authController?.cancel()
         authenticationAnchor = anchor
         scope = request.scope
@@ -173,7 +173,7 @@ public class CredentialManager: NSObject {
     // MARK: - Auto-fill
     @available(macCatalyst, unavailable)
     @available(iOS 16.0, *)
-    func beginAutoFillAssistedPasskeySignIn(request: NativeLoginRequest) async -> Result<AuthToken, ReachFiveError> {
+    func beginAutoFillAssistedPasskeySignIn(request: NativeLoginRequest) async throws -> AuthToken {
         authController?.cancel()
         authenticationAnchor = request.anchor
         originR5 = request.origin
@@ -200,7 +200,7 @@ public class CredentialManager: NSObject {
     }
 
     // MARK: - Modal
-    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) async -> Result<AuthToken, ReachFiveError> {
+    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) async throws -> AuthToken {
         if #available(iOS 16.0, *) { authController?.cancel() }
         authenticationAnchor = request.anchor
         originR5 = request.origin
@@ -249,7 +249,7 @@ public class CredentialManager: NSObject {
         }
     }
 
-    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?) async -> Result<LoginFlow, ReachFiveError> {
+    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?) async throws -> LoginFlow {
         if #available(iOS 16.0, *) { authController?.cancel() }
         authenticationAnchor = request.anchor
         originR5 = request.origin
@@ -271,7 +271,7 @@ public class CredentialManager: NSObject {
         }
     }
 
-    private func signInWith(_ webAuthnLoginRequest: WebAuthnLoginRequest, withMode mode: Mode, authorizing requestTypes: [ModalAuthorization], appleProvider: ConfiguredAppleProvider? = nil, makeAuthorization: @escaping (AuthenticationOptions) async -> Result<ASAuthorizationRequest?, ReachFiveError>) async -> Result<Void, ReachFiveError> {
+    private func signInWith(_ webAuthnLoginRequest: WebAuthnLoginRequest, withMode mode: Mode, authorizing requestTypes: [ModalAuthorization], appleProvider: ConfiguredAppleProvider? = nil, makeAuthorization: @escaping (AuthenticationOptions) async -> Result<ASAuthorizationRequest?, ReachFiveError>) async throws -> Void {
         scope = webAuthnLoginRequest.scope
 
         return await requestTypes.traverse { type -> Result<ASAuthorizationRequest?, ReachFiveError> in
@@ -547,14 +547,14 @@ extension CredentialManager {
         return nil
     }
 
-    func loginCallback(tkn: String, scope: String, origin: String? = nil) async -> Result<AuthToken, ReachFiveError> {
+    func loginCallback(tkn: String, scope: String, origin: String? = nil) async throws -> AuthToken {
         let pkce = Pkce.generate()
 
         return await reachFiveApi.loginCallback(loginCallback: LoginCallback(sdkConfig: reachFiveApi.sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
             .flatMapAsync({ await self.authWithCode(code: $0, pkce: pkce) })
     }
 
-    func authWithCode(code: String, pkce: Pkce? = nil) async -> Result<AuthToken, ReachFiveError> {
+    func authWithCode(code: String, pkce: Pkce? = nil) async throws -> AuthToken {
         let authCodeRequest = AuthCodeRequest(
             clientId: reachFiveApi.sdkConfig.clientId,
             code: code,

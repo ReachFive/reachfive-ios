@@ -16,7 +16,7 @@ public extension ReachFive {
 
     /// Signup with a passkey
     @available(iOS 16.0, *)
-    func signup(withRequest request: PasskeySignupRequest) async -> Result<AuthToken, ReachFiveError> {
+    func signup(withRequest request: PasskeySignupRequest) async throws -> AuthToken {
         let domain = sdkConfig.domain
         let signupOptions = SignupOptions(
             origin: request.originWebAuthn ?? "https://\(domain)",
@@ -37,7 +37,7 @@ public extension ReachFive {
     /// - Returns: an AuthToken when the user was successfully logged in, or a ReachFiveError
     @available(macCatalyst, unavailable)
     @available(iOS 16.0, *)
-    func beginAutoFillAssistedPasskeyLogin(withRequest request: NativeLoginRequest) async -> Result<AuthToken, ReachFiveError> {
+    func beginAutoFillAssistedPasskeyLogin(withRequest request: NativeLoginRequest) async throws -> AuthToken {
         await credentialManager.beginAutoFillAssistedPasskeySignIn(request: adapt(request))
     }
 
@@ -47,7 +47,7 @@ public extension ReachFive {
     ///   - requestTypes: choose between Password and/or Passkey
     ///   - mode: choose the behavior when there are no credentials available
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
-    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) async -> Result<LoginFlow, ReachFiveError> {
+    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) async throws -> LoginFlow {
         let appleProvider = providers.first { $0.name == AppleProvider.NAME } as? ConfiguredAppleProvider
         return await credentialManager.login(withRequest: adapt(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider)
     }
@@ -59,7 +59,7 @@ public extension ReachFive {
     ///   - requestTypes: only passkey are supported for now
     ///   - mode: choose the behavior when there are no credentials available
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
-    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) async -> Result<AuthToken, ReachFiveError> {
+    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) async throws -> AuthToken {
         await credentialManager.login(withNonDiscoverableUsername: username, forRequest: adapt(request), usingModalAuthorizationFor: requestTypes, display: mode)
     }
 

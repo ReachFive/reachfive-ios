@@ -10,7 +10,7 @@ public extension ReachFive {
         providers
     }
 
-    func reinitialize() async -> Result<[Provider], ReachFiveError> {
+    func reinitialize() async throws -> [Provider] {
         await reachFiveApi.clientConfig().flatMapAsync({ clientConfig -> Result<[Provider], ReachFiveError> in
             self.clientConfig = clientConfig
             self.scope = clientConfig.scope.components(separatedBy: " ")
@@ -24,7 +24,7 @@ public extension ReachFive {
         })
     }
 
-    func initialize() async -> Result<[Provider], ReachFiveError> {
+    func initialize() async throws -> [Provider] {
         switch state {
         case .NotInitialized:
             return await reinitialize()

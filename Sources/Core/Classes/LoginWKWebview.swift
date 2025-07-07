@@ -13,7 +13,7 @@ public class LoginWKWebview: UIView {
         super.init(coder: coder)
     }
 
-    public func loadLoginWebview(reachfive: ReachFive, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil) async -> Result<AuthToken, ReachFiveError> {
+    public func loadLoginWebview(reachfive: ReachFive, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> AuthToken {
         let pkce = Pkce.generate()
         self.reachfive = reachfive
         self.pkce = pkce

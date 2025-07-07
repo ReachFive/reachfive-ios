@@ -40,7 +40,7 @@ public extension ReachFive {
         return await reachFiveApi.startPasswordless(startPasswordlessRequest)
     }
 
-    func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async -> Result<AuthToken, ReachFiveError> {
+    func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> AuthToken {
         let pkce: Pkce? = storage.take(key: pkceKey)
         guard let pkce else {
             return .failure(.TechnicalError(reason: "Pkce not found"))

@@ -10,7 +10,7 @@ public extension ReachFive {
             .flatMapAsync { _ in await self.reachFiveApi.logout() }
     }
 
-    func refreshAccessToken(authToken: AuthToken) async -> Result<AuthToken, ReachFiveError> {
+    func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken {
         let refreshRequest = RefreshRequest(
             clientId: sdkConfig.clientId,
             refreshToken: authToken.refreshToken ?? "",
@@ -21,7 +21,7 @@ public extension ReachFive {
             .flatMap({ AuthToken.fromOpenIdTokenResponse($0) })
     }
 
-    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async -> Result<AuthToken, ReachFiveError> {
+    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {
         let pkce = Pkce.generate()
         let scope = (scopes ?? scope).joined(separator: " ")
 
@@ -47,7 +47,7 @@ public extension ReachFive {
         return reachFiveApi.buildAuthorizeURL(queryParams: options)
     }
 
-    func authWithCode(code: String, pkce: Pkce) async -> Result<AuthToken, ReachFiveError> {
+    func authWithCode(code: String, pkce: Pkce) async throws -> AuthToken {
         let authCodeRequest = AuthCodeRequest(
             clientId: sdkConfig.clientId,
             code: code,

@@ -142,7 +142,7 @@ class MfaAction {
         self.presentationAnchor = presentationAnchor
     }
 
-    func mfaStart(registering credential: Credential, authToken: AuthToken) async -> Result<MfaCredentialItem, ReachFiveError> {
+    func mfaStart(registering credential: Credential, authToken: AuthToken) async throws -> MfaCredentialItem {
         let future = await AppDelegate.reachfive()
             .mfaStart(registering: credential, authToken: authToken)
             .flatMapErrorAsync { error in
@@ -172,7 +172,7 @@ class MfaAction {
         return future
     }
 
-    func mfaStart(stepUp startStepUp: StartStepUp, authToken: AuthToken) async -> Result<AuthToken, ReachFiveError> {
+    func mfaStart(stepUp startStepUp: StartStepUp, authToken: AuthToken) async throws -> AuthToken {
         return await AppDelegate.reachfive()
             .mfaStart(stepUp: startStepUp)
             .flatMapErrorAsync { error in
@@ -199,7 +199,7 @@ class MfaAction {
             }
     }
 
-    private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) async -> Result<AuthToken, ReachFiveError> {
+    private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) async throws -> AuthToken {
         return await withCheckedContinuation { continuation in
             Task { @MainActor in
                 let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
@@ -209,14 +209,14 @@ class MfaAction {
                 let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
                     continuation.resume(returning: .failure(.AuthCanceled))
                 }
-                
+
                 let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
                     guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
                         print("verification code cannot be empty")
                         continuation.resume(returning: .failure(.AuthFailure(reason: "no verification code")))
                         return
                     }
-                    
+
                     Task { @MainActor in
                         let future = await resp.verify(code: verificationCode)
                             .onSuccess { _ in
@@ -238,7 +238,7 @@ class MfaAction {
         }
     }
 
-    private func handleStartVerificationCode(_ resp: MfaStartRegistrationResponse) async -> Result<MfaCredentialItem, ReachFiveError> {
+    private func handleStartVerificationCode(_ resp: MfaStartRegistrationResponse) async throws -> MfaCredentialItem {
         return await withCheckedContinuation { continuation in
             Task { @MainActor in
                 switch resp {
@@ -246,14 +246,14 @@ class MfaAction {
                     let alert = AppDelegate.createAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
                     presentationAnchor.present(alert, animated: true)
                     continuation.resume(returning: .success(registeredCredential))
-                    
+
                 case let .VerificationNeeded(continueRegistration):
                     let canal =
                     switch continueRegistration.credentialType {
                     case .Email: "Email"
                     case .PhoneNumber: "SMS"
                     }
-                    
+
                     let alert = UIAlertController(title: "Verification Code", message: "Please enter the verification Code you got by \(canal)", preferredStyle: .alert)
                     alert.addTextField { textField in
                         textField.placeholder = "Verification code"
@@ -261,7 +261,7 @@ class MfaAction {
                     let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
                         continuation.resume(returning: .failure(.AuthCanceled))
                     }
-                    
+
                     let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
                         guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
                             print("verification code cannot be empty")

@@ -18,7 +18,7 @@ class DefaultProvider: NSObject, Provider {
         scope: [String]?,
         origin: String,
         viewController: UIViewController?
-    ) async -> Result<AuthToken, ReachFiveError> {
+    ) async throws -> AuthToken {
 
         guard let presentationContextProvider = viewController as? ASWebAuthenticationPresentationContextProviding else {
             return .failure(.TechnicalError(reason: "No presenting viewController"))

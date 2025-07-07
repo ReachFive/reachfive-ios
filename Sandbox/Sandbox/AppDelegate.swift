@@ -227,7 +227,7 @@ extension UIViewController {
         }
     }
 
-    private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) async -> Result<AuthToken, ReachFiveError> {
+    private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) async throws -> AuthToken {
         return await withCheckedContinuation { (continuation: CheckedContinuation<Result<AuthToken, ReachFiveError>, Never>) in
 
             let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
