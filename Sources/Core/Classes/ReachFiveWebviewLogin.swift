@@ -27,13 +27,13 @@ public extension ReachFive {
                 }
 
                 guard let callbackURL else {
-                    continuation.resume(returning: .failure(.TechnicalError(reason: "No callback URL")))
+                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No callback URL"))
                     return
                 }
 
                 let params = URLComponents(url: callbackURL, resolvingAgainstBaseURL: true)?.queryItems
                 guard let params, let code = params.first(where: { $0.name == "code" })?.value else {
-                    continuation.resume(returning: .failure(.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))))
+                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params)))
                     return
                 }
 

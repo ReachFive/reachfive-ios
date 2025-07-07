@@ -235,13 +235,13 @@ extension UIViewController {
                 textField.placeholder = "Verification code"
             }
             let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-                continuation.resume(returning: .failure(.AuthCanceled))
+                continuation.resume(throwing: ReachFiveError.AuthCanceled)
             }
             func submitVerificationCode(withTrustDevice trustDevice: Bool?) -> Void {
                 Task { @MainActor in
                     guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
                         print("verification code cannot be empty")
-                        continuation.resume(returning: .failure(.AuthFailure(reason: "no verification code")))
+                        continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                         return
                     }
                     let future = await resp.verify(code: verificationCode, trustDevice: trustDevice)

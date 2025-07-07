@@ -207,13 +207,13 @@ class MfaAction {
                     textField.placeholder = "Verification code"
                 }
                 let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-                    continuation.resume(returning: .failure(.AuthCanceled))
+                    continuation.resume(throwing: ReachFiveError.AuthCanceled)
                 }
 
                 let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
                     guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
                         print("verification code cannot be empty")
-                        continuation.resume(returning: .failure(.AuthFailure(reason: "no verification code")))
+                        continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                         return
                     }
 
@@ -259,13 +259,13 @@ class MfaAction {
                         textField.placeholder = "Verification code"
                     }
                     let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-                        continuation.resume(returning: .failure(.AuthCanceled))
+                        continuation.resume(throwing: ReachFiveError.AuthCanceled)
                     }
 
                     let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
                         guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
                             print("verification code cannot be empty")
-                            continuation.resume(returning: .failure(.AuthFailure(reason: "no verification code")))
+                            continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                             return
                         }
                         Task { @MainActor in
