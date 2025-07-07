@@ -84,7 +84,7 @@ class PasskeyCredentialController: UIViewController {
                                 }
                                 .onFailure { error in
                                     switch error {
-                                    case .AuthCanceled: return
+                                    case ReachFiveError.AuthCanceled: return
                                     default:
                                         let alert = AppDelegate.createAlert(title: "Register New Passkey", message: "Error: \(error.localizedDescription)")
                                         self.present(alert, animated: true)

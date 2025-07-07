@@ -77,22 +77,22 @@ class DemoController: UIViewController {
                     self.passwordLabel.isHidden = false
                     self.loginProviderStackView.isHidden = false
 
-                    switch error {
-                    case .AuthCanceled:
-                    #if targetEnvironment(macCatalyst)
-                        return
-                    #else
-                        if #available(iOS 16.0, *) {
-                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
-                                .onSuccess(callback: self.goToProfile)
-                                .onFailure { error in
-                                    print("error: \(error) \(error.localizedDescription)")
-                                }
-                        }
-                    #endif
-                    default: return
+                switch error {
+                case ReachFiveError.AuthCanceled:
+                #if targetEnvironment(macCatalyst)
+                    return
+                #else
+                    if #available(iOS 16.0, *) {
+                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
+                            .onSuccess(callback: self.goToProfile)
+                            .onFailure { error in
+                                print("error: \(error) \(error.localizedDescription)")
+                            }
                     }
+                #endif
+                default: return
                 }
+            }
         }
     }
 
@@ -121,7 +121,7 @@ class DemoController: UIViewController {
                     .onSuccess(callback: goToProfile)
                     .onFailure { error in
                         switch error {
-                        case .AuthCanceled: goToSignup()
+                        case ReachFiveError.AuthCanceled: goToSignup()
                         default:
                             let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.localizedDescription)")
                             self.present(alert, animated: true)
@@ -153,7 +153,7 @@ class DemoController: UIViewController {
             let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
             func onFailure(error: ReachFiveError) -> Void {
                 switch error {
-                case .AuthCanceled:
+                case ReachFiveError.AuthCanceled:
                 #if targetEnvironment(macCatalyst)
                     return
                 #else
@@ -218,7 +218,7 @@ class DemoController: UIViewController {
                 .onSuccess(callback: handleLoginFlow)
                 .onFailure { error in
                     switch error {
-                    case .AuthCanceled: return
+                    case ReachFiveError.AuthCanceled: return
                     default:
                         let alert = AppDelegate.createAlert(title: "Signup with Apple", message: "Error: \(error.localizedDescription)")
                         self.present(alert, animated: true, completion: nil)

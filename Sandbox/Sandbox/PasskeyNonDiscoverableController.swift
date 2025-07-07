@@ -27,7 +27,7 @@ class PasskeyNonDiscoverableController: UIViewController {
             .onSuccess(callback: goToProfile)
             .onFailure { error in
                 switch error {
-                case .AuthCanceled:
+                case ReachFiveError.AuthCanceled:
                     return
                 default:
                     let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")

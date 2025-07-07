@@ -35,7 +35,7 @@ class LoginPasskeyController: UIViewController {
                     self.createAccountButton.isHidden = false
 
                     switch error {
-                    case .AuthCanceled:
+                    case ReachFiveError.AuthCanceled:
                     #if targetEnvironment(macCatalyst)
                         return
                     #else
@@ -59,7 +59,7 @@ class LoginPasskeyController: UIViewController {
         let request = NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.nonDiscoverableLogin")
         func onFailure(error: ReachFiveError) -> Void {
             switch error {
-            case .AuthCanceled:
+            case ReachFiveError.AuthCanceled:
                 #if targetEnvironment(macCatalyst)
                     return
                 #else

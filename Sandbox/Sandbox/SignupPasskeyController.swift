@@ -32,7 +32,7 @@ class SignupPasskeyController: UIViewController {
                     .onSuccess(callback: goToProfile)
                     .onFailure { error in
                         switch (error) {
-                        case .AuthCanceled: return
+                        case ReachFiveError.AuthCanceled: return
                         default:
                             let alert = AppDelegate.createAlert(title: "Signup with Passkey", message: "Error: \(error.localizedDescription)")
                             self.present(alert, animated: true)
