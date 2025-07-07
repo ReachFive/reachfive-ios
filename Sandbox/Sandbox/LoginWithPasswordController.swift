@@ -36,7 +36,7 @@ class LoginWithPasswordController: UIViewController {
             let customIdentifier = customIdentifierInput.text
             let password = passwordInput.text ?? ""
 
-            await AppDelegate.reachfive()
+            try await AppDelegate.reachfive()
                 .loginWithPassword(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")
                 .onSuccess { resp in
                     self.error.text = nil

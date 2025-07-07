@@ -65,7 +65,7 @@ class DemoController: UIViewController {
             mode = .Always
         }
         Task { @MainActor in
-            await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
+            try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
                 .onSuccess(callback: handleLoginFlow)
                 .onFailure { error in
 
@@ -83,7 +83,7 @@ class DemoController: UIViewController {
                         return
                     #else
                         if #available(iOS 16.0, *) {
-                            await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
+                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
                                 .onSuccess(callback: self.goToProfile)
                                 .onFailure { error in
                                     print("error: \(error) \(error.message())")
@@ -117,7 +117,7 @@ class DemoController: UIViewController {
             }
 
             Task { @MainActor in
-                await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
+                try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
                     .onSuccess(callback: goToProfile)
                     .onFailure { error in
                         switch error {
@@ -144,7 +144,7 @@ class DemoController: UIViewController {
 
         if !pass.isEmpty {
             Task { @MainActor in
-                await loginWithPassword()
+                try await loginWithPassword()
             }
             return
         }
@@ -158,7 +158,7 @@ class DemoController: UIViewController {
                     return
                 #else
                 Task { @MainActor in
-                    await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
+                    try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
                         .onSuccess(callback: self.goToProfile)
                         .onFailure { error in
                             print("error: \(error) \(error.message())")
@@ -173,12 +173,12 @@ class DemoController: UIViewController {
 
             Task { @MainActor in
                 if username.isEmpty {
-                    await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                    try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                         .onSuccess(callback: handleLoginFlow)
                         .onFailure(callback: onFailure)
 
                 } else {
-                    await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                    try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                         .onSuccess(callback: goToProfile)
                         .onFailure(callback: onFailure)
                 }
@@ -192,12 +192,12 @@ class DemoController: UIViewController {
 
         let fut: Result<LoginFlow, ReachFiveError>
         if user.contains("@") {
-            fut = await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
+            fut = try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
         } else {
-            fut = await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
+            fut = try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
         }
 
-        await fut.onSuccess(callback: handleLoginFlow)
+        try await fut.onSuccess(callback: handleLoginFlow)
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                 self.present(alert, animated: true)
@@ -214,7 +214,7 @@ class DemoController: UIViewController {
         print("handleAuthorizationAppleIDButtonPress")
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         Task {
-            await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+            try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
                 .onSuccess(callback: handleLoginFlow)
                 .onFailure { error in
                     switch error {
@@ -241,7 +241,7 @@ extension DemoController: UITextFieldDelegate {
             // the password field was focused, defocus it and login
             textField.resignFirstResponder()
             Task { @MainActor in
-                await loginWithPassword()
+                try await loginWithPassword()
             }
         }
         return false

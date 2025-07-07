@@ -13,7 +13,7 @@ public class ContinueEmailVerification {
     public func verify(code: String, email: String, freshAuthToken: AuthToken? = nil) async throws -> Void {
         let userAuthToken = freshAuthToken ?? self.authToken
         let verifyEmailRequest = VerifyEmailRequest(email: email, verificationCode: code)
-        return await self.reachfive.reachFiveApi.verifyEmail(authToken: userAuthToken, verifyEmailRequest: verifyEmailRequest)
+        return try await self.reachfive.reachFiveApi.verifyEmail(authToken: userAuthToken, verifyEmailRequest: verifyEmailRequest)
     }
 }
 
@@ -24,13 +24,13 @@ public enum EmailVerificationResponse {
 
 public extension ReachFive {
     func getProfile(authToken: AuthToken) async throws -> Profile {
-        await reachFiveApi.getProfile(authToken: authToken)
+        try await reachFiveApi.getProfile(authToken: authToken)
     }
 
     func sendEmailVerification(authToken: AuthToken, redirectUrl: String? = nil) async throws -> EmailVerificationResponse{
         let sendEmailVerificationRequest = SendEmailVerificationRequest(redirectUrl: redirectUrl ?? sdkConfig.emailVerificationUri)
 
-        return await reachFiveApi
+        return try await reachFiveApi
             .sendEmailVerification(authToken: authToken, sendEmailVerificationRequest: sendEmailVerificationRequest)
             .map { resp in
                 switch resp.verificationEmailSent {
@@ -43,7 +43,7 @@ public extension ReachFive {
     func verifyEmail(authToken: AuthToken, code: String, email: String) async throws -> Void {
         let verifyEmailRequest = VerifyEmailRequest(email: email, verificationCode: code)
 
-        return await reachFiveApi.verifyEmail(authToken: authToken, verifyEmailRequest: verifyEmailRequest)
+        return try await reachFiveApi.verifyEmail(authToken: authToken, verifyEmailRequest: verifyEmailRequest)
     }
 
     func verifyPhoneNumber(
@@ -55,7 +55,7 @@ public extension ReachFive {
             phoneNumber: phoneNumber,
             verificationCode: verificationCode
         )
-        return await reachFiveApi
+        return try await reachFiveApi
             .verifyPhoneNumber(authToken: authToken, verifyPhoneNumberRequest: verifyPhoneNumberRequest)
     }
 
@@ -65,7 +65,7 @@ public extension ReachFive {
         redirectUrl: String? = nil
     ) async throws -> Profile {
         let updateEmailRequest = UpdateEmailRequest(email: email, redirectUrl: redirectUrl)
-        return await reachFiveApi.updateEmail(
+        return try await reachFiveApi.updateEmail(
             authToken: authToken,
             updateEmailRequest: updateEmailRequest
         )
@@ -76,7 +76,7 @@ public extension ReachFive {
         phoneNumber: String
     ) async throws -> Profile {
         let updatePhoneNumberRequest = UpdatePhoneNumberRequest(phoneNumber: phoneNumber)
-        return await reachFiveApi.updatePhoneNumber(
+        return try await reachFiveApi.updatePhoneNumber(
             authToken: authToken,
             updatePhoneNumberRequest: updatePhoneNumberRequest
         )
@@ -86,19 +86,19 @@ public extension ReachFive {
         authToken: AuthToken,
         profile: Profile
     ) async throws -> Profile {
-        await reachFiveApi.updateProfile(authToken: authToken, profile: profile)
+        try await reachFiveApi.updateProfile(authToken: authToken, profile: profile)
     }
 
     func updateProfile(
         authToken: AuthToken,
         profileUpdate: ProfileUpdate
     ) async throws -> Profile {
-        await reachFiveApi.updateProfile(authToken: authToken, profileUpdate: profileUpdate)
+        try await reachFiveApi.updateProfile(authToken: authToken, profileUpdate: profileUpdate)
     }
 
     func updatePassword(_ updatePasswordParams: UpdatePasswordParams) async throws -> Void {
         let authToken = updatePasswordParams.getAuthToken()
-        return await reachFiveApi.updatePassword(
+        return try await reachFiveApi.updatePassword(
             authToken: authToken,
             updatePasswordRequest: UpdatePasswordRequest(
                 updatePasswordParams: updatePasswordParams,
@@ -118,7 +118,7 @@ public extension ReachFive {
             phoneNumber: phoneNumber,
             redirectUrl: redirectUrl
         )
-        return await reachFiveApi.requestPasswordReset(
+        return try await reachFiveApi.requestPasswordReset(
             requestPasswordResetRequest: requestPasswordResetRequest
         )
     }
@@ -136,17 +136,17 @@ public extension ReachFive {
             redirectUrl: redirectUrl ?? sdkConfig.accountRecoveryUri,
             origin: origin
         )
-        return await reachFiveApi.requestAccountRecovery(requestAccountRecoveryRequest)
+        return try await reachFiveApi.requestAccountRecovery(requestAccountRecoveryRequest)
     }
 
     /// Lists all passkeys the user has registered
     func listWebAuthnCredentials(authToken: AuthToken) async throws -> [DeviceCredential] {
-        await reachFiveApi.getWebAuthnRegistrations(authToken: authToken)
+        try await reachFiveApi.getWebAuthnRegistrations(authToken: authToken)
     }
 
     /// Deletes a passkey the user has registered
     func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async throws -> Void {
-        await reachFiveApi.deleteWebAuthnRegistration(id: id, authToken: authToken)
+        try await reachFiveApi.deleteWebAuthnRegistration(id: id, authToken: authToken)
     }
 
     func addAccountRecoveryCallback(accountRecoveryCallback: @escaping AccountRecoveryCallback) {

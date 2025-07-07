@@ -15,7 +15,7 @@ public extension ReachFive {
             redirectUrl: redirectUrl,
             origin: origin
         )
-        let token = await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
+        let token = try await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
         return token.flatMap {
             AuthToken.fromOpenIdTokenResponse($0)
         }
@@ -40,18 +40,18 @@ public extension ReachFive {
             scope: strScope,
             origin: origin
         )
-        return await reachFiveApi
+        return try await reachFiveApi
             .loginWithPassword(loginRequest: loginRequest)
             .flatMapAsync { resp in
                 if resp.mfaRequired == true {
                     let pkce = Pkce.generate()
                     self.storage.save(key: self.pkceKey, value: pkce)
-                    return await self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
+                    return try await self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
                         .map { intiationStepUpResponse in
                             LoginFlow.OngoingStepUp(token: intiationStepUpResponse.token, availableMfaCredentialItemTypes: intiationStepUpResponse.amr)
                         }
                 } else {
-                    return await self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
+                    return try await self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
                         .map { res in
                             .AchievedLogin(authToken: res)
                         }

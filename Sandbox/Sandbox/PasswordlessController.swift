@@ -28,7 +28,7 @@ class PasswordlessController: UIViewController {
 
     @IBAction func loginWithEmail(_ sender: Any) {
         Task { @MainActor in
-            await AppDelegate.reachfive()
+            try await AppDelegate.reachfive()
                 .startPasswordless(
                     .Email(
                         email: emailInput.text ?? "",
@@ -52,7 +52,7 @@ class PasswordlessController: UIViewController {
 
     @IBAction func loginWithPhoneNumber(_ sender: Any) {
         Task { @MainActor in
-            await AppDelegate.reachfive()
+            try await AppDelegate.reachfive()
                 .startPasswordless(
                     .PhoneNumber(
                         phoneNumber: phoneNumberInput.text ?? "",
@@ -82,7 +82,7 @@ class PasswordlessController: UIViewController {
             origin: "PasswordlessController.verifyCode"
         )
         Task { @MainActor in
-            await AppDelegate.reachfive()
+            try await AppDelegate.reachfive()
                 .verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
                 .onSuccess(callback: goToProfile)
                 .onFailure { error in

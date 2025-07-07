@@ -48,7 +48,7 @@ class MfaController: UIViewController {
             print("not logged in")
             return
         }
-        await AppDelegate.reachfive()
+        try await AppDelegate.reachfive()
             .mfaListCredentials(authToken: authToken)
             .onSuccess { response in
                 self.mfaCredentialsToDisplay = response.credentials.map { MfaCredential.convert(from: $0) }
@@ -60,7 +60,7 @@ class MfaController: UIViewController {
             print("not logged in")
             return
         }
-        await AppDelegate.reachfive()
+        try await AppDelegate.reachfive()
             .mfaListTrustedDevices(authToken: authToken)
             .onSuccess { response in
                 self.mfaTrustedDevicesToDisplay = response
@@ -87,8 +87,8 @@ class MfaController: UIViewController {
         configureHierarchy()
         configureDataSource()
         Task { @MainActor in
-            await fetchMfaCredentials()
-            await fetchTrustedDevices()
+            try await fetchMfaCredentials()
+            try await fetchTrustedDevices()
         }
     }
 
@@ -108,9 +108,9 @@ class MfaController: UIViewController {
         let mfaAction = MfaAction(presentationAnchor: self)
 
         Task { @MainActor in
-            await mfaAction.mfaStart(stepUp: StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"]), authToken: authToken).onSuccess { freshToken in
+            try await mfaAction.mfaStart(stepUp: StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"]), authToken: authToken).onSuccess { freshToken in
                 AppDelegate.storage.setToken(freshToken)
-                await self.fetchTrustedDevices()
+                try await self.fetchTrustedDevices()
             }
         }
     }
@@ -128,8 +128,8 @@ class MfaController: UIViewController {
 
         let mfaAction = MfaAction(presentationAnchor: self)
         Task { @MainActor in
-            await mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken).onSuccess { _ in
-                await self.fetchMfaCredentials()
+            try await mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken).onSuccess { _ in
+                try await self.fetchMfaCredentials()
             }
         }
     }
@@ -143,7 +143,7 @@ class MfaAction {
     }
 
     func mfaStart(registering credential: Credential, authToken: AuthToken) async throws -> MfaCredentialItem {
-        let future = await AppDelegate.reachfive()
+        let future = try await AppDelegate.reachfive()
             .mfaStart(registering: credential, authToken: authToken)
             .flatMapErrorAsync { error in
                 guard case let .AuthFailure(reason: _, apiError: apiError) = error,
@@ -154,15 +154,15 @@ class MfaAction {
                 }
 
                 // Automatically refresh the token if it is stale
-                return await AppDelegate.reachfive()
+                return try await AppDelegate.reachfive()
                     .refreshAccessToken(authToken: authToken).flatMapAsync { (freshToken: AuthToken) in
                         AppDelegate.storage.setToken(freshToken)
-                        return await AppDelegate.reachfive()
+                        return try await AppDelegate.reachfive()
                             .mfaStart(registering: credential, authToken: freshToken)
                     }
             }
             .flatMapAsync { resp in
-                await self.handleStartVerificationCode(resp)
+                try await self.handleStartVerificationCode(resp)
             }
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Start MFA \(credential.credentialType) Registration", message: "Error: \(error.message())")
@@ -173,7 +173,7 @@ class MfaAction {
     }
 
     func mfaStart(stepUp startStepUp: StartStepUp, authToken: AuthToken) async throws -> AuthToken {
-        return await AppDelegate.reachfive()
+        return try await AppDelegate.reachfive()
             .mfaStart(stepUp: startStepUp)
             .flatMapErrorAsync { error in
                 guard case let .AuthFailure(reason: _, apiError: apiError) = error,
@@ -183,15 +183,15 @@ class MfaAction {
                     return .failure(error)
                 }
 
-                return await AppDelegate.reachfive()
+                return try await AppDelegate.reachfive()
                     .refreshAccessToken(authToken: authToken).flatMapAsync { (freshToken: AuthToken) in
                         AppDelegate.storage.setToken(freshToken)
-                        return await AppDelegate.reachfive()
+                        return try await AppDelegate.reachfive()
                             .mfaStart(stepUp: startStepUp)
                     }
             }
             .flatMapAsync { resp in
-                await self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
+                try await self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
             }
             .onFailure { error in
                 let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.message())")
@@ -200,7 +200,7 @@ class MfaAction {
     }
 
     private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) async throws -> AuthToken {
-        return await withCheckedContinuation { continuation in
+        return try await withCheckedContinuation { continuation in
             Task { @MainActor in
                 let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
                 alert.addTextField { textField in
@@ -218,7 +218,7 @@ class MfaAction {
                     }
 
                     Task { @MainActor in
-                        let future = await resp.verify(code: verificationCode)
+                        let future = try await resp.verify(code: verificationCode)
                             .onSuccess { _ in
                                 let alert = AppDelegate.createAlert(title: "Step Up", message: "Success")
                                 self.presentationAnchor.present(alert, animated: true)
@@ -239,7 +239,7 @@ class MfaAction {
     }
 
     private func handleStartVerificationCode(_ resp: MfaStartRegistrationResponse) async throws -> MfaCredentialItem {
-        return await withCheckedContinuation { continuation in
+        return try await withCheckedContinuation { continuation in
             Task { @MainActor in
                 switch resp {
                 case let .Success(registeredCredential):
@@ -269,7 +269,7 @@ class MfaAction {
                             return
                         }
                         Task { @MainActor in
-                            let future = await continueRegistration.verify(code: verificationCode)
+                            let future = try await continueRegistration.verify(code: verificationCode)
                                 .onSuccess { succ in
                                     let alert = AppDelegate.createAlert(title: "Verify MFA \(succ.type) registration", message: "Success")
                                     self.presentationAnchor.present(alert, animated: true)
@@ -510,7 +510,7 @@ extension TrustedDeviceCollectionViewCell {
         }
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
             Task { @MainActor in
-                await AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
+                try await AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
                     .onSuccess { _ in
                         self.contentView.removeFromSuperview()
                     }
@@ -591,13 +591,13 @@ extension CredentialCollectionViewCell {
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
             Task { @MainActor in
                 if identifier.contains("@") {
-                    await AppDelegate.reachfive()
+                    try await AppDelegate.reachfive()
                         .mfaDeleteCredential(authToken: authToken)
                         .onSuccess { _ in
                             self.contentView.removeFromSuperview()
                         }
                 } else {
-                    await AppDelegate.reachfive()
+                    try await AppDelegate.reachfive()
                         .mfaDeleteCredential(identifier, authToken: authToken)
                         .onSuccess { _ in
                             self.contentView.removeFromSuperview()

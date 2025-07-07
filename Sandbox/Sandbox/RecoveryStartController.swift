@@ -16,7 +16,7 @@ class RecoveryStartController: UIViewController {
         }
 
         Task { @MainActor in
-            await AppDelegate.reachfive().requestAccountRecovery(email: email, phoneNumber: phoneNumber, origin: "RecoveryStartController:sendLink")
+            try await AppDelegate.reachfive().requestAccountRecovery(email: email, phoneNumber: phoneNumber, origin: "RecoveryStartController:sendLink")
                 .onSuccess { _ in
                     if let verificationController = self.storyboard?.instantiateViewController(withIdentifier: "AccountRecoveryVerification") as? RecoveryVerificationController {
                         verificationController.email = email

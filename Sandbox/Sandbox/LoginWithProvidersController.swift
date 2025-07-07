@@ -70,7 +70,7 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
 
             let scope = ["openid", "email", "profile", "phone", "full_write", "offline_access"]
 
-            await AppDelegate.reachfive()
+            try await AppDelegate.reachfive()
                 .getProvider(name: selectedProvider.name)?
                 .login(
                     scope: scope,

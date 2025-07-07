@@ -34,14 +34,14 @@ class PasskeyCredentialController: UIViewController {
             print("PasskeyCredentialController.viewWillAppear")
             super.viewWillAppear(animated)
             if let authToken = AppDelegate.storage.getToken() {
-                await self.reloadCredentials(authToken: authToken)
+                try await self.reloadCredentials(authToken: authToken)
             }
         }
     }
 
     private func reloadCredentials(authToken: AuthToken) async {
         // Beware that a valid token for profile might not be fresh enough to retrieve the credentials
-        await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken).onSuccess { listCredentials in
+        try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken).onSuccess { listCredentials in
                 self.devices = listCredentials
                 self.credentialTableview.reloadData()
             }
@@ -60,11 +60,11 @@ class PasskeyCredentialController: UIViewController {
                 print("not logged in")
                 return
             }
-            await AppDelegate.reachfive()
+            try await AppDelegate.reachfive()
                 .getProfile(authToken: authToken)
                 .onSuccess { profile in
                     let friendlyName = ProfileController.username(profile: profile)
-                    
+
                     let alert = UIAlertController(
                         title: "Register New Passkey",
                         message: "Name the passkey",
@@ -78,9 +78,9 @@ class PasskeyCredentialController: UIViewController {
                     let registerAction = UIAlertAction(title: "Add", style: .default) { [unowned alert] (_) in
                         let textField = alert.textFields?[0]
                         Task { @MainActor in
-                            await AppDelegate.reachfive().registerNewPasskey(withRequest: NewPasskeyRequest(anchor: window, friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey"), authToken: authToken)
+                            try await AppDelegate.reachfive().registerNewPasskey(withRequest: NewPasskeyRequest(anchor: window, friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey"), authToken: authToken)
                                 .onSuccess { _ in
-                                    await self.reloadCredentials(authToken: authToken)
+                                    try await self.reloadCredentials(authToken: authToken)
                                 }
                                 .onFailure { error in
                                     switch error {
@@ -132,7 +132,7 @@ extension PasskeyCredentialController: UITableViewDataSource {
             if editingStyle == .delete {
                 guard let authToken = AppDelegate.storage.getToken() else { return }
                 let element = devices[indexPath.row]
-                await AppDelegate.reachfive().deleteWebAuthnRegistration(id: element.id, authToken: authToken)
+                try await AppDelegate.reachfive().deleteWebAuthnRegistration(id: element.id, authToken: authToken)
                     .onSuccess { _ in
                         self.devices.remove(at: indexPath.row)
                         print("did remove passkey \(element.friendlyName)")

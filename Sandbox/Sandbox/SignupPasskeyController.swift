@@ -28,7 +28,7 @@ class SignupPasskeyController: UIViewController {
             let window: UIWindow = view.window!
             //TODO: est-ce qu'on ne ferait pas une Task.detached, mais on marquerait goToProfile et present(alert) avec Task { @MainActor }
             Task { @MainActor in
-                await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "SignupPasskeyController.signup"))
+                try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "SignupPasskeyController.signup"))
                     .onSuccess(callback: goToProfile)
                     .onFailure { error in
                         switch (error) {

@@ -28,14 +28,14 @@ class NativePasswordController: UIViewController {
         Task { @MainActor in
             guard let pass = password.text, !pass.isEmpty, let user = username.text, !user.isEmpty else { return }
             let origin = "NativePasswordController.passwordEditingDidEnd"
-            
+
             let fut: Result<LoginFlow, ReachFiveError>
             if user.contains("@") {
-                fut = await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
+                fut = try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
             } else {
-                fut = await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
+                fut = try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
             }
-            await fut.onSuccess(callback: handleLoginFlow)
+            try await fut.onSuccess(callback: handleLoginFlow)
                 .onFailure { error in
                     let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
                     self.present(alert, animated: true)
@@ -46,10 +46,10 @@ class NativePasswordController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         Task { @MainActor in
             super.viewDidAppear(animated)
-            
+
             guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-            
-            await AppDelegate.reachfive()
+
+            try await AppDelegate.reachfive()
                 .login(withRequest: NativeLoginRequest(anchor: window, origin: "NativePasswordController.viewDidAppear"), usingModalAuthorizationFor: [.Password], display: .Always)
                 .onSuccess(callback: handleLoginFlow)
                 .onFailure { error in

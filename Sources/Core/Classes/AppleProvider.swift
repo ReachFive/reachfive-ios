@@ -46,9 +46,9 @@ class ConfiguredAppleProvider: NSObject, Provider {
         origin: String,
         viewController: UIViewController?
     ) async throws -> AuthToken {
-        guard let window = await viewController?.view.window else { fatalError("The view was not in the app's view hierarchy!") }
+        guard let window = try await viewController?.view.window else { fatalError("The view was not in the app's view hierarchy!") }
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
-        return await credentialManager.login(withRequest: NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin), usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self)
+        return try await credentialManager.login(withRequest: NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin), usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self)
             .flatMap { flow in
                 switch flow {
                 case .AchievedLogin(let authToken): .success(authToken)

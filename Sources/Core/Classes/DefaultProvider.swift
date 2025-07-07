@@ -24,7 +24,7 @@ class DefaultProvider: NSObject, Provider {
             return .failure(.TechnicalError(reason: "No presenting viewController"))
         }
 
-        return await reachfive.webviewLogin(WebviewLoginRequest(scope: scope, presentationContextProvider: presentationContextProvider, origin: origin, provider: providerConfig.provider))
+        return try await reachfive.webviewLogin(WebviewLoginRequest(scope: scope, presentationContextProvider: presentationContextProvider, origin: origin, provider: providerConfig.provider))
     }
 
     override var description: String {

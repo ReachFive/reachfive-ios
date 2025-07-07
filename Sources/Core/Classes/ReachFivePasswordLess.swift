@@ -37,7 +37,7 @@ public extension ReachFive {
                 origin: origin
             )
         }
-        return await reachFiveApi.startPasswordless(startPasswordlessRequest)
+        return try await reachFiveApi.startPasswordless(startPasswordlessRequest)
     }
 
     func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> AuthToken {
@@ -45,7 +45,7 @@ public extension ReachFive {
         guard let pkce else {
             return .failure(.TechnicalError(reason: "Pkce not found"))
         }
-        return await reachFiveApi
+        return try await reachFiveApi
             .verifyAuthCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
             .flatMapAsync { _ in
                 let verifyPasswordlessRequest = VerifyPasswordlessRequest(
@@ -57,7 +57,7 @@ public extension ReachFive {
                     responseType: "code",
                     origin: verifyAuthCodeRequest.origin
                 )
-                return await self.reachFiveApi
+                return try await self.reachFiveApi
                     .verifyPasswordless(verifyPasswordlessRequest: verifyPasswordlessRequest)
                     .flatMapAsync { response in
 
@@ -65,7 +65,7 @@ public extension ReachFive {
                             return .failure(.TechnicalError(reason: "No authorization code"))
                         }
 
-                        return await self.authWithCode(code: code, pkce: pkce)
+                        return try await self.authWithCode(code: code, pkce: pkce)
                     }
             }
     }
@@ -83,6 +83,6 @@ public extension ReachFive {
             return
         }
 
-        self.passwordlessCallback?(await authWithCode(code: code, pkce: pkce))
+        self.passwordlessCallback?(try await authWithCode(code: code, pkce: pkce))
     }
 }

@@ -20,13 +20,13 @@ class SignupController: UIViewController {
             let email = emailInput.text ?? ""
             let password = passwordInput.text ?? ""
             let name = nameInput.text ?? ""
-            
+
             let profile = ProfileSignupRequest(
                 password: password,
                 email: email,
                 name: name
             )
-            await AppDelegate.reachfive().signup(profile: profile, origin: origin)
+            try await AppDelegate.reachfive().signup(profile: profile, origin: origin)
                 .onSuccess(callback: goToProfile)
                 .onFailure { error in
                     let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.message())")

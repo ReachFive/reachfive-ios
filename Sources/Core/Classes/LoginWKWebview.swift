@@ -23,7 +23,7 @@ public class LoginWKWebview: UIView {
         self.webView = webView
         webView.navigationDelegate = self
         addSubview(webView)
-        return await withCheckedContinuation { (continuation: CheckedContinuation<Result<AuthToken, ReachFiveError>, Never>) in
+        return try await withCheckedContinuation { (continuation: CheckedContinuation<Result<AuthToken, ReachFiveError>, Never>) in
             self.continuation = continuation
             webView.load(URLRequest(url: reachfive.buildAuthorizeURL(pkce: pkce, state: state, nonce: nonce, scope: scope, origin: origin)))
         }
@@ -43,7 +43,7 @@ extension LoginWKWebview: WKNavigationDelegate {
 
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
         if let params, let code = params.first(where: { $0.name == "code" })?.value {
-            continuation.resume(returning: await reachfive.authWithCode(code: code, pkce: pkce))
+            continuation.resume(returning: try await reachfive.authWithCode(code: code, pkce: pkce))
         } else {
             continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params)))
         }

@@ -25,7 +25,7 @@ class LoginPasskeyController: UIViewController {
 
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         Task { @MainActor in
-            await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear"), usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
+            try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear"), usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
                 .onSuccess(callback: handleLoginFlow)
                 .onFailure { error in
 
@@ -39,7 +39,7 @@ class LoginPasskeyController: UIViewController {
                     #if targetEnvironment(macCatalyst)
                         return
                     #else
-                        await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear.AuthCanceled"))
+                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear.AuthCanceled"))
                             .onSuccess(callback: self.goToProfile)
                             .onFailure { error in
                                 let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
@@ -64,7 +64,7 @@ class LoginPasskeyController: UIViewController {
                     return
                 #else
                 Task { @MainActor in
-                    await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.nonDiscoverableLogin.AuthCanceled"))
+                    try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.nonDiscoverableLogin.AuthCanceled"))
                         .onSuccess(callback: self.goToProfile)
                         .onFailure { error in
                             let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.message())")
@@ -81,12 +81,12 @@ class LoginPasskeyController: UIViewController {
             switch (usernameField.text) {
             case .none, .some(""):
                 // this is optional, but a good way to present a modal with a fallback to QR code for loging using a nearby device
-                await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                     .onSuccess(callback: handleLoginFlow)
                     .onFailure(callback: onFailure)
 
             case .some(let username):
-                await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                     .onSuccess(callback: goToProfile)
                     .onFailure(callback: onFailure)
             }
@@ -115,7 +115,7 @@ class LoginPasskeyController: UIViewController {
 
         let window: UIWindow = view.window!
         Task { @MainActor in
-            await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "LoginPasskeyController.createAccount"))
+            try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "LoginPasskeyController.createAccount"))
                 .onSuccess(callback: goToProfile)
                 .onFailure { error in
                     let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.message())")

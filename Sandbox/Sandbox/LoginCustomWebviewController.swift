@@ -55,7 +55,7 @@ extension LoginCustomWebviewController: WKNavigationDelegate {
                 }
                 let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
                 if let code = params?.first(where: { $0.name == "code" })?.value {
-                    await reachfive.authWithCode(code: code, pkce: pkce).onComplete { self.handleResult(result: $0) }
+                    try await reachfive.authWithCode(code: code, pkce: pkce).onComplete { self.handleResult(result: $0) }
                 }
             }
         }

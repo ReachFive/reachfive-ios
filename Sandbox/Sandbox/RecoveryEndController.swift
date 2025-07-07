@@ -21,7 +21,7 @@ class RecoveryEndController: UIViewController {
         }
         Task { @MainActor in
             if #available(iOS 16.0, *) {
-                await AppDelegate.reachfive().resetPasskeys(withRequest: ResetPasskeyRequest(verificationCode: verificationCode, friendlyName: username, anchor: window, email: email, phoneNumber: phoneNumber, origin: "RecoveryEndController.newPasskey"))
+                try await AppDelegate.reachfive().resetPasskeys(withRequest: ResetPasskeyRequest(verificationCode: verificationCode, friendlyName: username, anchor: window, email: email, phoneNumber: phoneNumber, origin: "RecoveryEndController.newPasskey"))
                     .onSuccess { _ in
                         print("succcess reset passkey")
                         self.navigationController?.popViewController(animated: true)
@@ -56,7 +56,7 @@ class RecoveryEndController: UIViewController {
             .SmsParams(phoneNumber: phoneNumber!, verificationCode: verificationCode, password: newPassword)
         }
         Task { @MainActor in
-            await AppDelegate.reachfive().updatePassword(params)
+            try await AppDelegate.reachfive().updatePassword(params)
                 .onSuccess { _ in
                     print("succcess reset password")
                     self.navigationController?.popViewController(animated: true)

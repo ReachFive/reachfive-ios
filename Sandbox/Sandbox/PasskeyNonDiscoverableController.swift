@@ -7,13 +7,13 @@ class PasskeyNonDiscoverableController: UIViewController {
 
     @IBAction func loginWithImmediatelyAvailableCredentials(_ sender: Any) {
         Task { @MainActor in
-            await login(display: .IfImmediatelyAvailableCredentials)
+            try await login(display: .IfImmediatelyAvailableCredentials)
         }
     }
 
     @IBAction func loginAlways(_ sender: Any) {
         Task { @MainActor in
-            await login(display: .Always)
+            try await login(display: .Always)
         }
     }
 
@@ -23,7 +23,7 @@ class PasskeyNonDiscoverableController: UIViewController {
         guard let username = username.text, !username.isEmpty else { return }
 
         let request = NativeLoginRequest(anchor: window, origin: "PasskeyNonDiscoverableController.login")
-        await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: mode)
+        try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: mode)
             .onSuccess(callback: goToProfile)
             .onFailure { error in
                 switch error {
