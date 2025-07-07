@@ -11,11 +11,11 @@ extension DataRequest {
         return status >= 200 && status < 300
     }
 
-    private func parseJson<T: Decodable>(json: Data, type: T.Type, decoder: JSONDecoder) throws -> T {
+    private func parseJson<T: Decodable>(json: Data, type: T.Type, decoder: JSONDecoder) throws(ReachFiveError) -> T {
         do {
             return try decoder.decode(type, from: json)
         } catch {
-            throw ReachFiveError.TechnicalError(reason: error.localizedDescription)
+            throw .TechnicalError(reason: error.localizedDescription)
         }
     }
 
