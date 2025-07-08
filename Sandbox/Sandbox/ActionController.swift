@@ -14,31 +14,34 @@ class ActionController: UITableViewController {
             if indexPath.section == 1 {
                 // Sign in with Apple
                 if indexPath.row == 1 {
-                    try await AppDelegate.reachfive()
-                        .login(withRequest: NativeLoginRequest(anchor: window, origin: "ActionController: Section Native"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
-                        .onSuccess(callback: handleLoginFlow)
-                        .onFailure { error in
-                            let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.localizedDescription)")
-                            self.present(alert, animated: true)
-                        }
+                    let request = NativeLoginRequest(anchor: window, origin: "ActionController: Section Native")
+                    do {
+                        let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+                        handleLoginFlow(flow: flow)
+                    } catch {
+                        let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.localizedDescription)")
+                        self.present(alert, animated: true)
+                    }
                 }
             }
 
-            let loginRequest = NativeLoginRequest(anchor: window, origin: "ActionController: Section Passkey")
-
             // Section Passkey
             if #available(iOS 16.0, *), indexPath.section == 2 {
-                // Login with passkey: modal persistent
-                if indexPath.row == 1 {
-                    try await AppDelegate.reachfive()
-                        .login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                        .onSuccess(callback: handleLoginFlow)
-                } else
-                // Login with passkey: modal non-persistent
-                if indexPath.row == 2 {
-                    try await AppDelegate.reachfive()
-                        .login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
-                        .onSuccess(callback: handleLoginFlow)
+                let loginRequest = NativeLoginRequest(anchor: window, origin: "ActionController: Section Passkey")
+
+                do {
+                    // Login with passkey: modal persistent
+                    if indexPath.row == 1 {
+                        let flow = try await AppDelegate.reachfive().login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                        handleLoginFlow(flow: flow)
+                    } else
+                    // Login with passkey: modal non-persistent
+                    if indexPath.row == 2 {
+                        let flow = try await AppDelegate.reachfive().login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
+                        handleLoginFlow(flow: flow)
+                    }
+                } catch {
+                    // Do not show error, the goal is to be non invasive in the UI
                 }
             }
 
@@ -46,9 +49,9 @@ class ActionController: UITableViewController {
             if indexPath.section == 3 {
                 // standard webview
                 if indexPath.row == 0 {
-                    try await AppDelegate.reachfive()
-                        .webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin"))
-                        .onComplete { self.handleResult(result: $0) }
+                    await handleAuthToken {
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin"))
+                    }
                 }
             }
 
@@ -59,13 +62,13 @@ class ActionController: UITableViewController {
                     guard let token = AppDelegate.storage.getToken() else {
                         return
                     }
-                    try await AppDelegate.reachfive()
-                        .refreshAccessToken(authToken: token)
-                        .onSuccess(callback: goToProfile)
-                        .onFailure { error in
-                            print("refresh error \(error)")
-                            AppDelegate.storage.removeToken()
-                        }
+                    do {
+                        let authToken = try await AppDelegate.reachfive().refreshAccessToken(authToken: token)
+                        goToProfile(authToken)
+                    } catch {
+                        print("refresh error \(error)")
+                        AppDelegate.storage.removeToken()
+                    }
                 }
             }
         }
@@ -89,11 +92,11 @@ class ActionController: UITableViewController {
         return indexPath
     }
 
-    func handleResult(result: Result<AuthToken, ReachFiveError>) {
-        switch result {
-        case .success(let authToken):
+    func handleAuthToken(_ body: () async throws -> AuthToken) async {
+        do {
+            let authToken = try await body()
             goToProfile(authToken)
-        case .failure(let error):
+        } catch {
             let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.localizedDescription)")
             present(alert, animated: true)
         }
