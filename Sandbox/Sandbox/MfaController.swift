@@ -43,28 +43,22 @@ class MfaController: UIViewController {
 
     var tokenNotification: NSObjectProtocol?
 
-    private func fetchMfaCredentials() async {
+    private func fetchMfaCredentials() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
             return
         }
-        try await AppDelegate.reachfive()
-            .mfaListCredentials(authToken: authToken)
-            .onSuccess { response in
-                self.mfaCredentialsToDisplay = response.credentials.map { MfaCredential.convert(from: $0) }
-            }
+        let response = try await AppDelegate.reachfive().mfaListCredentials(authToken: authToken)
+        self.mfaCredentialsToDisplay = response.credentials.map { MfaCredential.convert(from: $0) }
     }
 
-    private func fetchTrustedDevices() async {
+    private func fetchTrustedDevices() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
             return
         }
-        try await AppDelegate.reachfive()
-            .mfaListTrustedDevices(authToken: authToken)
-            .onSuccess { response in
-                self.mfaTrustedDevicesToDisplay = response
-            }
+        let response = try await AppDelegate.reachfive().mfaListTrustedDevices(authToken: authToken)
+        self.mfaTrustedDevicesToDisplay = response
     }
 
     override func viewDidLoad() {
@@ -78,7 +72,7 @@ class MfaController: UIViewController {
                     let alert = AppDelegate.createAlert(title: "Step up", message: "Success")
                     self.present(alert, animated: true)
                 case let .failure(error):
-                    let alert = AppDelegate.createAlert(title: "Step failed", message: "Error: \(error.localizedDescription)")
+                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
             }
@@ -107,10 +101,17 @@ class MfaController: UIViewController {
         }
         let mfaAction = MfaAction(presentationAnchor: self)
 
+        let stepUpFlow = StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"])
         Task { @MainActor in
-            try await mfaAction.mfaStart(stepUp: StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"]), authToken: authToken).onSuccess { freshToken in
+            do {
+                let freshToken = try await mfaAction.mfaStart(stepUp: stepUpFlow)
                 AppDelegate.storage.setToken(freshToken)
                 try await self.fetchTrustedDevices()
+                let alert = AppDelegate.createAlert(title: "Step Up", message: "Success")
+                self.present(alert, animated: true)
+            } catch {
+                let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.localizedDescription)")
+                self.present(alert, animated: true)
             }
         }
     }
@@ -128,8 +129,14 @@ class MfaController: UIViewController {
 
         let mfaAction = MfaAction(presentationAnchor: self)
         Task { @MainActor in
-            try await mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken).onSuccess { _ in
+            do {
+                let registeredCredential = try await mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken)
                 try await self.fetchMfaCredentials()
+                let alert = AppDelegate.createAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
+                self.present(alert, animated: true)
+            } catch {
+                let alert = AppDelegate.createAlert(title: "Start MFA Phone Number Registration", message: "Error: \(error.localizedDescription)")
+                self.present(alert, animated: true)
             }
         }
     }
@@ -142,65 +149,13 @@ class MfaAction {
         self.presentationAnchor = presentationAnchor
     }
 
-    func mfaStart(registering credential: Credential, authToken: AuthToken) async throws -> MfaCredentialItem {
-        let future = try await AppDelegate.reachfive()
-            .mfaStart(registering: credential, authToken: authToken)
-            .flatMapErrorAsync { error in
-                guard case let .AuthFailure(reason: _, apiError: apiError) = error,
-                      let key = apiError?.errorMessageKey,
-                      key == "error.accessToken.freshness"
-                else {
-                    return .failure(error)
-                }
-
-                // Automatically refresh the token if it is stale
-                return try await AppDelegate.reachfive()
-                    .refreshAccessToken(authToken: authToken).flatMapAsync { (freshToken: AuthToken) in
-                        AppDelegate.storage.setToken(freshToken)
-                        return try await AppDelegate.reachfive()
-                            .mfaStart(registering: credential, authToken: freshToken)
-                    }
-            }
-            .flatMapAsync { resp in
-                try await self.handleStartVerificationCode(resp)
-            }
-            .onFailure { error in
-                let alert = AppDelegate.createAlert(title: "Start MFA \(credential.credentialType) Registration", message: "Error: \(error.localizedDescription)")
-                self.presentationAnchor.present(alert, animated: true)
-            }
-
-        return future
-    }
-
-    func mfaStart(stepUp startStepUp: StartStepUp, authToken: AuthToken) async throws -> AuthToken {
-        return try await AppDelegate.reachfive()
-            .mfaStart(stepUp: startStepUp)
-            .flatMapErrorAsync { error in
-                guard case let .AuthFailure(reason: _, apiError: apiError) = error,
-                      let key = apiError?.errorMessageKey,
-                      key == "error.accessToken.freshness"
-                else {
-                    return .failure(error)
-                }
-
-                return try await AppDelegate.reachfive()
-                    .refreshAccessToken(authToken: authToken).flatMapAsync { (freshToken: AuthToken) in
-                        AppDelegate.storage.setToken(freshToken)
-                        return try await AppDelegate.reachfive()
-                            .mfaStart(stepUp: startStepUp)
-                    }
-            }
-            .flatMapAsync { resp in
-                try await self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
-            }
-            .onFailure { error in
-                let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.localizedDescription)")
-                self.presentationAnchor.present(alert, animated: true)
-            }
+    func mfaStart(stepUp startStepUp: StartStepUp) async throws -> AuthToken {
+        let resp = try await AppDelegate.reachfive().mfaStart(stepUp: startStepUp)
+        return try await self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
     }
 
     private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) async throws -> AuthToken {
-        return try await withCheckedContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             Task { @MainActor in
                 let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
                 alert.addTextField { textField in
@@ -216,18 +171,10 @@ class MfaAction {
                         continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                         return
                     }
-
-                    Task { @MainActor in
-                        let future = try await resp.verify(code: verificationCode)
-                            .onSuccess { _ in
-                                let alert = AppDelegate.createAlert(title: "Step Up", message: "Success")
-                                self.presentationAnchor.present(alert, animated: true)
-                            }
-                            .onFailure { error in
-                                let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.localizedDescription)")
-                                self.presentationAnchor.present(alert, animated: true)
-                            }
-                        continuation.resume(returning: future)
+                    Task {
+                        continuation.resume(with: await Result {
+                            try await resp.verify(code: verificationCode)
+                        })
                     }
                 }
                 alert.addAction(cancelAction)
@@ -238,14 +185,23 @@ class MfaAction {
         }
     }
 
+    func mfaStart(registering credential: Credential, authToken: AuthToken) async throws -> MfaCredentialItem {
+        let (resp, freshToken) = try await AppDelegate.reachfive().withFreshToken(potentiallyStale: authToken) { refreshableToken in
+            try await AppDelegate.reachfive().mfaStart(registering: credential, authToken: refreshableToken)
+        }
+        if let freshToken {
+            AppDelegate.storage.setToken(freshToken)
+        }
+
+        return try await self.handleStartVerificationCode(resp)
+    }
+
     private func handleStartVerificationCode(_ resp: MfaStartRegistrationResponse) async throws -> MfaCredentialItem {
-        return try await withCheckedContinuation { continuation in
+        return try await withCheckedThrowingContinuation { continuation in
             Task { @MainActor in
                 switch resp {
                 case let .Success(registeredCredential):
-                    let alert = AppDelegate.createAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
-                    presentationAnchor.present(alert, animated: true)
-                    continuation.resume(returning: .success(registeredCredential))
+                    continuation.resume(returning: registeredCredential)
 
                 case let .VerificationNeeded(continueRegistration):
                     let canal =
@@ -268,17 +224,10 @@ class MfaAction {
                             continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                             return
                         }
-                        Task { @MainActor in
-                            let future = try await continueRegistration.verify(code: verificationCode)
-                                .onSuccess { succ in
-                                    let alert = AppDelegate.createAlert(title: "Verify MFA \(succ.type) registration", message: "Success")
-                                    self.presentationAnchor.present(alert, animated: true)
-                                }
-                                .onFailure { error in
-                                    let alert = AppDelegate.createAlert(title: "MFA \(continueRegistration.credentialType) failure", message: "Error: \(error.localizedDescription)")
-                                    self.presentationAnchor.present(alert, animated: true)
-                                }
-                            continuation.resume(returning: future)
+                        Task {
+                            continuation.resume(with: await Result {
+                                try await continueRegistration.verify(code: verificationCode)
+                            })
                         }
                     }
                     alert.addAction(cancelAction)
@@ -510,10 +459,9 @@ extension TrustedDeviceCollectionViewCell {
         }
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
             Task { @MainActor in
-                try await AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
-                    .onSuccess { _ in
-                        self.contentView.removeFromSuperview()
-                    }
+                //TODO: tester ce que ça fait de faire planter un Task { @MainActor
+                try? await AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
+                self.contentView.removeFromSuperview()
             }
         }
         alert.addAction(cancelAction)
@@ -590,19 +538,9 @@ extension CredentialCollectionViewCell {
         }
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
             Task { @MainActor in
-                if identifier.contains("@") {
-                    try await AppDelegate.reachfive()
-                        .mfaDeleteCredential(authToken: authToken)
-                        .onSuccess { _ in
-                            self.contentView.removeFromSuperview()
-                        }
-                } else {
-                    try await AppDelegate.reachfive()
-                        .mfaDeleteCredential(identifier, authToken: authToken)
-                        .onSuccess { _ in
-                            self.contentView.removeFromSuperview()
-                        }
-                }
+                let id = identifier.contains("@") ? nil : identifier
+                try? await AppDelegate.reachfive().mfaDeleteCredential(id, authToken: authToken)
+                self.contentView.removeFromSuperview()
             }
         }
         alert.addAction(cancelAction)
