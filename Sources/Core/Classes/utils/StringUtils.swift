@@ -1,10 +1,10 @@
 import Foundation
 
-func mkString(start: String, fields: (field: Any?, name: String)...) -> String {
+public func mkString(start: String, fields: (field: Any?, name: String)...) -> String {
     mkString(start: "\(start)(", sep: ", ", end: ")", fields: fields)
 }
 
-func mkString(start: String, sep: String, end: String, fields: [(field: Any?, name: String)]) -> String {
+public func mkString(start: String, sep: String, end: String, fields: [(field: Any?, name: String)]) -> String {
     let nonNilFields = fields.compactMap { field, name in
         if let field {
             switch field {
@@ -18,7 +18,7 @@ func mkString(start: String, sep: String, end: String, fields: [(field: Any?, na
     return mkString(start: start, sep: sep, end: end, fields: nonNilFields)
 }
 
-func mkString(start: String, sep: String, end: String, fields: [String]) -> String {
+public func mkString(start: String, sep: String, end: String, fields: [String]) -> String {
     var iter = fields.makeIterator()
     var s = start
     var first = true
