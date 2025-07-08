@@ -13,12 +13,10 @@ class NativePasswordController: UIViewController {
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
                 self.dismiss(animated: true)
-                switch result {
-                case let .success(authToken):
-                    self.goToProfile(authToken)
-                case let .failure(error):
-                    let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true)
+                Task { @MainActor in
+                    await self.handleAuthToken(errorMessage: "Step up failed") {
+                        try result.get()
+                    }
                 }
             }
         }
