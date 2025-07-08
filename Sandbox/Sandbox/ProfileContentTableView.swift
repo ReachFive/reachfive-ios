@@ -26,7 +26,7 @@ extension ProfileController {
         try await AppDelegate.reachfive()
             .sendEmailVerification(authToken: authToken)
             .onFailure { error in
-                self.present(AppDelegate.createAlert(title: "Email verification", message: "Error: \(error.localizedDescription)"), animated: true)
+                self.presentErrorAlert(title: "Email verification", error)
             }
             .onSuccess { emailVerificationResponse in
                 switch emailVerificationResponse {
@@ -51,8 +51,7 @@ extension ProfileController {
                                     try await self.fetchProfile()
                                 }
                                 .onFailure { error in
-                                    let alert = AppDelegate.createAlert(title: "Email verification failure", message: "Error: \(error.localizedDescription)")
-                                    self.present(alert, animated: true)
+                                    self.presentErrorAlert(title: "Email verification failure", error)
                                 }
                         }
                     }
@@ -86,7 +85,7 @@ extension ProfileController {
                         self.profileData.reloadData()
                     }
                     .onFailure { error in
-                        self.present(AppDelegate.createAlert(title: titre, message: "Error: \(error.localizedDescription)"), animated: true)
+                        self.presentErrorAlert(title: titre, error)
                     }
             }
         }
@@ -123,7 +122,7 @@ extension ProfileController {
                 self.profileData.reloadData()
             }
             .onFailure { error in
-                self.present(AppDelegate.createAlert(title: titre, message: "Error: \(error.localizedDescription)"), animated: true)
+                self.presentErrorAlert(title: titre, error)
             }
     }
 }

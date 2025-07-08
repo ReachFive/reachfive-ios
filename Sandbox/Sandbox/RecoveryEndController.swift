@@ -29,9 +29,7 @@ class RecoveryEndController: UIViewController {
                         self.navigationController?.popViewController(animated: true)
                     }
                     .onFailure { error in
-                        print("Error: \(error.localizedDescription)")
-                        let alert = AppDelegate.createAlert(title: "Account Recovery Failed", message: "Error: \(error.localizedDescription)")
-                        self.present(alert, animated: true)
+                        self.presentErrorAlert(title: "Account Recovery Failed", error)
                     }
             }
         }
@@ -64,9 +62,7 @@ class RecoveryEndController: UIViewController {
                     self.navigationController?.popViewController(animated: true)
                 }
                 .onFailure { error in
-                    print("Error: \(error.localizedDescription)")
-                    let alert = AppDelegate.createAlert(title: "Account Recovery Failed", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true)
+                    self.presentErrorAlert(title: "Account Recovery Failed", error)
                 }
         }
     }

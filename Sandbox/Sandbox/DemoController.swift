@@ -120,8 +120,7 @@ class DemoController: UIViewController {
                     switch error {
                     case ReachFiveError.AuthCanceled: goToSignup()
                     default:
-                        let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.localizedDescription)")
-                        self.present(alert, animated: true)
+                        self.presentErrorAlert(title: "Signup", error)
                     }
                 }
             }
@@ -171,8 +170,7 @@ class DemoController: UIViewController {
                         }
                     #endif
                     default:
-                        let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
-                        self.present(alert, animated: true)
+                        self.presentErrorAlert(title: "Login", error)
                     }
                 }
             }

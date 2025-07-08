@@ -164,18 +164,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-//extension AppDelegate {
-//    static func createAlert(title: String, message: String) -> UIAlertController {
-//        let alert = UIAlertController(
-//            title: title,
-//            message: message,
-//            preferredStyle: UIAlertController.Style.alert
-//        )
-//        alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default))
-//        return alert
-//    }
-//}
-
 extension UIViewController {
     func handleAuthToken(errorMessage: String = "Login failed", _ body: () async throws -> AuthToken) async {
         do {
@@ -185,10 +173,10 @@ extension UIViewController {
             presentErrorAlert(title: errorMessage, error)
         }
     }
-    
+
     func goToProfile(_ authToken: AuthToken) {
         AppDelegate.storage.setToken(authToken)
-        
+
         Task { @MainActor in
             if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "Tabs") as? UITabBarController {
                 tabBarController.selectedIndex = 2 // profile is third from left
@@ -196,7 +184,7 @@ extension UIViewController {
             }
         }
     }
-    
+
     func handleLoginFlow(errorMessage: String = "Login failed", _ body: () async throws -> LoginFlow) async {
         do {
             let flow = try await body()
@@ -205,7 +193,7 @@ extension UIViewController {
             presentErrorAlert(title: errorMessage, error)
         }
     }
-    
+
     func flowTheLogin(_ flow: LoginFlow) {
         switch flow {
         case .AchievedLogin(let authToken):
@@ -223,7 +211,7 @@ extension UIViewController {
             present(selectMfaAuthTypeAlert, animated: true)
         }
     }
-    
+
     func showToast(message: String, seconds: Double) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         present(alert, animated: true)
@@ -231,7 +219,7 @@ extension UIViewController {
             alert.dismiss(animated: true)
         }
     }
-    
+
     private func createSelectMfaAuthTypeAction(type: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
         return UIAlertAction(title: type.rawValue, style: .default) { _ in
             Task { @MainActor in
@@ -241,10 +229,10 @@ extension UIViewController {
             }
         }
     }
-    
+
     private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) async throws -> AuthToken {
         return try await withCheckedThrowingContinuation { continuation in
-            
+
             let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
             alert.addTextField { textField in
                 textField.placeholder = "Verification code"
@@ -264,7 +252,7 @@ extension UIViewController {
                     }
                 }
             }
-            
+
             let submitVerificationTrustDevice = UIAlertAction(title: "Trust device", style: .default) { _ in
                 submitVerificationCode(withTrustDevice: true)
             }
@@ -281,7 +269,7 @@ extension UIViewController {
             present(alert, animated: true)
         }
     }
-    
+
     func presentAlert(title: String, message: String) {
         let alert = UIAlertController(
             title: title,
@@ -291,7 +279,7 @@ extension UIViewController {
         alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default))
         self.present(alert, animated: true)
     }
-    
+
     func presentErrorAlert(title: String, _ error: Error) {
         switch error {
         case ReachFiveError.AuthCanceled: return

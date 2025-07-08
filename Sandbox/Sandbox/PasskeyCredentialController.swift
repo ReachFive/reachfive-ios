@@ -68,7 +68,7 @@ class PasskeyCredentialController: UIViewController {
             do {
                 let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
                 let friendlyName = ProfileController.username(profile: profile)
-                
+
                 let alert = UIAlertController(
                     title: "Register New Passkey",
                     message: "Name the passkey",
@@ -91,12 +91,7 @@ class PasskeyCredentialController: UIViewController {
                 alert.preferredAction = registerAction
                 self.present(alert, animated: true)
             } catch {
-                switch error {
-                case ReachFiveError.AuthCanceled: return
-                default:
-                    let alert = AppDelegate.createAlert(title: "Register New Passkey", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true)
-                }
+                self.presentErrorAlert(title: "Register New Passkey", error)
             }
         }
     }
@@ -137,8 +132,7 @@ extension PasskeyCredentialController: UITableViewDataSource {
                     print("did remove passkey \(element.friendlyName)")
                     tableView.deleteRows(at: [indexPath], with: .fade)
                 } catch {
-                    let alert = AppDelegate.createAlert(title: "Delete Passkey", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true)
+                    self.presentErrorAlert(title: "Delete Passkey", error)
                 }
             }
         }

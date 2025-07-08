@@ -60,8 +60,7 @@ class ProfileController: UIViewController {
                         self.presentAlert(title: "Email mfa registering success", message: "Email mfa registering success")
                         try await self.fetchProfile()
                     case .failure(let error):
-                        let alert = AppDelegate.createAlert(title: "Email mfa registering failed", message: "Error: \(error.localizedDescription)")
-                        self.present(alert, animated: true)
+                        self.presentErrorAlert(title: "Email mfa registering failed", error)
                     }
                 }
             }
@@ -76,8 +75,7 @@ class ProfileController: UIViewController {
                         self.presentAlert(title: "Email validation success", message: "Email validation success")
                         try await self.fetchProfile()
                     case .failure(let error):
-                        let alert = AppDelegate.createAlert(title: "Email validation failed", message: "Error: \(error.localizedDescription)")
-                        self.present(alert, animated: true)
+                        self.presentErrorAlert(title: "Email validation failed", error)
                     }
                 }
             }

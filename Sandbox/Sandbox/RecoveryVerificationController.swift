@@ -18,8 +18,7 @@ class RecoveryVerificationController: UIViewController {
                 }
 
             case .failure(let error):
-                let alert = AppDelegate.createAlert(title: "Account Recovery Failed", message: "Error: \(error.localizedDescription)")
-                self.present(alert, animated: true)
+                self.presentErrorAlert(title: "Account Recovery Failed", error)
             }
         }
     }
