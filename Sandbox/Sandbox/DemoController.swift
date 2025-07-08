@@ -81,11 +81,8 @@ class DemoController: UIViewController {
                     return
                 #else
                     if #available(iOS 16.0, *) {
-                        do {
-                            let authToken = try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
-                            self.goToProfile(authToken)
-                        } catch {
-                            print("error: \(error) \(error.localizedDescription)")
+                        await handleAuthToken {
+                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
                         }
                     }
                 #endif
@@ -168,11 +165,8 @@ class DemoController: UIViewController {
                         return
                     #else
                         Task { @MainActor in
-                            do {
-                                let authToken = try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
-                                goToProfile(authToken)
-                            } catch {
-                                print("error: \(error) \(error.localizedDescription)")
+                            await handleAuthToken {
+                                try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
                             }
                         }
                     #endif
