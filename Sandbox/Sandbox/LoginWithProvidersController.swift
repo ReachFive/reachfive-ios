@@ -51,17 +51,6 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
         return cell!
     }
 
-    func handleResult(result: Result<AuthToken, ReachFiveError>) {
-        switch result {
-        case .success(let authToken):
-            goToProfile(authToken)
-        case .failure(let error):
-            print(error)
-            let alert = AppDelegate.createAlert(title: "Login with provider", message: "Error: \(error.localizedDescription)")
-            self.present(alert, animated: true)
-        }
-    }
-
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         Task { @MainActor in
             tableView.deselectRow(at: indexPath, animated: true)
@@ -69,19 +58,14 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
             let selectedProvider = providers[indexPath.row]
 
             let scope = ["openid", "email", "profile", "phone", "full_write", "offline_access"]
-
-            try await AppDelegate.reachfive()
-                .getProvider(name: selectedProvider.name)?
-                .login(
-                    scope: scope,
-                    origin: "LoginWithProvidersController.didSelectRowAt",
-                    viewController: self
-                )
-                .onComplete { result in
-                    self.handleResult(result: result)
+            if let provider = AppDelegate.reachfive().getProvider(name: selectedProvider.name) {
+                await handleAuthToken(errorMessage: "Login with provider failed") {
+                    try await provider.login(scope: scope, origin: "LoginWithProvidersController.didSelectRowAt", viewController: self)
                 }
+            }
         }
     }
+
 
     func numberOfSections(in tableView: UITableView) -> Int {
         1

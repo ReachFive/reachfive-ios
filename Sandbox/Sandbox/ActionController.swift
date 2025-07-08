@@ -15,12 +15,8 @@ class ActionController: UITableViewController {
                 // Sign in with Apple
                 if indexPath.row == 1 {
                     let request = NativeLoginRequest(anchor: window, origin: "ActionController: Section Native")
-                    do {
-                        let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
-                        handleLoginFlow(flow: flow)
-                    } catch {
-                        let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.localizedDescription)")
-                        self.present(alert, animated: true)
+                    await handleLoginFlow {
+                        try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
                     }
                 }
             }
@@ -33,12 +29,12 @@ class ActionController: UITableViewController {
                     // Login with passkey: modal persistent
                     if indexPath.row == 1 {
                         let flow = try await AppDelegate.reachfive().login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                        handleLoginFlow(flow: flow)
+                        flowTheLogin(flow)
                     } else
                     // Login with passkey: modal non-persistent
                     if indexPath.row == 2 {
                         let flow = try await AppDelegate.reachfive().login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
-                        handleLoginFlow(flow: flow)
+                        flowTheLogin(flow)
                     }
                 } catch {
                     // Do not show error, the goal is to be non invasive in the UI

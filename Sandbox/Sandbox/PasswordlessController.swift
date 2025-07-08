@@ -15,12 +15,10 @@ class PasswordlessController: UIViewController {
         super.viewDidLoad()
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { (note) in
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
-                switch result {
-                case .success(let authToken):
-                    self.goToProfile(authToken)
-                case .failure(let error):
-                    let alert = AppDelegate.createAlert(title: "Passwordless failed", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true)
+                Task { @MainActor in
+                    await self.handleAuthToken(errorMessage: "Passwordless failed") {
+                        try result.get()
+                    }
                 }
             }
         }
@@ -82,13 +80,10 @@ class PasswordlessController: UIViewController {
             origin: "PasswordlessController.verifyCode"
         )
         Task { @MainActor in
-            try await AppDelegate.reachfive()
-                .verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
-                .onSuccess(callback: goToProfile)
-                .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "Verify code", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true)
-                }
+            await handleAuthToken(errorMessage: "Verify code failed") {
+                try await AppDelegate.reachfive()
+                    .verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
+            }
         }
     }
 }

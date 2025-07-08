@@ -182,8 +182,12 @@ extension UIViewController {
             let authToken = try await body()
             goToProfile(authToken)
         } catch {
-            let alert = AppDelegate.createAlert(title: errorMessage, message: "Error: \(error.localizedDescription)")
-            present(alert, animated: true)
+            switch error {
+            case ReachFiveError.AuthCanceled: return
+            default:
+                let alert = AppDelegate.createAlert(title: errorMessage, message: "Error: \(error.localizedDescription)")
+                present(alert, animated: true)
+            }
         }
     }
     
@@ -198,7 +202,21 @@ extension UIViewController {
         }
     }
     
-    func handleLoginFlow(flow: LoginFlow) {
+    func handleLoginFlow(errorMessage: String = "Login failed", _ body: () async throws -> LoginFlow) async {
+        do {
+            let flow = try await body()
+            flowTheLogin(flow)
+        } catch {
+            switch error {
+            case ReachFiveError.AuthCanceled: return
+            default:
+                let alert = AppDelegate.createAlert(title: errorMessage, message: "Error: \(error.localizedDescription)")
+                present(alert, animated: true)
+            }
+        }
+    }
+    
+    func flowTheLogin(_ flow: LoginFlow) {
         switch flow {
         case .AchievedLogin(let authToken):
             goToProfile(authToken)

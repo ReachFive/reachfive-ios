@@ -65,7 +65,7 @@ class DemoController: UIViewController {
         Task { @MainActor in
             do {
                 let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
-                handleLoginFlow(flow: flow)
+                flowTheLogin(flow)
             } catch {
                 self.usernameField.isHidden = false
                 self.usernameLabel.isHidden = false
@@ -153,7 +153,7 @@ class DemoController: UIViewController {
                 do {
                     if username.isEmpty {
                         let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                        handleLoginFlow(flow: flow)
+                        flowTheLogin(flow)
                     } else {
                         let authToken = try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                         goToProfile(authToken)
@@ -183,17 +183,12 @@ class DemoController: UIViewController {
         guard let pass = passwordField.text, !pass.isEmpty, let user = usernameField.text, !user.isEmpty else { return }
         let origin = "DemoController.loginWithPassword"
 
-        do {
-            let flow =
+        await handleLoginFlow {
             if user.contains("@") {
                 try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
             } else {
                 try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
             }
-            handleLoginFlow(flow: flow)
-        } catch {
-            let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
-            self.present(alert, animated: true)
         }
     }
 
@@ -208,20 +203,13 @@ class DemoController: UIViewController {
         print("handleAuthorizationAppleIDButtonPress")
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         Task {
-            do {
-                let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
-                handleLoginFlow(flow: flow)
-            } catch {
-                switch error {
-                case ReachFiveError.AuthCanceled: return
-                default:
-                    let alert = AppDelegate.createAlert(title: "Signup with Apple", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true, completion: nil)
-                }
+            await handleLoginFlow(errorMessage: "Signup with Apple failed") {
+                try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
             }
         }
     }
 }
+
 
 extension DemoController: UITextFieldDelegate {
     // this is called when the Return/Done key is tapped on the keyboard

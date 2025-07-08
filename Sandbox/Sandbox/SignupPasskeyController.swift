@@ -28,16 +28,9 @@ class SignupPasskeyController: UIViewController {
             let window: UIWindow = view.window!
             //TODO: est-ce qu'on ne ferait pas une Task.detached, mais on marquerait goToProfile et present(alert) avec Task { @MainActor }
             Task { @MainActor in
-                try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "SignupPasskeyController.signup"))
-                    .onSuccess(callback: goToProfile)
-                    .onFailure { error in
-                        switch (error) {
-                        case ReachFiveError.AuthCanceled: return
-                        default:
-                            let alert = AppDelegate.createAlert(title: "Signup with Passkey", message: "Error: \(error.localizedDescription)")
-                            self.present(alert, animated: true)
-                        }
-                    }
+                await handleAuthToken(errorMessage: "Signup with Passkey failed") {
+                    try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "SignupPasskeyController.signup"))
+                }
             }
         } else {
             let alert = AppDelegate.createAlert(title: "Signup with Passkey", message: "Passkey requires iOS 16")

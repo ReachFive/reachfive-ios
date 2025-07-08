@@ -10,8 +10,8 @@ class LoginWithPasswordController: UIViewController {
     @IBOutlet weak var passwordInput: UITextField!
     @IBOutlet weak var error: UILabel!
     var tokenNotification: NSObjectProtocol?
-
-
+    
+    
     override func viewDidLoad() {
         print("LoginWithPasswordController.viewDidLoad")
         super.viewDidLoad()
@@ -26,23 +26,18 @@ class LoginWithPasswordController: UIViewController {
             }
         }
     }
-
+    
     @IBAction func login(_ sender: Any) {
         Task { @MainActor in
             let email = emailInput.text
             let phoneNumber = phoneNumberInput.text
             let customIdentifier = customIdentifierInput.text
             let password = passwordInput.text ?? ""
-
-            try await AppDelegate.reachfive()
-                .loginWithPassword(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")
-                .onSuccess { resp in
-                    self.error.text = nil
-                    self.handleLoginFlow(flow: resp)
-                }
-                .onFailure { error in
-                    self.error.text = error.localizedDescription
-                }
+            
+            await handleLoginFlow {
+                try await AppDelegate.reachfive()
+                    .loginWithPassword(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")
+            }
         }
     }
 }
