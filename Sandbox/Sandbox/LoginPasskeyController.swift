@@ -46,8 +46,7 @@ class LoginPasskeyController: UIViewController {
                     }
                 #endif
                 default:
-                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true)
+                    self.presentAlert(title: "Login", message: "Error: \(error.localizedDescription)")
                 }
             }
         }
@@ -80,8 +79,7 @@ class LoginPasskeyController: UIViewController {
                     }
                 #endif
                 default:
-                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true)
+                    self.presentAlert(title: "Login", message: "Error: \(error.localizedDescription)")
                 }
             }
         }

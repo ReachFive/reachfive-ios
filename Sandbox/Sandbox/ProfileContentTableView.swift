@@ -31,8 +31,7 @@ extension ProfileController {
             .onSuccess { emailVerificationResponse in
                 switch emailVerificationResponse {
                 case EmailVerificationResponse.Success:
-                    let alert = AppDelegate.createAlert(title: "Verify Email", message: "Success")
-                    self.present(alert, animated: true)
+                    self.presentAlert(title: "Verify Email", message: "Success")
                     try await self.fetchProfile()
                 case let EmailVerificationResponse.VerificationNeeded(continueEmailVerification):
                     let alert = UIAlertController(title: "Email verification", message: "Please enter the code you received by Email", preferredStyle: .alert)
@@ -48,8 +47,7 @@ extension ProfileController {
                             }
                             try await continueEmailVerification.verify(code: verificationCode, email: email)
                                 .onSuccess { succ in
-                                    let alert = AppDelegate.createAlert(title: "Verify Email", message: "Success")
-                                    self.present(alert, animated: true)
+                                    self.presentAlert(title: "Verify Email", message: "Success")
                                     try await self.fetchProfile()
                                 }
                                 .onFailure { error in

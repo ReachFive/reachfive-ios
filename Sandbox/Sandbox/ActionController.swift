@@ -74,14 +74,12 @@ class ActionController: UITableViewController {
         // passkey section restricted to iOS >= 16
         //TODO voir si on peut à la place carrément ne pas afficher la section
         if indexPath.section == 2, #unavailable(iOS 16.0) {
-            let alert = AppDelegate.createAlert(title: "Login", message: "Passkey requires iOS 16")
-            present(alert, animated: true)
+            presentAlert(title: "Login", message: "Passkey requires iOS 16")
             return nil
         }
         #if targetEnvironment(macCatalyst)
         if indexPath.section == 2, indexPath.row == 3 {
-            let alert = AppDelegate.createAlert(title: "Login", message: "AutoFill not available on macOS")
-            present(alert, animated: true)
+            presentAlert(title: "Login", message: "AutoFill not available on macOS")
             return nil
         }
         #endif

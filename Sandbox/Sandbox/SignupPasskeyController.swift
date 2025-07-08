@@ -7,8 +7,7 @@ class SignupPasskeyController: UIViewController {
 
     @IBAction func signup(_ sender: Any) {
         guard let username = usernameInput.text, !username.isEmpty else {
-            let alert = AppDelegate.createAlert(title: "Signup with Passkey", message: "Please provide a username")
-            present(alert, animated: true)
+            presentAlert(title: "Signup with Passkey", message: "Please provide a username")
             return
         }
         let profile: ProfilePasskeySignupRequest
@@ -33,8 +32,7 @@ class SignupPasskeyController: UIViewController {
                 }
             }
         } else {
-            let alert = AppDelegate.createAlert(title: "Signup with Passkey", message: "Passkey requires iOS 16")
-            present(alert, animated: true)
+            presentAlert(title: "Signup with Passkey", message: "Passkey requires iOS 16")
         }
     }
 }

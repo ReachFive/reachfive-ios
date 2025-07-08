@@ -35,8 +35,7 @@ class PasswordlessController: UIViewController {
                     )
                 )
                 .onSuccess {
-                    let alert = AppDelegate.createAlert(title: "Login with email", message: "Success")
-                    self.present(alert, animated: true)
+                    self.presentAlert(title: "Login with email", message: "Success")
                 }
                 .onFailure { error in
                     let alert = AppDelegate.createAlert(title: "Login with email", message: "Error: \(error.localizedDescription)")
@@ -59,8 +58,7 @@ class PasswordlessController: UIViewController {
                     )
                 )
                 .onSuccess {
-                    let alert = AppDelegate.createAlert(title: "Login with phone number", message: "Success")
-                    self.present(alert, animated: true)
+                    self.presentAlert(title: "Login with phone number", message: "Success")
                 }
                 .onFailure { error in
                     let alert = AppDelegate.createAlert(title: "Login with phone number", message: "Error: \(error.localizedDescription)")

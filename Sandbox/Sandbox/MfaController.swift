@@ -69,8 +69,7 @@ class MfaController: UIViewController {
                 switch result {
                 case let .success(freshToken):
                     AppDelegate.storage.setToken(freshToken)
-                    let alert = AppDelegate.createAlert(title: "Step up", message: "Success")
-                    self.present(alert, animated: true)
+                    self.presentAlert(title: "Step up", message: "Success")
                 case let .failure(error):
                     let alert = AppDelegate.createAlert(title: "Step up failed", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
@@ -107,8 +106,7 @@ class MfaController: UIViewController {
                 let freshToken = try await mfaAction.mfaStart(stepUp: stepUpFlow)
                 AppDelegate.storage.setToken(freshToken)
                 try await self.fetchTrustedDevices()
-                let alert = AppDelegate.createAlert(title: "Step Up", message: "Success")
-                self.present(alert, animated: true)
+                self.presentAlert(title: "Step Up", message: "Success")
             } catch {
                 let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.localizedDescription)")
                 self.present(alert, animated: true)

@@ -164,17 +164,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-extension AppDelegate {
-    static func createAlert(title: String, message: String) -> UIAlertController {
-        let alert = UIAlertController(
-            title: title,
-            message: message,
-            preferredStyle: UIAlertController.Style.alert
-        )
-        alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default))
-        return alert
-    }
-}
+//extension AppDelegate {
+//    static func createAlert(title: String, message: String) -> UIAlertController {
+//        let alert = UIAlertController(
+//            title: title,
+//            message: message,
+//            preferredStyle: UIAlertController.Style.alert
+//        )
+//        alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default))
+//        return alert
+//    }
+//}
 
 extension UIViewController {
     func handleAuthToken(errorMessage: String = "Login failed", _ body: () async throws -> AuthToken) async {
@@ -182,12 +182,7 @@ extension UIViewController {
             let authToken = try await body()
             goToProfile(authToken)
         } catch {
-            switch error {
-            case ReachFiveError.AuthCanceled: return
-            default:
-                let alert = AppDelegate.createAlert(title: errorMessage, message: "Error: \(error.localizedDescription)")
-                present(alert, animated: true)
-            }
+            presentErrorAlert(title: errorMessage, error)
         }
     }
     
@@ -207,12 +202,7 @@ extension UIViewController {
             let flow = try await body()
             flowTheLogin(flow)
         } catch {
-            switch error {
-            case ReachFiveError.AuthCanceled: return
-            default:
-                let alert = AppDelegate.createAlert(title: errorMessage, message: "Error: \(error.localizedDescription)")
-                present(alert, animated: true)
-            }
+            presentErrorAlert(title: errorMessage, error)
         }
     }
     
@@ -289,6 +279,24 @@ extension UIViewController {
             alert.addAction(submitVerificationNoTrustDevice)
             alert.addAction(submitVerificationWithoutRba)
             present(alert, animated: true)
+        }
+    }
+    
+    func presentAlert(title: String, message: String) {
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: UIAlertController.Style.alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default))
+        self.present(alert, animated: true)
+    }
+    
+    func presentErrorAlert(title: String, _ error: Error) {
+        switch error {
+        case ReachFiveError.AuthCanceled: return
+        default:
+            self.presentAlert(title: title, message: "Error: \(error.localizedDescription)")
         }
     }
 }
