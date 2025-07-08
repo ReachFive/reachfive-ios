@@ -7,12 +7,14 @@ class PasskeyCredentialController: UIViewController {
     var devices: [DeviceCredential] = [] {
         didSet {
             print("devices \(devices)")
-            if devices.isEmpty {
-                listPasskeyLabel.isHidden = true
-                credentialTableview.isHidden = true
-            } else {
-                listPasskeyLabel.isHidden = false
-                credentialTableview.isHidden = false
+            Task { @MainActor in
+                if devices.isEmpty {
+                    listPasskeyLabel.isHidden = true
+                    credentialTableview.isHidden = true
+                } else {
+                    listPasskeyLabel.isHidden = false
+                    credentialTableview.isHidden = false
+                }
             }
         }
     }
@@ -30,25 +32,28 @@ class PasskeyCredentialController: UIViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
+        print("PasskeyCredentialController.viewWillAppear")
         Task { @MainActor in
-            print("PasskeyCredentialController.viewWillAppear")
             super.viewWillAppear(animated)
             if let authToken = AppDelegate.storage.getToken() {
-                try await self.reloadCredentials(authToken: authToken)
+                await self.reloadCredentials(authToken: authToken)
             }
         }
     }
 
     private func reloadCredentials(authToken: AuthToken) async {
-        // Beware that a valid token for profile might not be fresh enough to retrieve the credentials
-        try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken).onSuccess { listCredentials in
-                self.devices = listCredentials
+        do {
+            let (listCredentials, _) = try await AppDelegate.reachfive().withFreshToken(potentiallyStale: authToken) { refreshableToken in
+                try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: refreshableToken)
+            }
+            self.devices = listCredentials
+            Task { @MainActor in
                 self.credentialTableview.reloadData()
             }
-            .onFailure { error in
-                self.devices = []
-                print("getCredentials error = \(error.localizedDescription)")
-            }
+        } catch {
+            self.devices = []
+            print("getCredentials error = \(error.localizedDescription)")
+        }
     }
 
     @available(iOS 16.0, *)
@@ -60,45 +65,39 @@ class PasskeyCredentialController: UIViewController {
                 print("not logged in")
                 return
             }
-            try await AppDelegate.reachfive()
-                .getProfile(authToken: authToken)
-                .onSuccess { profile in
-                    let friendlyName = ProfileController.username(profile: profile)
-
-                    let alert = UIAlertController(
-                        title: "Register New Passkey",
-                        message: "Name the passkey",
-                        preferredStyle: .alert
-                    )
-                    // init the text field with the profile's identifier
-                    alert.addTextField { field in
-                        field.text = friendlyName
+            do {
+                let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
+                let friendlyName = ProfileController.username(profile: profile)
+                
+                let alert = UIAlertController(
+                    title: "Register New Passkey",
+                    message: "Name the passkey",
+                    preferredStyle: .alert
+                )
+                // init the text field with the profile's identifier
+                alert.addTextField { field in
+                    field.text = friendlyName
+                }
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                let registerAction = UIAlertAction(title: "Add", style: .default) { [unowned alert] (_) in
+                    let textField = alert.textFields?[0]
+                    Task { @MainActor in
+                        let request = NewPasskeyRequest(anchor: window, friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey")
+                        try await AppDelegate.reachfive().registerNewPasskey(withRequest: request, authToken: authToken)
+                        await self.reloadCredentials(authToken: authToken)
                     }
-                    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-                    let registerAction = UIAlertAction(title: "Add", style: .default) { [unowned alert] (_) in
-                        let textField = alert.textFields?[0]
-                        Task { @MainActor in
-                            try await AppDelegate.reachfive().registerNewPasskey(withRequest: NewPasskeyRequest(anchor: window, friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey"), authToken: authToken)
-                                .onSuccess { _ in
-                                    try await self.reloadCredentials(authToken: authToken)
-                                }
-                                .onFailure { error in
-                                    switch error {
-                                    case ReachFiveError.AuthCanceled: return
-                                    default:
-                                        let alert = AppDelegate.createAlert(title: "Register New Passkey", message: "Error: \(error.localizedDescription)")
-                                        self.present(alert, animated: true)
-                                    }
-                                }
-                        }
-                    }
-                    alert.addAction(registerAction)
-                    alert.preferredAction = registerAction
+                }
+                alert.addAction(registerAction)
+                alert.preferredAction = registerAction
+                self.present(alert, animated: true)
+            } catch {
+                switch error {
+                case ReachFiveError.AuthCanceled: return
+                default:
+                    let alert = AppDelegate.createAlert(title: "Register New Passkey", message: "Error: \(error.localizedDescription)")
                     self.present(alert, animated: true)
                 }
-                .onFailure { error in
-                    print("getProfile error = \(error.localizedDescription)")
-                }
+            }
         }
     }
 }
@@ -132,13 +131,15 @@ extension PasskeyCredentialController: UITableViewDataSource {
             if editingStyle == .delete {
                 guard let authToken = AppDelegate.storage.getToken() else { return }
                 let element = devices[indexPath.row]
-                try await AppDelegate.reachfive().deleteWebAuthnRegistration(id: element.id, authToken: authToken)
-                    .onSuccess { _ in
-                        self.devices.remove(at: indexPath.row)
-                        print("did remove passkey \(element.friendlyName)")
-                        tableView.deleteRows(at: [indexPath], with: .fade)
-                    }
-                    .onFailure { error in print(error.localizedDescription) }
+                do {
+                    try await AppDelegate.reachfive().deleteWebAuthnRegistration(id: element.id, authToken: authToken)
+                    self.devices.remove(at: indexPath.row)
+                    print("did remove passkey \(element.friendlyName)")
+                    tableView.deleteRows(at: [indexPath], with: .fade)
+                } catch {
+                    let alert = AppDelegate.createAlert(title: "Delete Passkey", message: "Error: \(error.localizedDescription)")
+                    self.present(alert, animated: true)
+                }
             }
         }
     }
