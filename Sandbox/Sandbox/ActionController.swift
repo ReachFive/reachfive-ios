@@ -91,16 +91,6 @@ class ActionController: UITableViewController {
         #endif
         return indexPath
     }
-
-    func handleAuthToken(_ body: () async throws -> AuthToken) async {
-        do {
-            let authToken = try await body()
-            goToProfile(authToken)
-        } catch {
-            let alert = AppDelegate.createAlert(title: "Login failed", message: "Error: \(error.localizedDescription)")
-            present(alert, animated: true)
-        }
-    }
 }
 
 extension ActionController: ASWebAuthenticationPresentationContextProviding {
