@@ -217,18 +217,15 @@ extension UIViewController {
     private func createSelectMfaAuthTypeAction(type: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
         return UIAlertAction(title: type.rawValue, style: .default) { _ in
             Task { @MainActor in
-                try await AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken)).onSuccess { resp in
-                    try await self.handleStartVerificationCode(resp, authType: type)
-                        .onSuccess { authToken in
-                            self.goToProfile(authToken)
-                        }
-                }
+                let resp = try await AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken))
+                let authToken = try await self.handleStartVerificationCode(resp, authType: type)
+                self.goToProfile(authToken)
             }
         }
     }
 
     private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) async throws -> AuthToken {
-        return try await withCheckedContinuation { (continuation: CheckedContinuation<Result<AuthToken, ReachFiveError>, Never>) in
+        return try await withCheckedThrowingContinuation { continuation in
 
             let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
             alert.addTextField { textField in
@@ -244,12 +241,12 @@ extension UIViewController {
                         continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                         return
                     }
-                    let future = try await resp.verify(code: verificationCode, trustDevice: trustDevice)
-                        .onFailure { error in
-                            let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.localizedDescription)")
-                            self.present(alert, animated: true)
-                        }
-                    continuation.resume(returning: future)
+                    continuation.resume(with: await Result {
+                        try await resp.verify(code: verificationCode, trustDevice: trustDevice)
+                    }.onFailure { error in
+                        let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.localizedDescription)")
+                        self.present(alert, animated: true)
+                    })
                 }
             }
 
