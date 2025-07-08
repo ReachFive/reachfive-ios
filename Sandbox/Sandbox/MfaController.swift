@@ -172,9 +172,9 @@ class MfaAction {
                         return
                     }
                     Task {
-                        continuation.resume(with: await Result {
+                        await continuation.resume {
                             try await resp.verify(code: verificationCode)
-                        })
+                        }
                     }
                 }
                 alert.addAction(cancelAction)

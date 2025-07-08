@@ -9,28 +9,16 @@ public extension Result {
             self = .failure(error)
         }
     }
+}
 
-    @discardableResult
-    func onSuccess(callback: @escaping (Success) async -> Void) async -> Self {
-        if case .success(let value) = self {
-            await callback(value)
+public extension CheckedContinuation {
+
+    @inlinable
+    func resume(catching body: () async throws(E) -> T) async {
+        do {
+            self.resume(returning: try await body())
+        } catch {
+            self.resume(throwing: error)
         }
-        return self
     }
-
-
-    @discardableResult
-    func onFailure(callback: @escaping (Failure) async -> Void) async -> Self {
-        if case .failure(let value) = self {
-            await callback(value)
-        }
-        return self
-    }
-
-    @discardableResult
-    func onComplete(callback: @escaping (Self) async -> Void) async -> Self {
-        await callback(self)
-        return self
-    }
-
 }

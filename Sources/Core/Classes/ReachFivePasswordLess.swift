@@ -83,9 +83,6 @@ public extension ReachFive {
         } catch {
             result = .failure(error as! ReachFiveError)
         }
-//        let result = await Result {
-//            try await authWithCode(code: code, pkce: pkce)
-//        }
         self.passwordlessCallback?(result)
     }
 }

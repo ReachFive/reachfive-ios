@@ -269,12 +269,9 @@ extension UIViewController {
                         continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                         return
                     }
-                    continuation.resume(with: await Result {
+                    await continuation.resume {
                         try await resp.verify(code: verificationCode, trustDevice: trustDevice)
-                    }.onFailure { error in
-                        let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.localizedDescription)")
-                        self.present(alert, animated: true)
-                    })
+                    }
                 }
             }
             
