@@ -65,17 +65,17 @@ class DemoController: UIViewController {
             mode = .Always
         }
         Task { @MainActor in
-            try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
-                .onSuccess(callback: handleLoginFlow)
-                .onFailure { error in
-
-                    self.usernameField.isHidden = false
-                    self.usernameLabel.isHidden = false
-                    self.loginButton.isHidden = false
-                    self.createAccountButton.isHidden = false
-                    self.passwordField.isHidden = false
-                    self.passwordLabel.isHidden = false
-                    self.loginProviderStackView.isHidden = false
+            do {
+                let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
+                handleLoginFlow(flow: flow)
+            } catch {
+                self.usernameField.isHidden = false
+                self.usernameLabel.isHidden = false
+                self.loginButton.isHidden = false
+                self.createAccountButton.isHidden = false
+                self.passwordField.isHidden = false
+                self.passwordLabel.isHidden = false
+                self.loginProviderStackView.isHidden = false
 
                 switch error {
                 case ReachFiveError.AuthCanceled:
@@ -83,11 +83,12 @@ class DemoController: UIViewController {
                     return
                 #else
                     if #available(iOS 16.0, *) {
-                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
-                            .onSuccess(callback: self.goToProfile)
-                            .onFailure { error in
-                                print("error: \(error) \(error.localizedDescription)")
-                            }
+                        do {
+                            let authToken = try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
+                            self.goToProfile(authToken)
+                        } catch {
+                            print("error: \(error) \(error.localizedDescription)")
+                        }
                     }
                 #endif
                 default: return
@@ -117,16 +118,17 @@ class DemoController: UIViewController {
             }
 
             Task { @MainActor in
-                try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
-                    .onSuccess(callback: goToProfile)
-                    .onFailure { error in
-                        switch error {
-                        case ReachFiveError.AuthCanceled: goToSignup()
-                        default:
-                            let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.localizedDescription)")
-                            self.present(alert, animated: true)
-                        }
+                do {
+                    let authToken = try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
+                    goToProfile(authToken)
+                } catch {
+                    switch error {
+                    case ReachFiveError.AuthCanceled: goToSignup()
+                    default:
+                        let alert = AppDelegate.createAlert(title: "Signup", message: "Error: \(error.localizedDescription)")
+                        self.present(alert, animated: true)
                     }
+                }
             }
         } else {
             goToSignup()
@@ -144,43 +146,42 @@ class DemoController: UIViewController {
 
         if !pass.isEmpty {
             Task { @MainActor in
-                try await loginWithPassword()
+                await loginWithPassword()
             }
             return
         }
 
         if #available(iOS 16.0, *) {
             let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
-            func onFailure(error: ReachFiveError) -> Void {
-                switch error {
-                case ReachFiveError.AuthCanceled:
-                #if targetEnvironment(macCatalyst)
-                    return
-                #else
-                Task { @MainActor in
-                    try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
-                        .onSuccess(callback: self.goToProfile)
-                        .onFailure { error in
-                            print("error: \(error) \(error.localizedDescription)")
-                        }
-                }
-                #endif
-                default:
-                    let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
-                    self.present(alert, animated: true)
-                }
-            }
 
             Task { @MainActor in
-                if username.isEmpty {
-                    try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                        .onSuccess(callback: handleLoginFlow)
-                        .onFailure(callback: onFailure)
-
-                } else {
-                    try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
-                        .onSuccess(callback: goToProfile)
-                        .onFailure(callback: onFailure)
+                do {
+                    if username.isEmpty {
+                        let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                        handleLoginFlow(flow: flow)
+                    } else {
+                        let authToken = try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                        goToProfile(authToken)
+                    }
+                } catch {
+                    switch error {
+                    case ReachFiveError.AuthCanceled:
+                    #if targetEnvironment(macCatalyst)
+                        return
+                    #else
+                        Task { @MainActor in
+                            do {
+                                let authToken = try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
+                                goToProfile(authToken)
+                            } catch {
+                                print("error: \(error) \(error.localizedDescription)")
+                            }
+                        }
+                    #endif
+                    default:
+                        let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
+                        self.present(alert, animated: true)
+                    }
                 }
             }
         }
@@ -190,19 +191,20 @@ class DemoController: UIViewController {
         guard let pass = passwordField.text, !pass.isEmpty, let user = usernameField.text, !user.isEmpty else { return }
         let origin = "DemoController.loginWithPassword"
 
-        let fut: Result<LoginFlow, ReachFiveError>
-        if user.contains("@") {
-            fut = try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
-        } else {
-            fut = try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
-        }
-
-        try await fut.onSuccess(callback: handleLoginFlow)
-            .onFailure { error in
-                let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
-                self.present(alert, animated: true)
+        do {
+            let flow =
+            if user.contains("@") {
+                try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
+            } else {
+                try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
             }
+            handleLoginFlow(flow: flow)
+        } catch {
+            let alert = AppDelegate.createAlert(title: "Login", message: "Error: \(error.localizedDescription)")
+            self.present(alert, animated: true)
+        }
     }
+
 
     func setupProviderLoginView() {
         let authorizationButton = ASAuthorizationAppleIDButton()
@@ -214,16 +216,17 @@ class DemoController: UIViewController {
         print("handleAuthorizationAppleIDButtonPress")
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         Task {
-            try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
-                .onSuccess(callback: handleLoginFlow)
-                .onFailure { error in
-                    switch error {
-                    case ReachFiveError.AuthCanceled: return
-                    default:
-                        let alert = AppDelegate.createAlert(title: "Signup with Apple", message: "Error: \(error.localizedDescription)")
-                        self.present(alert, animated: true, completion: nil)
-                    }
+            do {
+                let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+                handleLoginFlow(flow: flow)
+            } catch {
+                switch error {
+                case ReachFiveError.AuthCanceled: return
+                default:
+                    let alert = AppDelegate.createAlert(title: "Signup with Apple", message: "Error: \(error.localizedDescription)")
+                    self.present(alert, animated: true, completion: nil)
                 }
+            }
         }
     }
 }
@@ -241,7 +244,7 @@ extension DemoController: UITextFieldDelegate {
             // the password field was focused, defocus it and login
             textField.resignFirstResponder()
             Task { @MainActor in
-                try await loginWithPassword()
+                await loginWithPassword()
             }
         }
         return false
