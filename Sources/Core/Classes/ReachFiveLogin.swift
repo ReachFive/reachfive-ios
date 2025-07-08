@@ -14,7 +14,7 @@ public extension ReachFive {
     func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken {
         let refreshRequest = RefreshRequest(
             clientId: sdkConfig.clientId,
-            refreshToken: authToken.refreshToken ?? "",
+            refreshToken: authToken.refreshToken,
             redirectUri: sdkConfig.scheme
         )
         let token = try await reachFiveApi.refreshAccessToken(refreshRequest)
@@ -55,5 +55,15 @@ public extension ReachFive {
             pkce: pkce)
         let token = try await reachFiveApi.authWithCode(authCodeRequest: authCodeRequest)
         return try AuthToken.fromOpenIdTokenResponse(token)
+    }
+
+    func withFreshToken<T>(potentiallyStale token: AuthToken, _ body: (AuthToken) async throws -> T) async throws -> (T, freshToken: AuthToken?) {
+        do {
+            return try await (body(token), nil)
+        } catch ReachFiveError.AuthFailure(_, let apiError) where apiError?.errorMessageKey == "error.accessToken.freshness" {
+            // Automatically refresh the token if it is stale
+            let freshToken = try await refreshAccessToken(authToken: token)
+            return try await (body(freshToken), freshToken)
+        }
     }
 }
