@@ -180,13 +180,9 @@ class MfaAction {
     }
 
     func mfaStart(registering credential: Credential, authToken: AuthToken) async throws -> MfaCredentialItem {
-        let (resp, freshToken) = try await AppDelegate.reachfive().withFreshToken(potentiallyStale: authToken) { refreshableToken in
+        let resp = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
             try await AppDelegate.reachfive().mfaStart(registering: credential, authToken: refreshableToken)
         }
-        if let freshToken {
-            AppDelegate.storage.setToken(freshToken)
-        }
-
         return try await self.handleStartVerificationCode(resp)
     }
 

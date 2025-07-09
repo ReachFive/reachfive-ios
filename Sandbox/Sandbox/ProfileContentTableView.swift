@@ -64,7 +64,6 @@ extension ProfileController {
         }
     }
 
-    //TODO return a future like mfaStart or directly update the profile info here
     func addPhoneNumber(shouldReplaceExisting: Bool, authToken: AuthToken) {
         let titre = if shouldReplaceExisting { "Updated phone number" } else { "New Phone Number" }
         let alert = UIAlertController(title: titre, message: "Please enter a phone number", preferredStyle: .alert)

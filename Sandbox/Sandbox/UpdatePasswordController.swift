@@ -23,7 +23,9 @@ class UpdatePasswordController: UIViewController {
         Task { @MainActor in
             if let authToken {
                 do {
-                    try await AppDelegate.reachfive().updatePassword(.FreshAccessTokenParams(authToken: authToken, password: newPassword.text ?? ""))
+                    try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
+                        try await AppDelegate.reachfive().updatePassword(.FreshAccessTokenParams(authToken: refreshableToken, password: newPassword.text ?? ""))
+                    }
                     self.presentAlert(title: "Update Password", message: "Success")
                 } catch {
                     self.presentErrorAlert(title: "Update Password", error)

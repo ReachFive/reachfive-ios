@@ -43,7 +43,7 @@ class PasskeyCredentialController: UIViewController {
 
     private func reloadCredentials(authToken: AuthToken) async {
         do {
-            let (listCredentials, _) = try await AppDelegate.reachfive().withFreshToken(potentiallyStale: authToken) { refreshableToken in
+            let listCredentials = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
                 try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: refreshableToken)
             }
             self.devices = listCredentials
@@ -83,8 +83,14 @@ class PasskeyCredentialController: UIViewController {
                     let textField = alert.textFields?[0]
                     Task { @MainActor in
                         let request = NewPasskeyRequest(anchor: window, friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey")
-                        try await AppDelegate.reachfive().registerNewPasskey(withRequest: request, authToken: authToken)
-                        await self.reloadCredentials(authToken: authToken)
+                        do {
+                            try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
+                                try await AppDelegate.reachfive().registerNewPasskey(withRequest: request, authToken: refreshableToken)
+                            }
+                            await self.reloadCredentials(authToken: authToken)
+                        } catch {
+                            self.presentErrorAlert(title: "New passkey registration failed", error)
+                        }
                     }
                 }
                 alert.addAction(registerAction)

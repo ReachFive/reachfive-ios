@@ -67,7 +67,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     #if targetEnvironment(macCatalyst)
     static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
     static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
-    let reachfive = macRemote
+    let reachfive = macLocal
     #else
     static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
     static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
@@ -161,6 +161,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
         print("applicationProtectedDataDidBecomeAvailable")
+    }
+}
+
+extension AppDelegate {
+    static func withFreshToken<T>(potentiallyStale token: AuthToken, _ body: (_ refreshableToken: AuthToken) async throws -> T) async throws -> T {
+        do {
+            return try await body(token)
+        } catch ReachFiveError.AuthFailure(_, let apiError) where apiError?.errorMessageKey == "error.accessToken.freshness" {
+            // Automatically refresh the token if it is stale
+            let freshToken = try await reachfive().refreshAccessToken(authToken: token)
+            AppDelegate.storage.setToken(freshToken)
+            return try await body(freshToken)
+        }
     }
 }
 
