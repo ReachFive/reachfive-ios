@@ -16,17 +16,16 @@ class RecoveryStartController: UIViewController {
         }
 
         Task { @MainActor in
-            try await AppDelegate.reachfive().requestAccountRecovery(email: email, phoneNumber: phoneNumber, origin: "RecoveryStartController:sendLink")
-                .onSuccess { _ in
-                    if let verificationController = self.storyboard?.instantiateViewController(withIdentifier: "AccountRecoveryVerification") as? RecoveryVerificationController {
-                        verificationController.email = email
-                        verificationController.phoneNumber = phoneNumber
-                        self.navigationController?.pushViewController(verificationController, animated: true)
-                    }
+            do {
+                try await AppDelegate.reachfive().requestAccountRecovery(email: email, phoneNumber: phoneNumber, origin: "RecoveryStartController:sendLink")
+                if let verificationController = self.storyboard?.instantiateViewController(withIdentifier: "AccountRecoveryVerification") as? RecoveryVerificationController {
+                    verificationController.email = email
+                    verificationController.phoneNumber = phoneNumber
+                    self.navigationController?.pushViewController(verificationController, animated: true)
                 }
-                .onFailure { error in
-                    self.presentErrorAlert(title: "Login failed", error)
-                }
+            } catch {
+                self.presentErrorAlert(title: "Login failed", error)
+            }
         }
     }
 }
