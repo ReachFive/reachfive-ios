@@ -26,45 +26,37 @@ class PasswordlessController: UIViewController {
 
     @IBAction func loginWithEmail(_ sender: Any) {
         Task { @MainActor in
-            try await AppDelegate.reachfive()
-                .startPasswordless(
-                    .Email(
-                        email: emailInput.text ?? "",
-                        redirectUri: redirectUriInput.text != "" ? redirectUriInput.text : nil,
-                        origin: "PasswordlessController.loginWithEmail"
+            do {
+                try await AppDelegate.reachfive()
+                    .startPasswordless(
+                        .Email(
+                            email: emailInput.text ?? "",
+                            redirectUri: redirectUriInput.text != "" ? redirectUriInput.text : nil,
+                            origin: "PasswordlessController.loginWithEmail"
+                        )
                     )
-                )
-                .onSuccess {
-                    self.presentAlert(title: "Login with email", message: "Success")
-                }
-                .onFailure { error in
-                    self.presentErrorAlert(title: "Login with email", error)
-                }
-                .onComplete { result in
-                    print("startPasswordless email \(result)")
-                }
+                self.presentAlert(title: "Login with email", message: "Success")
+            } catch {
+                self.presentErrorAlert(title: "Login with email", error)
+            }
         }
     }
 
     @IBAction func loginWithPhoneNumber(_ sender: Any) {
         Task { @MainActor in
-            try await AppDelegate.reachfive()
-                .startPasswordless(
-                    .PhoneNumber(
-                        phoneNumber: phoneNumberInput.text ?? "",
-                        redirectUri: redirectUriInput.text != "" ? redirectUriInput.text : nil,
-                        origin: "PasswordlessController.loginWithPhoneNumber"
+            do {
+                try await AppDelegate.reachfive()
+                    .startPasswordless(
+                        .PhoneNumber(
+                            phoneNumber: phoneNumberInput.text ?? "",
+                            redirectUri: redirectUriInput.text != "" ? redirectUriInput.text : nil,
+                            origin: "PasswordlessController.loginWithPhoneNumber"
+                        )
                     )
-                )
-                .onSuccess {
-                    self.presentAlert(title: "Login with phone number", message: "Success")
-                }
-                .onFailure { error in
-                    self.presentErrorAlert(title: "Login with phone number", error)
-                }
-                .onComplete { result in
-                    print("startPasswordless phone number \(result)")
-                }
+                self.presentAlert(title: "Login with phone number", message: "Success")
+            } catch {
+                self.presentErrorAlert(title: "Login with phone number", error)
+            }
         }
     }
 
