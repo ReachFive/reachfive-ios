@@ -11,13 +11,8 @@ class UpdatePasswordController: UIViewController {
         Task { @MainActor in
             authToken = AppDelegate.storage.getToken()
             if let authToken {
-                try await AppDelegate.reachfive()
-                    .getProfile(authToken: authToken)
-                    .onSuccess { profile in
-                        DispatchQueue.main.async {
-                            self.username.text = ProfileController.username(profile: profile)
-                        }
-                    }
+                let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
+                self.username.text = ProfileController.username(profile: profile)
             }
 
             super.viewWillAppear(animated)
@@ -27,14 +22,12 @@ class UpdatePasswordController: UIViewController {
     @IBAction func update(_ sender: Any) {
         Task { @MainActor in
             if let authToken {
-                try await AppDelegate.reachfive()
-                    .updatePassword(.FreshAccessTokenParams(authToken: authToken, password: newPassword.text ?? ""))
-                    .onSuccess {
-                        self.presentAlert(title: "Update Password", message: "Success")
-                    }
-                    .onFailure { error in
-                        self.presentErrorAlert(title: "Update Password", error)
-                    }
+                do {
+                    try await AppDelegate.reachfive().updatePassword(.FreshAccessTokenParams(authToken: authToken, password: newPassword.text ?? ""))
+                    self.presentAlert(title: "Update Password", message: "Success")
+                } catch {
+                    self.presentErrorAlert(title: "Update Password", error)
+                }
             }
         }
     }
