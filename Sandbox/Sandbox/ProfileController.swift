@@ -58,7 +58,7 @@ class ProfileController: UIViewController {
                     switch result {
                     case .success():
                         self.presentAlert(title: "Email mfa registering success", message: "Email mfa registering success")
-                        try await self.fetchProfile()
+                        await self.fetchProfile()
                     case .failure(let error):
                         self.presentErrorAlert(title: "Email mfa registering failed", error)
                     }
@@ -73,7 +73,7 @@ class ProfileController: UIViewController {
                     switch result {
                     case .success():
                         self.presentAlert(title: "Email validation success", message: "Email validation success")
-                        try await self.fetchProfile()
+                        await self.fetchProfile()
                     case .failure(let error):
                         self.presentErrorAlert(title: "Email validation failed", error)
                     }
@@ -103,51 +103,51 @@ class ProfileController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         Task { @MainActor in
             print("ProfileController.viewWillAppear")
-            try await fetchProfile()
+            await fetchProfile()
         }
     }
 
     func fetchProfile() async {
         print("ProfileController.fetchProfile")
-
+        
         authToken = AppDelegate.storage.getToken()
         guard let authToken else {
             print("not logged in")
             return
         }
-        try await AppDelegate.reachfive()
-            .getProfile(authToken: authToken)
-            .onSuccess { profile in
-                self.profile = profile
-                self.profileData.reloadData()
-                try await self.setStatusImage(authToken: authToken)
-                self.mfaButton.isHidden = false
-                self.editProfileButton.isHidden = false
-                self.passkeyButton.isHidden = false
+        do {
+            let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
+            self.profile = profile
+            self.profileData.reloadData()
+            
+            await self.setStatusImage(authToken: authToken)
+            
+            self.mfaButton.isHidden = false
+            self.editProfileButton.isHidden = false
+            self.passkeyButton.isHidden = false
+        } catch {
+            self.didLogout()
+            if authToken.refreshToken != nil {
+                // the token is probably expired, but it is still possible that it can be refreshed
+                self.profileTabBarItem.image = SandboxTabBarController.tokenExpiredButRefreshable
+                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+            } else {
+                self.profileTabBarItem.image = SandboxTabBarController.loggedOut
+                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
             }
-            .onFailure { error in
-                self.didLogout()
-                if authToken.refreshToken != nil {
-                    // the token is probably expired, but it is still possible that it can be refreshed
-                    self.profileTabBarItem.image = SandboxTabBarController.tokenExpiredButRefreshable
-                    self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
-                } else {
-                    self.profileTabBarItem.image = SandboxTabBarController.loggedOut
-                    self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
-                }
-                print("getProfile error = \(error.localizedDescription)")
-            }
+            print("getProfile error = \(error.localizedDescription)")
+        }
     }
 
     private func setStatusImage(authToken: AuthToken) async {
         // Use listWebAuthnCredentials to test if token is fresh
         // A fresh token is also needed for updating the profile and registering MFA credentials
-        try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken).onSuccess { _ in
+        do {
+            let _ = try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken)
             self.passkeyButton.isEnabled = true
             self.profileTabBarItem.image = SandboxTabBarController.loggedIn
             self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
-        }
-        .onFailure { error in
+        } catch {
             self.passkeyButton.isEnabled = false
             self.profileTabBarItem.image = SandboxTabBarController.loggedInButNotFresh
             self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
@@ -171,11 +171,11 @@ class ProfileController: UIViewController {
 
     @IBAction func logoutAction(_ sender: Any) {
         Task { @MainActor in
+            defer {
+                AppDelegate.storage.removeToken()
+                self.navigationController?.popViewController(animated: true)
+            }
             try await AppDelegate.reachfive().logout()
-                .onComplete { result in
-                    AppDelegate.storage.removeToken()
-                    self.navigationController?.popViewController(animated: true)
-                }
         }
     }
 
