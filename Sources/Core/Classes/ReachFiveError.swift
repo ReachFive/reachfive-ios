@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ReachFiveError: Error, CustomStringConvertible {
+public enum ReachFiveError: Error, CustomStringConvertible, LocalizedError {
     /// debug friendly message
     public var description: String {
         switch self {
@@ -29,7 +29,7 @@ public enum ReachFiveError: Error, CustomStringConvertible {
         }
     }
     
-    var localizedDescription: String {
+    public var errorDescription: String? {
         return message()
     }
 
