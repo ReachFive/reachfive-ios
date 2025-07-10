@@ -21,9 +21,6 @@ public class CredentialManager: NSObject {
     // the controller for the current request, to cancel it before starting a new request (mainly to cancel an auto-fill request when starting a modal request)
     var authController: ASAuthorizationController?
 
-    // indicates whether the request is modal or auto-fill, in order to show a special error when the modal is canceled by the user
-    var isPerformingModalRequest = false
-
     // data for signup/register
     var passkeyCreationType: PasskeyCreationType?
     // differentiate between login disco/non-disco
@@ -83,7 +80,6 @@ public class CredentialManager: NSObject {
 
             self.continuationWithAuthToken = continuation
             self.authController = authController
-            self.isPerformingModalRequest = true
         }
     }
 
@@ -118,7 +114,6 @@ public class CredentialManager: NSObject {
 
             self.continuationRegistration = continuation
             self.authController = authController
-            self.isPerformingModalRequest = true
         }
     }
 
@@ -154,7 +149,6 @@ public class CredentialManager: NSObject {
 
             self.continuationRegistration = continuation
             self.authController = authController
-            self.isPerformingModalRequest = true
         }
     }
 
@@ -181,7 +175,6 @@ public class CredentialManager: NSObject {
 
             self.continuationWithAuthToken = continuation
             self.authController = authController
-            self.isPerformingModalRequest = false
         }
     }
 
@@ -314,7 +307,6 @@ public class CredentialManager: NSObject {
         }
 
         self.authController = authController
-        self.isPerformingModalRequest = true
     }
 }
 
@@ -497,20 +489,21 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
         guard let authorizationError = error as? ASAuthorizationError else {
             continuationWithStepUp?.resume(throwing: ReachFiveError.TechnicalError(reason: "\(error.localizedDescription)"))
             continuationRegistration?.resume(throwing: ReachFiveError.TechnicalError(reason: "\(error.localizedDescription)"))
+            continuationWithAuthToken?.resume(throwing: ReachFiveError.TechnicalError(reason: "\(error.localizedDescription)"))
             return
         }
 
         if authorizationError.code == .canceled {
             // Either the system doesn't find any credentials and the request ends silently, or the user cancels the request.
             // This is a good time to show a traditional login form, or ask the user to create an account.
-            if isPerformingModalRequest {
-                continuationWithStepUp?.resume(throwing: ReachFiveError.AuthCanceled)
-                continuationRegistration?.resume(throwing: ReachFiveError.AuthCanceled)
-            }
+            continuationWithStepUp?.resume(throwing: ReachFiveError.AuthCanceled)
+            continuationRegistration?.resume(throwing: ReachFiveError.AuthCanceled)
+            continuationWithAuthToken?.resume(throwing: ReachFiveError.AuthCanceled)
         } else {
             // Another ASAuthorization error.
             continuationWithStepUp?.resume(throwing: ReachFiveError.TechnicalError(reason: "\(error)"))
             continuationRegistration?.resume(throwing: ReachFiveError.TechnicalError(reason: "\(error)"))
+            continuationWithAuthToken?.resume(throwing: ReachFiveError.TechnicalError(reason: "\(error)"))
         }
     }
 }
