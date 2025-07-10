@@ -22,9 +22,9 @@ public class LoginWKWebview: UIView {
         self.webView = webView
         webView.navigationDelegate = self
         addSubview(webView)
+        webView.load(URLRequest(url: reachfive.buildAuthorizeURL(pkce: pkce, state: state, nonce: nonce, scope: scope, origin: origin)))
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
-            webView.load(URLRequest(url: reachfive.buildAuthorizeURL(pkce: pkce, state: state, nonce: nonce, scope: scope, origin: origin)))
         }
     }
 }

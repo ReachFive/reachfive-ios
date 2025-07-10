@@ -139,18 +139,6 @@ public class ReachFiveApi {
             .responseJson(type: TknMfa.self, decoder: decoder)
     }
 
-    public func loginWithPasswordAsync(loginRequest: LoginRequest) async throws -> TknMfa {
-        try await AF
-            .request(
-                createUrl(path: "/identity/v1/password/login"),
-                method: .post,
-                parameters: loginRequest.dictionary(),
-                encoding: JSONEncoding.default
-            )
-            .validate(contentType: ["application/json"])
-            .responseJson(type: TknMfa.self, decoder: decoder)
-    }
-
     public func loginCallback(loginCallback: LoginCallback) async throws -> String {
         try await authorize(params: loginCallback.dictionary() as? [String: String])
     }

@@ -3,9 +3,12 @@ import Foundation
 public extension ReachFive {
 
     func logout() async throws -> Void {
-        //TODO: déconnecter les providers en parallèle ?
         for provider in providers {
-            try await provider.logout()
+            do {
+                try await provider.logout()
+            } catch {
+                // Continue logging out other providers
+            }
         }
         try await self.reachFiveApi.logout()
     }

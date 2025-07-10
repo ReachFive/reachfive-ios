@@ -28,7 +28,8 @@ public enum ReachFiveError: Error, CustomStringConvertible, LocalizedError {
             return createMessage(reason: reason, apiError: apiError)
         }
     }
-    
+
+    /// Used by localizedDescription
     public var errorDescription: String? {
         return message()
     }
