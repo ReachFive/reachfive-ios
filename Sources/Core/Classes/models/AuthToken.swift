@@ -25,12 +25,12 @@ public class AuthToken: Codable {
     }
 
     public static func fromOpenIdTokenResponse(_ openIdTokenResponse: AccessTokenResponse) throws -> AuthToken {
-        if let token = openIdTokenResponse.idToken {
-            let user = try fromIdToken(token)
-            return withUser(openIdTokenResponse, user)
-        } else {
+        guard let token = openIdTokenResponse.idToken else {
             return withUser(openIdTokenResponse, nil)
         }
+        
+        let user = try fromIdToken(token)
+        return withUser(openIdTokenResponse, user)
     }
 
     static func withUser(_ accessTokenResponse: AccessTokenResponse, _ user: OpenIdUser?) -> AuthToken {
@@ -47,16 +47,19 @@ public class AuthToken: Codable {
     static func fromIdToken(_ idToken: String) throws -> OpenIdUser {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
         let parts = idToken.components(separatedBy: ".")
-        if parts.count == 3 {
+        guard
+            parts.count == 3,
             let data = parts[1].decodeBase64Url()
-            do {
-                return try decoder.decode(OpenIdUser.CodingData.self, from: data!).openIdUser
-            } catch {
-                throw ReachFiveError.TechnicalError(reason: error.localizedDescription)
-            }
-        } else {
+        else {
             throw ReachFiveError.TechnicalError(reason: "idToken invalid")
+        }
+        
+        do {
+            return try decoder.decode(OpenIdUser.CodingData.self, from: data).openIdUser
+        } catch {
+            throw ReachFiveError.TechnicalError(reason: error.localizedDescription)
         }
     }
 }

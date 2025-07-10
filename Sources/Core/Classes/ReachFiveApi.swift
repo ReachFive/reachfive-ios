@@ -316,7 +316,7 @@ public class ReachFiveApi {
         authToken: AuthToken?,
         updatePasswordRequest: UpdatePasswordRequest
     ) async throws -> Void {
-        let headers: HTTPHeaders = authToken != nil ? tokenHeader(authToken!) : [:]
+        let headers: HTTPHeaders = authToken.map { tokenHeader($0) } ?? [:]
         return try await AF
             .request(
                 createUrl(path: "/identity/v1/update-password"),

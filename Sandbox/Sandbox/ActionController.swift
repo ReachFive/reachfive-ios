@@ -38,6 +38,7 @@ class ActionController: UITableViewController {
                     }
                 } catch {
                     // Do not show error, the goal is to be non invasive in the UI
+                    print("Discoverable passkey login \(error.localizedDescription)")
                 }
             }
 

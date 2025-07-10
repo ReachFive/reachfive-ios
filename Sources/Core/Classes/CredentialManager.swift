@@ -288,14 +288,12 @@ public class CredentialManager: NSObject {
                     let authOptions = try await self.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
                     let passkeyRequest = try await makeAuthorization(authOptions)
                     requests.append(passkeyRequest)
-                } catch {
-                    // if there are other types of requests, do not block auth if passkey fails
-                    if requestTypes.count == 1 {
-                        throw error
-                    }
+                } catch _ where requestTypes.count > 1 {
+                    // if there are other types of requests, do not block auth if only passkey fails. Just eat the error
                 }
             }
         }
+
         let authController = ASAuthorizationController(authorizationRequests: requests)
         authController.delegate = self
         authController.presentationContextProvider = self

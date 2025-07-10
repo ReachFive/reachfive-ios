@@ -21,7 +21,7 @@ extension DataRequest {
     private func handleResponseStatus(status: Int?, apiError: ApiError) -> ReachFiveError {
         guard let status else {
             return .TechnicalError(
-                reason: "Technical error: Request without error code",
+                reason: "Technical error: Response without error code",
                 apiError: apiError)
         }
         if status == 400 {
@@ -31,7 +31,7 @@ extension DataRequest {
             return .AuthFailure(reason: "Unauthorized", apiError: apiError)
         }
         return .TechnicalError(
-            reason: "Technical error: Request with \(status) error code",
+            reason: "Technical error: Response with \(status) error code",
             apiError: apiError
         )
     }
