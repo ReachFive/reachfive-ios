@@ -1,7 +1,6 @@
 import UIKit
 import Reach5
 
-
 //TODO
 //      - déplacer le bouton login with refresh ici pour que, même logué, on puisse afficher les passkey (qui sont expirées)
 //      - faire du pull-to-refresh soit sur la table des clés soit carrément sur tout le profil (déclencher le refresh token)
@@ -109,7 +108,7 @@ class ProfileController: UIViewController {
 
     func fetchProfile() async {
         print("ProfileController.fetchProfile")
-        
+
         authToken = AppDelegate.storage.getToken()
         guard let authToken else {
             print("not logged in")
@@ -119,9 +118,9 @@ class ProfileController: UIViewController {
             let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
             self.profile = profile
             self.profileData.reloadData()
-            
+
             await self.setStatusImage(authToken: authToken)
-            
+
             self.mfaButton.isHidden = false
             self.editProfileButton.isHidden = false
             self.passkeyButton.isHidden = false

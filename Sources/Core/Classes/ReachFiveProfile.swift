@@ -1,6 +1,5 @@
 import Foundation
 
-
 public class ContinueEmailVerification {
     private let reachfive: ReachFive
     private let authToken: AuthToken
@@ -29,7 +28,7 @@ public extension ReachFive {
 
     func sendEmailVerification(authToken: AuthToken, redirectUrl: String? = nil) async throws -> EmailVerificationResponse{
         let sendEmailVerificationRequest = SendEmailVerificationRequest(redirectUrl: redirectUrl ?? sdkConfig.emailVerificationUri)
-        
+
         let resp = try await reachFiveApi.sendEmailVerification(authToken: authToken, sendEmailVerificationRequest: sendEmailVerificationRequest)
         return switch resp.verificationEmailSent {
         case false: EmailVerificationResponse.Success

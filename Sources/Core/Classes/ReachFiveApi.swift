@@ -1,5 +1,4 @@
 import Alamofire
-
 import DeviceKit
 import Foundation
 

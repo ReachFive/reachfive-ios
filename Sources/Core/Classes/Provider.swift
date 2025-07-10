@@ -1,7 +1,6 @@
 import Foundation
 import UIKit
 
-
 public protocol ProviderCreator {
     var name: String { get }
     var variant: String? { get }

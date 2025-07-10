@@ -1,7 +1,6 @@
 import Reach5
 import UIKit
 
-
 class PasskeyCredentialController: UIViewController {
 
     var devices: [DeviceCredential] = [] {

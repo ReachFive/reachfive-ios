@@ -1,5 +1,4 @@
 import Alamofire
-
 import Foundation
 
 public enum CredentialType {

@@ -1,7 +1,6 @@
 import Foundation
 import AuthenticationServices
 
-
 public extension ReachFive {
 // On naming and signature for methods:
 // first argument indicates modality to distinguish the two primary way UI is shown to user: Modal and AutoFill

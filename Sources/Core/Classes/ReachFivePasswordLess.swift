@@ -1,6 +1,5 @@
 import Foundation
 
-
 public enum PasswordLessRequest {
     case Email(email: String, redirectUri: String?, origin: String? = nil)
     case PhoneNumber(phoneNumber: String, redirectUri: String?, origin: String? = nil)
@@ -60,7 +59,7 @@ public extension ReachFive {
         guard let code = response.code else {
             throw ReachFiveError.TechnicalError(reason: "No authorization code")
         }
-        
+
         return try await self.authWithCode(code: code, pkce: pkce)
     }
 

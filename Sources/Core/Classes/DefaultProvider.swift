@@ -1,5 +1,4 @@
 import Foundation
-
 import AuthenticationServices
 
 class DefaultProvider: NSObject, Provider {

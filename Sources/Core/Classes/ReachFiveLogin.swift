@@ -1,6 +1,5 @@
 import Foundation
 
-
 public extension ReachFive {
 
     func logout() async throws -> Void {

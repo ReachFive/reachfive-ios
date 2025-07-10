@@ -1,6 +1,5 @@
 import Foundation
 
-
 public extension ReachFive {
     func getProvider(name: String) -> Provider? {
         providers.first(where: { $0.name == name })
@@ -12,17 +11,17 @@ public extension ReachFive {
 
     func reinitialize() async throws -> [Provider] {
         let clientConfig = try await reachFiveApi.clientConfig()
-        
+
         self.clientConfig = clientConfig
         self.scope = clientConfig.scope.components(separatedBy: " ")
-        
+
         let variants = Dictionary(uniqueKeysWithValues: self.providersCreators.map { ($0.name, $0.variant) })
         let providersConfigs = try await self.reachFiveApi.providersConfigs(variants: variants)
         let providers = self.createProviders(providersConfigsResult: providersConfigs, clientConfigResponse: clientConfig)
-        
+
         self.providers = providers
         self.state = .Initialized
-        
+
         return providers
     }
 

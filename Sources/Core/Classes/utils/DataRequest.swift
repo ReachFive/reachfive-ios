@@ -1,7 +1,6 @@
 import Foundation
 import Alamofire
 
-
 extension DataRequest {
 
     private func isSuccess(_ status: Int?) -> Bool {

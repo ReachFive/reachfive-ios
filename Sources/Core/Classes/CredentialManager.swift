@@ -1,7 +1,6 @@
 import Foundation
 import AuthenticationServices
 
-
 public class CredentialManager: NSObject {
     let reachFiveApi: ReachFiveApi
     let storage: Storage
