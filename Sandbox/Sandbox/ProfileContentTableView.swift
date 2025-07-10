@@ -221,7 +221,7 @@ extension ProfileController: UITableViewDataSource {
         }
 
         if let valeur = field.value {
-            let copy = UIAction(title: "Copy", image: UIImage(systemName: "clipboard")) { action in
+            let copy = UIAction(title: "Copy", image: UIImage(systemName: "clipboard")) { _ in
                 UIPasteboard.general.string = valeur
             }
             children.append(copy)
@@ -230,7 +230,7 @@ extension ProfileController: UITableViewDataSource {
             if(field.name == "Email") {
                 if(field.value != nil && field.value!.contains(" ✘")) {
                     let email = field.value!.split(separator: " ").first
-                    let emailVerification = UIAction(title: "Verify Email", image: UIImage(systemName: "lock")) { action in
+                    let emailVerification = UIAction(title: "Verify Email", image: UIImage(systemName: "lock")) { _ in
                         Task { @MainActor in
                             await self.emailVerificationCode(authToken: token, email: email!.base)
                         }
@@ -247,11 +247,15 @@ extension ProfileController: UITableViewDataSource {
                 default: .PhoneNumber(valeur)
                 }
 
-                let mfaRegister = UIAction(title: "Enroll your \(credential.credentialType) as MFA", image: UIImage(systemName: "key")) { action in
+                let mfaRegister = UIAction(title: "Enroll your \(credential.credentialType) as MFA", image: UIImage(systemName: "key")) { _ in
                     let mfaAction = MfaAction(presentationAnchor: self)
                     Task { @MainActor in
-                        let _ = try await mfaAction.mfaStart(registering: credential, authToken: token)
-                        await self.fetchProfile()
+                        do {
+                            let _ = try await mfaAction.mfaStart(registering: credential, authToken: token)
+                            await self.fetchProfile()
+                        } catch {
+                            self.presentErrorAlert(title: "Enroll failed", error)
+                        }
                     }
                 }
 

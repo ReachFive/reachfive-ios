@@ -7,13 +7,13 @@ class NativePasswordController: UIViewController {
     @IBOutlet var username: UITextField!
     @IBOutlet var password: UITextField!
     var tokenNotification: NSObjectProtocol?
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
-                self.dismiss(animated: true)
                 Task { @MainActor in
+                    self.dismiss(animated: true)
                     await self.handleAuthToken(errorMessage: "Step up failed") {
                         try result.get()
                     }
@@ -21,12 +21,12 @@ class NativePasswordController: UIViewController {
             }
         }
     }
-    
+
     @IBAction func passwordEditingDidEnd(_ sender: Any) {
         Task { @MainActor in
             guard let pass = password.text, !pass.isEmpty, let user = username.text, !user.isEmpty else { return }
             let origin = "NativePasswordController.passwordEditingDidEnd"
-            
+
             await handleLoginFlow {
                 if user.contains("@") {
                     try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
@@ -36,13 +36,13 @@ class NativePasswordController: UIViewController {
             }
         }
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         Task { @MainActor in
             super.viewDidAppear(animated)
-            
+
             guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-            
+
             let request = NativeLoginRequest(anchor: window, origin: "NativePasswordController.viewDidAppear")
             await handleLoginFlow {
                 try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Password], display: .Always)

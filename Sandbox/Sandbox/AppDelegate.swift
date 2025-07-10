@@ -78,6 +78,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     #endif
     #endif
 
+    @MainActor
     static func reachfive() -> ReachFive {
         let app = UIApplication.shared.delegate as! AppDelegate
         return app.reachfive

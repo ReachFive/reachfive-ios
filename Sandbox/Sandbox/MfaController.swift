@@ -64,14 +64,16 @@ class MfaController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
-            if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
-                self.dismiss(animated: true)
-                switch result {
-                case let .success(freshToken):
-                    AppDelegate.storage.setToken(freshToken)
-                    self.presentAlert(title: "Step up", message: "Success")
-                case let .failure(error):
-                    self.presentErrorAlert(title: "Step up failed", error)
+            Task { @MainActor in
+                if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
+                    self.dismiss(animated: true)
+                    switch result {
+                    case let .success(freshToken):
+                        AppDelegate.storage.setToken(freshToken)
+                        self.presentAlert(title: "Step up", message: "Success")
+                    case let .failure(error):
+                        self.presentErrorAlert(title: "Step up failed", error)
+                    }
                 }
             }
         }
@@ -449,9 +451,12 @@ extension TrustedDeviceCollectionViewCell {
         }
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
             Task { @MainActor in
-                //TODO: tester ce que ça fait de faire planter un Task { @MainActor
-                try? await AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
-                self.contentView.removeFromSuperview()
+                do {
+                    try await AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
+                    self.contentView.removeFromSuperview()
+                } catch {
+                    self.window?.rootViewController?.presentErrorAlert(title: "Remove trusted device failed", error)
+                }
             }
         }
         alert.addAction(cancelAction)
@@ -529,8 +534,12 @@ extension CredentialCollectionViewCell {
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
             Task { @MainActor in
                 let id = identifier.contains("@") ? nil : identifier
-                try? await AppDelegate.reachfive().mfaDeleteCredential(id, authToken: authToken)
-                self.contentView.removeFromSuperview()
+                do {
+                    try await AppDelegate.reachfive().mfaDeleteCredential(id, authToken: authToken)
+                    self.contentView.removeFromSuperview()
+                } catch {
+                    self.window?.rootViewController?.presentErrorAlert(title: "Remove identifier failed", error)
+                }
             }
         }
         alert.addAction(cancelAction)

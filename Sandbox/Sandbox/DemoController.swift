@@ -18,8 +18,8 @@ class DemoController: UIViewController {
         super.viewDidLoad()
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
-                self.dismiss(animated: true)
                 Task { @MainActor in
+                    self.dismiss(animated: true)
                     await self.handleAuthToken(errorMessage: "Step up failed") {
                         try result.get()
                     }
