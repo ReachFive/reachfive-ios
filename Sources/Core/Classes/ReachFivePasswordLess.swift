@@ -44,7 +44,7 @@ public extension ReachFive {
         guard let pkce else {
             throw ReachFiveError.TechnicalError(reason: "Pkce not found")
         }
-        //TODO: c'est quoi ces appels qui s'enchainent sans dépendre l'un de l'autre ?
+
         try await reachFiveApi.verifyAuthCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
         let verifyPasswordlessRequest = VerifyPasswordlessRequest(
             email: verifyAuthCodeRequest.email,

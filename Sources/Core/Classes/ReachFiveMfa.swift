@@ -113,9 +113,11 @@ public extension ReachFive {
 
     func mfaStart(stepUp request: StartStepUp) async throws -> ContinueStepUp {
         switch request {
+
         case let .LoginFlow(authType, stepUpToken, redirectUri, origin):
             let response = try await reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin))
             return ContinueStepUp(challengeId: response.challengeId, reachFive: self)
+
         case let .AuthTokenFlow(authType, authToken, redirectUri, overwrittenScope, origin):
             let pkce = Pkce.generate()
             storage.save(key: pkceKey, value: pkce)

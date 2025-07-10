@@ -17,7 +17,6 @@ public extension ReachFive {
         )
         let token = try await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
         return try AuthToken.fromOpenIdTokenResponse(token)
-        
     }
 
     func loginWithPassword(
@@ -40,12 +39,12 @@ public extension ReachFive {
             origin: origin
         )
         let resp = try await reachFiveApi.loginWithPassword(loginRequest: loginRequest)
-        
+
         if resp.mfaRequired != true {
-            let res = try await self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
-            return .AchievedLogin(authToken: res)
+            let token = try await self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
+            return .AchievedLogin(authToken: token)
         }
-        
+
         let pkce = Pkce.generate()
         self.storage.save(key: self.pkceKey, value: pkce)
         let stepUpResponse = try await self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
