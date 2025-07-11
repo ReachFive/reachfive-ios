@@ -180,14 +180,13 @@ extension UIViewController {
         }
     }
 
+    @MainActor
     func goToProfile(_ authToken: AuthToken) {
         AppDelegate.storage.setToken(authToken)
 
-        Task { @MainActor in
-            if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "Tabs") as? UITabBarController {
-                tabBarController.selectedIndex = 2 // profile is third from left
-                navigationController?.pushViewController(tabBarController, animated: true)
-            }
+        if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "Tabs") as? UITabBarController {
+            tabBarController.selectedIndex = 2 // profile is third from left
+            navigationController?.pushViewController(tabBarController, animated: true)
         }
     }
 
@@ -228,7 +227,7 @@ extension UIViewController {
 
     private func createSelectMfaAuthTypeAction(type: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
         return UIAlertAction(title: type.rawValue, style: .default) { _ in
-            Task { @MainActor in
+            Task {
                 let resp = try await AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken))
                 let authToken = try await self.handleStartVerificationCode(resp, authType: type)
                 self.goToProfile(authToken)
