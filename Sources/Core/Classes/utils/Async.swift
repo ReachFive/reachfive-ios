@@ -14,11 +14,13 @@ public extension Result {
 public extension CheckedContinuation {
 
     @inlinable
-    func resume(catching body: () async throws(E) -> T) async {
-        do {
-            self.resume(returning: try await body())
-        } catch {
-            self.resume(throwing: error)
+    func resume(catching body: @escaping () async throws(E) -> T) {
+        Task {
+            do {
+                self.resume(returning: try await body())
+            } catch {
+                self.resume(throwing: error as! E)
+            }
         }
     }
 }

@@ -36,10 +36,8 @@ public extension ReachFive {
                     return
                 }
 
-                Task {
-                    await continuation.resume {
-                        try await self.authWithCode(code: code, pkce: pkce)
-                    }
+                continuation.resume {
+                    try await self.authWithCode(code: code, pkce: pkce)
                 }
             }
 

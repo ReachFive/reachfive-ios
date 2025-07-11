@@ -42,7 +42,7 @@ extension LoginWKWebview: WKNavigationDelegate {
 
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
         if let params, let code = params.first(where: { $0.name == "code" })?.value {
-            await continuation.resume {
+            continuation.resume {
                 try await reachfive.authWithCode(code: code, pkce: pkce)
             }
         } else {

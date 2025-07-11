@@ -253,7 +253,7 @@ extension UIViewController {
                         continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                         return
                     }
-                    await continuation.resume {
+                    continuation.resume {
                         try await resp.verify(code: verificationCode, trustDevice: trustDevice)
                     }
                 }
