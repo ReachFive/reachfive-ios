@@ -63,7 +63,7 @@ public extension ReachFive {
         return try await self.authWithCode(code: code, pkce: pkce)
     }
 
-    internal func interceptPasswordless(_ url: URL) async {
+    internal func interceptPasswordless(_ url: URL) {
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
 
         let pkce: Pkce? = storage.take(key: pkceKey)
@@ -76,12 +76,12 @@ public extension ReachFive {
             return
         }
 
-        var result: Result<AuthToken, ReachFiveError>
-        do {
-            result = .success(try await authWithCode(code: code, pkce: pkce))
-        } catch {
-            result = .failure(error as! ReachFiveError)
+        Task {
+            do {
+                self.passwordlessCallback?(.success(try await authWithCode(code: code, pkce: pkce)))
+            } catch {
+                self.passwordlessCallback?(.failure(error as! ReachFiveError))
+            }
         }
-        self.passwordlessCallback?(result)
     }
 }
