@@ -131,7 +131,7 @@ class MfaController: UIViewController {
                 try await self.fetchMfaCredentials()
                 self.presentAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
             } catch {
-                self.presentErrorAlert(title: "Start MFA Phone Number Registration", error)
+                self.presentErrorAlert(title: "Start MFA Phone Number Registration failed", error)
             }
         }
     }
@@ -232,14 +232,14 @@ extension MfaController {
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
                                                   heightDimension: .fractionalHeight(0.1))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
-            
+
             let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.95),
                                                    heightDimension: .absolute(250))
             let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-            
+
             let section = NSCollectionLayoutSection(group: group)
             section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-            
+
             let titleSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                    heightDimension: .estimated(22))
             let titleSupplementary = NSCollectionLayoutBoundarySupplementaryItem(
@@ -250,10 +250,10 @@ extension MfaController {
             section.boundarySupplementaryItems = [titleSupplementary]
             return section
         }
-        
+
         let config = UICollectionViewCompositionalLayoutConfiguration()
         config.interSectionSpacing = 20
-        
+
         let layout = UICollectionViewCompositionalLayout(
             sectionProvider: sectionProvider, configuration: config)
         return layout

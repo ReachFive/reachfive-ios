@@ -56,7 +56,7 @@ class ProfileController: UIViewController {
                     self.dismiss(animated: true)
                     switch result {
                     case .success():
-                        self.presentAlert(title: "Email mfa registering success", message: "Email mfa registering success")
+                        self.presentAlert(title: "Email mfa registering", message: "Email mfa registering success")
                         await self.fetchProfile()
                     case .failure(let error):
                         self.presentErrorAlert(title: "Email mfa registering failed", error)
@@ -71,7 +71,7 @@ class ProfileController: UIViewController {
                     self.dismiss(animated: true)
                     switch result {
                     case .success():
-                        self.presentAlert(title: "Email validation success", message: "Email validation success")
+                        self.presentAlert(title: "Email validation", message: "Email validation success")
                         await self.fetchProfile()
                     case .failure(let error):
                         self.presentErrorAlert(title: "Email validation failed", error)
@@ -118,12 +118,11 @@ class ProfileController: UIViewController {
             let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
             self.profile = profile
             self.profileData.reloadData()
-
-            await self.setStatusImage(authToken: authToken)
-
             self.mfaButton.isHidden = false
             self.editProfileButton.isHidden = false
             self.passkeyButton.isHidden = false
+
+            await self.setStatusImage(authToken: authToken)
         } catch {
             self.didLogout()
             if authToken.refreshToken != nil {

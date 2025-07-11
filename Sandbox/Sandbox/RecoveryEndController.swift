@@ -28,7 +28,7 @@ class RecoveryEndController: UIViewController {
                     self.navigationController?.popViewController(animated: true)
                     self.navigationController?.popViewController(animated: true)
                 } catch {
-                    self.presentErrorAlert(title: "Account Recovery Failed", error)
+                    self.presentErrorAlert(title: "Account Recovery failed", error)
                 }
             }
         }
@@ -60,7 +60,7 @@ class RecoveryEndController: UIViewController {
                 self.navigationController?.popViewController(animated: true)
                 self.navigationController?.popViewController(animated: true)
             } catch {
-                self.presentErrorAlert(title: "Account Recovery Failed", error)
+                self.presentErrorAlert(title: "Account Recovery failed", error)
             }
         }
     }

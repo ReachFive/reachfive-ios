@@ -18,7 +18,7 @@ class RecoveryVerificationController: UIViewController {
                 }
 
             case .failure(let error):
-                self.presentErrorAlert(title: "Account Recovery Failed", error)
+                self.presentErrorAlert(title: "Account Recovery failed", error)
             }
         }
     }

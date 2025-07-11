@@ -37,7 +37,7 @@ class PasswordlessController: UIViewController {
                     )
                 self.presentAlert(title: "Login with email", message: "Success")
             } catch {
-                self.presentErrorAlert(title: "Login with email", error)
+                self.presentErrorAlert(title: "Login with email failed", error)
             }
         }
     }
@@ -55,7 +55,7 @@ class PasswordlessController: UIViewController {
                     )
                 self.presentAlert(title: "Login with phone number", message: "Success")
             } catch {
-                self.presentErrorAlert(title: "Login with phone number", error)
+                self.presentErrorAlert(title: "Login with phone number failed", error)
             }
         }
     }
@@ -69,8 +69,7 @@ class PasswordlessController: UIViewController {
         )
         Task { @MainActor in
             await handleAuthToken(errorMessage: "Verify code failed") {
-                try await AppDelegate.reachfive()
-                    .verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
+                try await AppDelegate.reachfive().verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
             }
         }
     }

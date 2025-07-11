@@ -28,7 +28,7 @@ class UpdatePasswordController: UIViewController {
                     }
                     self.presentAlert(title: "Update Password", message: "Success")
                 } catch {
-                    self.presentErrorAlert(title: "Update Password", error)
+                    self.presentErrorAlert(title: "Update Password failed", error)
                 }
             }
         }

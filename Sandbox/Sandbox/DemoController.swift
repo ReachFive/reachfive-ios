@@ -118,7 +118,7 @@ class DemoController: UIViewController {
                 } catch ReachFiveError.AuthCanceled {
                     goToSignup()
                 } catch {
-                    self.presentErrorAlert(title: "Signup", error)
+                    self.presentErrorAlert(title: "Signup failed", error)
                 }
             }
         } else {
@@ -165,7 +165,7 @@ class DemoController: UIViewController {
                         }
                     #endif
                 } catch {
-                    self.presentErrorAlert(title: "Login", error)
+                    self.presentErrorAlert(title: "Login failed", error)
                 }
             }
         }

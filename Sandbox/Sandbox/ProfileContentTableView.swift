@@ -25,13 +25,13 @@ extension ProfileController {
     func emailVerificationCode(authToken: AuthToken, email: String) async {
         do {
             let emailVerificationResponse = try await AppDelegate.reachfive().sendEmailVerification(authToken: authToken)
-            
+
             switch emailVerificationResponse {
-            
+
             case EmailVerificationResponse.Success:
-                self.presentAlert(title: "Verify Email", message: "Success")
+                self.presentAlert(title: "Email verification", message: "Success")
                 await self.fetchProfile()
-            
+
             case let EmailVerificationResponse.VerificationNeeded(continueEmailVerification):
                 let alert = UIAlertController(title: "Email verification", message: "Please enter the code you received by Email", preferredStyle: .alert)
                 alert.addTextField { textField in
@@ -46,10 +46,10 @@ extension ProfileController {
                         }
                         do {
                             let _ = try await continueEmailVerification.verify(code: verificationCode, email: email)
-                            self.presentAlert(title: "Verify Email", message: "Success")
+                            self.presentAlert(title: "Email verification", message: "Success")
                             await self.fetchProfile()
                         } catch {
-                            self.presentErrorAlert(title: "Email verification failure", error)
+                            self.presentErrorAlert(title: "Email verification failed", error)
                         }
                     }
                 }
@@ -58,9 +58,9 @@ extension ProfileController {
                 alert.preferredAction = submitVerificationCode
                 self.present(alert, animated: true)
             }
-            
+
         } catch {
-            self.presentErrorAlert(title: "Email verification", error)
+            self.presentErrorAlert(title: "Email verification failed", error)
         }
     }
 
@@ -74,7 +74,6 @@ extension ProfileController {
         let submitPhoneNumber = UIAlertAction(title: "Submit", style: .default) { _ in
             Task { @MainActor in
                 guard let phoneNumber = alert.textFields?[0].text else {
-                    //TODO alerte
                     print("Phone number cannot be empty")
                     return
                 }
@@ -83,7 +82,7 @@ extension ProfileController {
                     self.profile = profile
                     self.profileData.reloadData()
                 } catch {
-                    self.presentErrorAlert(title: titre, error)
+                    self.presentErrorAlert(title: "\(titre) failed", error)
                 }
             }
         }
@@ -118,7 +117,7 @@ extension ProfileController {
             self.profile = profile
             self.profileData.reloadData()
         } catch {
-            self.presentErrorAlert(title: titre, error)
+            self.presentErrorAlert(title: "\(titre) failed", error)
         }
     }
 }

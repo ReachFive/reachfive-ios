@@ -96,7 +96,7 @@ class PasskeyCredentialController: UIViewController {
                 alert.preferredAction = registerAction
                 self.present(alert, animated: true)
             } catch {
-                self.presentErrorAlert(title: "Register New Passkey", error)
+                self.presentErrorAlert(title: "Register New Passkey failed", error)
             }
         }
     }
@@ -137,7 +137,7 @@ extension PasskeyCredentialController: UITableViewDataSource {
                     print("did remove passkey \(element.friendlyName)")
                     tableView.deleteRows(at: [indexPath], with: .fade)
                 } catch {
-                    self.presentErrorAlert(title: "Delete Passkey", error)
+                    self.presentErrorAlert(title: "Delete Passkey failed", error)
                 }
             }
         }

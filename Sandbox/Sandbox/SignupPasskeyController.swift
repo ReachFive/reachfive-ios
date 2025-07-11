@@ -32,7 +32,7 @@ class SignupPasskeyController: UIViewController {
                 }
             }
         } else {
-            presentAlert(title: "Signup with Passkey", message: "Passkey requires iOS 16")
+            presentAlert(title: "Signup with Passkey failed", message: "Passkey requires iOS 16")
         }
     }
 }
