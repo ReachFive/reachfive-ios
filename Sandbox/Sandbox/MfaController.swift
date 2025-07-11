@@ -106,9 +106,9 @@ class MfaController: UIViewController {
                 let freshToken = try await mfaAction.mfaStart(stepUp: stepUpFlow)
                 AppDelegate.storage.setToken(freshToken)
                 try await self.fetchTrustedDevices()
-                self.presentAlert(title: "Step Up", message: "Success")
+                self.presentAlert(title: "Step up", message: "Success")
             } catch {
-                self.presentErrorAlert(title: "Step up", error)
+                self.presentErrorAlert(title: "Step up failed", error)
             }
         }
     }
@@ -144,6 +144,13 @@ class MfaAction {
         self.presentationAnchor = presentationAnchor
     }
 
+    func mfaStart(registering credential: Credential, authToken: AuthToken) async throws -> MfaCredentialItem {
+        let resp = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
+            try await AppDelegate.reachfive().mfaStart(registering: credential, authToken: refreshableToken)
+        }
+        return try await self.handleStartVerificationCode(resp)
+    }
+
     func mfaStart(stepUp startStepUp: StartStepUp) async throws -> AuthToken {
         let resp = try await AppDelegate.reachfive().mfaStart(stepUp: startStepUp)
         return try await self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
@@ -162,14 +169,11 @@ class MfaAction {
 
                 let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
                     guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
-                        print("verification code cannot be empty")
                         continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                         return
                     }
-                    Task {
-                        await continuation.resume {
-                            try await resp.verify(code: verificationCode)
-                        }
+                    continuation.resume {
+                        try await resp.verify(code: verificationCode)
                     }
                 }
                 alert.addAction(cancelAction)
@@ -178,13 +182,6 @@ class MfaAction {
                 presentationAnchor.present(alert, animated: true)
             }
         }
-    }
-
-    func mfaStart(registering credential: Credential, authToken: AuthToken) async throws -> MfaCredentialItem {
-        let resp = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
-            try await AppDelegate.reachfive().mfaStart(registering: credential, authToken: refreshableToken)
-        }
-        return try await self.handleStartVerificationCode(resp)
     }
 
     private func handleStartVerificationCode(_ resp: MfaStartRegistrationResponse) async throws -> MfaCredentialItem {
@@ -211,14 +208,11 @@ class MfaAction {
 
                     let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
                         guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
-                            print("verification code cannot be empty")
                             continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
                             return
                         }
-                        Task {
-                            continuation.resume(with: await Result {
-                                try await continueRegistration.verify(code: verificationCode)
-                            })
+                        continuation.resume {
+                            try await continueRegistration.verify(code: verificationCode)
                         }
                     }
                     alert.addAction(cancelAction)
@@ -235,31 +229,31 @@ extension MfaController {
     func createLayout(_ elementKind: String) -> UICollectionViewLayout {
         let sectionProvider = { (_: Int,
                                  _: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
-                                                      heightDimension: .fractionalHeight(0.1))
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-
-                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.95),
-                                                       heightDimension: .absolute(250))
-                let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-
-                let section = NSCollectionLayoutSection(group: group)
-                section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-
-                let titleSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                       heightDimension: .estimated(22))
-                let titleSupplementary = NSCollectionLayoutBoundarySupplementaryItem(
-                    layoutSize: titleSize,
-                    elementKind: elementKind,
-                    alignment: .top)
-                titleSupplementary.pinToVisibleBounds = true
-                section.boundarySupplementaryItems = [titleSupplementary]
-                return section
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
+                                                  heightDimension: .fractionalHeight(0.1))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.95),
+                                                   heightDimension: .absolute(250))
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+            
+            let section = NSCollectionLayoutSection(group: group)
+            section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+            
+            let titleSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                   heightDimension: .estimated(22))
+            let titleSupplementary = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: titleSize,
+                elementKind: elementKind,
+                alignment: .top)
+            titleSupplementary.pinToVisibleBounds = true
+            section.boundarySupplementaryItems = [titleSupplementary]
+            return section
         }
-
+        
         let config = UICollectionViewCompositionalLayoutConfiguration()
         config.interSectionSpacing = 20
-
+        
         let layout = UICollectionViewCompositionalLayout(
             sectionProvider: sectionProvider, configuration: config)
         return layout
