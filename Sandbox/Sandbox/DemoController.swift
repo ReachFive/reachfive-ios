@@ -115,12 +115,10 @@ class DemoController: UIViewController {
                 do {
                     let authToken = try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
                     goToProfile(authToken)
+                } catch ReachFiveError.AuthCanceled {
+                    goToSignup()
                 } catch {
-                    switch error {
-                    case ReachFiveError.AuthCanceled: goToSignup()
-                    default:
-                        self.presentErrorAlert(title: "Signup", error)
-                    }
+                    self.presentErrorAlert(title: "Signup", error)
                 }
             }
         } else {
@@ -156,9 +154,7 @@ class DemoController: UIViewController {
                         let authToken = try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                         goToProfile(authToken)
                     }
-                } catch {
-                    switch error {
-                    case ReachFiveError.AuthCanceled:
+                } catch ReachFiveError.AuthCanceled {
                     #if targetEnvironment(macCatalyst)
                         return
                     #else
@@ -168,9 +164,8 @@ class DemoController: UIViewController {
                             }
                         }
                     #endif
-                    default:
-                        self.presentErrorAlert(title: "Login", error)
-                    }
+                } catch {
+                    self.presentErrorAlert(title: "Login", error)
                 }
             }
         }

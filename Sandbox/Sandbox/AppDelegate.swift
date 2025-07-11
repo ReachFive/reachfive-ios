@@ -16,7 +16,7 @@ import UIKit
 
 //TODO
 // Mettre une nouvelle page dans une quatrième tabs ou dans l'app réglages:
-// - Paramétrage : scopes, origin, utilisation du refresh au démarage ?
+// - Paramétrage : scopes, origin, utilisation du refresh au démarrage ?
 // cf. wireframe de JC pour d'autres idées : https://miro.com/app/board/uXjVOMB0pG4=/
 // Pouvoir sélectionner entre plusieurs confs ReachFive
 // - d'abord en dur ici et dans les entitlements. Sélectionner la bonne dans le let reachfive: ReachFive =
@@ -31,13 +31,6 @@ import UIKit
 // gérer l'upgrade d'un mot de passe vers SIWA ou mdp fort : https://developer.apple.com/videos/play/wwdc2020/10666
 // synchroniser les règles de mdp de la console avec les password rules, à mettre dans la conf de l'app (https://developer.apple.com/videos/play/wwdc2020/10666?time=658)
 // voir si les SMS 2FA sont auto-complétés
-
-
-//TODO: async/await
-// - Login with password est lent à la détente
-// - Update password (dans la page de profil) ne s'affiche pas une fois sur deux
-
-
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

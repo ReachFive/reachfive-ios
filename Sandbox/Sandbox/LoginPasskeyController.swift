@@ -45,7 +45,7 @@ class LoginPasskeyController: UIViewController {
                     }
                 #endif
                 default:
-                    self.presentAlert(title: "Login", message: "Error: \(error.localizedDescription)")
+                    self.presentErrorAlert(title: "Login failed", error)
                 }
             }
         }
@@ -67,9 +67,7 @@ class LoginPasskeyController: UIViewController {
                     let authToken = try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                     goToProfile(authToken)
                 }
-            } catch {
-                switch error {
-                case ReachFiveError.AuthCanceled:
+            } catch ReachFiveError.AuthCanceled {
                 #if targetEnvironment(macCatalyst)
                     return
                 #else
@@ -77,9 +75,8 @@ class LoginPasskeyController: UIViewController {
                         try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.nonDiscoverableLogin.AuthCanceled"))
                     }
                 #endif
-                default:
-                    self.presentAlert(title: "Login", message: "Error: \(error.localizedDescription)")
-                }
+            } catch {
+                self.presentErrorAlert(title: "Login failed", error)
             }
         }
     }
