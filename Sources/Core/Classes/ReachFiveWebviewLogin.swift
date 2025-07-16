@@ -13,13 +13,12 @@ public extension ReachFive {
             // Initialize the session.
             let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: reachFiveApi.sdkConfig.baseScheme) { callbackURL, error in
                 if let error {
-                    let r5Error: ReachFiveError
-                    switch error._code {
-                    case 1: r5Error = .AuthCanceled
-                    case 2: r5Error = .TechnicalError(reason: "Presentation Context Not Provided")
-                    case 3: r5Error = .TechnicalError(reason: "Presentation Context Invalid")
+                    let r5Error: ReachFiveError = switch error._code {
+                    case 1: .AuthCanceled
+                    case 2: .TechnicalError(reason: "Presentation Context Not Provided")
+                    case 3: .TechnicalError(reason: "Presentation Context Invalid")
                     default:
-                        r5Error = .TechnicalError(reason: "Unknown Error")
+                            .TechnicalError(reason: "Unknown Error")
                     }
                     continuation.resume(throwing: r5Error)
                     return
