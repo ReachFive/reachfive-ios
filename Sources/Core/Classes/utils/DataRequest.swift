@@ -3,11 +3,8 @@ import Alamofire
 
 extension DataRequest {
 
-    private func isSuccess(_ status: Int?) -> Bool {
-        guard let status else {
-            return false
-        }
-        return status >= 200 && status < 300
+    private func isSuccess(_ status: Int) -> Bool {
+        status >= 200 && status < 300
     }
 
     private func parseJson<T: Decodable>(json: Data, type: T.Type, decoder: JSONDecoder) throws(ReachFiveError) -> T {
@@ -18,12 +15,7 @@ extension DataRequest {
         }
     }
 
-    private func handleResponseStatus(status: Int?, apiError: ApiError) -> ReachFiveError {
-        guard let status else {
-            return .TechnicalError(
-                reason: "Technical error: Response without error code",
-                apiError: apiError)
-        }
+    private func handleResponseStatus(status: Int, apiError: ApiError) -> ReachFiveError {
         if status == 400 {
             return .RequestError(apiError: apiError)
         }
@@ -31,7 +23,7 @@ extension DataRequest {
             return .AuthFailure(reason: "Unauthorized", apiError: apiError)
         }
         return .TechnicalError(
-            reason: "Technical error: Response with \(status) error code",
+            reason: "Response with \(status) error code",
             apiError: apiError
         )
     }
@@ -44,15 +36,16 @@ extension DataRequest {
                     continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
 
                 case let .success(data):
-                    let status = responseData.response?.statusCode
-                    if self.isSuccess(status) {
-                        continuation.resume(returning: ())
-                    } else {
-                        do {
+                    guard let response = responseData.response else {
+                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request without response"))
+                        return
+                    }
+
+                    let status = response.statusCode
+                    continuation.resume {
+                        if !self.isSuccess(status) {
                             let apiError = try self.parseJson(json: data, type: ApiError.self, decoder: decoder)
-                            continuation.resume(throwing: self.handleResponseStatus(status: status, apiError: apiError))
-                        } catch {
-                            continuation.resume(throwing: error)
+                            throw self.handleResponseStatus(status: status, apiError: apiError)
                         }
                     }
                 }
@@ -68,16 +61,19 @@ extension DataRequest {
                     continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
 
                 case let .success(data):
-                    let status = responseData.response?.statusCode
-                    do {
-                        if self.isSuccess(status) {
-                            continuation.resume(returning: try self.parseJson(json: data, type: T.self, decoder: decoder))
-                        } else {
+                    guard let response = responseData.response else {
+                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request without response"))
+                        return
+                    }
+
+                    let status = response.statusCode
+                    continuation.resume {
+                        guard self.isSuccess(status) else {
                             let apiError = try self.parseJson(json: data, type: ApiError.self, decoder: decoder)
-                            continuation.resume(throwing: self.handleResponseStatus(status: status, apiError: apiError))
+                            throw self.handleResponseStatus(status: status, apiError: apiError)
                         }
-                    } catch {
-                        continuation.resume(throwing: error)
+
+                        return try self.parseJson(json: data, type: T.self, decoder: decoder)
                     }
                 }
             }
