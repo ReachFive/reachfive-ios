@@ -6,7 +6,7 @@ target 'Sandbox' do
   project 'Sandbox.xcodeproj'
   # Dev mode
   pod 'Reach5', :path => '../Reach5.podspec'
-#   pod 'Reach5Google', :path => '../../reachfive-ios-google/Reach5Google.podspec'
+#TODO:   pod 'Reach5Google', :path => '../../reachfive-ios-google/Reach5Google.podspec'
 #   pod 'Reach5Facebook', :path => '../../reachfive-ios-facebook/Reach5Facebook.podspec'
   # pod 'Reach5WeChat', :path => '../../reachfive-ios-wechat/Reach5WeChat.podspec'
 
