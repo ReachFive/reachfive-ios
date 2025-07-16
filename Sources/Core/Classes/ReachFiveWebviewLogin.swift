@@ -17,8 +17,7 @@ public extension ReachFive {
                     case 1: .AuthCanceled
                     case 2: .TechnicalError(reason: "Presentation Context Not Provided")
                     case 3: .TechnicalError(reason: "Presentation Context Invalid")
-                    default:
-                            .TechnicalError(reason: "Unknown Error")
+                    default:.TechnicalError(reason: "Unknown Error \(error.localizedDescription)")
                     }
                     continuation.resume(throwing: r5Error)
                     return
