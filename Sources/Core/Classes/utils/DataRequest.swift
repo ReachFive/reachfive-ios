@@ -36,7 +36,7 @@ extension DataRequest {
         )
     }
 
-    func responseJson(decoder: JSONDecoder) async throws -> Void {
+    func responseJson(decoder: JSONDecoder) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             responseData { responseData in
                 switch responseData.result {

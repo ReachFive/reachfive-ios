@@ -47,6 +47,6 @@ extension DefaultProvider {
     public func applicationDidBecomeActive(_ application: UIApplication) {
     }
 
-    public func logout() -> Void {
+    public func logout() {
     }
 }

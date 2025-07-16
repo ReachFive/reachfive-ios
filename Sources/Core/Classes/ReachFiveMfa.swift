@@ -139,7 +139,7 @@ public extension ReachFive {
         return try await self.authWithCode(code: code, pkce: pkce)
     }
 
-    func mfaDeleteCredential(_ phoneNumber: String? = nil, authToken: AuthToken) async throws -> Void {
+    func mfaDeleteCredential(_ phoneNumber: String? = nil, authToken: AuthToken) async throws {
         if let phoneNumber {
             return try await reachFiveApi.deleteMfaPhoneNumberCredential(phoneNumber: phoneNumber, authToken: authToken)
         }
@@ -152,7 +152,7 @@ public extension ReachFive {
             .trustedDevices
     }
 
-    func mfaDelete(trustedDeviceId deviceId: String, authToken: AuthToken) async throws -> Void {
+    func mfaDelete(trustedDeviceId deviceId: String, authToken: AuthToken) async throws {
         try await reachFiveApi.deleteMfaTrustedDevice(deviceId: deviceId, authToken: authToken)
     }
 

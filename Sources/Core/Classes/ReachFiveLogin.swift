@@ -2,7 +2,7 @@ import Foundation
 
 public extension ReachFive {
 
-    func logout() async throws -> Void {
+    func logout() async throws {
         for provider in providers {
             do {
                 try await provider.logout()

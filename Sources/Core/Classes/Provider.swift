@@ -15,5 +15,5 @@ public protocol Provider {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     func applicationDidBecomeActive(_ application: UIApplication)
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool
-    func logout() async throws -> Void
+    func logout() async throws
 }

@@ -74,7 +74,7 @@ class ConfiguredAppleProvider: NSObject, Provider {
         true
     }
 
-    public func logout() -> Void {
+    public func logout() {
     }
 
     override var description: String {

@@ -9,7 +9,7 @@ public class ContinueEmailVerification {
         self.reachfive = reachFive
     }
 
-    public func verify(code: String, email: String, freshAuthToken: AuthToken? = nil) async throws -> Void {
+    public func verify(code: String, email: String, freshAuthToken: AuthToken? = nil) async throws {
         let userAuthToken = freshAuthToken ?? self.authToken
         let verifyEmailRequest = VerifyEmailRequest(email: email, verificationCode: code)
         return try await self.reachfive.reachFiveApi.verifyEmail(authToken: userAuthToken, verifyEmailRequest: verifyEmailRequest)
@@ -36,7 +36,7 @@ public extension ReachFive {
         }
     }
 
-    func verifyEmail(authToken: AuthToken, code: String, email: String) async throws -> Void {
+    func verifyEmail(authToken: AuthToken, code: String, email: String) async throws {
         let verifyEmailRequest = VerifyEmailRequest(email: email, verificationCode: code)
 
         return try await reachFiveApi.verifyEmail(authToken: authToken, verifyEmailRequest: verifyEmailRequest)
@@ -46,7 +46,7 @@ public extension ReachFive {
         authToken: AuthToken,
         phoneNumber: String,
         verificationCode: String
-    ) async throws -> Void {
+    ) async throws {
         let verifyPhoneNumberRequest = VerifyPhoneNumberRequest(
             phoneNumber: phoneNumber,
             verificationCode: verificationCode
@@ -92,7 +92,7 @@ public extension ReachFive {
         try await reachFiveApi.updateProfile(authToken: authToken, profileUpdate: profileUpdate)
     }
 
-    func updatePassword(_ updatePasswordParams: UpdatePasswordParams) async throws -> Void {
+    func updatePassword(_ updatePasswordParams: UpdatePasswordParams) async throws {
         let authToken = updatePasswordParams.getAuthToken()
         return try await reachFiveApi.updatePassword(
             authToken: authToken,
@@ -107,7 +107,7 @@ public extension ReachFive {
         email: String? = nil,
         phoneNumber: String? = nil,
         redirectUrl: String? = nil
-    ) async throws -> Void {
+    ) async throws {
         let requestPasswordResetRequest = RequestPasswordResetRequest(
             clientId: sdkConfig.clientId,
             email: email,
@@ -124,7 +124,7 @@ public extension ReachFive {
         phoneNumber: String? = nil,
         redirectUrl: String? = nil,
         origin: String? = nil
-    ) async throws -> Void {
+    ) async throws {
         let requestAccountRecoveryRequest = RequestAccountRecoveryRequest(
             clientId: sdkConfig.clientId,
             email: email,
@@ -141,7 +141,7 @@ public extension ReachFive {
     }
 
     /// Deletes a passkey the user has registered
-    func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async throws -> Void {
+    func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async throws {
         try await reachFiveApi.deleteWebAuthnRegistration(id: id, authToken: authToken)
     }
 

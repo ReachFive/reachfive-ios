@@ -11,7 +11,7 @@ public extension ReachFive {
         self.passwordlessCallback = passwordlessCallback
     }
 
-    func startPasswordless(_ request: PasswordLessRequest) async throws -> Void {
+    func startPasswordless(_ request: PasswordLessRequest) async throws {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
         let startPasswordlessRequest = switch request {
