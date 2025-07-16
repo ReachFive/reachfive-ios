@@ -1,8 +1,7 @@
+import Reach5
+import SafariServices
 import UIKit
 import WebKit
-import SafariServices
-import Reach5
-import Alamofire
 
 class LoginCustomWebviewController: UIViewController {
 
@@ -26,14 +25,13 @@ extension LoginCustomWebviewController: WKNavigationDelegate {
         guard let url = navigationAction.request.url, url.scheme == reachfive.sdkConfig.baseScheme.lowercased(), app.canOpenURL(url) else {
             return .allow
         }
-        
-        
+
         let useScheme = true
         // two choices
         // 1. Let the SDK read the callback URL by opening the app with the URL Scheme and listening to the passwordless callback
         if (useScheme) {
             await app.open(url)
-            
+
             // create a one-time notification by removing the observer from within the observation block
             let center = NotificationCenter.default
             var token: NSObjectProtocol?
