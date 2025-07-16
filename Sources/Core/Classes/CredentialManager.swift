@@ -23,8 +23,6 @@ public class CredentialManager: NSObject {
 
     // data for signup/register
     var passkeyCreationType: PasskeyCreationType?
-    // differentiate between login disco/non-disco
-    var requestLoginType: RequestLoginType?
     // the scope of the request
     var scope: String?
     // optional origin for user events
@@ -37,11 +35,6 @@ public class CredentialManager: NSObject {
         case Signup(signupOptions: RegistrationOptions)
         case AddPasskey(authToken: AuthToken)
         case ResetPasskey(resetOptions: ResetOptions)
-    }
-
-    enum RequestLoginType {
-        case WithPassword
-        case WithoutPassword
     }
 
     // MARK: -
@@ -168,7 +161,6 @@ public class CredentialManager: NSObject {
         let assertionRequestOptions = try await reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
         let authorizationRequest = try createCredentialAssertionRequest(assertionRequestOptions)
 
-        self.requestLoginType = .WithoutPassword
         // AutoFill-assisted requests only support ASAuthorizationPlatformPublicKeyCredentialAssertionRequest.
         let authController = ASAuthorizationController(authorizationRequests: [authorizationRequest])
         authController.delegate = self
@@ -204,8 +196,6 @@ public class CredentialManager: NSObject {
 
         let authzs = requestTypes.compactMap { adaptAuthz($0) }
 
-        self.requestLoginType = .WithoutPassword
-
         try await signInWith(webAuthnLoginRequest, withMode: mode, authorizing: authzs) { assertionRequestOptions in
             guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 16 context
                 throw ReachFiveError.TechnicalError(reason: "Must be iOS 16 or higher")
@@ -232,8 +222,6 @@ public class CredentialManager: NSObject {
         originR5 = request.origin
 
         let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFiveApi.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
-
-        self.requestLoginType = .WithPassword
 
         try await signInWith(webAuthnLoginRequest, withMode: mode, authorizing: requestTypes, appleProvider: appleProvider) { authenticationOptions in
             guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 15 context
@@ -440,10 +428,6 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 } else if #available(iOS 16.0, *), let credentialAssertion = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialAssertion {
                     // A passkey was selected to sign in
 
-                    guard let requestLoginType else {
-                        throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: requestLoginType")
-                    }
-
                     guard let scope else {
                         throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope")
                     }
@@ -459,10 +443,8 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                     let authenticationToken = try await reachFiveApi.authenticateWithWebAuthn(authenticationPublicKeyCredential: AuthenticationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: response))
                     let authToken = try await self.loginCallback(tkn: authenticationToken.tkn, scope: scope, origin: self.originR5)
 
-                    switch requestLoginType {
-                    case .WithPassword: continuationWithStepUp?.resume(returning: .AchievedLogin(authToken: authToken))
-                    case .WithoutPassword: continuationWithAuthToken?.resume(returning: authToken)
-                    }
+                    continuationWithStepUp?.resume(returning: .AchievedLogin(authToken: authToken))
+                    continuationWithAuthToken?.resume(returning: authToken)
                 } else {
                     throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: Received unknown authorization type.")
                 }
