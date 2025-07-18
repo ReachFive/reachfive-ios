@@ -63,7 +63,8 @@ include::partial$params.adoc[tags="startStepUp"]
 
 == Response
 
-`Future<ContinueStepUp, ReachFiveError>`
+* *Type*: ContinueStepUp
+* *Error*: <<ReachFiveError>>
 
 // `ContinueStepUp` contains the `challengeId`.
 

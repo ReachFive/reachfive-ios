@@ -31,7 +31,10 @@ include::partial$params.adoc[tags="verifyStepUp"]
 
 == Response
 
-`Future<AuthToken, ReachFiveError>`
+* *Type*: <<AuthToken>>
+* *Error*: <<ReachFiveError>>
+
+include::partial$models.adoc[tag=authtoken]
 
 === Error response
 

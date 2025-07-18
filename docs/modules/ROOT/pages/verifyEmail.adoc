@@ -41,7 +41,7 @@ include::partial$params.adoc[tag="email"]
 
 == Response
 
-Type: `Future<Void, ReachFiveError>`
+*Error*: <<ReachFiveError>>
 
 If verified, the response indicates "Successfully verified email".
 If the email is already verified, the response indicates "Email already verified".

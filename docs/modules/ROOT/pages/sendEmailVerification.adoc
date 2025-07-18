@@ -39,7 +39,8 @@ include::partial$params.adoc[tag="redirecturl"]
 
 == Response
 
-Type: `Future<EmailVerificationResponse, ReachFiveError>`
+* *Type*: EmailVerificationResponse
+* *Error*: <<ReachFiveError>>
 
 The response is an `EmailVerificationResponse` enum with two cases:
 

@@ -42,15 +42,16 @@ include::partial$params.adoc[tags="authtoken,redirecturl,updateEmail"]
 
 == Response
 
-Type: `Future<<<Profile>>, <<ReachFiveError>>>`
+* *Type*: <<Profile>>
+* *Error*: <<ReachFiveError>>
 
 Return the profile with the updated email address.
 
 The promise will be rejected and will return a `ReachFiveError` if:
 
-- The parameters are invalid,
-- The `full_write` scope is missing,
-- The email template is incomplete.
+* The parameters are invalid,
+* The `full_write` scope is missing,
+* The email template is incomplete.
 
 include::partial$models.adoc[tag=profile]
 

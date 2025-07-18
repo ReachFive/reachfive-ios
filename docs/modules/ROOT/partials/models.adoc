@@ -316,6 +316,9 @@ This is only applicable for the type `email`.
 // end::MfaCredentialsListResponse[]
 
 // tag::MfaTrustedDevice[]
+
+=== MfaTrustedDevice
+
 [cols="3,7a"]
 |===
 |Field |Description

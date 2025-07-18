@@ -35,7 +35,8 @@ include::partial$params.adoc[tag="PasskeySignupRequest"]
 
 == Response
 
-Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+* *Type*: <<AuthToken>>
+* *Error*: <<ReachFiveError>>
 
 include::partial$models.adoc[tag=authtoken]
 

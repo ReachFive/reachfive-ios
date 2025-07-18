@@ -32,6 +32,6 @@ include::partial$params.adoc[tag="ResetPasskeyRequest"]
 
 == Response
 
-Type: `Future<(), <<ReachFiveError>>>`
+*Error*: <<ReachFiveError>>
 
 include::partial$models.adoc[tag=reachfiveerror]

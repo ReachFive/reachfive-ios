@@ -56,7 +56,7 @@ include::partial$params.adoc[tag="redirecturl"]
 
 == Response
 
-Type: `Future<(), <<ReachFiveError>>>`
+*Error*: <<ReachFiveError>>
 
 The profile receives an email or an SMS depending if you pass an email or mobile phone number.
 If the identifier is invalid or if the templates are incomplete, the promise is rejected and returns a `ReachFiveError`.

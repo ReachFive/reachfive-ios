@@ -71,6 +71,6 @@ include::partial$params.adoc[tag="name"]
 
 == Response
 
-Type: `<<Provider>>`
+*Type*: <<Provider>>
 
 include::partial$models.adoc[tag=provider]

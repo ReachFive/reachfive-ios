@@ -34,7 +34,8 @@ include::partial$params.adoc[tag="authtoken"]
 
 == Response
 
-Type: `Future<<<Profile>>, <<ReachFiveError>>>`
+* *Type*: <<<Profile>>
+* *Error*: <<ReachFiveError>>
 
 It will return the fetched profile, otherwise you'll get a `ReachFiveError`.
 

@@ -55,7 +55,8 @@ include::partial$params.adoc[tag="scope"]
 
 == Response
 
-Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+* *Type*: <<AuthToken>>
+* *Error*: <<ReachFiveError>>
 
 Return the profile's authentication token. If the parameters are invalid or if a profile already exists with the same email address, the promise will be rejected and will return a `ReachFiveError`.
 

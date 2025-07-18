@@ -29,7 +29,8 @@ include::partial$params.adoc[tags="authtoken"]
 
 == Response
 
-`Future<[TrustedDevice], ReachFiveError>`
+* *Type*: [<<MfaTrustedDevice>>]
+* *Error*: <<ReachFiveError>>
 
 include::partial$models.adoc[tag=MfaTrustedDevice]
 
