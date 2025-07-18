@@ -7,6 +7,7 @@
 .Guides icon:book[]
 ** xref:guides/account-recovery.adoc[]
 ** xref:guides/passkeys.adoc[]
+** xref:guides/migrate-futures.adoc[]
 
 .Configuration icon:cogs[]
 ** `application`()
