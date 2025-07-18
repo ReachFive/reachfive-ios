@@ -55,7 +55,7 @@ class LoginPasskeyController: UIViewController {
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         let request = NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.nonDiscoverableLogin")
 
-        Task { @MainActor in
+        Task {
             do {
                 switch (usernameField.text) {
                 case .none, .some(""):
@@ -102,7 +102,7 @@ class LoginPasskeyController: UIViewController {
         }
 
         let window: UIWindow = view.window!
-        Task { @MainActor in
+        Task {
             await handleAuthToken(errorMessage: "Signup") {
                 try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "LoginPasskeyController.createAccount"))
             }

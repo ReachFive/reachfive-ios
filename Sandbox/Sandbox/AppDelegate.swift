@@ -215,10 +215,13 @@ extension UIViewController {
             }
             selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             selectMfaAuthTypeAlert.preferredAction = lastAction
-            present(selectMfaAuthTypeAlert, animated: true)
+           Task { @MainActor in
+                present(selectMfaAuthTypeAlert, animated: true)
+           }
         }
     }
 
+    @MainActor
     func showToast(message: String, seconds: Double) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         present(alert, animated: true)
@@ -230,9 +233,10 @@ extension UIViewController {
     private func createSelectMfaAuthTypeAction(type: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
         return UIAlertAction(title: type.rawValue, style: .default) { _ in
             Task {
-                let resp = try await AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken))
-                let authToken = try await self.handleStartVerificationCode(resp, authType: type)
-                self.goToProfile(authToken)
+                await self.handleAuthToken {
+                    let resp = try await AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken))
+                    return try await self.handleStartVerificationCode(resp, authType: type)
+                }
             }
         }
     }
@@ -248,10 +252,9 @@ extension UIViewController {
                 continuation.resume(throwing: ReachFiveError.AuthCanceled)
             }
             func submitVerificationCode(withTrustDevice trustDevice: Bool?) {
-                Task { @MainActor in
+                Task {
                     guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
-                        print("verification code cannot be empty")
-                        continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
+                        continuation.resume(throwing: ReachFiveError.AuthCanceled)
                         return
                     }
                     continuation.resume {
@@ -277,6 +280,7 @@ extension UIViewController {
         }
     }
 
+    @MainActor
     func presentAlert(title: String, message: String) {
         let alert = UIAlertController(
             title: title,

@@ -95,6 +95,7 @@ class DemoController: UIViewController {
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         guard let username = usernameField.text else { return }
 
+        @MainActor
         func goToSignup() {
             if let signupController = storyboard?.instantiateViewController(withIdentifier: "SignupController") as? SignupController {
                 signupController.initialEmail = username
@@ -111,7 +112,7 @@ class DemoController: UIViewController {
                 profile = ProfilePasskeySignupRequest(phoneNumber: username)
             }
 
-            Task { @MainActor in
+            Task {
                 do {
                     let authToken = try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
                     goToProfile(authToken)
@@ -136,7 +137,7 @@ class DemoController: UIViewController {
         guard let pass = passwordField.text, let username = usernameField.text else { return }
 
         if !pass.isEmpty {
-            Task { @MainActor in
+            Task {
                 await loginWithPassword()
             }
             return
@@ -145,7 +146,7 @@ class DemoController: UIViewController {
         if #available(iOS 16.0, *) {
             let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
 
-            Task { @MainActor in
+            Task {
                 do {
                     if username.isEmpty {
                         let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
@@ -158,10 +159,8 @@ class DemoController: UIViewController {
                     #if targetEnvironment(macCatalyst)
                         return
                     #else
-                        Task { @MainActor in
-                            await handleAuthToken {
-                                try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
-                            }
+                        await handleAuthToken {
+                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
                         }
                     #endif
                 } catch {
@@ -215,7 +214,7 @@ extension DemoController: UITextFieldDelegate {
         } else {
             // the password field was focused, defocus it and login
             textField.resignFirstResponder()
-            Task { @MainActor in
+            Task {
                 await loginWithPassword()
             }
         }

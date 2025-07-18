@@ -27,12 +27,12 @@ class LoginWithPasswordController: UIViewController {
     }
 
     @IBAction func login(_ sender: Any) {
-        Task { @MainActor in
-            let email = emailInput.text
-            let phoneNumber = phoneNumberInput.text
-            let customIdentifier = customIdentifierInput.text
-            let password = passwordInput.text ?? ""
+        let email = emailInput.text
+        let phoneNumber = phoneNumberInput.text
+        let customIdentifier = customIdentifierInput.text
+        let password = passwordInput.text ?? ""
 
+        Task {
             await handleLoginFlow {
                 try await AppDelegate.reachfive()
                     .loginWithPassword(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")

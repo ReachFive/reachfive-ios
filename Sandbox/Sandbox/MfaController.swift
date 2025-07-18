@@ -79,7 +79,7 @@ class MfaController: UIViewController {
 
         configureHierarchy()
         configureDataSource()
-        Task { @MainActor in
+        Task {
             try await fetchMfaCredentials()
             try await fetchTrustedDevices()
         }
@@ -101,7 +101,7 @@ class MfaController: UIViewController {
         let mfaAction = MfaAction(presentationAnchor: self)
 
         let stepUpFlow = StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"])
-        Task { @MainActor in
+        Task {
             do {
                 let freshToken = try await mfaAction.mfaStart(stepUp: stepUpFlow)
                 AppDelegate.storage.setToken(freshToken)
@@ -125,7 +125,7 @@ class MfaController: UIViewController {
         }
 
         let mfaAction = MfaAction(presentationAnchor: self)
-        Task { @MainActor in
+        Task {
             do {
                 let registeredCredential = try await mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken)
                 try await self.fetchMfaCredentials()

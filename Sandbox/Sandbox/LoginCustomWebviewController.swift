@@ -38,7 +38,7 @@ extension LoginCustomWebviewController: WKNavigationDelegate {
             token = center.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { (note) in
                 center.removeObserver(token!)
                 if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
-                    Task { @MainActor in
+                    Task {
                         await self.handleAuthToken {
                             try result.get()
                         }

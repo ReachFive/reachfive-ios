@@ -25,8 +25,7 @@ class SignupPasskeyController: UIViewController {
 
         if #available(iOS 16.0, *) {
             let window: UIWindow = view.window!
-            //TODO: est-ce qu'on ne ferait pas une Task.detached, mais on marquerait goToProfile et present(alert) avec Task { @MainActor }
-            Task { @MainActor in
+            Task {
                 await handleAuthToken(errorMessage: "Signup with Passkey failed") {
                     try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "SignupPasskeyController.signup"))
                 }
