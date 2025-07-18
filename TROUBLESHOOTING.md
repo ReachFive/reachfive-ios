@@ -1,4 +1,4 @@
-# Problems encourtered while creating an app using this Pod
+# Problems encountered while creating an app using this Pod
 
 1. Don't forget use_frameworks! in the Podfile
 
