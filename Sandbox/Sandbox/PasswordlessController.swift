@@ -15,7 +15,7 @@ class PasswordlessController: UIViewController {
         super.viewDidLoad()
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { (note) in
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
-                Task { @MainActor in
+                Task {
                     await self.handleAuthToken(errorMessage: "Passwordless failed") {
                         try result.get()
                     }
@@ -25,7 +25,7 @@ class PasswordlessController: UIViewController {
     }
 
     @IBAction func loginWithEmail(_ sender: Any) {
-        Task { @MainActor in
+        Task {
             do {
                 try await AppDelegate.reachfive()
                     .startPasswordless(
@@ -43,7 +43,7 @@ class PasswordlessController: UIViewController {
     }
 
     @IBAction func loginWithPhoneNumber(_ sender: Any) {
-        Task { @MainActor in
+        Task {
             do {
                 try await AppDelegate.reachfive()
                     .startPasswordless(
@@ -67,7 +67,7 @@ class PasswordlessController: UIViewController {
             verificationCode: verificationCodeInput.text ?? "",
             origin: "PasswordlessController.verifyCode"
         )
-        Task { @MainActor in
+        Task {
             await handleAuthToken(errorMessage: "Verify code failed") {
                 try await AppDelegate.reachfive().verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
             }

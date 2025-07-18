@@ -5,13 +5,13 @@ class PasskeyNonDiscoverableController: UIViewController {
     @IBOutlet weak var username: UITextField!
 
     @IBAction func loginWithImmediatelyAvailableCredentials(_ sender: Any) {
-        Task { @MainActor in
+        Task {
             await login(display: .IfImmediatelyAvailableCredentials)
         }
     }
 
     @IBAction func loginAlways(_ sender: Any) {
-        Task { @MainActor in
+        Task {
             await login(display: .Always)
         }
     }

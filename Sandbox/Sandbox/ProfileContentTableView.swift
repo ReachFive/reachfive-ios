@@ -30,7 +30,7 @@ extension ProfileController {
 
             case EmailVerificationResponse.Success:
                 self.presentAlert(title: "Email verification", message: "Success")
-                await self.fetchProfile()
+                self.fetchProfile()
 
             case let EmailVerificationResponse.VerificationNeeded(continueEmailVerification):
                 let alert = UIAlertController(title: "Email verification", message: "Please enter the code you received by Email", preferredStyle: .alert)
@@ -39,7 +39,7 @@ extension ProfileController {
                 }
                 let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
                 let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
-                    Task { @MainActor in
+                    Task {
                         guard let verificationCode = alert.textFields?[0].text else {
                             print("VerificationCode cannot be empty")
                             return
@@ -47,7 +47,7 @@ extension ProfileController {
                         do {
                             let _ = try await continueEmailVerification.verify(code: verificationCode, email: email)
                             self.presentAlert(title: "Email verification", message: "Success")
-                            await self.fetchProfile()
+                            self.fetchProfile()
                         } catch {
                             self.presentErrorAlert(title: "Email verification failed", error)
                         }
@@ -72,15 +72,14 @@ extension ProfileController {
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         let submitPhoneNumber = UIAlertAction(title: "Submit", style: .default) { _ in
-            Task { @MainActor in
+            Task {
                 guard let phoneNumber = alert.textFields?[0].text else {
                     print("Phone number cannot be empty")
                     return
                 }
                 do {
                     let profile = try await AppDelegate.reachfive().updatePhoneNumber(authToken: authToken, phoneNumber: phoneNumber)
-                    self.profile = profile
-                    self.profileData.reloadData()
+                    self.reaload(updated: profile)
                 } catch {
                     self.presentErrorAlert(title: "\(titre) failed", error)
                 }
@@ -98,7 +97,7 @@ extension ProfileController {
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         let submitAction = UIAlertAction(title: "Submit", style: .default) { _ in
-            Task { @MainActor in
+            Task {
                 guard let newValue = alert.textFields?[0].text, !newValue.isEmpty else {
                     print("\(fieldName) cannot be empty")
                     return
@@ -114,11 +113,16 @@ extension ProfileController {
     func updateProfileField(titre: String, authToken: AuthToken, update: ProfileUpdate) async {
         do {
             let profile = try await AppDelegate.reachfive().updateProfile(authToken: authToken, profileUpdate: update)
-            self.profile = profile
-            self.profileData.reloadData()
+            reaload(updated: profile)
         } catch {
             self.presentErrorAlert(title: "\(titre) failed", error)
         }
+    }
+
+    @MainActor
+    func reaload(updated profile: Profile) {
+        self.profile = profile
+        self.profileData.reloadData()
     }
 }
 
@@ -168,7 +172,7 @@ extension ProfileController: UITableViewDataSource {
             children.append(updatePhone)
             if field.value != nil {
                 let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "minus.circle.fill")) { action in
-                    Task { @MainActor in
+                    Task {
                         await self.updateProfileField(titre: "Delete Phone number", authToken: token, update: ProfileUpdate(phoneNumber: .Delete))
                     }
                 }
@@ -187,7 +191,7 @@ extension ProfileController: UITableViewDataSource {
                 children.append(updateAction)
                 if field.value != nil {
                     let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "minus.circle.fill")) { action in
-                        Task { @MainActor in
+                        Task {
                             await self.updateProfileField(titre: "Delete \(name)", authToken: token, update: updater(.Delete))
                         }
                     }
@@ -230,7 +234,7 @@ extension ProfileController: UITableViewDataSource {
                 if(field.value != nil && field.value!.contains(" ✘")) {
                     let email = field.value!.split(separator: " ").first
                     let emailVerification = UIAction(title: "Verify Email", image: UIImage(systemName: "lock")) { _ in
-                        Task { @MainActor in
+                        Task {
                             await self.emailVerificationCode(authToken: token, email: email!.base)
                         }
                     }
@@ -248,7 +252,7 @@ extension ProfileController: UITableViewDataSource {
 
                 let mfaRegister = UIAction(title: "Enroll your \(credential.credentialType) as MFA", image: UIImage(systemName: "key")) { _ in
                     let mfaAction = MfaAction(presentationAnchor: self)
-                    Task { @MainActor in
+                    Task {
                         do {
                             let _ = try await mfaAction.mfaStart(registering: credential, authToken: token)
                             await self.fetchProfile()

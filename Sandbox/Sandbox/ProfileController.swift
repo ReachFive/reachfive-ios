@@ -57,7 +57,7 @@ class ProfileController: UIViewController {
                     switch result {
                     case .success():
                         self.presentAlert(title: "Email mfa registering", message: "Email mfa registering success")
-                        await self.fetchProfile()
+                        self.fetchProfile()
                     case .failure(let error):
                         self.presentErrorAlert(title: "Email mfa registering failed", error)
                     }
@@ -72,7 +72,7 @@ class ProfileController: UIViewController {
                     switch result {
                     case .success():
                         self.presentAlert(title: "Email validation", message: "Email validation success")
-                        await self.fetchProfile()
+                        self.fetchProfile()
                     case .failure(let error):
                         self.presentErrorAlert(title: "Email validation failed", error)
                     }
@@ -100,13 +100,11 @@ class ProfileController: UIViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        Task { @MainActor in
-            print("ProfileController.viewWillAppear")
-            await fetchProfile()
-        }
+        print("ProfileController.viewWillAppear")
+        fetchProfile()
     }
 
-    func fetchProfile() async {
+    func fetchProfile() {
         print("ProfileController.fetchProfile")
 
         authToken = AppDelegate.storage.getToken()
@@ -114,26 +112,28 @@ class ProfileController: UIViewController {
             print("not logged in")
             return
         }
-        do {
-            let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
-            self.profile = profile
-            self.profileData.reloadData()
-            self.mfaButton.isHidden = false
-            self.editProfileButton.isHidden = false
-            self.passkeyButton.isHidden = false
+        Task { @MainActor in
+            do {
+                let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
+                self.profile = profile
+                self.profileData.reloadData()
+                self.mfaButton.isHidden = false
+                self.editProfileButton.isHidden = false
+                self.passkeyButton.isHidden = false
 
-            await self.setStatusImage(authToken: authToken)
-        } catch {
-            self.didLogout()
-            if authToken.refreshToken != nil {
-                // the token is probably expired, but it is still possible that it can be refreshed
-                self.profileTabBarItem.image = SandboxTabBarController.tokenExpiredButRefreshable
-                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
-            } else {
-                self.profileTabBarItem.image = SandboxTabBarController.loggedOut
-                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+                await self.setStatusImage(authToken: authToken)
+            } catch {
+                self.didLogout()
+                if authToken.refreshToken != nil {
+                    // the token is probably expired, but it is still possible that it can be refreshed
+                    self.profileTabBarItem.image = SandboxTabBarController.tokenExpiredButRefreshable
+                    self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+                } else {
+                    self.profileTabBarItem.image = SandboxTabBarController.loggedOut
+                    self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+                }
+                print("getProfile error = \(error.localizedDescription)")
             }
-            print("getProfile error = \(error.localizedDescription)")
         }
     }
 
@@ -168,12 +168,10 @@ class ProfileController: UIViewController {
     }
 
     @IBAction func logoutAction(_ sender: Any) {
-        Task { @MainActor in
-            defer {
-                AppDelegate.storage.removeToken()
-                self.navigationController?.popViewController(animated: true)
-            }
-            try await AppDelegate.reachfive().logout()
+        Task {
+            try? await AppDelegate.reachfive().logout()
+            AppDelegate.storage.removeToken()
+            self.navigationController?.popViewController(animated: true)
         }
     }
 

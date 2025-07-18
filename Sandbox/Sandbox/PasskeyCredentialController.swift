@@ -32,8 +32,8 @@ class PasskeyCredentialController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         print("PasskeyCredentialController.viewWillAppear")
-        Task { @MainActor in
-            super.viewWillAppear(animated)
+        super.viewWillAppear(animated)
+        Task {
             if let authToken = AppDelegate.storage.getToken() {
                 await self.reloadCredentials(authToken: authToken)
             }
@@ -57,7 +57,7 @@ class PasskeyCredentialController: UIViewController {
 
     @available(iOS 16.0, *)
     @IBAction func registerNewPasskey(_ sender: Any) {
-        Task { @MainActor in
+        Task {
             print("registerNewPasskey")
             guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
             guard let authToken = AppDelegate.storage.getToken() else {
@@ -80,12 +80,10 @@ class PasskeyCredentialController: UIViewController {
                 alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
                 let registerAction = UIAlertAction(title: "Add", style: .default) { [unowned alert] (_) in
                     let textField = alert.textFields?[0]
-                    Task { @MainActor in
+                    Task {
                         let request = NewPasskeyRequest(anchor: window, friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey")
                         do {
-                            try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
-                                try await AppDelegate.reachfive().registerNewPasskey(withRequest: request, authToken: refreshableToken)
-                            }
+                            try await AppDelegate.reachfive().registerNewPasskey(withRequest: request, authToken: authToken)
                             await self.reloadCredentials(authToken: authToken)
                         } catch {
                             self.presentErrorAlert(title: "New passkey registration failed", error)

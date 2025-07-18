@@ -8,7 +8,7 @@ class UpdatePasswordController: UIViewController {
     @IBOutlet weak var username: UITextField!
 
     override func viewWillAppear(_ animated: Bool) {
-        Task { @MainActor in
+        Task {
             authToken = AppDelegate.storage.getToken()
             if let authToken {
                 let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
@@ -20,7 +20,7 @@ class UpdatePasswordController: UIViewController {
     }
 
     @IBAction func update(_ sender: Any) {
-        Task { @MainActor in
+        Task {
             if let authToken {
                 do {
                     try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
