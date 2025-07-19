@@ -1774,6 +1774,40 @@
                                     <action selector="startStepUp:" destination="oW2-ti-e1U" eventType="touchUpInside" id="tap-ln-Lt7"/>
                                 </connections>
                             </button>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="credentialsTableView-ID">
+                                <rect key="frame" x="0.0" y="350" width="393" height="200"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="credentialsTableViewHeightConstraint-ID"/>
+                                </constraints>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="CredentialCell" id="credentialCell-ID" customClass="CredentialTableViewCell" customModule="Sandbox" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="50" width="393" height="51.666667938232422"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="credentialCell-ID" id="credentialCellContentView-ID">
+                                            <rect key="frame" x="0.0" y="0.0" width="393" height="51.666667938232422"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="trustedDevicesTableView-ID">
+                                <rect key="frame" x="0.0" y="560" width="393" height="200"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="trustedDevicesTableViewHeightConstraint-ID"/>
+                                </constraints>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TrustedDeviceCell" id="trustedDeviceCell-ID" customClass="TrustedDeviceTableViewCell" customModule="Sandbox" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="50" width="393" height="51.666667938232422"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="trustedDeviceCell-ID" id="trustedDeviceCellContentView-ID">
+                                            <rect key="frame" x="0.0" y="0.0" width="393" height="51.666667938232422"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="d4u-HN-3F3"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -1784,17 +1818,25 @@
                             <constraint firstItem="eWw-Lr-dWC" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="3J7-ip-0VJ" secondAttribute="trailingMargin" id="JxC-fl-jZI"/>
                             <constraint firstItem="eWw-Lr-dWC" firstAttribute="top" secondItem="pM9-yn-BLG" secondAttribute="bottom" constant="20" id="R4a-El-h7A"/>
                             <constraint firstItem="d4u-HN-3F3" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="pM9-yn-BLG" secondAttribute="trailing" id="ZPT-fM-gyS"/>
+                            <constraint firstItem="credentialsTableView-ID" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" id="credentialsTableViewLeadingConstraint-ID"/>
+                            <constraint firstItem="credentialsTableView-ID" firstAttribute="top" secondItem="bP6-fJ-u2I" secondAttribute="bottom" constant="33.666666666666686" id="credentialsTableViewTopConstraint-ID"/>
+                            <constraint firstItem="credentialsTableView-ID" firstAttribute="trailing" secondItem="d4u-HN-3F3" secondAttribute="trailing" id="credentialsTableViewTrailingConstraint-ID"/>
                             <constraint firstItem="eWw-Lr-dWC" firstAttribute="leading" secondItem="pM9-yn-BLG" secondAttribute="leading" id="deN-00-389"/>
                             <constraint firstItem="bP6-fJ-u2I" firstAttribute="top" secondItem="eWw-Lr-dWC" secondAttribute="bottom" constant="20" id="mVG-83-IwB"/>
+                            <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" id="trustedDevicesTableViewLeadingConstraint-ID"/>
+                            <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="top" secondItem="credentialsTableView-ID" secondAttribute="bottom" constant="10" id="trustedDevicesTableViewTopConstraint-ID"/>
+                            <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="trailing" secondItem="d4u-HN-3F3" secondAttribute="trailing" id="trustedDevicesTableViewTrailingConstraint-ID"/>
                             <constraint firstItem="pM9-yn-BLG" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" constant="20.000000000000007" id="vba-uP-qtQ"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="MFA Credentials" id="zJI-Nr-w8b" userLabel="MFA Phone Number Registration"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="credentialsTableView" destination="credentialsTableView-ID" id="dwO-5a-Wur"/>
                         <outlet property="phoneNumberMfaRegistration" destination="eWw-Lr-dWC" id="6r4-rN-rpc"/>
                         <outlet property="selectedStepUpType" destination="xO1-vg-5iz" id="U2h-gt-qDP"/>
                         <outlet property="startStepUp" destination="cS0-d5-6IH" id="lFR-vh-Wxx"/>
+                        <outlet property="trustedDevicesTableView" destination="trustedDevicesTableView-ID" id="trustedDevicesTableViewOutlet-ID"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xLq-6O-6FR" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
