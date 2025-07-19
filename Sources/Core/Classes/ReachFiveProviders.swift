@@ -1,5 +1,4 @@
 import Foundation
-import BrightFutures
 
 public extension ReachFive {
     func getProvider(name: String) -> Provider? {
@@ -10,27 +9,29 @@ public extension ReachFive {
         providers
     }
 
-    func reinitialize() -> Future<[Provider], ReachFiveError> {
-        reachFiveApi.clientConfig().flatMap({ clientConfig -> Future<[Provider], ReachFiveError> in
-            self.clientConfig = clientConfig
-            self.scope = clientConfig.scope.components(separatedBy: " ")
-            let variants = Dictionary(uniqueKeysWithValues: self.providersCreators.map { ($0.name, $0.variant) })
-            return self.reachFiveApi.providersConfigs(variants: variants).map { providersConfigs in
-                let providers = self.createProviders(providersConfigsResult: providersConfigs, clientConfigResponse: clientConfig)
-                self.providers = providers
-                self.state = .Initialized
-                return providers
-            }
-        })
+    func reinitialize() async throws -> [Provider] {
+        let clientConfig = try await reachFiveApi.clientConfig()
+
+        self.clientConfig = clientConfig
+        self.scope = clientConfig.scope.components(separatedBy: " ")
+
+        let variants = Dictionary(uniqueKeysWithValues: self.providersCreators.map { ($0.name, $0.variant) })
+        let providersConfigs = try await self.reachFiveApi.providersConfigs(variants: variants)
+        let providers = self.createProviders(providersConfigsResult: providersConfigs, clientConfigResponse: clientConfig)
+
+        self.providers = providers
+        self.state = .Initialized
+
+        return providers
     }
 
-    func initialize() -> Future<[Provider], ReachFiveError> {
+    func initialize() async throws -> [Provider] {
         switch state {
         case .NotInitialized:
-            return reinitialize()
+            return try await reinitialize()
 
         case .Initialized:
-            return Future(value: providers)
+            return providers
         }
     }
 

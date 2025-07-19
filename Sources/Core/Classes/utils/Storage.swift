@@ -16,17 +16,19 @@ public class UserDefaultsStorage: Storage {
     }
     
     public func get<T: Codable>(key: String) -> T? {
-        if let data = UserDefaults.standard.value(forKey: key) as? Data {
-            return try? JSONDecoder().decode(T.self, from: data)
-        } else {
+        guard let data = UserDefaults.standard.value(forKey: key) as? Data else {
             return nil
         }
+        
+        return try? JSONDecoder().decode(T.self, from: data)
     }
     
     public func take<D>(key: String) -> D? where D: Decodable, D: Encodable {
-        let value: D? = get(key: key)
-        clear(key: key)
-        return value
+        defer {
+            clear(key: key)
+        }
+
+        return get(key: key)
     }
     
     public func clear(key: String) {

@@ -1,95 +1,90 @@
-import BrightFutures
 import Foundation
 import Reach5
 import UIKit
 
 class MfaController: UIViewController {
     @IBOutlet var phoneNumberMfaRegistration: UITextField!
-    
+
     var listMfaCredentialsView: UICollectionView! = nil
-    
+
     var listMfaTrustedDevicesView: UICollectionView! = nil
-    
+
     @IBOutlet var selectedStepUpType: UISegmentedControl!
-    
+
     @IBOutlet var startStepUp: UIButton!
-    
+
     enum Section {
         case main
         case trusted
     }
-    
+
     var listMfaCredentialsDataSource: UICollectionViewDiffableDataSource<Section, MfaCredential>! = nil
-    
+
     var currentListMfaCredentialSnapshot: NSDiffableDataSourceSnapshot<Section, MfaCredential>! = nil
-    
+
     var listMfaTrustedDevicesDataSource: UICollectionViewDiffableDataSource<Section, TrustedDevice>! = nil
-    
+
     var currentListMfaTrustedDeviceSnapshot: NSDiffableDataSourceSnapshot<Section, TrustedDevice>! = nil
-    
+
     var mfaCredentialsToDisplay: [MfaCredential] = [] {
         didSet {
             currentListMfaCredentialSnapshot.appendItems(mfaCredentialsToDisplay)
             listMfaCredentialsDataSource.apply(currentListMfaCredentialSnapshot)
         }
     }
-    
+
     var mfaTrustedDevicesToDisplay: [TrustedDevice] = [] {
         didSet {
             currentListMfaTrustedDeviceSnapshot.appendItems(mfaTrustedDevicesToDisplay)
             listMfaTrustedDevicesDataSource.apply(currentListMfaTrustedDeviceSnapshot)
         }
     }
-    
+
     var tokenNotification: NSObjectProtocol?
-    
-    private func fetchMfaCredentials() {
+
+    private func fetchMfaCredentials() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
             return
         }
-        AppDelegate.reachfive()
-            .mfaListCredentials(authToken: authToken)
-            .onSuccess { response in
-                self.mfaCredentialsToDisplay = response.credentials.map { MfaCredential.convert(from: $0) }
-            }
+        let response = try await AppDelegate.reachfive().mfaListCredentials(authToken: authToken)
+        self.mfaCredentialsToDisplay = response.credentials.map { MfaCredential.convert(from: $0) }
     }
-    
-    private func fetchTrustedDevices() {
+
+    private func fetchTrustedDevices() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
             return
         }
-        AppDelegate.reachfive()
-            .mfaListTrustedDevices(authToken: authToken)
-            .onSuccess { response in
-                self.mfaTrustedDevicesToDisplay = response
-            }
+        let response = try await AppDelegate.reachfive().mfaListTrustedDevices(authToken: authToken)
+        self.mfaTrustedDevicesToDisplay = response
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
-            if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
-                self.dismiss(animated: true)
-                switch result {
-                case let .success(freshToken):
-                    AppDelegate.storage.setToken(freshToken)
-                    let alert = AppDelegate.createAlert(title: "Step up", message: "Success")
-                    self.present(alert, animated: true)
-                case let .failure(error):
-                    let alert = AppDelegate.createAlert(title: "Step failed", message: "Error: \(error.message())")
-                    self.present(alert, animated: true)
+            Task { @MainActor in
+                if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
+                    self.dismiss(animated: true)
+                    switch result {
+                    case let .success(freshToken):
+                        AppDelegate.storage.setToken(freshToken)
+                        self.presentAlert(title: "Step up", message: "Success")
+                    case let .failure(error):
+                        self.presentErrorAlert(title: "Step up failed", error)
+                    }
                 }
             }
         }
 
         configureHierarchy()
         configureDataSource()
-        fetchMfaCredentials()
-        fetchTrustedDevices()
+        Task {
+            try await fetchMfaCredentials()
+            try await fetchTrustedDevices()
+        }
     }
-    
+
     @IBAction func startStepUp(_ sender: UIButton) {
         print("MfaController.startStepUp")
         guard let authToken = AppDelegate.storage.getToken() else {
@@ -104,13 +99,20 @@ class MfaController: UIViewController {
             MfaCredentialItemType.sms
         }
         let mfaAction = MfaAction(presentationAnchor: self)
-        
-        mfaAction.mfaStart(stepUp: StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"]), authToken: authToken).onSuccess { freshToken in
-            AppDelegate.storage.setToken(freshToken)
-            self.fetchTrustedDevices()
+
+        let stepUpFlow = StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"])
+        Task {
+            do {
+                let freshToken = try await mfaAction.mfaStart(stepUp: stepUpFlow)
+                AppDelegate.storage.setToken(freshToken)
+                try await self.fetchTrustedDevices()
+                self.presentAlert(title: "Step up", message: "Success")
+            } catch {
+                self.presentErrorAlert(title: "Step up failed", error)
+            }
         }
     }
-    
+
     @IBAction func startMfaPhoneRegistration(_ sender: UIButton) {
         print("MfaController.startMfaPhoneRegistration")
         guard let authToken = AppDelegate.storage.getToken() else {
@@ -121,160 +123,105 @@ class MfaController: UIViewController {
             print("phone number cannot be empty")
             return
         }
-        
+
         let mfaAction = MfaAction(presentationAnchor: self)
-        mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken).onSuccess { _ in
-            self.fetchMfaCredentials()
+        Task {
+            do {
+                let registeredCredential = try await mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken)
+                try await self.fetchMfaCredentials()
+                self.presentAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
+            } catch {
+                self.presentErrorAlert(title: "Start MFA Phone Number Registration failed", error)
+            }
         }
     }
 }
 
 class MfaAction {
     let presentationAnchor: UIViewController
-    
+
     public init(presentationAnchor: UIViewController) {
         self.presentationAnchor = presentationAnchor
     }
-    
-    func mfaStart(registering credential: Credential, authToken: AuthToken) -> Future<MfaCredentialItem, ReachFiveError> {
-        let future = AppDelegate.reachfive()
-            .mfaStart(registering: credential, authToken: authToken)
-            .recoverWith { error in
-                guard case let .AuthFailure(reason: _, apiError: apiError) = error,
-                      let key = apiError?.errorMessageKey,
-                      key == "error.accessToken.freshness"
-                else {
-                    return Future(error: error)
-                }
-                
-                // Automatically refresh the token if it is stale
-                return AppDelegate.reachfive()
-                    .refreshAccessToken(authToken: authToken).flatMap { (freshToken: AuthToken) in
-                        AppDelegate.storage.setToken(freshToken)
-                        return AppDelegate.reachfive()
-                            .mfaStart(registering: credential, authToken: freshToken)
-                    }
-            }
-            .flatMap { resp in
-                self.handleStartVerificationCode(resp)
-            }
-            .onFailure { error in
-                let alert = AppDelegate.createAlert(title: "Start MFA \(credential.credentialType) Registration", message: "Error: \(error.message())")
-                self.presentationAnchor.present(alert, animated: true)
-            }
-        
-        return future
+
+    func mfaStart(registering credential: Credential, authToken: AuthToken) async throws -> MfaCredentialItem {
+        let resp = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
+            try await AppDelegate.reachfive().mfaStart(registering: credential, authToken: refreshableToken)
+        }
+        return try await self.handleStartVerificationCode(resp)
     }
-    
-    func mfaStart(stepUp startStepUp: StartStepUp, authToken: AuthToken) -> Future<AuthToken, ReachFiveError> {
-        return AppDelegate.reachfive()
-            .mfaStart(stepUp: startStepUp)
-            .recoverWith { error in
-                guard case let .AuthFailure(reason: _, apiError: apiError) = error,
-                      let key = apiError?.errorMessageKey,
-                      key == "error.accessToken.freshness"
-                else {
-                    return Future(error: error)
+
+    func mfaStart(stepUp startStepUp: StartStepUp) async throws -> AuthToken {
+        let resp = try await AppDelegate.reachfive().mfaStart(stepUp: startStepUp)
+        return try await self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
+    }
+
+    private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) async throws -> AuthToken {
+        return try await withCheckedThrowingContinuation { continuation in
+            Task { @MainActor in
+                let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
+                alert.addTextField { textField in
+                    textField.placeholder = "Verification code"
+                }
+                let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                    continuation.resume(throwing: ReachFiveError.AuthCanceled)
                 }
 
-                return AppDelegate.reachfive()
-                    .refreshAccessToken(authToken: authToken).flatMap { (freshToken: AuthToken) in
-                        AppDelegate.storage.setToken(freshToken)
-                        return AppDelegate.reachfive()
-                            .mfaStart(stepUp: startStepUp)
+                let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
+                    guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
+                        continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
+                        return
                     }
+                    continuation.resume {
+                        try await resp.verify(code: verificationCode)
+                    }
+                }
+                alert.addAction(cancelAction)
+                alert.addAction(submitVerificationCode)
+                alert.preferredAction = submitVerificationCode
+                presentationAnchor.present(alert, animated: true)
             }
-            .flatMap { resp in
-                self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
-            }
-            .onFailure { error in
-                let alert = AppDelegate.createAlert(title: "Step up", message: "Error: \(error.message())")
-                self.presentationAnchor.present(alert, animated: true)
-            }
+        }
     }
-    
-    private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) -> Future<AuthToken, ReachFiveError> {
-        let promise: Promise<AuthToken, ReachFiveError> = Promise()
-        let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
-        alert.addTextField { textField in
-            textField.placeholder = "Verification code"
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-            promise.failure(.AuthCanceled)
-        }
-        
-        let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
-            guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
-                print("verification code cannot be empty")
-                promise.failure(.AuthFailure(reason: "no verification code"))
-                return
-            }
-            let future = resp.verify(code: verificationCode)
-            promise.completeWith(future)
-            future
-                .onSuccess { _ in
-                    let alert = AppDelegate.createAlert(title: "Step Up", message: "Success")
-                    self.presentationAnchor.present(alert, animated: true)
-                }
-                .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
-                    self.presentationAnchor.present(alert, animated: true)
-                }
-        }
-        alert.addAction(cancelAction)
-        alert.addAction(submitVerificationCode)
-        alert.preferredAction = submitVerificationCode
-        presentationAnchor.present(alert, animated: true)
-        return promise.future
-    }
-    
-    private func handleStartVerificationCode(_ resp: MfaStartRegistrationResponse) -> Future<MfaCredentialItem, ReachFiveError> {
-        let promise: Promise<MfaCredentialItem, ReachFiveError> = Promise()
-        switch resp {
-        case let .Success(registeredCredential):
-            let alert = AppDelegate.createAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
-            presentationAnchor.present(alert, animated: true)
-            promise.success(registeredCredential)
-        
-        case let .VerificationNeeded(continueRegistration):
-            let canal =
-                switch continueRegistration.credentialType {
-                case .Email: "Email"
-                case .PhoneNumber: "SMS"
-                }
-            
-            let alert = UIAlertController(title: "Verification Code", message: "Please enter the verification Code you got by \(canal)", preferredStyle: .alert)
-            alert.addTextField { textField in
-                textField.placeholder = "Verification code"
-            }
-            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-                promise.failure(.AuthCanceled)
-            }
-            
-            let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
-                guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
-                    print("verification code cannot be empty")
-                    promise.failure(.AuthFailure(reason: "no verification code"))
-                    return
-                }
-                let future = continueRegistration.verify(code: verificationCode)
-                promise.completeWith(future)
-                future
-                    .onSuccess { succ in
-                        let alert = AppDelegate.createAlert(title: "Verify MFA \(succ.type) registration", message: "Success")
-                        self.presentationAnchor.present(alert, animated: true)
+
+    private func handleStartVerificationCode(_ resp: MfaStartRegistrationResponse) async throws -> MfaCredentialItem {
+        return try await withCheckedThrowingContinuation { continuation in
+            Task { @MainActor in
+                switch resp {
+                case let .Success(registeredCredential):
+                    continuation.resume(returning: registeredCredential)
+
+                case let .VerificationNeeded(continueRegistration):
+                    let canal =
+                    switch continueRegistration.credentialType {
+                    case .Email: "Email"
+                    case .PhoneNumber: "SMS"
                     }
-                    .onFailure { error in
-                        let alert = AppDelegate.createAlert(title: "MFA \(continueRegistration.credentialType) failure", message: "Error: \(error.message())")
-                        self.presentationAnchor.present(alert, animated: true)
+
+                    let alert = UIAlertController(title: "Verification Code", message: "Please enter the verification Code you got by \(canal)", preferredStyle: .alert)
+                    alert.addTextField { textField in
+                        textField.placeholder = "Verification code"
                     }
+                    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                        continuation.resume(throwing: ReachFiveError.AuthCanceled)
+                    }
+
+                    let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
+                        guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
+                            continuation.resume(throwing: ReachFiveError.AuthFailure(reason: "no verification code"))
+                            return
+                        }
+                        continuation.resume {
+                            try await continueRegistration.verify(code: verificationCode)
+                        }
+                    }
+                    alert.addAction(cancelAction)
+                    alert.addAction(submitVerificationCode)
+                    alert.preferredAction = submitVerificationCode
+                    presentationAnchor.present(alert, animated: true)
+                }
             }
-            alert.addAction(cancelAction)
-            alert.addAction(submitVerificationCode)
-            alert.preferredAction = submitVerificationCode
-            presentationAnchor.present(alert, animated: true)
         }
-        return promise.future
     }
 }
 
@@ -282,26 +229,26 @@ extension MfaController {
     func createLayout(_ elementKind: String) -> UICollectionViewLayout {
         let sectionProvider = { (_: Int,
                                  _: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
-                                                      heightDimension: .fractionalHeight(0.1))
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                    
-                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.95),
-                                                       heightDimension: .absolute(250))
-                let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-            
-                let section = NSCollectionLayoutSection(group: group)
-                section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
+                                                  heightDimension: .fractionalHeight(0.1))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-                let titleSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                       heightDimension: .estimated(22))
-                let titleSupplementary = NSCollectionLayoutBoundarySupplementaryItem(
-                    layoutSize: titleSize,
-                    elementKind: elementKind,
-                    alignment: .top)
-                titleSupplementary.pinToVisibleBounds = true
-                section.boundarySupplementaryItems = [titleSupplementary]
-                return section
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.95),
+                                                   heightDimension: .absolute(250))
+            let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+
+            let section = NSCollectionLayoutSection(group: group)
+            section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+
+            let titleSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                   heightDimension: .estimated(22))
+            let titleSupplementary = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: titleSize,
+                elementKind: elementKind,
+                alignment: .top)
+            titleSupplementary.pinToVisibleBounds = true
+            section.boundarySupplementaryItems = [titleSupplementary]
+            return section
         }
 
         let config = UICollectionViewCompositionalLayoutConfiguration()
@@ -311,7 +258,7 @@ extension MfaController {
             sectionProvider: sectionProvider, configuration: config)
         return layout
     }
-    
+
     func configureHierarchy() {
         listMfaCredentialsView = UICollectionView(frame: .zero, collectionViewLayout: createLayout("Mfa credentials"))
         listMfaCredentialsView?.translatesAutoresizingMaskIntoConstraints = false
@@ -330,7 +277,7 @@ extension MfaController {
             listMfaTrustedDevicesView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
     }
-    
+
     private func configureDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<CredentialCollectionViewCell, MfaCredential> { cell, _, credential in
             cell.configure(with: credential)
@@ -344,7 +291,7 @@ extension MfaController {
             (supplementaryView, _, _) in
             supplementaryView.label.text = "Enrolled MFA credentials"
         }
-        
+
         listMfaCredentialsDataSource.supplementaryViewProvider = { _, _, index in
             self.listMfaCredentialsView.collectionViewLayout.collectionView?.dequeueConfiguredReusableSupplementary(
                 using: supplementaryRegistration, for: index)
@@ -353,7 +300,7 @@ extension MfaController {
         currentListMfaCredentialSnapshot.appendSections([.main])
         currentListMfaCredentialSnapshot.appendItems(mfaCredentialsToDisplay)
         listMfaCredentialsDataSource.apply(currentListMfaCredentialSnapshot, animatingDifferences: false)
-        
+
         let cellTrustedDeviceRegistration = UICollectionView.CellRegistration<TrustedDeviceCollectionViewCell, TrustedDevice> { cell, _, trustedDevice in
             cell.configure(with: trustedDevice)
         }
@@ -361,7 +308,7 @@ extension MfaController {
             (collectionView: UICollectionView, indexPath: IndexPath, trustedDevice: TrustedDevice) -> UICollectionViewCell? in
             collectionView.dequeueConfiguredReusableCell(using: cellTrustedDeviceRegistration, for: indexPath, item: trustedDevice)
         }
-        
+
         let supplementaryTrustedDeviceRegistration = UICollectionView.SupplementaryRegistration<TitleSupplementaryView>(elementKind: "Mfa trusted devices") {
             supplementaryView, _, _ in
             supplementaryView.label.text = "Added trusted devices"
@@ -379,54 +326,54 @@ extension MfaController {
 
 class TrustedDeviceCollectionViewCell: UICollectionViewListCell {
     static let identifier = "TrustedDeviceCollectionViewCell"
-    
+
     let id: UILabel = {
         let label = UILabel()
         return label
     }()
-    
+
     let userId: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .body)
 
         return label
     }()
-    
+
     let ip: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .body)
 
         return label
     }()
-    
+
     let createdAt: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .body)
 
         return label
     }()
-    
+
     let operatingSystem: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .body)
 
         return label
     }()
-    
+
     let deviceClass: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .body)
 
         return label
     }()
-    
+
     let deviceName: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .body)
 
         return label
     }()
-    
+
     let deleteButton: UIButton = {
         let uiButton = UIButton()
         uiButton.tintColor = UIColor.red
@@ -438,40 +385,40 @@ class TrustedDeviceCollectionViewCell: UICollectionViewListCell {
 extension TrustedDeviceCollectionViewCell {
     public func configure(with trustedDevice: TrustedDevice) {
         id.text = trustedDevice.id
-        
+
         ip.text = trustedDevice.metadata.ip
         ip.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(ip)
-        
+
         operatingSystem.text = trustedDevice.metadata.operatingSystem
         operatingSystem.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(operatingSystem)
-        
+
         deviceClass.text = trustedDevice.metadata.deviceClass
         deviceClass.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(deviceClass)
-        
+
         deviceName.text = trustedDevice.metadata.deviceName
         deviceName.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(deviceName)
-        
+
         createdAt.text = trustedDevice.createdAt.components(separatedBy: "T")[0]
         createdAt.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(createdAt)
-        
+
         deleteButton.frame = CGRect(x: contentView.frame.width - 20, y: 0, width: 20, height: 20)
         deleteButton.addTarget(self, action: #selector(deleteTrustedDeviceButtonTapped), for: UIControl.Event.touchUpInside)
         contentView.addSubview(deleteButton)
-        
+
         let fontSize = contentView.frame.size.width < 330 ? 6.0 : 9.0
         createdAt.font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
         ip.font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
         operatingSystem.font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
         deviceClass.font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
         deviceName.font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
-        
+
         let spacing = CGFloat(contentView.frame.width/6.5)
-    
+
         NSLayoutConstraint.activate([
             ip.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             operatingSystem.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 1.2 * spacing),
@@ -490,16 +437,20 @@ extension TrustedDeviceCollectionViewCell {
             print("identifier cannot be nil")
             return
         }
-        
+
         let alert = UIAlertController(title: "Remove trusted device", message: "Are you sure you want to remove the trusted device ?", preferredStyle: .alert)
-        
+
         let cancelAction = UIAlertAction(title: "No", style: .cancel) { _ in
         }
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
-            AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
-                .onSuccess { _ in
+            Task { @MainActor in
+                do {
+                    try await AppDelegate().reachfive.mfaDelete(trustedDeviceId: deviceId, authToken: authToken)
                     self.contentView.removeFromSuperview()
+                } catch {
+                    self.window?.rootViewController?.presentErrorAlert(title: "Remove trusted device failed", error)
                 }
+            }
         }
         alert.addAction(cancelAction)
         alert.addAction(approveRemove)
@@ -513,17 +464,17 @@ class CredentialCollectionViewCell: UICollectionViewListCell {
     let id: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .body)
-        
+
         return label
     }()
-    
+
     let createdAt: UILabel = {
         let label = UILabel()
         label.font = UIFont.preferredFont(forTextStyle: .body)
 
         return label
     }()
-    
+
     let deleteButton: UIButton = {
         let uiButton = UIButton()
         uiButton.tintColor = UIColor.red
@@ -541,17 +492,17 @@ extension CredentialCollectionViewCell {
         createdAt.text = credential.createdAt.components(separatedBy: ".")[0]
         createdAt.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(createdAt)
-        
+
         deleteButton.frame = CGRect(x: contentView.frame.width - 20, y: 0, width: 20, height: 20)
         deleteButton.addTarget(self, action: #selector(deleteCredentialButtonTapped), for: UIControl.Event.touchUpInside)
         contentView.addSubview(deleteButton)
-        
+
         let fontSize = contentView.frame.size.width < 330 ? 12.0 : 15.0
         id.font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
         createdAt.font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
 
         let spacing = CGFloat(contentView.frame.width/2.5)
-    
+
         NSLayoutConstraint.activate([
             id.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             createdAt.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: spacing),
@@ -568,23 +519,20 @@ extension CredentialCollectionViewCell {
             print("identifier cannot be nil")
             return
         }
-        
+
         let alert = UIAlertController(title: "Remove identifier \(identifier)", message: "Are you sure you want to remove the identifier ?", preferredStyle: .alert)
-        
+
         let cancelAction = UIAlertAction(title: "No", style: .cancel) { _ in
         }
         let approveRemove = UIAlertAction(title: "Yes", style: .default) { _ in
-            if identifier.contains("@") {
-                AppDelegate.reachfive().mfaDeleteCredential(authToken: authToken)
-                    .onSuccess { _ in
-                        self.contentView.removeFromSuperview()
-                    }
-            } else {
-                AppDelegate.reachfive()
-                    .mfaDeleteCredential(identifier, authToken: authToken)
-                    .onSuccess { _ in
-                        self.contentView.removeFromSuperview()
-                    }
+            Task { @MainActor in
+                let id = identifier.contains("@") ? nil : identifier
+                do {
+                    try await AppDelegate.reachfive().mfaDeleteCredential(id, authToken: authToken)
+                    self.contentView.removeFromSuperview()
+                } catch {
+                    self.window?.rootViewController?.presentErrorAlert(title: "Remove identifier failed", error)
+                }
             }
         }
         alert.addAction(cancelAction)
@@ -598,11 +546,11 @@ struct MfaCredential: Hashable {
     let createdAt: String
     let email: String?
     let phoneNumber: String?
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(identifier)
     }
-    
+
     static func convert(from mfaCredentialItem: MfaCredentialItem) -> MfaCredential {
         let identifier = switch mfaCredentialItem.type {
         case .sms:

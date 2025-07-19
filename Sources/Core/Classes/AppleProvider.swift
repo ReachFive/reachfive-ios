@@ -1,4 +1,3 @@
-import BrightFutures
 import Foundation
 import UIKit
 
@@ -46,15 +45,17 @@ class ConfiguredAppleProvider: NSObject, Provider {
         scope: [String]?,
         origin: String,
         viewController: UIViewController?
-    ) -> Future<AuthToken, ReachFiveError> {
-        guard let window = viewController?.view.window else { fatalError("The view was not in the app's view hierarchy!") }
+    ) async throws -> AuthToken {
+        guard let window = await viewController?.view.window else { throw ReachFiveError.TechnicalError(reason: "The view was not in the app's view hierarchy!") }
+
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
-        return credentialManager.login(withRequest: NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin), usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self).map { LoginFlow in
-            switch LoginFlow {
-            case let .AchievedLogin(authToken): return authToken
-            case .OngoingStepUp:
-                fatalError("Not a password flow")
-            }
+        let request = NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin)
+
+        let flow = try await credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self)
+
+        switch flow {
+        case .AchievedLogin(let authToken): return authToken
+        case .OngoingStepUp:                throw ReachFiveError.TechnicalError(reason: "Should not happen: MFA Step Up in a Sign In with Apple flow")
         }
     }
 
@@ -73,8 +74,7 @@ class ConfiguredAppleProvider: NSObject, Provider {
         true
     }
 
-    public func logout() -> Future<(), ReachFiveError> {
-        Future(value: ())
+    public func logout() {
     }
 
     override var description: String {

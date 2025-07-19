@@ -1,9 +1,8 @@
 import AuthenticationServices
-import BrightFutures
 import Foundation
 import Reach5
-import Reach5Google
-import Reach5Facebook
+//TODO: import Reach5Google
+// import Reach5Facebook
 import UIKit
 
 #if targetEnvironment(macCatalyst)
@@ -19,7 +18,7 @@ import UIKit
 
 //TODO
 // Mettre une nouvelle page dans une quatrième tabs ou dans l'app réglages:
-// - Paramétrage : scopes, origin, utilisation du refresh au démarage ?
+// - Paramétrage : scopes, origin, utilisation du refresh au démarrage ?
 // cf. wireframe de JC pour d'autres idées : https://miro.com/app/board/uXjVOMB0pG4=/
 // Pouvoir sélectionner entre plusieurs confs ReachFive
 // - d'abord en dur ici et dans les entitlements. Sélectionner la bonne dans le let reachfive: ReachFive =
@@ -58,7 +57,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         clientId: "9DKRdQyDLpaJqQQQAR9K"
     )
 
-    static let providers: [ProviderCreator] = [GoogleProvider(variant: "one_tap"), FacebookProvider(), AppleProvider(variant: "natif")]
+    static let providers: [ProviderCreator] = [/*GoogleProvider(variant: "one_tap"), FacebookProvider(),*/ AppleProvider(variant: "natif")]
     #if targetEnvironment(macCatalyst)
     static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
     static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
@@ -73,6 +72,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     #endif
     #endif
 
+    @MainActor
     static func reachfive() -> ReachFive {
         let app = UIApplication.shared.delegate as! AppDelegate
         return app.reachfive
@@ -93,7 +93,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("addEmailVerificationCallback \(result)")
             NotificationCenter.default.post(name: .DidReceiveEmailVerificationCallback, object: nil, userInfo: ["result": result])
         }
-        
+
         let appleIDProvider = ASAuthorizationAppleIDProvider()
         // Ceci est l'id tel que renvoyé par Apple dans idToken.sub ou AppleIDCredential.user
         appleIDProvider.getCredentialState(forUserID: "000707.3cc381460bce4bcc96e6fd5abdc1f121.1742") { (credentialState, error) in
@@ -160,18 +160,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 extension AppDelegate {
-    static func createAlert(title: String, message: String) -> UIAlertController {
-        let alert = UIAlertController(
-            title: title,
-            message: message,
-            preferredStyle: UIAlertController.Style.alert
-        )
-        alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default))
-        return alert
+    static func withFreshToken<T>(potentiallyStale token: AuthToken, _ body: (_ refreshableToken: AuthToken) async throws -> T) async throws -> T {
+        do {
+            return try await body(token)
+        } catch ReachFiveError.AuthFailure(_, let apiError) where apiError?.errorMessageKey == "error.accessToken.freshness" {
+            // Automatically refresh the token if it is stale
+            let freshToken = try await reachfive().refreshAccessToken(authToken: token)
+            AppDelegate.storage.setToken(freshToken)
+            return try await body(freshToken)
+        }
     }
 }
 
 extension UIViewController {
+    func handleAuthToken(errorMessage: String = "Login failed", _ body: () async throws -> AuthToken) async {
+        do {
+            let authToken = try await body()
+            goToProfile(authToken)
+        } catch {
+            presentErrorAlert(title: errorMessage, error)
+        }
+    }
+
+    @MainActor
     func goToProfile(_ authToken: AuthToken) {
         AppDelegate.storage.setToken(authToken)
 
@@ -181,15 +192,16 @@ extension UIViewController {
         }
     }
 
-    func showToast(message: String, seconds: Double) {
-        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        present(alert, animated: true)
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + seconds) {
-            alert.dismiss(animated: true)
+    func handleLoginFlow(errorMessage: String = "Login failed", _ body: () async throws -> LoginFlow) async {
+        do {
+            let flow = try await body()
+            flowTheLogin(flow)
+        } catch {
+            presentErrorAlert(title: errorMessage, error)
         }
     }
 
-    func handleLoginFlow(flow: LoginFlow) {
+    func flowTheLogin(_ flow: LoginFlow) {
         switch flow {
         case .AchievedLogin(let authToken):
             goToProfile(authToken)
@@ -203,60 +215,88 @@ extension UIViewController {
             }
             selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             selectMfaAuthTypeAlert.preferredAction = lastAction
-            present(selectMfaAuthTypeAlert, animated: true)
+           Task { @MainActor in
+                present(selectMfaAuthTypeAlert, animated: true)
+           }
+        }
+    }
+
+    @MainActor
+    func showToast(message: String, seconds: Double) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        present(alert, animated: true)
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + seconds) {
+            alert.dismiss(animated: true)
         }
     }
 
     private func createSelectMfaAuthTypeAction(type: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
         return UIAlertAction(title: type.rawValue, style: .default) { _ in
-            AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken)).onSuccess { resp in
-                self.handleStartVerificationCode(resp, authType: type)
-                    .onSuccess { authToken in
-                        self.goToProfile(authToken)
-                    }
+            Task {
+                await self.handleAuthToken {
+                    let resp = try await AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken))
+                    return try await self.handleStartVerificationCode(resp, authType: type)
+                }
             }
         }
     }
 
-    private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) -> Future<AuthToken, ReachFiveError> {
-        let promise: Promise<AuthToken, ReachFiveError> = Promise()
+    private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) async throws -> AuthToken {
+        return try await withCheckedThrowingContinuation { continuation in
 
-        let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
-        alert.addTextField { textField in
-            textField.placeholder = "Verification code"
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-            promise.failure(.AuthCanceled)
-        }
-        func submitVerificationCode(withTrustDevice trustDevice: Bool?) -> Void {
-            guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
-                print("verification code cannot be empty")
-                promise.failure(.AuthFailure(reason: "no verification code"))
-                return
+            let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
+            alert.addTextField { textField in
+                textField.placeholder = "Verification code"
             }
-            let future = resp.verify(code: verificationCode, trustDevice: trustDevice)
-                .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "MFA step up failure", message: "Error: \(error.message())")
-                    self.present(alert, animated: true)
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+                continuation.resume(throwing: ReachFiveError.AuthCanceled)
+            }
+            func submitVerificationCode(withTrustDevice trustDevice: Bool?) {
+                Task {
+                    guard let verificationCode = alert.textFields?[0].text, !verificationCode.isEmpty else {
+                        continuation.resume(throwing: ReachFiveError.AuthCanceled)
+                        return
+                    }
+                    continuation.resume {
+                        try await resp.verify(code: verificationCode, trustDevice: trustDevice)
+                    }
                 }
-            promise.completeWith(future)
-        }
+            }
 
-        let submitVerificationTrustDevice = UIAlertAction(title: "Trust device", style: .default) { _ in
-            submitVerificationCode(withTrustDevice: true)
+            let submitVerificationTrustDevice = UIAlertAction(title: "Trust device", style: .default) { _ in
+                submitVerificationCode(withTrustDevice: true)
+            }
+            let submitVerificationNoTrustDevice = UIAlertAction(title: "Don't trust device", style: .default) { _ in
+                submitVerificationCode(withTrustDevice: false)
+            }
+            let submitVerificationWithoutRba = UIAlertAction(title: "Ignore RBA", style: .default) { _ in
+                submitVerificationCode(withTrustDevice: nil)
+            }
+            alert.addAction(cancelAction)
+            alert.addAction(submitVerificationTrustDevice)
+            alert.addAction(submitVerificationNoTrustDevice)
+            alert.addAction(submitVerificationWithoutRba)
+            present(alert, animated: true)
         }
-        let submitVerificationNoTrustDevice = UIAlertAction(title: "Don't trust device", style: .default) { _ in
-            submitVerificationCode(withTrustDevice: false)
+    }
+
+    @MainActor
+    func presentAlert(title: String, message: String) {
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: UIAlertController.Style.alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default))
+        self.present(alert, animated: true)
+    }
+
+    func presentErrorAlert(title: String, _ error: Error) {
+        switch error {
+        case ReachFiveError.AuthCanceled: return
+        default:
+            self.presentAlert(title: title, message: "Error: \(error.localizedDescription)")
         }
-        let submitVerificationWithoutRba = UIAlertAction(title: "Ignore RBA", style: .default) { _ in
-            submitVerificationCode(withTrustDevice: nil)
-        }
-        alert.addAction(cancelAction)
-        alert.addAction(submitVerificationTrustDevice)
-        alert.addAction(submitVerificationNoTrustDevice)
-        alert.addAction(submitVerificationWithoutRba)
-        present(alert, animated: true)
-        return promise.future
     }
 }
 

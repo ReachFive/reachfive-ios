@@ -1,11 +1,9 @@
 PODS:
   - Alamofire (5.10.2)
-  - BrightFutures (8.2.0)
   - CryptoSwift (1.8.4)
   - DeviceKit (5.6.0)
   - Reach5 (8.2.0):
     - Alamofire (~> 5.8)
-    - BrightFutures (~> 8.2.0)
     - CryptoSwift (~> 1.8)
     - DeviceKit (~> 5.1)
 
@@ -15,7 +13,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Alamofire
-    - BrightFutures
     - CryptoSwift
     - DeviceKit
 
@@ -25,10 +22,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
-  BrightFutures: 67e0e8cd974ab9f6c04650cc64153f7adf1ec489
   CryptoSwift: e64e11850ede528a02a0f3e768cec8e9d92ecb90
   DeviceKit: 9f2e0b68984a384f864b0f4e40a54bae43636bd8
-  Reach5: f0c9be416df8280e2135dfd8d98e72c783fae7a9
+  Reach5: f6c40733621594533f4507a44316843cd120edd3
 
 PODFILE CHECKSUM: 9a44ddf91ef9134960bddf8567626a150b34c6e4
 

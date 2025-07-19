@@ -1,6 +1,5 @@
 import UIKit
 import Reach5
-import BrightFutures
 
 //TODO
 //      - déplacer le bouton login with refresh ici pour que, même logué, on puisse afficher les passkey (qui sont expirées)
@@ -29,101 +28,101 @@ class ProfileController: UIViewController {
             ]
         }
     }
-    
+
     var clearTokenObserver: NSObjectProtocol?
     var setTokenObserver: NSObjectProtocol?
-    
+
     var emailMfaVerifyNotification: NSObjectProtocol?
     var emailVerificationNotification: NSObjectProtocol?
-    
+
     var propertiesToDisplay: [Field] = []
     let mfaRegistrationAvailable = ["Email", "Phone Number"]
-    
+
     @IBOutlet weak var otherOptions: UITableView!
-    
+
     @IBOutlet weak var profileTabBarItem: UITabBarItem!
     @IBOutlet var profileData: UITableView!
     @IBOutlet weak var mfaButton: UIButton!
     @IBOutlet weak var passkeyButton: UIButton!
     @IBOutlet weak var editProfileButton: UIButton!
-    
+
     override func viewDidLoad() {
         print("ProfileController.viewDidLoad")
         super.viewDidLoad()
         emailMfaVerifyNotification = NotificationCenter.default.addObserver(forName: .DidReceiveMfaVerifyEmail, object: nil, queue: nil) {
             (note) in
-            if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
-                self.dismiss(animated: true)
-                switch result {
-                case .success():
-                    let alert = AppDelegate.createAlert(title: "Email mfa registering success", message: "Email mfa registering success")
-                    self.present(alert, animated: true)
-                    self.fetchProfile()
-                case .failure(let error):
-                    let alert = AppDelegate.createAlert(title: "Email mfa registering failed", message: "Error: \(error.message())")
-                    self.present(alert, animated: true)
+            Task { @MainActor in
+                if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
+                    self.dismiss(animated: true)
+                    switch result {
+                    case .success():
+                        self.presentAlert(title: "Email mfa registering", message: "Email mfa registering success")
+                        self.fetchProfile()
+                    case .failure(let error):
+                        self.presentErrorAlert(title: "Email mfa registering failed", error)
+                    }
                 }
             }
         }
         emailVerificationNotification = NotificationCenter.default.addObserver(forName: .DidReceiveEmailVerificationCallback, object: nil, queue: nil) {
             (note) in
-            if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
-                self.dismiss(animated: true)
-                switch result {
-                case .success():
-                    let alert = AppDelegate.createAlert(title: "Email validation success", message: "Email validation success")
-                    self.present(alert, animated: true)
-                    self.fetchProfile()
-                case .failure(let error):
-                    let alert = AppDelegate.createAlert(title: "Email validation failed", message: "Error: \(error.message())")
-                    self.present(alert, animated: true)
+            Task { @MainActor in
+                if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
+                    self.dismiss(animated: true)
+                    switch result {
+                    case .success():
+                        self.presentAlert(title: "Email validation", message: "Email validation success")
+                        self.fetchProfile()
+                    case .failure(let error):
+                        self.presentErrorAlert(title: "Email validation failed", error)
+                    }
                 }
             }
         }
-        
+
         //TODO: mieux gérer les notifications pour ne pas en avoir plusieurs qui se déclenche pour le même évènement
         clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { _ in
             self.didLogout()
         }
-        
+
         setTokenObserver = NotificationCenter.default.addObserver(forName: .DidSetAuthToken, object: nil, queue: nil) { _ in
             self.didLogin()
         }
-        
+
         authToken = AppDelegate.storage.getToken()
         if authToken != nil {
             profileTabBarItem.image = SandboxTabBarController.tokenPresent
             profileTabBarItem.selectedImage = profileTabBarItem.image
         }
-        
+
         self.profileData.delegate = self
         self.profileData.dataSource = self
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         print("ProfileController.viewWillAppear")
         fetchProfile()
     }
-    
+
     func fetchProfile() {
         print("ProfileController.fetchProfile")
-        
+
         authToken = AppDelegate.storage.getToken()
         guard let authToken else {
             print("not logged in")
             return
         }
-        AppDelegate.reachfive()
-            .getProfile(authToken: authToken)
-            .onSuccess { profile in
+        Task { @MainActor in
+            do {
+                let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
                 self.profile = profile
                 self.profileData.reloadData()
-                self.setStatusImage(authToken: authToken)
                 self.mfaButton.isHidden = false
                 self.editProfileButton.isHidden = false
                 self.passkeyButton.isHidden = false
-            }
-            .onFailure { error in
+
+                await self.setStatusImage(authToken: authToken)
+            } catch {
                 self.didLogout()
                 if authToken.refreshToken != nil {
                     // the token is probably expired, but it is still possible that it can be refreshed
@@ -133,30 +132,31 @@ class ProfileController: UIViewController {
                     self.profileTabBarItem.image = SandboxTabBarController.loggedOut
                     self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
                 }
-                print("getProfile error = \(error.message())")
+                print("getProfile error = \(error.localizedDescription)")
             }
+        }
     }
-    
-    private func setStatusImage(authToken: AuthToken) {
+
+    private func setStatusImage(authToken: AuthToken) async {
         // Use listWebAuthnCredentials to test if token is fresh
         // A fresh token is also needed for updating the profile and registering MFA credentials
-        AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken).onSuccess { _ in
-                self.passkeyButton.isEnabled = true
-                self.profileTabBarItem.image = SandboxTabBarController.loggedIn
-                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
-            }
-            .onFailure { error in
-                self.passkeyButton.isEnabled = false
-                self.profileTabBarItem.image = SandboxTabBarController.loggedInButNotFresh
-                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
-            }
+        do {
+            let _ = try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken)
+            self.passkeyButton.isEnabled = true
+            self.profileTabBarItem.image = SandboxTabBarController.loggedIn
+            self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+        } catch {
+            self.passkeyButton.isEnabled = false
+            self.profileTabBarItem.image = SandboxTabBarController.loggedInButNotFresh
+            self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+        }
     }
-    
+
     func didLogin() {
         print("ProfileController.didLogin")
         authToken = AppDelegate.storage.getToken()
     }
-    
+
     func didLogout() {
         print("ProfileController.didLogout")
         authToken = nil
@@ -166,15 +166,15 @@ class ProfileController: UIViewController {
         editProfileButton.isHidden = true
         self.profileData.reloadData()
     }
-    
+
     @IBAction func logoutAction(_ sender: Any) {
-        AppDelegate.reachfive().logout()
-            .onComplete { result in
-                AppDelegate.storage.removeToken()
-                self.navigationController?.popViewController(animated: true)
-            }
+        Task {
+            try? await AppDelegate.reachfive().logout()
+            AppDelegate.storage.removeToken()
+            self.navigationController?.popViewController(animated: true)
+        }
     }
-    
+
     internal static func username(profile: Profile) -> String {
         let username: String
         // here the priority for phone number over email follows the backend rule

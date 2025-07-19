@@ -1,6 +1,6 @@
 import Foundation
 
-public enum ReachFiveError: Error, CustomStringConvertible {
+public enum ReachFiveError: Error, CustomStringConvertible, LocalizedError {
     /// debug friendly message
     public var description: String {
         switch self {
@@ -27,6 +27,11 @@ public enum ReachFiveError: Error, CustomStringConvertible {
         case .TechnicalError(reason: let reason, apiError: let apiError):
             return createMessage(reason: reason, apiError: apiError)
         }
+    }
+
+    /// Used by localizedDescription
+    public var errorDescription: String? {
+        return message()
     }
 
     private func createMessage(reason: String, apiError: ApiError? = nil) -> String {

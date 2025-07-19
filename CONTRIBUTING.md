@@ -87,17 +87,17 @@ when you need to add a new file or rename one, you have to be in the specific mo
 
 ## Modules
 A podspec cannot reference, without resorting to dirty tricks, other locally changed pods.<br>
-Instead they reference the latest version available on Cocoapods.<br>
+Instead, they reference the latest version available on Cocoapods.<br>
 This means that the non-core pods will not have access to the core changes on CI until the core changes are deployed.<br>
-Local development is not impacted by this problem.
+This problem does not impact local development.
 
-So first release Reach5 Core, then you can use the new APIs from this release in the Facebook/Google/Webview/WeChat pods.
+So, first, release Reach5 Core. Then you can use the new APIs from this release in the Facebook/Google/WeChat pods.
 
 ### When to add a new module for a provider
 
 If the provider depends on an external dependency or needs a specific configuration in the property file, then add a new module, otherwise add it to Core.
 
-For example a native Apple Provider should not be in a new module.<br>
+For example, a native Apple Provider should not be in a new module.<br>
 Also a provider that would depend only on specific web configuration not possible to do in `WebViewProvider`.<br>
 Or one that would use `SFSafariViewController` instead of `ASWebAuthenticationSession` (not sure that it is a good idea, it is just an example).
 
@@ -106,8 +106,8 @@ XCode > File > New > Project... > Framework.
 
 Create the Podfile and podspec (with pod commands or by copying from other modules).
 
-Be aware, as per point above, that the podspec does not reference the local version but the remote version.
+Be aware, as per the point above, that the podspec does not reference the local version but the remote version.
 
-Add at least one file for now, push and tag (why 5.9.0-beta worked and not 5.9.0 might forever remain a mystery).<br/>
+Add at least one file for now, push and tag.<br/>
 Push the new pod `pod trunk push` so that XCode can show the proper icon in the Products view
 

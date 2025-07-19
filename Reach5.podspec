@@ -21,7 +21,6 @@ Pod::Spec.new do |spec|
   }
 
   spec.dependency 'Alamofire', '~> 5.8'
-  spec.dependency 'BrightFutures', '~> 8.2.0'
   spec.dependency 'CryptoSwift', '~> 1.8'
   spec.dependency 'DeviceKit', '~> 5.1'
 

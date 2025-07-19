@@ -1,31 +1,21 @@
 import Foundation
 import Alamofire
-import BrightFutures
 
 extension DataRequest {
-    
-    private func isSuccess(_ status: Int?) -> Bool {
-        guard let status else {
-            return false
-        }
-        return status >= 200 && status < 300
+
+    private func isSuccess(_ status: Int) -> Bool {
+        status >= 200 && status < 300
     }
-    
-    private func parseJson<T: Decodable>(json: Data, type: T.Type, decoder: JSONDecoder) -> Result<T, ReachFiveError> {
+
+    private func parseJson<T: Decodable>(json: Data, type: T.Type, decoder: JSONDecoder) throws(ReachFiveError) -> T {
         do {
-            let value = try decoder.decode(type, from: json)
-            return .success(value)
+            return try decoder.decode(type, from: json)
         } catch {
-            return .failure(.TechnicalError(reason: error.localizedDescription))
+            throw .TechnicalError(reason: error.localizedDescription)
         }
     }
-    
-    private func handleResponseStatus(status: Int?, apiError: ApiError) -> ReachFiveError {
-        guard let status else {
-            return .TechnicalError(
-                reason: "Technical error: Request without error code",
-                apiError: apiError)
-        }
+
+    private func handleResponseStatus(status: Int, apiError: ApiError) -> ReachFiveError {
         if status == 400 {
             return .RequestError(apiError: apiError)
         }
@@ -33,54 +23,61 @@ extension DataRequest {
             return .AuthFailure(reason: "Unauthorized", apiError: apiError)
         }
         return .TechnicalError(
-            reason: "Technical error: Request with \(status) error code",
+            reason: "Response with \(status) error code",
             apiError: apiError
         )
     }
-    
-    func responseJson(decoder: JSONDecoder) -> Future<(), ReachFiveError> {
-        let promise = Promise<(), ReachFiveError>()
-        responseData { responseData in
-            switch responseData.result {
-            case let .failure(error):
-                promise.failure(.TechnicalError(reason: error.localizedDescription))
-            
-            case let .success(data):
-                let status = responseData.response?.statusCode
-                if self.isSuccess(status) {
-                    promise.success(())
-                } else {
-                    switch self.parseJson(json: data, type: ApiError.self, decoder: decoder) {
-                    case .success(let value): promise.failure(self.handleResponseStatus(status: status, apiError: value))
-                    case .failure(let error): promise.failure(error)
+
+    func responseJson(decoder: JSONDecoder) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            responseData { responseData in
+                switch responseData.result {
+                case let .failure(error):
+                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
+
+                case let .success(data):
+                    guard let response = responseData.response else {
+                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request without response"))
+                        return
+                    }
+
+                    let status = response.statusCode
+                    continuation.resume {
+                        if !self.isSuccess(status) {
+                            let apiError = try self.parseJson(json: data, type: ApiError.self, decoder: decoder)
+                            throw self.handleResponseStatus(status: status, apiError: apiError)
+                        }
                     }
                 }
             }
         }
-        return promise.future
     }
-    
-    func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) -> Future<T, ReachFiveError> {
-        let promise = Promise<T, ReachFiveError>()
-        
-        responseData { responseData in
-            switch responseData.result {
-            case let .failure(error):
-                promise.failure(.TechnicalError(reason: error.localizedDescription))
-            
-            case let .success(data):
-                let status = responseData.response?.statusCode
-                if self.isSuccess(status) {
-                    promise.tryComplete(self.parseJson(json: data, type: T.self, decoder: decoder))
-                } else {
-                    switch self.parseJson(json: data, type: ApiError.self, decoder: decoder) {
-                    case .success(let value): promise.failure(self.handleResponseStatus(status: status, apiError: value))
-                    case .failure(let error): promise.failure(error)
+
+    func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) async throws -> T {
+        return try await withCheckedThrowingContinuation { continuation in
+            responseData { responseData in
+                switch responseData.result {
+                case let .failure(error):
+                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
+
+                case let .success(data):
+                    guard let response = responseData.response else {
+                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request without response"))
+                        return
+                    }
+
+                    let status = response.statusCode
+                    continuation.resume {
+                        guard self.isSuccess(status) else {
+                            let apiError = try self.parseJson(json: data, type: ApiError.self, decoder: decoder)
+                            throw self.handleResponseStatus(status: status, apiError: apiError)
+                        }
+
+                        return try self.parseJson(json: data, type: T.self, decoder: decoder)
                     }
                 }
             }
         }
-        
-        return promise.future
     }
 }
+
