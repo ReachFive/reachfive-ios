@@ -1744,7 +1744,7 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bP6-fJ-u2I">
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bP6-fJ-u2I">
                                 <rect key="frame" x="20" y="276" width="87" height="40.333333333333314"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Register"/>
@@ -1757,52 +1757,52 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <segmentedControl opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="xO1-vg-5iz">
-                                <rect key="frame" x="20" y="300" width="105" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <segments>
-                                    <segment title="Email"/>
-                                    <segment title="SMS"/>
-                                </segments>
-                            </segmentedControl>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cS0-d5-6IH">
-                                <rect key="frame" x="254" y="300" width="82" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="StepUp"/>
-                                <connections>
-                                    <action selector="startStepUp:" destination="oW2-ti-e1U" eventType="touchUpInside" id="tap-ln-Lt7"/>
-                                </connections>
-                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="stepUpStackView-ID">
+                                <rect key="frame" x="20" y="326.33333333333331" width="353" height="31"/>
+                                <subviews>
+                                    <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="xO1-vg-5iz">
+                                        <rect key="frame" x="0.0" y="0.0" width="105" height="31"/>
+                                        <segments>
+                                            <segment title="Email"/>
+                                            <segment title="SMS"/>
+                                        </segments>
+                                    </segmentedControl>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cS0-d5-6IH">
+                                        <rect key="frame" x="113" y="0.0" width="240" height="31"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="filled" title="StepUp"/>
+                                        <connections>
+                                            <action selector="startStepUp:" destination="oW2-ti-e1U" eventType="touchUpInside" id="tap-ln-Lt7"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="credentialsTableView-ID">
-                                <rect key="frame" x="0.0" y="350" width="393" height="200"/>
+                                <rect key="frame" x="0.0" y="377.33333333333331" width="393" height="180"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="200" id="credentialsTableViewHeightConstraint-ID"/>
+                                    <constraint firstAttribute="height" constant="180" id="credentialsTableViewHeightConstraint-ID"/>
                                 </constraints>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="CredentialCell" id="credentialCell-ID" customClass="CredentialTableViewCell" customModule="Sandbox" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="50" width="393" height="51.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="50" width="393" height="43.5"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="credentialCell-ID" id="credentialCellContentView-ID">
-                                            <rect key="frame" x="0.0" y="0.0" width="393" height="51.666667938232422"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="393" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="trustedDevicesTableView-ID">
-                                <rect key="frame" x="0.0" y="560" width="393" height="200"/>
+                                <rect key="frame" x="0.0" y="567.33333333333337" width="393" height="180.66666666666663"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="200" id="trustedDevicesTableViewHeightConstraint-ID"/>
-                                </constraints>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TrustedDeviceCell" id="trustedDeviceCell-ID" customClass="TrustedDeviceTableViewCell" customModule="Sandbox" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="50" width="393" height="51.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="50" width="393" height="43.5"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="trustedDeviceCell-ID" id="trustedDeviceCellContentView-ID">
-                                            <rect key="frame" x="0.0" y="0.0" width="393" height="51.666667938232422"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="393" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -1819,7 +1819,6 @@
                             <constraint firstItem="eWw-Lr-dWC" firstAttribute="top" secondItem="pM9-yn-BLG" secondAttribute="bottom" constant="20" id="R4a-El-h7A"/>
                             <constraint firstItem="d4u-HN-3F3" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="pM9-yn-BLG" secondAttribute="trailing" id="ZPT-fM-gyS"/>
                             <constraint firstItem="credentialsTableView-ID" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" id="credentialsTableViewLeadingConstraint-ID"/>
-                            <constraint firstItem="credentialsTableView-ID" firstAttribute="top" secondItem="bP6-fJ-u2I" secondAttribute="bottom" constant="33.666666666666686" id="credentialsTableViewTopConstraint-ID"/>
                             <constraint firstItem="credentialsTableView-ID" firstAttribute="trailing" secondItem="d4u-HN-3F3" secondAttribute="trailing" id="credentialsTableViewTrailingConstraint-ID"/>
                             <constraint firstItem="eWw-Lr-dWC" firstAttribute="leading" secondItem="pM9-yn-BLG" secondAttribute="leading" id="deN-00-389"/>
                             <constraint firstItem="bP6-fJ-u2I" firstAttribute="top" secondItem="eWw-Lr-dWC" secondAttribute="bottom" constant="20" id="mVG-83-IwB"/>
@@ -1827,6 +1826,11 @@
                             <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="top" secondItem="credentialsTableView-ID" secondAttribute="bottom" constant="10" id="trustedDevicesTableViewTopConstraint-ID"/>
                             <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="trailing" secondItem="d4u-HN-3F3" secondAttribute="trailing" id="trustedDevicesTableViewTrailingConstraint-ID"/>
                             <constraint firstItem="pM9-yn-BLG" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" constant="20.000000000000007" id="vba-uP-qtQ"/>
+                            <constraint firstItem="stepUpStackView-ID" firstAttribute="top" secondItem="bP6-fJ-u2I" secondAttribute="bottom" constant="10" id="stepUpStackViewTopConstraint-ID"/>
+                            <constraint firstItem="stepUpStackView-ID" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" constant="20" id="stepUpStackViewLeadingConstraint-ID"/>
+                            <constraint firstItem="d4u-HN-3F3" firstAttribute="trailing" secondItem="stepUpStackView-ID" secondAttribute="trailing" constant="20" id="stepUpStackViewTrailingConstraint-ID"/>
+                            <constraint firstItem="credentialsTableView-ID" firstAttribute="top" secondItem="stepUpStackView-ID" secondAttribute="bottom" constant="20" id="credentialsTableViewTopConstraint-ID"/>
+                            <constraint firstItem="d4u-HN-3F3" firstAttribute="bottom" secondItem="trustedDevicesTableView-ID" secondAttribute="bottom" id="trustedDevicesTableViewBottomConstraint-ID"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="MFA Credentials" id="zJI-Nr-w8b" userLabel="MFA Phone Number Registration"/>
