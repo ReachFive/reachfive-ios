@@ -3,7 +3,6 @@ import Reach5
 import UIKit
 
 class MfaController: UIViewController {
-    @IBOutlet var phoneNumberMfaRegistration: UITextField!
     @IBOutlet var selectedStepUpType: UISegmentedControl!
     @IBOutlet var startStepUp: UIButton!
 
@@ -94,21 +93,6 @@ class MfaController: UIViewController {
             }
         }
     }
-    
-    func addMfaCredential() {
-        let alert = UIAlertController(title: "Add MFA Credential", message: "Enter a phone number to register a new MFA credential.", preferredStyle: .alert)
-        alert.addTextField { textField in
-            textField.placeholder = "Phone number"
-            textField.keyboardType = .phonePad
-        }
-        let addAction = UIAlertAction(title: "Add", style: .default) { [weak self] _ in
-            guard let self = self, let phoneNumber = alert.textFields?.first?.text, !phoneNumber.isEmpty else { return }
-            self.startMfaPhoneRegistration(phoneNumber: phoneNumber)
-        }
-        alert.addAction(addAction)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        present(alert, animated: true)
-    }
 
     @IBAction func startStepUp(_ sender: UIButton) {
         guard let authToken = AppDelegate.storage.getToken() else {
@@ -132,14 +116,21 @@ class MfaController: UIViewController {
         }
     }
 
-    @IBAction func startMfaPhoneRegistration(_ sender: UIButton) {
-        guard let phoneNumber = phoneNumberMfaRegistration.text, !phoneNumber.isEmpty else {
-            print("Phone number is empty")
-            return
+    func addMfaCredential() {
+        let alert = UIAlertController(title: "Add MFA Credential", message: "Enter a phone number to register a new MFA credential.", preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.placeholder = "Phone number"
+            textField.keyboardType = .phonePad
         }
-        startMfaPhoneRegistration(phoneNumber: phoneNumber)
+        let addAction = UIAlertAction(title: "Add", style: .default) { [weak self] _ in
+            guard let self, let phoneNumber = alert.textFields?.first?.text, !phoneNumber.isEmpty else { return }
+            self.startMfaPhoneRegistration(phoneNumber: phoneNumber)
+        }
+        alert.addAction(addAction)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
     }
-    
+
     private func startMfaPhoneRegistration(phoneNumber: String) {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("Not logged in")
@@ -164,7 +155,7 @@ extension MfaController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
-    
+
     // Use a custom header view for each section.
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: EditableSectionHeaderView.reuseIdentifier) as? EditableSectionHeaderView else {

@@ -1738,34 +1738,15 @@
                         <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Phone number" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pM9-yn-BLG">
-                                <rect key="frame" x="20.000000000000007" y="188" width="111.66666666666669" height="20"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bP6-fJ-u2I">
-                                <rect key="frame" x="20" y="282" width="87" height="40.666666666666686"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Register"/>
-                                <connections>
-                                    <action selector="startMfaPhoneRegistration:" destination="oW2-ti-e1U" eventType="touchUpInside" id="wiB-na-R92"/>
-                                </connections>
-                            </button>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="eWw-Lr-dWC" userLabel="Phone Number field">
-                                <rect key="frame" x="20" y="228" width="400" height="34"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                            </textField>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="xO1-vg-5iz">
-                                <rect key="frame" x="20" y="342.66666666666669" width="105" height="32"/>
+                                <rect key="frame" x="20" y="188" width="105" height="32"/>
                                 <segments>
                                     <segment title="Email"/>
                                     <segment title="SMS"/>
                                 </segments>
                             </segmentedControl>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cS0-d5-6IH">
-                                <rect key="frame" x="145" y="338" width="81.333333333333314" height="40.666666666666686"/>
+                                <rect key="frame" x="145" y="183.33333333333334" width="81.333333333333314" height="40.666666666666657"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="StepUp"/>
                                 <connections>
@@ -1773,7 +1754,7 @@
                                 </connections>
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="credentialsTableView-ID">
-                                <rect key="frame" x="0.0" y="393.66666666666669" width="440" height="180.00000000000006"/>
+                                <rect key="frame" x="0.0" y="239" width="440" height="180"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="180" id="credentialsTableViewHeightConstraint-ID"/>
@@ -1790,7 +1771,7 @@
                                 </prototypes>
                             </tableView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="trustedDevicesTableView-ID">
-                                <rect key="frame" x="0.0" y="583.66666666666663" width="440" height="255.33333333333337"/>
+                                <rect key="frame" x="0.0" y="429" width="440" height="410"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TrustedDeviceCell" id="trustedDeviceCell-ID">
@@ -1808,33 +1789,23 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="cS0-d5-6IH" firstAttribute="leading" secondItem="xO1-vg-5iz" secondAttribute="trailing" constant="20" id="1ma-z0-g6K"/>
-                            <constraint firstItem="pM9-yn-BLG" firstAttribute="top" secondItem="d4u-HN-3F3" secondAttribute="top" constant="20" id="3vF-Bg-N93"/>
-                            <constraint firstItem="d4u-HN-3F3" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="bP6-fJ-u2I" secondAttribute="trailing" id="GAV-3U-EqM"/>
-                            <constraint firstItem="bP6-fJ-u2I" firstAttribute="leading" secondItem="eWw-Lr-dWC" secondAttribute="leading" id="Gpq-an-iPR"/>
-                            <constraint firstItem="eWw-Lr-dWC" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="3J7-ip-0VJ" secondAttribute="trailingMargin" id="JxC-fl-jZI"/>
-                            <constraint firstItem="eWw-Lr-dWC" firstAttribute="top" secondItem="pM9-yn-BLG" secondAttribute="bottom" constant="20" id="R4a-El-h7A"/>
                             <constraint firstItem="cS0-d5-6IH" firstAttribute="centerY" secondItem="xO1-vg-5iz" secondAttribute="centerY" id="Uxe-2a-Tb4"/>
                             <constraint firstItem="d4u-HN-3F3" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="cS0-d5-6IH" secondAttribute="trailing" id="Vhl-OO-XOd"/>
-                            <constraint firstItem="d4u-HN-3F3" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="pM9-yn-BLG" secondAttribute="trailing" id="ZPT-fM-gyS"/>
                             <constraint firstItem="credentialsTableView-ID" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" id="credentialsTableViewLeadingConstraint-ID"/>
                             <constraint firstItem="credentialsTableView-ID" firstAttribute="top" secondItem="xO1-vg-5iz" secondAttribute="bottom" constant="20" id="credentialsTableViewTopConstraint-ID"/>
                             <constraint firstItem="credentialsTableView-ID" firstAttribute="trailing" secondItem="d4u-HN-3F3" secondAttribute="trailing" id="credentialsTableViewTrailingConstraint-ID"/>
-                            <constraint firstItem="eWw-Lr-dWC" firstAttribute="leading" secondItem="pM9-yn-BLG" secondAttribute="leading" id="deN-00-389"/>
                             <constraint firstItem="xO1-vg-5iz" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" constant="20" id="kdT-QU-s9N"/>
-                            <constraint firstItem="bP6-fJ-u2I" firstAttribute="top" secondItem="eWw-Lr-dWC" secondAttribute="bottom" constant="20" id="mVG-83-IwB"/>
-                            <constraint firstItem="xO1-vg-5iz" firstAttribute="top" secondItem="bP6-fJ-u2I" secondAttribute="bottom" constant="20" id="stepUpStackViewTopConstraint-ID"/>
+                            <constraint firstItem="xO1-vg-5iz" firstAttribute="top" secondItem="d4u-HN-3F3" secondAttribute="top" constant="20" id="stepUpStackViewTopConstraint-ID"/>
                             <constraint firstItem="d4u-HN-3F3" firstAttribute="bottom" secondItem="trustedDevicesTableView-ID" secondAttribute="bottom" id="trustedDevicesTableViewBottomConstraint-ID"/>
                             <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" id="trustedDevicesTableViewLeadingConstraint-ID"/>
                             <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="top" secondItem="credentialsTableView-ID" secondAttribute="bottom" constant="10" id="trustedDevicesTableViewTopConstraint-ID"/>
                             <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="trailing" secondItem="d4u-HN-3F3" secondAttribute="trailing" id="trustedDevicesTableViewTrailingConstraint-ID"/>
-                            <constraint firstItem="pM9-yn-BLG" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" constant="20.000000000000007" id="vba-uP-qtQ"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="MFA Credentials" id="zJI-Nr-w8b" userLabel="MFA Phone Number Registration"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="credentialsTableView" destination="credentialsTableView-ID" id="dwO-5a-Wur"/>
-                        <outlet property="phoneNumberMfaRegistration" destination="eWw-Lr-dWC" id="6r4-rN-rpc"/>
                         <outlet property="selectedStepUpType" destination="xO1-vg-5iz" id="U2h-gt-qDP"/>
                         <outlet property="startStepUp" destination="cS0-d5-6IH" id="lFR-vh-Wxx"/>
                         <outlet property="trustedDevicesTableView" destination="trustedDevicesTableView-ID" id="trustedDevicesTableViewOutlet-ID"/>
