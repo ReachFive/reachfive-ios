@@ -113,15 +113,7 @@ extension PasskeyCredentialController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = credentialTableview.dequeueReusableCell(withIdentifier: "credentialCell") else {
-            fatalError("No credentialCell cell")
-        }
-
-        let friendlyName = devices[indexPath.row].friendlyName
-        var content = cell.defaultContentConfiguration()
-        content.text = friendlyName
-        cell.contentConfiguration = content
-        return cell
+        return credentialTableview.dequeueDefaultReusableCell(withIdentifier: "", for: indexPath, text: devices[indexPath.row].friendlyName)
     }
 
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {

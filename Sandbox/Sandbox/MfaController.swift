@@ -204,7 +204,8 @@ extension MfaController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == credentialsTableView {
             return mfaCredentials.count
-        } else if tableView == trustedDevicesTableView {
+        }
+        if tableView == trustedDevicesTableView {
             return trustedDevices.count
         }
         return 0
@@ -212,44 +213,12 @@ extension MfaController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if tableView == credentialsTableView {
-            let cell = tableView.dequeueReusableCell(withIdentifier: MfaController.mfaCell, for: indexPath)
             let credential = mfaCredentials[indexPath.row]
-
-            var content = cell.defaultContentConfiguration()
-
-            content.text = credential.identifier
-            content.secondaryText = credential.createdAt
-            content.prefersSideBySideTextAndSecondaryText = true
-
-            content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
-            content.textProperties.adjustsFontForContentSizeCategory = true
-            content.textProperties.adjustsFontSizeToFitWidth = true
-
-            content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
-            content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
-            content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
-            cell.contentConfiguration = content
-
-            return cell
-        } else if tableView == trustedDevicesTableView {
-            let cell = tableView.dequeueReusableCell(withIdentifier: MfaController.trustedDeviceCell, for: indexPath)
+            return tableView.dequeueDefaultReusableCell(withIdentifier: MfaController.mfaCell, for: indexPath, text: credential.identifier, secondaryText: credential.createdAt)
+        }
+        if tableView == trustedDevicesTableView {
             let device = trustedDevices[indexPath.row]
-
-            var content = cell.defaultContentConfiguration()
-
-            content.text = device.metadata.deviceName
-            content.secondaryText = device.createdAt
-            content.prefersSideBySideTextAndSecondaryText = true
-
-            content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
-            content.textProperties.adjustsFontForContentSizeCategory = true
-            content.textProperties.adjustsFontSizeToFitWidth = true
-
-            content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
-            content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
-            content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
-            cell.contentConfiguration = content
-            return cell
+            return tableView.dequeueDefaultReusableCell(withIdentifier: MfaController.trustedDeviceCell, for: indexPath, text: device.metadata.deviceName ?? "Anonymous device", secondaryText: device.createdAt)
         }
         return UITableViewCell()
     }

@@ -305,3 +305,26 @@ extension NSNotification.Name {
     static let DidReceiveMfaVerifyEmail = Notification.Name("DidReceiveMfaVerifyEmail")
     static let DidReceiveEmailVerificationCallback = Notification.Name("DidReceiveEmailVerificationCallback")
 }
+
+extension UITableView {
+    func dequeueDefaultReusableCell(withIdentifier identifier: String, for indexPath: IndexPath, text: String, secondaryText: String? = nil) -> UITableViewCell {
+        let cell = self.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
+
+        var content = cell.defaultContentConfiguration()
+        
+        content.text = text
+        content.secondaryText = secondaryText
+        content.prefersSideBySideTextAndSecondaryText = true
+        
+        content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
+        content.textProperties.adjustsFontForContentSizeCategory = true
+        content.textProperties.adjustsFontSizeToFitWidth = true
+        
+        content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
+        content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
+        content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
+        cell.contentConfiguration = content
+
+        return cell
+    }
+}

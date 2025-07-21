@@ -138,23 +138,8 @@ extension ProfileController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDisplayCell", for: indexPath)
-
-        var content = cell.defaultContentConfiguration()
-        content.text = self.propertiesToDisplay[indexPath.row].name
-        content.secondaryText = self.propertiesToDisplay[indexPath.row].value
-        content.prefersSideBySideTextAndSecondaryText = true
-
-        content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
-        content.textProperties.adjustsFontForContentSizeCategory = true
-        content.textProperties.adjustsFontSizeToFitWidth = true
-
-        content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
-        content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
-        content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
-        cell.contentConfiguration = content
-
-        return cell
+        let field = self.propertiesToDisplay[indexPath.row]
+        return tableView.dequeueDefaultReusableCell(withIdentifier: "ToDisplayCell", for: indexPath, text: field.name, secondaryText: field.value)
     }
 
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
