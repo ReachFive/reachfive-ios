@@ -37,6 +37,7 @@ class PasskeyCredentialController: UIViewController {
     }
 
     private func reloadCredentials(authToken: AuthToken) async {
+        print(#function)
         var listCredentials: [DeviceCredential] = []
         do {
             listCredentials = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
@@ -101,6 +102,7 @@ extension PasskeyCredentialController: UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        print(#function)
         guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: EditableSectionHeaderView.reuseIdentifier) as? EditableSectionHeaderView else {
             return nil
         }
@@ -114,7 +116,9 @@ extension PasskeyCredentialController: UITableViewDelegate {
                 button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
             }
         )
-        if #available(macCatalyst 16.0, *) {
+        print("ready to set onAddButtonTapped")
+        if #available(iOS 16.0, *) {
+            print("iOS 16 available")
             headerView.onAddButtonTapped = { [weak self] in
                 guard let self else { return }
                 Task {
@@ -133,7 +137,7 @@ extension PasskeyCredentialController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return credentialTableview.dequeueDefaultReusableCell(withIdentifier: "", for: indexPath, text: devices[indexPath.row].friendlyName)
+        return credentialTableview.dequeueDefaultReusableCell(withIdentifier: "credentialCell", for: indexPath, text: devices[indexPath.row].friendlyName)
     }
 
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {

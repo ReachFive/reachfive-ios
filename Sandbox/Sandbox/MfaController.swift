@@ -178,7 +178,7 @@ extension MfaController: UITableViewDelegate {
             headerView.configure(
                 title: "Enrolled MFA Credentials",
                 onEdit: { [weak self] button in
-                    guard let self = self else { return }
+                    guard let self else { return }
                     let isEditing = !self.credentialsTableView.isEditing
                     self.credentialsTableView.setEditing(isEditing, animated: true)
                     button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
@@ -192,7 +192,7 @@ extension MfaController: UITableViewDelegate {
             headerView.configure(
                 title: "Trusted Devices",
                 onEdit: { [weak self] button in
-                    guard let self = self else { return }
+                    guard let self else { return }
                     let isEditing = !self.trustedDevicesTableView.isEditing
                     self.trustedDevicesTableView.setEditing(isEditing, animated: true)
                     button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
