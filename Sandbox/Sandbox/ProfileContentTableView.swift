@@ -36,6 +36,8 @@ extension ProfileController {
                 let alert = UIAlertController(title: "Email verification", message: "Please enter the code you received by Email", preferredStyle: .alert)
                 alert.addTextField { textField in
                     textField.placeholder = "Verification code"
+                    textField.keyboardType = .numberPad
+                    textField.textContentType = .oneTimeCode
                 }
                 let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
                 let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in

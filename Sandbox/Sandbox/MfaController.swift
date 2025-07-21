@@ -294,6 +294,8 @@ class MfaAction {
                 let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
                 alert.addTextField { textField in
                     textField.placeholder = "Verification code"
+                    textField.keyboardType = .numberPad
+                    textField.textContentType = .oneTimeCode
                 }
                 let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
                     continuation.resume(throwing: ReachFiveError.AuthCanceled)
@@ -333,6 +335,8 @@ class MfaAction {
                     let alert = UIAlertController(title: "Verification Code", message: "Please enter the verification Code you got by \(canal)", preferredStyle: .alert)
                     alert.addTextField { textField in
                         textField.placeholder = "Verification code"
+                        textField.keyboardType = .numberPad
+                        textField.textContentType = .oneTimeCode
                     }
                     let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
                         continuation.resume(throwing: ReachFiveError.AuthCanceled)
