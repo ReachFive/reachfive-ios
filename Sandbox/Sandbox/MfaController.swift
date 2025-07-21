@@ -92,6 +92,21 @@ class MfaController: UIViewController {
             }
         }
     }
+    
+    func addMfaCredential() {
+        let alert = UIAlertController(title: "Add MFA Credential", message: "Enter a phone number to register a new MFA credential.", preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.placeholder = "Phone number"
+            textField.keyboardType = .phonePad
+        }
+        let addAction = UIAlertAction(title: "Add", style: .default) { [weak self] _ in
+            guard let self = self, let phoneNumber = alert.textFields?.first?.text, !phoneNumber.isEmpty else { return }
+            self.startMfaPhoneRegistration(phoneNumber: phoneNumber)
+        }
+        alert.addAction(addAction)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
+    }
 
     @IBAction func startStepUp(_ sender: UIButton) {
         guard let authToken = AppDelegate.storage.getToken() else {
@@ -116,8 +131,16 @@ class MfaController: UIViewController {
     }
 
     @IBAction func startMfaPhoneRegistration(_ sender: UIButton) {
-        guard let authToken = AppDelegate.storage.getToken(), let phoneNumber = phoneNumberMfaRegistration.text, !phoneNumber.isEmpty else {
-            print("Not logged in or phone number is empty")
+        guard let phoneNumber = phoneNumberMfaRegistration.text, !phoneNumber.isEmpty else {
+            print("Phone number is empty")
+            return
+        }
+        startMfaPhoneRegistration(phoneNumber: phoneNumber)
+    }
+    
+    private func startMfaPhoneRegistration(phoneNumber: String) {
+        guard let authToken = AppDelegate.storage.getToken() else {
+            print("Not logged in")
             return
         }
 
@@ -146,34 +169,35 @@ extension MfaController: UITableViewDelegate {
             return nil
         }
 
-        let title: String
-        let action: (UIButton) -> Void
-        let isHidden: Bool
-
         if tableView == credentialsTableView {
-            title = "Enrolled MFA Credentials"
-            isHidden = mfaCredentials.isEmpty
-            action = { [weak self] button in
-                guard let self = self else { return }
-                let isEditing = !self.credentialsTableView.isEditing
-                self.credentialsTableView.setEditing(isEditing, animated: true)
-                button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
-            }
+            headerView.configure(
+                title: "Enrolled MFA Credentials",
+                onEdit: { [weak self] button in
+                    guard let self = self else { return }
+                    let isEditing = !self.credentialsTableView.isEditing
+                    self.credentialsTableView.setEditing(isEditing, animated: true)
+                    button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
+                },
+                onAdd: { [weak self] in
+                    self?.addMfaCredential()
+                }
+            )
+            headerView.setEditButtonHidden(mfaCredentials.isEmpty)
         } else if tableView == trustedDevicesTableView {
-            title = "Trusted Devices"
-            isHidden = trustedDevices.isEmpty
-            action = { [weak self] button in
-                guard let self = self else { return }
-                let isEditing = !self.trustedDevicesTableView.isEditing
-                self.trustedDevicesTableView.setEditing(isEditing, animated: true)
-                button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
-            }
+            headerView.configure(
+                title: "Trusted Devices",
+                onEdit: { [weak self] button in
+                    guard let self = self else { return }
+                    let isEditing = !self.trustedDevicesTableView.isEditing
+                    self.trustedDevicesTableView.setEditing(isEditing, animated: true)
+                    button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
+                }
+            )
+            headerView.setEditButtonHidden(trustedDevices.isEmpty)
         } else {
             return nil
         }
 
-        headerView.configure(title: title, onEdit: action)
-        headerView.setEditButtonHidden(isHidden)
         return headerView
     }
 }

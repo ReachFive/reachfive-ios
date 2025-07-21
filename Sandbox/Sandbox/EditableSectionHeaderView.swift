@@ -8,11 +8,19 @@ class EditableSectionHeaderView: UITableViewHeaderFooterView {
     // A closure that is called when the edit button is tapped.
     // The `sender` button is passed to allow for state changes (e.g., updating the title).
     var onEditButtonTapped: ((UIButton) -> Void)?
+    var onAddButtonTapped: (() -> Void)?
 
     // The button to toggle editing mode for a table view.
     private let editButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Modify", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let addButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "plus"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -29,6 +37,7 @@ class EditableSectionHeaderView: UITableViewHeaderFooterView {
         super.init(reuseIdentifier: reuseIdentifier)
         setupViews()
         editButton.addTarget(self, action: #selector(editButtonAction), for: .touchUpInside)
+        addButton.addTarget(self, action: #selector(addButtonAction), for: .touchUpInside)
     }
 
     required init?(coder: NSCoder) {
@@ -36,9 +45,11 @@ class EditableSectionHeaderView: UITableViewHeaderFooterView {
     }
 
     // Configures the view with a title and the button tap action.
-    func configure(title: String, onEdit: @escaping (UIButton) -> Void) {
+    func configure(title: String, onEdit: @escaping (UIButton) -> Void, onAdd: (() -> Void)? = nil) {
         titleLabel.text = title
         self.onEditButtonTapped = onEdit
+        self.onAddButtonTapped = onAdd
+        addButton.isHidden = onAdd == nil
     }
     
     // Shows or hides the edit button.
@@ -48,25 +59,25 @@ class EditableSectionHeaderView: UITableViewHeaderFooterView {
 
     // Sets up the layout and constraints for the subviews.
     private func setupViews() {
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(editButton)
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, addButton, editButton])
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        contentView.addSubview(stackView)
 
         NSLayoutConstraint.activate([
-            // Constraints for the title label
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
-            titleLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-
-            // Constraints for the edit button
-            editButton.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
-            editButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            
-            // Ensure the title doesn't overlap with the button
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: editButton.leadingAnchor, constant: -8)
+            stackView.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
+            stackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
         ])
     }
 
     // The action called when the edit button is tapped.
     @objc private func editButtonAction() {
         onEditButtonTapped?(editButton)
+    }
+    
+    @objc private func addButtonAction() {
+        onAddButtonTapped?()
     }
 }
