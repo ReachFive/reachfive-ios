@@ -107,6 +107,16 @@ extension PasskeyCredentialController: UITableViewDelegate {
             return nil
         }
 
+        var onAdd: (() -> Void)? = nil
+        if #available(iOS 16.0, *) {
+            onAdd = { [weak self] in
+                guard let self else { return }
+                Task {
+                    await self.registerNewPasskey()
+                }
+            }
+        }
+
         headerView.configure(
             title: "Passkey Credentials",
             onEdit: { [weak self] button in
@@ -114,18 +124,10 @@ extension PasskeyCredentialController: UITableViewDelegate {
                 let isEditing = !self.credentialTableview.isEditing
                 self.credentialTableview.setEditing(isEditing, animated: true)
                 button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
-            }
+            },
+            onAdd: onAdd
         )
-        print("ready to set onAddButtonTapped")
-        if #available(iOS 16.0, *) {
-            print("iOS 16 available")
-            headerView.onAddButtonTapped = { [weak self] in
-                guard let self else { return }
-                Task {
-                    await self.registerNewPasskey()
-                }
-            }
-        }
+        
         headerView.setEditButtonHidden(devices.isEmpty)
         return headerView
     }
