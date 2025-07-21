@@ -32,9 +32,14 @@ class MfaController: UIViewController {
 
         credentialsTableView.dataSource = self
         credentialsTableView.delegate = self
+        // Register the custom header view for the credentials table.
+        credentialsTableView.register(EditableSectionHeaderView.self, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
 
         trustedDevicesTableView.dataSource = self
         trustedDevicesTableView.delegate = self
+        // Register the custom header view for the trusted devices table.
+        trustedDevicesTableView.register(EditableSectionHeaderView.self, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
+
 
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
             Task { @MainActor in
@@ -125,6 +130,39 @@ extension MfaController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    
+    // Use a custom header view for each section.
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: EditableSectionHeaderView.reuseIdentifier) as? EditableSectionHeaderView else {
+            return nil
+        }
+
+        let title: String
+        let action: (UIButton) -> Void
+
+        if tableView == credentialsTableView {
+            title = "Enrolled MFA Credentials"
+            action = { [weak self] button in
+                guard let self = self else { return }
+                let isEditing = !self.credentialsTableView.isEditing
+                self.credentialsTableView.setEditing(isEditing, animated: true)
+                button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
+            }
+        } else if tableView == trustedDevicesTableView {
+            title = "Trusted Devices"
+            action = { [weak self] button in
+                guard let self = self else { return }
+                let isEditing = !self.trustedDevicesTableView.isEditing
+                self.trustedDevicesTableView.setEditing(isEditing, animated: true)
+                button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
+            }
+        } else {
+            return nil
+        }
+
+        headerView.configure(title: title, onEdit: action)
+        return headerView
+    }
 }
 
 extension MfaController: UITableViewDataSource {
@@ -186,16 +224,7 @@ extension MfaController: UITableViewDataSource {
         return UITableViewCell()
     }
 
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if tableView == credentialsTableView {
-            return "Enrolled MFA Credentials"
-        } else if tableView == trustedDevicesTableView {
-            return "Trusted Devices"
-        }
-        return nil
-    }
-
-    //TODO I also want a modify button as an accessory, which when clicked displays "red circle to remove" buttons on each rows, just like it is done on the favorites list in Safari
+    // The commit editing style function enables the swipe-to-delete functionality and responds to the delete action.
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             guard let authToken = AppDelegate.storage.getToken() else { return }

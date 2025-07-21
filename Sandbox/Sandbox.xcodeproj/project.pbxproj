@@ -18,6 +18,7 @@
 		2AB299ED2C0E29E300D0C5C8 /* RecoveryStartController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */; };
 		2AB299EF2C0E29F900D0C5C8 /* RecoveryEndController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */; };
 		2AB299F12C0E2AB900D0C5C8 /* RecoveryVerificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */; };
+		2AD29AB32E2E931500B26535 /* EditableSectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */; };
 		2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFF7DE8296F1EB900514B47 /* ActionController.swift */; };
 		3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3414A7CC22DDD39C00CF393A /* ProfileController.swift */; };
 		341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341731FD229D6B6400681CFD /* AppDelegate.swift */; };
@@ -50,6 +51,7 @@
 		2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryStartController.swift; sourceTree = "<group>"; };
 		2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEndController.swift; sourceTree = "<group>"; };
 		2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryVerificationController.swift; sourceTree = "<group>"; };
+		2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableSectionHeaderView.swift; sourceTree = "<group>"; };
 		2AFF7DE8296F1EB900514B47 /* ActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionController.swift; sourceTree = "<group>"; };
 		2E55CD881F31583F8D3480D8 /* Pods_Sandbox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Sandbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3414A7CC22DDD39C00CF393A /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 				2AFF7DE8296F1EB900514B47 /* ActionController.swift */,
 				341731FD229D6B6400681CFD /* AppDelegate.swift */,
 				2AA4B58F2975B3920001747C /* DemoController.swift */,
+				2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */,
 				2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */,
 				EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */,
 				3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */,
@@ -280,6 +283,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34797ABD22A9607D00ED093C /* SignupController.swift in Sources */,
+				2AD29AB32E2E931500B26535 /* EditableSectionHeaderView.swift in Sources */,
 				3417FF7022FB11CD0009EC84 /* LoginWithPasswordController.swift in Sources */,
 				34173200229D6B6400681CFD /* LoginWithProvidersController.swift in Sources */,
 				2A52203B297F187D00815558 /* SandboxTabBarController.swift in Sources */,
