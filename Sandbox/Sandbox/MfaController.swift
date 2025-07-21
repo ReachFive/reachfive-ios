@@ -13,17 +13,11 @@ class MfaController: UIViewController {
     static let mfaCell = "MfaCredentialCell"
     static let trustedDeviceCell = "TrustedDeviceCell"
 
-    var mfaCredentials: [MfaCredential] = [] {
-        didSet {
-            credentialsTableView.reloadData()
-        }
-    }
-
-    var trustedDevices: [TrustedDevice] = [] {
-        didSet {
-            trustedDevicesTableView.reloadData()
-        }
-    }
+    // The data sources for the table views.
+    // The `didSet` observers were removed to prevent automatic reloads, which conflicted with animated row deletions.
+    // Table view reloads are now handled manually in the data fetching methods.
+    var mfaCredentials: [MfaCredential] = []
+    var trustedDevices: [TrustedDevice] = []
 
     var tokenNotification: NSObjectProtocol?
 
@@ -62,6 +56,7 @@ class MfaController: UIViewController {
         }
     }
 
+    // Fetches the user's MFA credentials and reloads the table view on the main thread.
     private func fetchMfaCredentials() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
@@ -69,8 +64,12 @@ class MfaController: UIViewController {
         }
         let response = try await AppDelegate.reachfive().mfaListCredentials(authToken: authToken)
         self.mfaCredentials = response.credentials.map { MfaCredential.convert(from: $0) }
+        await MainActor.run {
+            credentialsTableView.reloadData()
+        }
     }
 
+    // Fetches the user's trusted devices and reloads the table view on the main thread.
     private func fetchTrustedDevices() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
@@ -81,6 +80,10 @@ class MfaController: UIViewController {
             self.trustedDevices = response
         } catch let ReachFiveError.TechnicalError(_, apiError) where apiError?.errorMessageKey == "error.feature.notAvailable" {
             print("Trusted device feature not available")
+            self.trustedDevices = []
+        }
+        await MainActor.run {
+            trustedDevicesTableView.reloadData()
         }
     }
 
