@@ -2,10 +2,10 @@ import DeviceKit
 import Foundation
 
 public class ReachFiveApi {
+    // MARK: - Properties
+
     let sdkConfig: SdkConfig
-
     private let networkClient: NetworkClient
-
     private let profile_fields = [
         "birthdate",
         "bio",
@@ -56,12 +56,16 @@ public class ReachFiveApi {
         "updated_at",
     ]
 
+    // MARK: - Initialization
+
     public init(sdkConfig: SdkConfig) {
         self.sdkConfig = sdkConfig
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         self.networkClient = NetworkClient(decoder: decoder)
     }
+
+    // MARK: - URL Construction
 
     func createUrl(path: String, params: [String: String?]? = nil) -> URL {
         var components = URLComponents()
@@ -86,10 +90,16 @@ public class ReachFiveApi {
         return components.url!
     }
 
+    public func buildAuthorizeURL(queryParams: [String: String?]) -> URL {
+        createUrl(path: "/oauth/authorize", params: queryParams)
+    }
+
     /// Keep only non-nil values
     private func filter(params: [String: String?]) -> [String: String] {
         params.compactMapValues { $0 }
     }
+
+    // MARK: - Configuration
 
     public func clientConfig() async throws -> ClientConfigResponse {
         try await networkClient.request(createUrl(path: "/identity/v1/config", params: ["client_id": sdkConfig.clientId]))
@@ -101,9 +111,9 @@ public class ReachFiveApi {
             .responseJson(type: ProvidersConfigsResult.self)
     }
 
-    public func loginWithProvider(
-        loginProviderRequest: LoginProviderRequest
-    ) async throws -> AccessTokenResponse {
+    // MARK: - Authentication
+
+    public func loginWithProvider(loginProviderRequest: LoginProviderRequest) async throws -> AccessTokenResponse {
         try await networkClient.request(createUrl(path: "/identity/v1/oauth/provider/token"), method: .post, parameters: loginProviderRequest.dictionary())
             .responseJson(type: AccessTokenResponse.self)
     }
@@ -124,10 +134,8 @@ public class ReachFiveApi {
 
     public func authorize(params: [String: String?]?) async throws -> String {
         let url = try await networkClient.request(createUrl(path: "/oauth/authorize", params: params)).redirect()
-
         let params = URLComponents(string: url.absoluteString)?.queryItems
-        let code = params?.first(where: { $0.name == "code" })?.value
-        guard let code else {
+        guard let code = params?.first(where: { $0.name == "code" })?.value else {
             throw ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))
         }
         return code
@@ -143,156 +151,138 @@ public class ReachFiveApi {
             .responseJson(type: AccessTokenResponse.self)
     }
 
+    public func logout() async throws {
+        try await networkClient.request(createUrl(path: "/identity/v1/logout"))
+            .responseJson()
+    }
+
+    // MARK: - Profile Management
+
     public func getProfile(authToken: AuthToken) async throws -> Profile {
         try await networkClient.request(createUrl(path: "/identity/v1/userinfo", params: ["fields": profile_fields.joined(separator: ","), "flatcf": "true"]), headers: tokenHeader(authToken))
             .responseJson(type: Profile.self)
     }
 
-    public func sendEmailVerification(
-        authToken: AuthToken,
-        sendEmailVerificationRequest: SendEmailVerificationRequest
-    ) async throws -> SendEmailVerificationResponse {
-        try await networkClient.request(createUrl(path: "/identity/v1/send-email-verification"), method: .post, headers: tokenHeader(authToken), parameters: sendEmailVerificationRequest.dictionary())
-            .responseJson(type: SendEmailVerificationResponse.self)
-    }
-
-    public func verifyEmail(
-        authToken: AuthToken,
-        verifyEmailRequest: VerifyEmailRequest
-    ) async throws {
-        try await networkClient.request(createUrl(path: "/identity/v1/verify-email"), method: .post, headers: tokenHeader(authToken), parameters: verifyEmailRequest.dictionary())
-            .responseJson()
-    }
-
-    public func verifyPhoneNumber(
-        authToken: AuthToken,
-        verifyPhoneNumberRequest: VerifyPhoneNumberRequest
-    ) async throws {
-        try await networkClient.request(createUrl(path: "/identity/v1/verify-phone-number"), method: .post, headers: tokenHeader(authToken), parameters: verifyPhoneNumberRequest.dictionary())
-            .responseJson()
-    }
-
-    public func updateEmail(
-        authToken: AuthToken,
-        updateEmailRequest: UpdateEmailRequest
-    ) async throws -> Profile {
-        try await networkClient.request(createUrl(path: "/identity/v1/update-email"), method: .post, headers: tokenHeader(authToken), parameters: updateEmailRequest.dictionary())
-            .responseJson(type: Profile.self)
-    }
-
-    public func updateProfile(
-        authToken: AuthToken,
-        profile: Profile
-    ) async throws -> Profile {
+    public func updateProfile(authToken: AuthToken, profile: Profile) async throws -> Profile {
         try await networkClient.request(createUrl(path: "/identity/v1/update-profile"), method: .post, headers: tokenHeader(authToken), parameters: profile.dictionary())
             .responseJson(type: Profile.self)
     }
 
-    public func updateProfile(
-        authToken: AuthToken,
-        profileUpdate: ProfileUpdate
-    ) async throws -> Profile {
+    public func updateProfile(authToken: AuthToken, profileUpdate: ProfileUpdate) async throws -> Profile {
         try await networkClient.request(createUrl(path: "/identity/v1/update-profile"), method: .post, headers: tokenHeader(authToken), parameters: profileUpdate.dictionary())
             .responseJson(type: Profile.self)
     }
 
-    public func updatePassword(
-        authToken: AuthToken?,
-        updatePasswordRequest: UpdatePasswordRequest
-    ) async throws {
+    public func updateEmail(authToken: AuthToken, updateEmailRequest: UpdateEmailRequest) async throws -> Profile {
+        try await networkClient.request(createUrl(path: "/identity/v1/update-email"), method: .post, headers: tokenHeader(authToken), parameters: updateEmailRequest.dictionary())
+            .responseJson(type: Profile.self)
+    }
+
+    public func updatePhoneNumber(authToken: AuthToken, updatePhoneNumberRequest: UpdatePhoneNumberRequest) async throws -> Profile {
+        try await networkClient.request(createUrl(path: "/identity/v1/update-phone-number"), method: .post, headers: tokenHeader(authToken), parameters: updatePhoneNumberRequest.dictionary())
+            .responseJson(type: Profile.self)
+    }
+
+    // MARK: - Verification
+
+    public func sendEmailVerification(authToken: AuthToken, sendEmailVerificationRequest: SendEmailVerificationRequest) async throws -> SendEmailVerificationResponse {
+        try await networkClient.request(createUrl(path: "/identity/v1/send-email-verification"), method: .post, headers: tokenHeader(authToken), parameters: sendEmailVerificationRequest.dictionary())
+            .responseJson(type: SendEmailVerificationResponse.self)
+    }
+
+    public func verifyEmail(authToken: AuthToken, verifyEmailRequest: VerifyEmailRequest) async throws {
+        try await networkClient.request(createUrl(path: "/identity/v1/verify-email"), method: .post, headers: tokenHeader(authToken), parameters: verifyEmailRequest.dictionary())
+            .responseJson()
+    }
+
+    public func verifyPhoneNumber(authToken: AuthToken, verifyPhoneNumberRequest: VerifyPhoneNumberRequest) async throws {
+        try await networkClient.request(createUrl(path: "/identity/v1/verify-phone-number"), method: .post, headers: tokenHeader(authToken), parameters: verifyPhoneNumberRequest.dictionary())
+            .responseJson()
+    }
+
+    public func verifyAuthCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws {
+        try await networkClient.request(createUrl(path: "/identity/v1/verify-auth-code"), method: .post, parameters: verifyAuthCodeRequest.dictionary())
+            .responseJson()
+    }
+
+    // MARK: - Password Management
+
+    public func updatePassword(authToken: AuthToken?, updatePasswordRequest: UpdatePasswordRequest) async throws {
         let headers: [String: String] = authToken.map { tokenHeader($0) } ?? [:]
         try await networkClient.request(createUrl(path: "/identity/v1/update-password"), method: .post, headers: headers, parameters: updatePasswordRequest.dictionary())
             .responseJson()
     }
 
-    public func updatePhoneNumber(
-        authToken: AuthToken,
-        updatePhoneNumberRequest: UpdatePhoneNumberRequest
-    ) async throws -> Profile {
-        try await networkClient.request(createUrl(path: "/identity/v1/update-phone-number"), method: .post, headers: tokenHeader(authToken), parameters: updatePhoneNumberRequest.dictionary())
-            .responseJson(type: Profile.self)
+    public func requestPasswordReset(requestPasswordResetRequest: RequestPasswordResetRequest) async throws {
+        try await networkClient.request(createUrl(path: "/identity/v1/forgot-password"), method: .post, parameters: requestPasswordResetRequest.dictionary())
+            .responseJson()
     }
 
-    public func startMfaPhoneRegistration(
-        _ mfaStartPhoneRegistrationRequest: MfaStartPhoneRegistrationRequest,
-        authToken: AuthToken
-    ) async throws -> MfaStartCredentialRegistrationResponse {
+    // MARK: - Passwordless
+
+    public func startPasswordless(_ startPasswordlessRequest: StartPasswordlessRequest) async throws {
+        try await networkClient.request(createUrl(path: "/identity/v1/passwordless/start"), method: .post, parameters: startPasswordlessRequest.dictionary())
+            .responseJson()
+    }
+
+    public func verifyPasswordless(verifyPasswordlessRequest: VerifyPasswordlessRequest) async throws -> PasswordlessVerifyResponse {
+        try await networkClient.request(createUrl(path: "/identity/v1/passwordless/verify"), method: .post, parameters: verifyPasswordlessRequest.dictionary())
+            .responseJson(type: PasswordlessVerifyResponse.self)
+    }
+
+    // MARK: - MFA
+
+    public func startMfaPhoneRegistration(_ mfaStartPhoneRegistrationRequest: MfaStartPhoneRegistrationRequest, authToken: AuthToken) async throws -> MfaStartCredentialRegistrationResponse {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/credentials/phone-numbers"), method: .post, headers: tokenHeader(authToken), parameters: mfaStartPhoneRegistrationRequest.dictionary())
             .responseJson(type: MfaStartCredentialRegistrationResponse.self)
     }
 
-    public func startMfaEmailRegistration(
-        _ mfaStartEmailRegistrationRequest: MfaStartEmailRegistrationRequest,
-        authToken: AuthToken
-    ) async throws -> MfaStartCredentialRegistrationResponse {
+    public func startMfaEmailRegistration(_ mfaStartEmailRegistrationRequest: MfaStartEmailRegistrationRequest, authToken: AuthToken) async throws -> MfaStartCredentialRegistrationResponse {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/credentials/emails"), method: .post, headers: tokenHeader(authToken), parameters: mfaStartEmailRegistrationRequest.dictionary())
             .responseJson(type: MfaStartCredentialRegistrationResponse.self)
     }
 
-    public func verifyMfaEmailRegistrationPost(
-        _ mfaVerifyEmailRegistrationRequest: MfaVerifyEmailRegistrationPostRequest,
-        authToken: AuthToken
-    ) async throws -> MfaCredentialItem {
+    public func verifyMfaEmailRegistrationPost(_ mfaVerifyEmailRegistrationRequest: MfaVerifyEmailRegistrationPostRequest, authToken: AuthToken) async throws -> MfaCredentialItem {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/credentials/emails/verify"), method: .post, headers: tokenHeader(authToken), parameters: mfaVerifyEmailRegistrationRequest.dictionary())
             .responseJson(type: MfaCredentialItem.self)
     }
 
-    public func verifyMfaEmailRegistrationGet(
-        _ request: MfaVerifyEmailRegistrationGetRequest
-    ) async throws {
+    public func verifyMfaEmailRegistrationGet(_ request: MfaVerifyEmailRegistrationGetRequest) async throws {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/credentials/emails/verify"), method: .post, parameters: request.dictionary())
             .responseJson()
     }
 
-    public func verifyMfaPhoneRegistration(
-        _ mfaVerifyPhoneRegistrationRequest: MfaVerifyPhoneRegistrationRequest,
-        authToken: AuthToken
-    ) async throws -> MfaCredentialItem {
+    public func verifyMfaPhoneRegistration(_ mfaVerifyPhoneRegistrationRequest: MfaVerifyPhoneRegistrationRequest, authToken: AuthToken) async throws -> MfaCredentialItem {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/credentials/phone-numbers/verify"), method: .post, headers: tokenHeader(authToken), parameters: mfaVerifyPhoneRegistrationRequest.dictionary())
             .responseJson(type: MfaCredentialItem.self)
     }
 
-    public func deleteMfaPhoneNumberCredential(
-        phoneNumber: String,
-        authToken: AuthToken
-    ) async throws {
+    public func deleteMfaPhoneNumberCredential(phoneNumber: String, authToken: AuthToken) async throws {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/credentials/phone-numbers"), method: .delete, headers: tokenHeader(authToken), parameters: ["phone_number": phoneNumber])
             .responseJson()
     }
 
-    public func deleteMfaEmailCredential(
-        authToken: AuthToken
-    ) async throws {
+    public func deleteMfaEmailCredential(authToken: AuthToken) async throws {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/credentials/emails"), method: .delete, headers: tokenHeader(authToken))
             .responseJson()
     }
 
-    public func listMfaTrustedDevices(
-        authToken: AuthToken
-    ) async throws -> MfaListTrustedDevices {
+    public func listMfaTrustedDevices(authToken: AuthToken) async throws -> MfaListTrustedDevices {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/trusteddevices"), headers: tokenHeader(authToken))
             .responseJson(type: MfaListTrustedDevices.self)
     }
 
-    public func deleteMfaTrustedDevice(
-        deviceId: String,
-        authToken: AuthToken
-    ) async throws {
+    public func deleteMfaTrustedDevice(deviceId: String, authToken: AuthToken) async throws {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/trusteddevices/\(deviceId)"), method: .delete, headers: tokenHeader(authToken))
             .responseJson()
     }
 
-    public func mfaListCredentials(
-        authToken: AuthToken
-    ) async throws -> MfaCredentialsListResponse {
+    public func mfaListCredentials(authToken: AuthToken) async throws -> MfaCredentialsListResponse {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/credentials"), headers: tokenHeader(authToken))
             .responseJson(type: MfaCredentialsListResponse.self)
     }
 
-    public func startMfaStepUp(
-        _ request: StartMfaStepUpRequest,
-        authToken: AuthToken? = nil
-    ) async throws -> StartMfaStepUpResponse {
+    public func startMfaStepUp(_ request: StartMfaStepUpRequest, authToken: AuthToken? = nil) async throws -> StartMfaStepUpResponse {
         try await networkClient.request(createUrl(path: "/identity/v1/mfa/stepup"), method: .post, headers: authToken.map(tokenHeader), parameters: request.dictionary())
             .responseJson(type: StartMfaStepUpResponse.self)
     }
@@ -307,47 +297,7 @@ public class ReachFiveApi {
             .responseJson(type: PasswordlessVerifyResponse.self)
     }
 
-    public func requestPasswordReset(
-        requestPasswordResetRequest: RequestPasswordResetRequest
-    ) async throws {
-        try await networkClient.request(createUrl(path: "/identity/v1/forgot-password"), method: .post, parameters: requestPasswordResetRequest.dictionary())
-            .responseJson()
-    }
-
-    public func requestAccountRecovery(
-        _ requestAccountRecoveryRequest: RequestAccountRecoveryRequest
-    ) async throws {
-        try await networkClient.request(createUrl(path: "/identity/v1/account-recovery"), method: .post, parameters: requestAccountRecoveryRequest.dictionary())
-            .responseJson()
-    }
-
-    public func startPasswordless(_ startPasswordlessRequest: StartPasswordlessRequest) async throws {
-        try await networkClient.request(createUrl(path: "/identity/v1/passwordless/start"), method: .post, parameters: startPasswordlessRequest.dictionary())
-            .responseJson()
-    }
-
-    public func verifyPasswordless(verifyPasswordlessRequest: VerifyPasswordlessRequest) async throws -> PasswordlessVerifyResponse {
-        try await networkClient.request(createUrl(path: "/identity/v1/passwordless/verify"), method: .post, parameters: verifyPasswordlessRequest.dictionary())
-            .responseJson(type: PasswordlessVerifyResponse.self)
-    }
-
-    public func verifyAuthCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws {
-        try await networkClient.request(createUrl(path: "/identity/v1/verify-auth-code"), method: .post, parameters: verifyAuthCodeRequest.dictionary())
-            .responseJson()
-    }
-
-    public func logout() async throws {
-        try await networkClient.request(createUrl(path: "/identity/v1/logout"))
-            .responseJson()
-    }
-
-    func tokenHeader(_ authToken: AuthToken) -> [String: String] {
-       ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
-    }
-
-    public func buildAuthorizeURL(queryParams: [String: String?]) -> URL {
-        createUrl(path: "/oauth/authorize", params: queryParams)
-    }
+    // MARK: - WebAuthn (Passkeys)
 
     public func createWebAuthnSignupOptions(webAuthnSignupOptions: SignupOptions) async throws -> RegistrationOptions {
         try await networkClient.request(createUrl(path: "/identity/v1/webauthn/signup-options"), method: .post, parameters: webAuthnSignupOptions.dictionary())
@@ -397,6 +347,17 @@ public class ReachFiveApi {
     public func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async throws {
         try await networkClient.request(createUrl(path: "/identity/v1/webauthn/registration/\(id)"), method: .delete, headers: tokenHeader(authToken))
             .responseJson()
+    }
+
+    public func requestAccountRecovery(_ requestAccountRecoveryRequest: RequestAccountRecoveryRequest) async throws {
+        try await networkClient.request(createUrl(path: "/identity/v1/account-recovery"), method: .post, parameters: requestAccountRecoveryRequest.dictionary())
+            .responseJson()
+    }
+
+    // MARK: - Helpers
+
+    func tokenHeader(_ authToken: AuthToken) -> [String: String] {
+       ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
     }
 }
 
