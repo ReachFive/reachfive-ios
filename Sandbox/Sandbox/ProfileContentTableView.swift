@@ -9,7 +9,6 @@ struct Field {
 
 // TODO:
 // - remove enroll MFA identifier in menu when the identifier has already been enrolled. Requires listMfaCredentials
-// - refaire la présentation avec une Collection View : https://developer.apple.com/videos/play/wwdc2019/215
 extension ProfileController {
 
     func format(date: Int) -> String {

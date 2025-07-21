@@ -16,7 +16,7 @@ import UIKit
 // import Reach5WeChat
 #endif
 
-//TODO
+//TODO:
 // Mettre une nouvelle page dans une quatrième tabs ou dans l'app réglages:
 // - Paramétrage : scopes, origin, utilisation du refresh au démarrage ?
 // cf. wireframe de JC pour d'autres idées : https://miro.com/app/board/uXjVOMB0pG4=/
