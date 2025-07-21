@@ -10,7 +10,6 @@ class MfaController: UIViewController {
     @IBOutlet weak var trustedDevicesTableView: UITableView!
 
     static let mfaCell = "MfaCredentialCell"
-    static let trustedDeviceCell = "TrustedDeviceCell"
 
     // The data sources for the table views.
     // A `didSet` observer is used to automatically update the header's edit button visibility
@@ -42,6 +41,9 @@ class MfaController: UIViewController {
         // Register the custom header view's .xib file for the trusted devices table.
         let trustedDevicesNib = UINib(nibName: "EditableSectionHeaderView", bundle: nil)
         trustedDevicesTableView.register(trustedDevicesNib, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
+        
+        let trustedDeviceCellNib = UINib(nibName: "TrustedDeviceCell", bundle: nil)
+        trustedDevicesTableView.register(trustedDeviceCellNib, forCellReuseIdentifier: TrustedDeviceCell.reuseIdentifier)
 
 
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
@@ -229,8 +231,10 @@ extension MfaController: UITableViewDataSource {
             return tableView.dequeueDefaultReusableCell(withIdentifier: MfaController.mfaCell, for: indexPath, text: credential.identifier, secondaryText: credential.createdAt)
         }
         if tableView == trustedDevicesTableView {
+            let cell = tableView.dequeueReusableCell(withIdentifier: TrustedDeviceCell.reuseIdentifier, for: indexPath) as! TrustedDeviceCell
             let device = trustedDevices[indexPath.row]
-            return tableView.dequeueDefaultReusableCell(withIdentifier: MfaController.trustedDeviceCell, for: indexPath, text: device.metadata.deviceName ?? "Anonymous device", secondaryText: device.createdAt)
+            cell.configure(with: device)
+            return cell
         }
         return UITableViewCell()
     }
