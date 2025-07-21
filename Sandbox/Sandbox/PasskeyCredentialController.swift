@@ -37,7 +37,6 @@ class PasskeyCredentialController: UIViewController {
     }
 
     private func reloadCredentials(authToken: AuthToken) async {
-        print(#function)
         var listCredentials: [DeviceCredential] = []
         do {
             listCredentials = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
@@ -102,7 +101,6 @@ extension PasskeyCredentialController: UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        print(#function)
         guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: EditableSectionHeaderView.reuseIdentifier) as? EditableSectionHeaderView else {
             return nil
         }
@@ -127,7 +125,7 @@ extension PasskeyCredentialController: UITableViewDelegate {
             },
             onAdd: onAdd
         )
-        
+
         headerView.setEditButtonHidden(devices.isEmpty)
         return headerView
     }
@@ -139,7 +137,7 @@ extension PasskeyCredentialController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return credentialTableview.dequeueDefaultReusableCell(withIdentifier: "credentialCell", for: indexPath, text: devices[indexPath.row].friendlyName)
+        credentialTableview.dequeueDefaultReusableCell(withIdentifier: "credentialCell", for: indexPath, text: devices[indexPath.row].friendlyName)
     }
 
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
