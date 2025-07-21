@@ -52,25 +52,21 @@ class MfaController: UIViewController {
         }
 
         Task {
-            await fetchMfaCredentials()
-            await fetchTrustedDevices()
+            try await fetchMfaCredentials()
+            try await fetchTrustedDevices()
         }
     }
 
-    private func fetchMfaCredentials() async {
+    private func fetchMfaCredentials() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
             return
         }
-        do {
-            let response = try await AppDelegate.reachfive().mfaListCredentials(authToken: authToken)
-            self.mfaCredentials = response.credentials.map { MfaCredential.convert(from: $0) }
-        } catch {
-            self.presentErrorAlert(title: "Load MFA credentials error", error)
-        }
+        let response = try await AppDelegate.reachfive().mfaListCredentials(authToken: authToken)
+        self.mfaCredentials = response.credentials.map { MfaCredential.convert(from: $0) }
     }
 
-    private func fetchTrustedDevices() async {
+    private func fetchTrustedDevices() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
             return
@@ -80,8 +76,6 @@ class MfaController: UIViewController {
             self.trustedDevices = response
         } catch let ReachFiveError.TechnicalError(_, apiError) where apiError?.errorMessageKey == "error.feature.notAvailable" {
             print("Trusted device feature not available")
-        } catch {
-            self.presentErrorAlert(title: "Load trusted device error", error)
         }
     }
 
@@ -99,7 +93,7 @@ class MfaController: UIViewController {
             do {
                 let freshToken = try await mfaAction.mfaStart(stepUp: stepUpFlow)
                 AppDelegate.storage.setToken(freshToken)
-                await fetchMfaCredentials()
+                try await fetchMfaCredentials()
                 self.presentAlert(title: "Step up", message: "Success")
             } catch {
                 self.presentErrorAlert(title: "Step up failed", error)
@@ -117,7 +111,7 @@ class MfaController: UIViewController {
         Task {
             do {
                 let registeredCredential = try await mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken)
-                await fetchMfaCredentials()
+                try await fetchMfaCredentials()
                 self.presentAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
             } catch {
                 self.presentErrorAlert(title: "Start MFA Phone Number Registration failed", error)
@@ -134,11 +128,11 @@ extension MfaController: UITableViewDelegate {
 }
 
 extension MfaController: UITableViewDataSource {
-    
+
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == credentialsTableView {
             return mfaCredentials.count
@@ -147,42 +141,42 @@ extension MfaController: UITableViewDataSource {
         }
         return 0
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if tableView == credentialsTableView {
             let cell = tableView.dequeueReusableCell(withIdentifier: MfaController.mfaCell, for: indexPath)
             let credential = mfaCredentials[indexPath.row]
-            
+
             var content = cell.defaultContentConfiguration()
-            
+
             content.text = credential.identifier
             content.secondaryText = credential.createdAt
             content.prefersSideBySideTextAndSecondaryText = true
-            
+
             content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
             content.textProperties.adjustsFontForContentSizeCategory = true
             content.textProperties.adjustsFontSizeToFitWidth = true
-            
+
             content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
             content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
             content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
             cell.contentConfiguration = content
-            
+
             return cell
         } else if tableView == trustedDevicesTableView {
             let cell = tableView.dequeueReusableCell(withIdentifier: MfaController.trustedDeviceCell, for: indexPath)
             let device = trustedDevices[indexPath.row]
-            
+
             var content = cell.defaultContentConfiguration()
-            
+
             content.text = device.metadata.deviceName
             content.secondaryText = device.createdAt
             content.prefersSideBySideTextAndSecondaryText = true
-            
+
             content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
             content.textProperties.adjustsFontForContentSizeCategory = true
             content.textProperties.adjustsFontSizeToFitWidth = true
-            
+
             content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
             content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
             content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
@@ -191,7 +185,7 @@ extension MfaController: UITableViewDataSource {
         }
         return UITableViewCell()
     }
-    
+
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if tableView == credentialsTableView {
             return "Enrolled MFA Credentials"
@@ -200,12 +194,13 @@ extension MfaController: UITableViewDataSource {
         }
         return nil
     }
-    
+
+    //TODO I also want a modify button as an accessory, which when clicked displays "red circle to remove" buttons on each rows, just like it is done on the favorites list in Safari
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             guard let authToken = AppDelegate.storage.getToken() else { return }
             Task { @MainActor in
-                
+
                 if tableView == credentialsTableView {
                     let element = mfaCredentials[indexPath.row]
                     do {
