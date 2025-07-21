@@ -13,6 +13,8 @@
 		2A310F482C87794D0037A8FB /* TknMfa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A310F472C87794D0037A8FB /* TknMfa.swift */; };
 		2A624FDA2B2BDBC400BF33A7 /* DefaultProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */; };
 		2AB29A0B2C1225F500D0C5C8 /* ReachFiveApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB29A0A2C1225F500D0C5C8 /* ReachFiveApplication.swift */; };
+		2AD29ABD2E2EE27700B26535 /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29ABC2E2EE27700B26535 /* NetworkClient.swift */; };
+		2AD29ABF2E2EE28900B26535 /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29ABE2E2EE28900B26535 /* Async.swift */; };
 		2AD4CC482D08A8B300761E63 /* ProfileUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD4CC472D08A8A800761E63 /* ProfileUpdate.swift */; };
 		2ADFF84F2BFE661300A659FE /* RequestAccountRecoveryRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */; };
 		2AE040E42C88E33900162014 /* AppleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE040E32C88E33900162014 /* AppleProvider.swift */; };
@@ -105,6 +107,8 @@
 		2A310F472C87794D0037A8FB /* TknMfa.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TknMfa.swift; sourceTree = "<group>"; };
 		2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultProvider.swift; sourceTree = "<group>"; };
 		2AB29A0A2C1225F500D0C5C8 /* ReachFiveApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveApplication.swift; sourceTree = "<group>"; };
+		2AD29ABC2E2EE27700B26535 /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
+		2AD29ABE2E2EE28900B26535 /* Async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
 		2AD4CC472D08A8A800761E63 /* ProfileUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUpdate.swift; sourceTree = "<group>"; };
 		2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestAccountRecoveryRequest.swift; sourceTree = "<group>"; };
 		2AE040E32C88E33900162014 /* AppleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleProvider.swift; sourceTree = "<group>"; };
@@ -234,10 +238,12 @@
 		34689A9A22CE3E34002970F9 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				2AD29ABE2E2EE28900B26535 /* Async.swift */,
 				34689A9B22CE3E57002970F9 /* Base64.swift */,
 				34DD31FE22F3286400279E54 /* CustomField.swift */,
 				34E508B122F19F7700BF9BAF /* DataRequest.swift */,
 				3455FCEB22F1B57400892794 /* DictionaryEncodable.swift */,
+				2AD29ABC2E2EE27700B26535 /* NetworkClient.swift */,
 				34B5295922D376FF00B7B6AA /* Pkce.swift */,
 				349E16EF230C49E0002EA06B /* Storage.swift */,
 				2AE533052994629400EF97E0 /* StringUtils.swift */,
@@ -531,6 +537,7 @@
 				8496EB4425DEB141005098DD /* R5PublicKeyCredentialRpEntity.swift in Sources */,
 				34BDDA3C22E5BF3600D16DAE /* Emails.swift in Sources */,
 				8496EB3E25DEB141005098DD /* R5PublicKeyCredentialDescriptor.swift in Sources */,
+				2AD29ABD2E2EE27700B26535 /* NetworkClient.swift in Sources */,
 				34689A9C22CE3E57002970F9 /* Base64.swift in Sources */,
 				34BDDA3622E5BE6000D16DAE /* ProfileAddress.swift in Sources */,
 				2A0305142C063DEA00A92524 /* ResetPublicKeyCredential.swift in Sources */,
@@ -572,6 +579,7 @@
 				34689A9E22CE4666002970F9 /* VerifyPhoneNumberRequest.swift in Sources */,
 				3404A40C22CBA6DD002FFEDB /* AuthCodeRequest.swift in Sources */,
 				8496EB2425DEAFCF005098DD /* R5AuthenticatorAssertionResponse.swift in Sources */,
+				2AD29ABF2E2EE28900B26535 /* Async.swift in Sources */,
 				34BDDA3E22E5BFAC00D16DAE /* ProfileSignupRequest.swift in Sources */,
 				991296BF2BDBBCAF00DCEDC1 /* MfaStepUpRequest.swift in Sources */,
 				3455FCEC22F1B57400892794 /* DictionaryEncodable.swift in Sources */,
