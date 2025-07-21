@@ -16,6 +16,7 @@
 		2AD29ABD2E2EE27700B26535 /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29ABC2E2EE27700B26535 /* NetworkClient.swift */; };
 		2AD29ABF2E2EE28900B26535 /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29ABE2E2EE28900B26535 /* Async.swift */; };
 		2AD29AC12E2EF5A500B26535 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AC02E2EF5A500B26535 /* Logger.swift */; };
+		2AD29AC32E2EFE3B00B26535 /* ReachFiveSpi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AC22E2EFE3B00B26535 /* ReachFiveSpi.swift */; };
 		2AD4CC482D08A8B300761E63 /* ProfileUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD4CC472D08A8A800761E63 /* ProfileUpdate.swift */; };
 		2ADFF84F2BFE661300A659FE /* RequestAccountRecoveryRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */; };
 		2AE040E42C88E33900162014 /* AppleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE040E32C88E33900162014 /* AppleProvider.swift */; };
@@ -111,6 +112,7 @@
 		2AD29ABC2E2EE27700B26535 /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
 		2AD29ABE2E2EE28900B26535 /* Async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
 		2AD29AC02E2EF5A500B26535 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		2AD29AC22E2EFE3B00B26535 /* ReachFiveSpi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveSpi.swift; sourceTree = "<group>"; };
 		2AD4CC472D08A8A800761E63 /* ProfileUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUpdate.swift; sourceTree = "<group>"; };
 		2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestAccountRecoveryRequest.swift; sourceTree = "<group>"; };
 		2AE040E32C88E33900162014 /* AppleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleProvider.swift; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@
 				3417FF6922FAD1810009EC84 /* ReachFivePasswordLess.swift */,
 				34BDDA4322E5D95B00D16DAE /* ReachFiveProfile.swift */,
 				34BDDA3F22E5D73900D16DAE /* ReachFiveProviders.swift */,
+				2AD29AC22E2EFE3B00B26535 /* ReachFiveSpi.swift */,
 				2AE53307299462DD00EF97E0 /* ReachFiveWebviewLogin.swift */,
 				34E18B8D22A6C13100952EBD /* models */,
 				34689A9A22CE3E34002970F9 /* utils */,
@@ -518,6 +521,7 @@
 				34BDDA3822E5BE8C00D16DAE /* LoginSummary.swift in Sources */,
 				2AB29A0B2C1225F500D0C5C8 /* ReachFiveApplication.swift in Sources */,
 				347FDB69229C04C200660687 /* ProviderConfig.swift in Sources */,
+				2AD29AC32E2EFE3B00B26535 /* ReachFiveSpi.swift in Sources */,
 				2AE5331E2994638000EF97E0 /* ProfilePasskeySignupRequest.swift in Sources */,
 				2AE5330E299462DD00EF97E0 /* ReachFiveNative.swift in Sources */,
 				8496EB2925DEAFCF005098DD /* R5AuthenticatorAttestationResponse.swift in Sources */,
