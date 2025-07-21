@@ -9,6 +9,9 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
 
     @IBOutlet weak var credentialsTableView: UITableView!
     @IBOutlet weak var trustedDevicesTableView: UITableView!
+    
+    static let mfaCell = "MfaCredentialCell"
+    static let trustedDeviceCell = "TrustedDeviceCell"
 
     var mfaCredentials: [MfaCredential] = [] {
         didSet {
@@ -26,10 +29,10 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         credentialsTableView.dataSource = self
         credentialsTableView.delegate = self
-        
+
         trustedDevicesTableView.dataSource = self
         trustedDevicesTableView.delegate = self
 
@@ -49,25 +52,36 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
 
         Task {
-            await fetchData()
+            await fetchMfaCredentials()
+            await fetchTrustedDevices()
         }
     }
     
-    private func fetchData() async {
+    private func fetchMfaCredentials() async {
+        guard let authToken = AppDelegate.storage.getToken() else {
+            print("not logged in")
+            return
+        }
         do {
-            guard let authToken = AppDelegate.storage.getToken() else {
-                print("not logged in")
-                return
-            }
-            async let credentialsResponse = AppDelegate.reachfive().mfaListCredentials(authToken: authToken)
-            async let trustedDevicesResponse = AppDelegate.reachfive().mfaListTrustedDevices(authToken: authToken)
-            
-            let (credentials, devices) = try await (credentialsResponse, trustedDevicesResponse)
-            
-            self.mfaCredentials = credentials.credentials.map { MfaCredential.convert(from: $0) }
-            self.trustedDevices = devices
+            let response = try await AppDelegate.reachfive().mfaListCredentials(authToken: authToken)
+            self.mfaCredentials = response.credentials.map { MfaCredential.convert(from: $0) }
         } catch {
-            presentErrorAlert(title: "Failed to fetch MFA data", error)
+            self.presentErrorAlert(title: "Load MFA credentials error", error)
+        }
+    }
+
+    private func fetchTrustedDevices() async {
+        guard let authToken = AppDelegate.storage.getToken() else {
+            print("not logged in")
+            return
+        }
+        do {
+            let response = try await AppDelegate.reachfive().mfaListTrustedDevices(authToken: authToken)
+            self.trustedDevices = response
+        } catch let ReachFiveError.TechnicalError(_, apiError) where apiError?.errorMessageKey == "error.feature.notAvailable" {
+            print("Trusted device feature not available")
+        } catch {
+            self.presentErrorAlert(title: "Load trusted device error", error)
         }
     }
 
@@ -80,12 +94,12 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
         let stepUpSelectedType: MfaCredentialItemType = selectedStepUpType.selectedSegmentIndex == 0 ? .email : .sms
         let mfaAction = MfaAction(presentationAnchor: self)
         let stepUpFlow = StartStepUp.AuthTokenFlow(authType: stepUpSelectedType, authToken: authToken, scope: ["openid", "email", "profile", "phone", "full_write", "offline_access", "mfa"])
-        
+
         Task {
             do {
                 let freshToken = try await mfaAction.mfaStart(stepUp: stepUpFlow)
                 AppDelegate.storage.setToken(freshToken)
-                await fetchData()
+                await fetchMfaCredentials()
                 self.presentAlert(title: "Step up", message: "Success")
             } catch {
                 self.presentErrorAlert(title: "Step up failed", error)
@@ -103,20 +117,20 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
         Task {
             do {
                 let registeredCredential = try await mfaAction.mfaStart(registering: .PhoneNumber(phoneNumber), authToken: authToken)
-                await fetchData()
+                await fetchMfaCredentials()
                 self.presentAlert(title: "MFA \(registeredCredential.type) \(registeredCredential.friendlyName) enabled", message: "Success")
             } catch {
                 self.presentErrorAlert(title: "Start MFA Phone Number Registration failed", error)
             }
         }
     }
-    
+
     // MARK: - UITableViewDataSource
-    
+
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == credentialsTableView {
             return mfaCredentials.count
@@ -125,28 +139,51 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
         return 0
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if tableView == credentialsTableView {
-            let cell = tableView.dequeueReusableCell(withIdentifier: CredentialTableViewCell.identifier, for: indexPath) as! CredentialTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: MfaController.mfaCell, for: indexPath)
             let credential = mfaCredentials[indexPath.row]
-            cell.configure(with: credential)
-            cell.onDelete = { [weak self] in
-                self?.deleteCredential(credential)
-            }
+            
+            var content = cell.defaultContentConfiguration()
+            
+            content.text = credential.identifier
+            content.secondaryText = credential.createdAt
+            content.prefersSideBySideTextAndSecondaryText = true
+
+            content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
+            content.textProperties.adjustsFontForContentSizeCategory = true
+            content.textProperties.adjustsFontSizeToFitWidth = true
+
+            content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
+            content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
+            content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
+            cell.contentConfiguration = content
+
             return cell
         } else if tableView == trustedDevicesTableView {
-            let cell = tableView.dequeueReusableCell(withIdentifier: TrustedDeviceTableViewCell.identifier, for: indexPath) as! TrustedDeviceTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: MfaController.trustedDeviceCell, for: indexPath)
             let device = trustedDevices[indexPath.row]
-            cell.configure(with: device)
-            cell.onDelete = { [weak self] in
-                self?.deleteTrustedDevice(device)
-            }
+            
+            var content = cell.defaultContentConfiguration()
+
+            content.text = device.metadata.deviceName
+            content.secondaryText = device.createdAt
+            content.prefersSideBySideTextAndSecondaryText = true
+
+            content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
+            content.textProperties.adjustsFontForContentSizeCategory = true
+            content.textProperties.adjustsFontSizeToFitWidth = true
+
+            content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
+            content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
+            content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
+            cell.contentConfiguration = content
             return cell
         }
         return UITableViewCell()
     }
-    
+
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if tableView == credentialsTableView {
             return "Enrolled MFA Credentials"
@@ -155,12 +192,12 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
         }
         return nil
     }
-    
+
     // MARK: - Deletion Logic
-    
+
     private func deleteCredential(_ credential: MfaCredential) {
         guard let authToken = AppDelegate.storage.getToken() else { return }
-        
+
         let alert = UIAlertController(title: "Remove Identifier", message: "Are you sure you want to remove \(credential.identifier)?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in
@@ -168,7 +205,7 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
                 do {
                     let id = credential.identifier.contains("@") ? nil : credential.identifier
                     try await AppDelegate.reachfive().mfaDeleteCredential(id, authToken: authToken)
-                    await self.fetchData()
+                    await self.fetchMfaCredentials()
                 } catch {
                     self.presentErrorAlert(title: "Remove identifier failed", error)
                 }
@@ -176,7 +213,7 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
         })
         present(alert, animated: true)
     }
-    
+
     private func deleteTrustedDevice(_ device: TrustedDevice) {
         guard let authToken = AppDelegate.storage.getToken() else { return }
 
@@ -186,7 +223,7 @@ class MfaController: UIViewController, UITableViewDataSource, UITableViewDelegat
             Task {
                 do {
                     try await AppDelegate.reachfive().mfaDelete(trustedDeviceId: device.id, authToken: authToken)
-                    await self.fetchData()
+                    await self.fetchTrustedDevices()
                 } catch {
                     self.presentErrorAlert(title: "Remove trusted device failed", error)
                 }
