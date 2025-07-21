@@ -90,7 +90,7 @@ class PasskeyCredentialController: UIViewController {
             alert.preferredAction = registerAction
             self.present(alert, animated: true)
         } catch {
-            self.presentErrorAlert(title: "Register New Passkey failed", error)
+            self.presentErrorAlert(title: "New passkey registration failed", error)
         }
     }
 }
