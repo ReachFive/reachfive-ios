@@ -1,54 +1,26 @@
 import UIKit
 
 // A reusable table view header with a title and an actionable "Modify"/"Done" button.
+// This view's layout is defined in EditableSectionHeaderView.xib.
 class EditableSectionHeaderView: UITableViewHeaderFooterView {
     // A unique identifier for dequeuing the view.
     static let reuseIdentifier = "EditableSectionHeaderView"
 
-    // A closure that is called when the edit button is tapped.
-    // The `sender` button is passed to allow for state changes (e.g., updating the title).
+    // Closures that are called when the buttons are tapped.
     var onEditButtonTapped: ((UIButton) -> Void)?
     var onAddButtonTapped: (() -> Void)?
 
-    // The button to toggle editing mode for a table view.
-    private let editButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Modify", for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private let addButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "plus"), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
+    // IBOutlets connected to the UI elements in the .xib file.
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var addButton: UIButton!
+    @IBOutlet weak var editButton: UIButton!
 
-    // The label to display the section's title.
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.preferredFont(forTextStyle: .headline)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-
-    override init(reuseIdentifier: String?) {
-        super.init(reuseIdentifier: reuseIdentifier)
-        setupViews()
-        editButton.addTarget(self, action: #selector(editButtonAction), for: .touchUpInside)
-        addButton.addTarget(self, action: #selector(addButtonAction), for: .touchUpInside)
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    // Configures the view with a title and the button tap action.
+    // Configures the view with a title and the button tap actions.
     func configure(title: String, onEdit: @escaping (UIButton) -> Void, onAdd: (() -> Void)? = nil) {
         titleLabel.text = title
         self.onEditButtonTapped = onEdit
         self.onAddButtonTapped = onAdd
+        // The add button is hidden if no action is provided.
         addButton.isHidden = onAdd == nil
     }
     
@@ -57,27 +29,13 @@ class EditableSectionHeaderView: UITableViewHeaderFooterView {
         editButton.isHidden = isHidden
     }
 
-    // Sets up the layout and constraints for the subviews.
-    private func setupViews() {
-        let stackView = UIStackView(arrangedSubviews: [titleLabel, addButton, editButton])
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .horizontal
-        stackView.spacing = 8
-        contentView.addSubview(stackView)
-
-        NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
-            stackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-        ])
-    }
-
-    // The action called when the edit button is tapped.
-    @objc private func editButtonAction() {
-        onEditButtonTapped?(editButton)
+    // The action called when the add button is tapped.
+    @IBAction func addButtonAction() {
+        onAddButtonTapped?()
     }
     
-    @objc private func addButtonAction() {
-        onAddButtonTapped?()
+    // The action called when the edit button is tapped.
+    @IBAction func editButtonAction() {
+        onEditButtonTapped?(editButton)
     }
 }

@@ -26,13 +26,15 @@ class MfaController: UIViewController {
 
         credentialsTableView.dataSource = self
         credentialsTableView.delegate = self
-        // Register the custom header view for the credentials table.
-        credentialsTableView.register(EditableSectionHeaderView.self, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
+        // Register the custom header view's .xib file for the credentials table.
+        let credentialsNib = UINib(nibName: "EditableSectionHeaderView", bundle: nil)
+        credentialsTableView.register(credentialsNib, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
 
         trustedDevicesTableView.dataSource = self
         trustedDevicesTableView.delegate = self
-        // Register the custom header view for the trusted devices table.
-        trustedDevicesTableView.register(EditableSectionHeaderView.self, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
+        // Register the custom header view's .xib file for the trusted devices table.
+        let trustedDevicesNib = UINib(nibName: "EditableSectionHeaderView", bundle: nil)
+        trustedDevicesTableView.register(trustedDevicesNib, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
 
 
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
