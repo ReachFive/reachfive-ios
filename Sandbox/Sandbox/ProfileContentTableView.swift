@@ -230,8 +230,8 @@ extension ProfileController: UITableViewDataSource {
             children.append(copy)
 
 
-            if(field.name == "Email") {
-                if(field.value != nil && field.value!.contains(" ✘")) {
+            if (field.name == "Email") {
+                if (field.value != nil && field.value!.contains(" ✘")) {
                     let email = field.value!.split(separator: " ").first
                     let emailVerification = UIAction(title: "Verify Email", image: UIImage(systemName: "lock")) { _ in
                         Task {
