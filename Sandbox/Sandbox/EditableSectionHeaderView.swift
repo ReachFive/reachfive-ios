@@ -40,6 +40,11 @@ class EditableSectionHeaderView: UITableViewHeaderFooterView {
         titleLabel.text = title
         self.onEditButtonTapped = onEdit
     }
+    
+    // Shows or hides the edit button.
+    func setEditButtonHidden(_ isHidden: Bool) {
+        editButton.isHidden = isHidden
+    }
 
     // Sets up the layout and constraints for the subviews.
     private func setupViews() {

@@ -66,6 +66,9 @@ class MfaController: UIViewController {
         self.mfaCredentials = response.credentials.map { MfaCredential.convert(from: $0) }
         await MainActor.run {
             credentialsTableView.reloadData()
+            if let header = credentialsTableView.headerView(forSection: 0) as? EditableSectionHeaderView {
+                header.setEditButtonHidden(mfaCredentials.isEmpty)
+            }
         }
     }
 
@@ -84,6 +87,9 @@ class MfaController: UIViewController {
         }
         await MainActor.run {
             trustedDevicesTableView.reloadData()
+            if let header = trustedDevicesTableView.headerView(forSection: 0) as? EditableSectionHeaderView {
+                header.setEditButtonHidden(trustedDevices.isEmpty)
+            }
         }
     }
 
@@ -142,9 +148,11 @@ extension MfaController: UITableViewDelegate {
 
         let title: String
         let action: (UIButton) -> Void
+        let isHidden: Bool
 
         if tableView == credentialsTableView {
             title = "Enrolled MFA Credentials"
+            isHidden = mfaCredentials.isEmpty
             action = { [weak self] button in
                 guard let self = self else { return }
                 let isEditing = !self.credentialsTableView.isEditing
@@ -153,6 +161,7 @@ extension MfaController: UITableViewDelegate {
             }
         } else if tableView == trustedDevicesTableView {
             title = "Trusted Devices"
+            isHidden = trustedDevices.isEmpty
             action = { [weak self] button in
                 guard let self = self else { return }
                 let isEditing = !self.trustedDevicesTableView.isEditing
@@ -164,6 +173,7 @@ extension MfaController: UITableViewDelegate {
         }
 
         headerView.configure(title: title, onEdit: action)
+        headerView.setEditButtonHidden(isHidden)
         return headerView
     }
 }
@@ -239,6 +249,9 @@ extension MfaController: UITableViewDataSource {
                         try await AppDelegate.reachfive().mfaDeleteCredential(element.phoneNumber, authToken: authToken)
                         self.mfaCredentials.remove(at: indexPath.row)
                         tableView.deleteRows(at: [indexPath], with: .fade)
+                        if let header = credentialsTableView.headerView(forSection: 0) as? EditableSectionHeaderView {
+                            header.setEditButtonHidden(mfaCredentials.isEmpty)
+                        }
                     } catch {
                         self.presentErrorAlert(title: "Remove identifier failed", error)
                     }
@@ -248,6 +261,9 @@ extension MfaController: UITableViewDataSource {
                         try await AppDelegate.reachfive().mfaDelete(trustedDeviceId: element.id, authToken: authToken)
                         self.trustedDevices.remove(at: indexPath.row)
                         tableView.deleteRows(at: [indexPath], with: .fade)
+                        if let header = trustedDevicesTableView.headerView(forSection: 0) as? EditableSectionHeaderView {
+                            header.setEditButtonHidden(trustedDevices.isEmpty)
+                        }
                     } catch {
                         self.presentErrorAlert(title: "Remove trusted device failed", error)
                     }
