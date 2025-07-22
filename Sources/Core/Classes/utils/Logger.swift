@@ -2,12 +2,12 @@ import Foundation
 
 class Logger {
     static let shared = Logger()
-    var isEnabled = false
+    var enabled = false
 
     private init() {}
 
     func log(request: URLRequest) {
-        guard isEnabled else { return }
+        guard enabled else { return }
 
         print("➡️ REQUEST: \(request.httpMethod ?? "GET") \(request.url?.absoluteString ?? "")")
         if let body = request.httpBody, let pretty = body.prettyPrintedJSONString {
@@ -16,7 +16,7 @@ class Logger {
     }
 
     func log(response: HTTPURLResponse, data: Data) {
-        guard isEnabled else { return }
+        guard enabled else { return }
 
         print("⬅️ RESPONSE: \(response.statusCode) \(response.url?.absoluteString ?? "")")
         if let pretty = data.prettyPrintedJSONString {
@@ -25,12 +25,12 @@ class Logger {
     }
 
     func log(parsedResponse: Any) {
-        guard isEnabled else { return }
+        guard enabled else { return }
         print("✅ PARSED: \(parsedResponse)")
     }
 
     func log(error: Error) {
-        guard isEnabled else { return }
+        guard enabled else { return }
         let message = switch error {
         case let rfe as ReachFiveError:
             rfe.description

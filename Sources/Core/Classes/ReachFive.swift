@@ -34,15 +34,15 @@ public class ReachFive: NSObject {
     let credentialManager: CredentialManager
     public let pkceKey = "PASSWORDLESS_PKCE"
 
-    public init(sdkConfig: SdkConfig, providersCreators: Array<ProviderCreator> = [], storage: Storage? = nil, spi: ReachFiveSpi? = nil) {
+    public init(sdkConfig: SdkConfig, providersCreators: Array<ProviderCreator> = [], storage: Storage? = nil, sdkInternalConfig: SdkInternalConfig? = nil) {
         self.sdkConfig = sdkConfig
         self.providersCreators = providersCreators
         self.reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig)
         self.storage = storage ?? UserDefaultsStorage()
         self.credentialManager = CredentialManager(reachFiveApi: reachFiveApi, storage: self.storage)
 
-        if let spi {
-            Logger.shared.isEnabled = spi.isLoggingEnabled
+        if let sdkInternalConfig {
+            Logger.shared.enabled = sdkInternalConfig.loggingEnabled
         }
     }
 
