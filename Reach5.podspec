@@ -20,7 +20,6 @@ Pod::Spec.new do |spec|
     'Reach5' => ['Sources/Core/PrivacyInfo.xcprivacy']
   }
 
-  spec.dependency 'CryptoSwift', '~> 1.8'
   spec.dependency 'DeviceKit', '~> 5.1'
 
 end

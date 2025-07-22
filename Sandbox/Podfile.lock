@@ -1,8 +1,6 @@
 PODS:
-  - CryptoSwift (1.8.4)
   - DeviceKit (5.6.0)
   - Reach5 (8.2.0):
-    - CryptoSwift (~> 1.8)
     - DeviceKit (~> 5.1)
 
 DEPENDENCIES:
@@ -10,7 +8,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - CryptoSwift
     - DeviceKit
 
 EXTERNAL SOURCES:
@@ -18,9 +15,8 @@ EXTERNAL SOURCES:
     :path: "../Reach5.podspec"
 
 SPEC CHECKSUMS:
-  CryptoSwift: e64e11850ede528a02a0f3e768cec8e9d92ecb90
   DeviceKit: 9f2e0b68984a384f864b0f4e40a54bae43636bd8
-  Reach5: 36065119931be5446f206ac35b42c8384d25b57d
+  Reach5: 3fdf899208b33d7c2783d84e9c1d1690eff25818
 
 PODFILE CHECKSUM: f08d4f1661216f05437ac8922ae88c25e32e8749
 
