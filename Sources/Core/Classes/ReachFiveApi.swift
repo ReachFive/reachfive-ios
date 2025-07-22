@@ -87,13 +87,13 @@ public class ReachFiveApi {
         return components.url!
     }
 
-    public func buildAuthorizeURL(queryParams: [String: String?]) -> URL {
-        createUrl(path: "/oauth/authorize", params: queryParams)
-    }
-
     /// Keep only non-nil values
     private func filter(params: [String: String?]) -> [String: String] {
         params.compactMapValues { $0 }
+    }
+
+    public func buildAuthorizeURL(queryParams: [String: String?]) -> URL {
+        createUrl(path: "/oauth/authorize", params: queryParams)
     }
 
     // MARK: - Configuration
@@ -357,8 +357,6 @@ public class ReachFiveApi {
        ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
     }
 }
-
-struct EmptyResponse: Decodable {}
 
 enum HttpMethod: String {
     case get = "GET"
