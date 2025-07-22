@@ -20,6 +20,4 @@ Pod::Spec.new do |spec|
     'Reach5' => ['Sources/Core/PrivacyInfo.xcprivacy']
   }
 
-  spec.dependency 'DeviceKit', '~> 5.1'
-
 end

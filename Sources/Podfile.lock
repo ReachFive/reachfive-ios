@@ -1,22 +1,15 @@
 PODS:
-  - DeviceKit (5.6.0)
-  - Reach5 (8.2.0):
-    - DeviceKit (~> 5.1)
+  - Reach5 (8.2.0)
 
 DEPENDENCIES:
   - Reach5 (from `../`)
-
-SPEC REPOS:
-  trunk:
-    - DeviceKit
 
 EXTERNAL SOURCES:
   Reach5:
     :path: "../"
 
 SPEC CHECKSUMS:
-  DeviceKit: 9f2e0b68984a384f864b0f4e40a54bae43636bd8
-  Reach5: 3fdf899208b33d7c2783d84e9c1d1690eff25818
+  Reach5: 5401438f8a27bf3e0539508ad42a2bda6216be45
 
 PODFILE CHECKSUM: 9a44ddf91ef9134960bddf8567626a150b34c6e4
 

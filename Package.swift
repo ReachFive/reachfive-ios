@@ -9,15 +9,9 @@ let package = Package(
     products: [
         .library(name: "Reach5", targets: ["Reach5"]),
     ],
-    dependencies: [
-        .package(url    : "https://github.com/devicekit/DeviceKit.git", .upToNextMajor(from: "5.1.0")),
-    ],
     targets: [
         .target(
             name: "Reach5",
-            dependencies: [
-                .product(name: "DeviceKit", package: "DeviceKit"),
-            ],
             resources: [.copy("Core/PrivacyInfo.xcprivacy")]
         )
     ]

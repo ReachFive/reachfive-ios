@@ -4,23 +4,7 @@
 
     ],
     "dependencies" : [
-      {
-        "basedOn" : null,
-        "packageRef" : {
-          "identity" : "devicekit",
-          "kind" : "remoteSourceControl",
-          "location" : "https://github.com/devicekit/DeviceKit.git",
-          "name" : "DeviceKit"
-        },
-        "state" : {
-          "checkoutState" : {
-            "revision" : "513b9d7e7a1bd46504a1009bbab943b75ce2f195",
-            "version" : "5.6.0"
-          },
-          "name" : "sourceControlCheckout"
-        },
-        "subpath" : "DeviceKit"
-      }
+
     ],
     "prebuilts" : [
 

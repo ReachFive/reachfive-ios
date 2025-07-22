@@ -26,7 +26,7 @@ import UIKit
 // - voir à la volée directement dans l'app ou dans une section de l'app réglages
 // - Indiquer sur quel environnement on est connecté en l'affichant en titre de la page des fonctions
 // Essayer d'améliorer la navigation pour qu'il n'y ait pas tous ces retours en arrière inutiles quand on navigue les onglets à la main
-// Mettre la version des SDK en tant que version de la Sandbox (vérif : User Agent Alamofire des user events)
+// Mettre la version des SDK en tant que version de la Sandbox (vérif : User Agent des user events)
 // Mettre un bouton recharger conf (lancer initialize) pour si la conf backend a changé
 // Apparemment sur Mac Catalyst pour que le remplissage automatique des mots de passe fonctionne il faut mettre "l'appid" dans apple-app-site-association. cf. https://developer.apple.com/videos/play/wwdc2019/516?time=289
 // register for revocation notification dans l'app (https://developer.apple.com/videos/play/wwdc2022/10122/?time=738)

@@ -1,4 +1,3 @@
-import DeviceKit
 import Foundation
 
 public class ReachFiveApi {
@@ -73,12 +72,10 @@ public class ReachFiveApi {
         components.host = sdkConfig.domain
         components.path = path.starts(with: "/") ? path : "/" + path
 
-        let deviceInfo: String = [Device.current.safeDescription, Device.current.systemName, Device.current.systemVersion].compactMap { $0 }.joined(separator: " ")
         let defaultParams: [String: String] = [
             "platform": "ios",
             // TODO: read from the version.rb. Either directly or indirectly from Reach5.h, Info.plist...
             "sdk": "8.2.0",
-            "device": deviceInfo,
         ]
 
         let additionalParams = filter(params: params ?? [:])
