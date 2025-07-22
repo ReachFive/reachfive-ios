@@ -9,7 +9,6 @@ struct Field {
 
 // TODO:
 // - remove enroll MFA identifier in menu when the identifier has already been enrolled. Requires listMfaCredentials
-// - refaire la présentation avec une Collection View : https://developer.apple.com/videos/play/wwdc2019/215
 extension ProfileController {
 
     func format(date: Int) -> String {
@@ -171,8 +170,10 @@ extension ProfileController: UITableViewDataSource {
             }
             children.append(updatePhone)
             if field.value != nil {
+                //TODO: Vérifier le numéro de téléphone
                 let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "minus.circle.fill")) { action in
                     Task {
+                        //TODO: Si la fonctionnalité SMS est activée, on nepeut pas utiliser cette méthode
                         await self.updateProfileField(titre: "Delete Phone number", authToken: token, update: ProfileUpdate(phoneNumber: .Delete))
                     }
                 }
@@ -230,8 +231,8 @@ extension ProfileController: UITableViewDataSource {
             children.append(copy)
 
 
-            if(field.name == "Email") {
-                if(field.value != nil && field.value!.contains(" ✘")) {
+            if (field.name == "Email") {
+                if (field.value != nil && field.value!.contains(" ✘")) {
                     let email = field.value!.split(separator: " ").first
                     let emailVerification = UIAction(title: "Verify Email", image: UIImage(systemName: "lock")) { _ in
                         Task {
@@ -255,7 +256,7 @@ extension ProfileController: UITableViewDataSource {
                     Task {
                         do {
                             let _ = try await mfaAction.mfaStart(registering: credential, authToken: token)
-                            await self.fetchProfile()
+                            self.fetchProfile()
                         } catch {
                             self.presentErrorAlert(title: "Enroll failed", error)
                         }

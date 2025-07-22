@@ -2,19 +2,10 @@
 
 1. Create a branch with the name of the version `x.x.x`
 
-2. Change the version in [version.rb](version.rb) file and in [ReachFiveApi.swift](Sources/Core/Classes/ReachFiveApi.swift)
+2. Change the version in [version.rb](version.rb) file
     ```ruby
     $VERSION = 'x.x.x'
     ```
-    ```swift
-    let defaultParams: [String: String] = [
-        "platform": "ios",
-        // TODO: read from the version.rb. Either directly or indirectly from Reach5.h, Info.plist...
-        "sdk": "x.x.x",
-        "device": deviceInfo,
-    ]
-    ```
-
 3. Run [update.sh](update.sh) to install the new version of this library and update the dependencies
     ```shell
     ./update.sh
