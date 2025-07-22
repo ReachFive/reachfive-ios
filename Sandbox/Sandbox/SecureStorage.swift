@@ -218,7 +218,7 @@ public class SecureStorage: Storage {
 
     public func clear(key: String) {
         remove(key: key).map {
-            //TODO: supprimer une fois que tous les usages sont mogrés aux fonctions spécifique des jetons
+            //TODO: supprimer une fois que tous les usages sont migrés aux fonctions spécifique des jetons
             if key == SecureStorage.authKey {
                 NotificationCenter.default.post(name: .DidClearAuthToken, object: nil)
             }

@@ -243,6 +243,8 @@ extension UIViewController {
             let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
             alert.addTextField { textField in
                 textField.placeholder = "Verification code"
+                textField.keyboardType = .numberPad
+                textField.textContentType = .oneTimeCode
             }
             let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
                 continuation.resume(throwing: ReachFiveError.AuthCanceled)
@@ -300,4 +302,27 @@ extension NSNotification.Name {
     static let DidReceiveLoginCallback = Notification.Name("DidReceiveLoginCallback")
     static let DidReceiveMfaVerifyEmail = Notification.Name("DidReceiveMfaVerifyEmail")
     static let DidReceiveEmailVerificationCallback = Notification.Name("DidReceiveEmailVerificationCallback")
+}
+
+extension UITableView {
+    func dequeueDefaultReusableCell(withIdentifier identifier: String, for indexPath: IndexPath, text: String, secondaryText: String? = nil) -> UITableViewCell {
+        let cell = self.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
+
+        var content = cell.defaultContentConfiguration()
+        
+        content.text = text
+        content.secondaryText = secondaryText
+        content.prefersSideBySideTextAndSecondaryText = true
+        
+        content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
+        content.textProperties.adjustsFontForContentSizeCategory = true
+        content.textProperties.adjustsFontSizeToFitWidth = true
+        
+        content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
+        content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
+        content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
+        cell.contentConfiguration = content
+
+        return cell
+    }
 }
