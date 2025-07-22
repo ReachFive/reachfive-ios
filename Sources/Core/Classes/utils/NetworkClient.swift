@@ -52,23 +52,24 @@ class RedirectHandler: NSObject, URLSessionTaskDelegate {
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
-        if let url = request.url, let scheme = url.scheme, !scheme.lowercased().starts(with: "http") {
-            let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
-            continuation?.resume(returning: url)
-            return nil
+        guard let url = request.url, let scheme = url.scheme, !scheme.lowercased().starts(with: "http") else {
+            return request
         }
-
-        return request
+        
+        let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
+        continuation?.resume(returning: url)
+        return nil
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         Task {
             let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
 
+            // empty error means request finished with success
             if let error {
                 continuation?.resume(throwing: error)
-            } else if let continuation {
-                continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request did not redirect as expected"))
+            } else {
+                continuation?.resume(throwing: ReachFiveError.TechnicalError(reason: "Request did not redirect as expected"))
             }
         }
     }
