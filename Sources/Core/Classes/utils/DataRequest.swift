@@ -44,13 +44,13 @@ class DataRequest {
         return error
     }
 
-    private func processResponse<T: Decodable>(data: Data, response: URLResponse, type: T.Type) throws -> T {
+    private func processHttpResponse<T>(data: Data, response: URLResponse, onSuccess: (Data) throws -> T) throws -> T {
         guard let httpResponse = response as? HTTPURLResponse else {
             let error = ReachFiveError.TechnicalError(reason: "Request without response")
             logger.log(error: error)
             throw error
         }
-        
+
         logger.log(response: httpResponse, data: data)
 
         let status = httpResponse.statusCode
@@ -59,37 +59,23 @@ class DataRequest {
             throw handleResponseStatus(status: status, apiError: apiError)
         }
 
-        return try parseJson(json: data, type: T.self)
-    }
-    
-    private func processEmptyResponse(data: Data, response: URLResponse) throws {
-        guard let httpResponse = response as? HTTPURLResponse else {
-            let error = ReachFiveError.TechnicalError(reason: "Request without response")
-            logger.log(error: error)
-            throw error
-        }
-        
-        logger.log(response: httpResponse, data: data)
-
-        let status = httpResponse.statusCode
-        if !isSuccess(status) {
-            let apiError = try parseJson(json: data, type: ApiError.self)
-            throw handleResponseStatus(status: status, apiError: apiError)
-        }
+        return try onSuccess(data)
     }
 
     func responseJson() async throws {
         logger.log(request: request)
         let (data, response) = try await session.data(for: request)
-        try processEmptyResponse(data: data, response: response)
+        try processHttpResponse(data: data, response: response) { _ in }
     }
 
     func responseJson<T: Decodable>(type: T.Type) async throws -> T {
         logger.log(request: request)
         let (data, response) = try await session.data(for: request)
-        return try processResponse(data: data, response: response, type: type)
+        return try processHttpResponse(data: data, response: response) { data in
+            try parseJson(json: data, type: T.self)
+        }
     }
-    
+
     func redirect() async throws -> URL {
         logger.log(request: request)
         return try await withCheckedThrowingContinuation { continuation in
