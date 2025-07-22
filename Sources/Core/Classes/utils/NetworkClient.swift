@@ -10,6 +10,10 @@ class NetworkClient {
         self.decoder = decoder
     }
 
+    deinit {
+        session.finishTasksAndInvalidate()
+    }
+
     func request(_ url: URL, method: HttpMethod = .get, headers: [String: String]? = nil, body: Data? = nil) -> DataRequest {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = method.rawValue
