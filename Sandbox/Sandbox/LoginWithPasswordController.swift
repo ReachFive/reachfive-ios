@@ -2,7 +2,9 @@ import Foundation
 import UIKit
 import Reach5
 
-//TODO faire que la complétion soit sur email et pas custom identifier par défaut
+//TODO: faire que la complétion soit sur email et pas custom identifier par défaut
+//TODO: changer la présentation pour n'avoir qu'un champ identifiant, et un segment control qui gère la signification: email/phone d'un côté, custom identifier de l'autre (voir trois segments pour email/phone/custom identifier)
+//TODO: Dynamic Scope Request and Consent: Allow the user to select which scopes to request during the login process
 class LoginWithPasswordController: UIViewController {
     @IBOutlet weak var emailInput: UITextField!
     @IBOutlet weak var phoneNumberInput: UITextField!

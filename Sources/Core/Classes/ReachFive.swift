@@ -13,7 +13,7 @@ public typealias AccountRecoveryCallback = (_ result: Result<AccountRecoveryResp
 
 public typealias EmailVerificationCallback = (_ result: Result<(), ReachFiveError>) -> Void
 
-//TODO
+//TODO:
 // Tester One-tap account upgrade : https://developer.apple.com/videos/play/wwdc2020/10666/
 // Tester le MFA avec "Securing Logins with iCloud Keychain Verification Codes" https://developer.apple.com/documentation/authenticationservices/securing_logins_with_icloud_keychain_verification_codes
 // Apparemment les custom scheme sont dépréciés et il faudrait utiliser les "Universal Links" : https://developer.apple.com/ios/universal-links/

@@ -20,4 +20,9 @@ Pod::Spec.new do |spec|
     'Reach5' => ['Sources/Core/PrivacyInfo.xcprivacy']
   }
 
+  spec.prepare_command = <<-CMD
+    VERSION=$(ruby -r ./version.rb -e 'puts $VERSION')
+    /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Sources/Core/Info.plist
+  CMD
+
 end

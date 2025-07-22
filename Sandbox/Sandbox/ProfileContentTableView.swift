@@ -9,7 +9,6 @@ struct Field {
 
 // TODO:
 // - remove enroll MFA identifier in menu when the identifier has already been enrolled. Requires listMfaCredentials
-// - refaire la présentation avec une Collection View : https://developer.apple.com/videos/play/wwdc2019/215
 extension ProfileController {
 
     func format(date: Int) -> String {
@@ -36,6 +35,8 @@ extension ProfileController {
                 let alert = UIAlertController(title: "Email verification", message: "Please enter the code you received by Email", preferredStyle: .alert)
                 alert.addTextField { textField in
                     textField.placeholder = "Verification code"
+                    textField.keyboardType = .numberPad
+                    textField.textContentType = .oneTimeCode
                 }
                 let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
                 let submitVerificationCode = UIAlertAction(title: "Submit", style: .default) { _ in
@@ -138,23 +139,8 @@ extension ProfileController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDisplayCell", for: indexPath)
-
-        var content = cell.defaultContentConfiguration()
-        content.text = self.propertiesToDisplay[indexPath.row].name
-        content.secondaryText = self.propertiesToDisplay[indexPath.row].value
-        content.prefersSideBySideTextAndSecondaryText = true
-
-        content.textProperties.font = UIFont.preferredFont(forTextStyle: .body)
-        content.textProperties.adjustsFontForContentSizeCategory = true
-        content.textProperties.adjustsFontSizeToFitWidth = true
-
-        content.secondaryTextProperties.font = UIFont.preferredFont(forTextStyle: .body)
-        content.secondaryTextProperties.adjustsFontForContentSizeCategory = true
-        content.secondaryTextProperties.adjustsFontSizeToFitWidth = true
-        cell.contentConfiguration = content
-
-        return cell
+        let field = self.propertiesToDisplay[indexPath.row]
+        return tableView.dequeueDefaultReusableCell(withIdentifier: "ToDisplayCell", for: indexPath, text: field.name, secondaryText: field.value)
     }
 
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
@@ -171,8 +157,10 @@ extension ProfileController: UITableViewDataSource {
             }
             children.append(updatePhone)
             if field.value != nil {
+                //TODO: Vérifier le numéro de téléphone
                 let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "minus.circle.fill")) { action in
                     Task {
+                        //TODO: Si la fonctionnalité SMS est activée, on nepeut pas utiliser cette méthode
                         await self.updateProfileField(titre: "Delete Phone number", authToken: token, update: ProfileUpdate(phoneNumber: .Delete))
                     }
                 }
@@ -230,8 +218,8 @@ extension ProfileController: UITableViewDataSource {
             children.append(copy)
 
 
-            if(field.name == "Email") {
-                if(field.value != nil && field.value!.contains(" ✘")) {
+            if (field.name == "Email") {
+                if (field.value != nil && field.value!.contains(" ✘")) {
                     let email = field.value!.split(separator: " ").first
                     let emailVerification = UIAction(title: "Verify Email", image: UIImage(systemName: "lock")) { _ in
                         Task {
@@ -255,7 +243,7 @@ extension ProfileController: UITableViewDataSource {
                     Task {
                         do {
                             let _ = try await mfaAction.mfaStart(registering: credential, authToken: token)
-                            await self.fetchProfile()
+                            self.fetchProfile()
                         } catch {
                             self.presentErrorAlert(title: "Enroll failed", error)
                         }

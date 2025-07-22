@@ -42,13 +42,8 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "providerCell")
-
         let provider = providers[indexPath.row]
-
-        cell?.textLabel?.text = provider.name
-
-        return cell!
+        return tableView.dequeueDefaultReusableCell(withIdentifier: "providerCell", for: indexPath, text: provider.name)
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
