@@ -32,16 +32,44 @@ class NetworkClient {
     }
 }
 
+private actor RedirectContinuationManager {
+    var redirectContinuations = [Int: CheckedContinuation<URL, Error>]()
+
+    func registerContinuation(_ continuation: CheckedContinuation<URL, Error>, for taskIdentifier: Int) {
+        redirectContinuations[taskIdentifier] = continuation
+    }
+
+    func pullContinuation(for taskIdentifier: Int) -> CheckedContinuation<URL, Error>? {
+        redirectContinuations.removeValue(forKey: taskIdentifier)
+    }
+}
+
 class RedirectHandler: NSObject, URLSessionTaskDelegate {
-    var redirectContinuation: CheckedContinuation<URL, Error>?
+    private let continuationManager = RedirectContinuationManager()
+
+    func registerContinuation(_ continuation: CheckedContinuation<URL, Error>, for taskIdentifier: Int) async {
+        await continuationManager.registerContinuation(continuation, for: taskIdentifier)
+    }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
         if let url = request.url, let scheme = url.scheme, !scheme.lowercased().starts(with: "http") {
-            redirectContinuation?.resume(returning: url)
-            redirectContinuation = nil
+            let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
+            continuation?.resume(returning: url)
             return nil
         }
 
         return request
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        Task {
+            let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
+
+            if let error {
+                continuation?.resume(throwing: error)
+            } else if let continuation {
+                continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request did not redirect as expected"))
+            }
+        }
     }
 }

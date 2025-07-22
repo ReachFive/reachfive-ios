@@ -78,10 +78,11 @@ class DataRequest {
 
     func redirect() async throws -> URL {
         logger.log(request: request)
+        let task = session.dataTask(with: request)
         return try await withCheckedThrowingContinuation { continuation in
-            redirectHandler.redirectContinuation = continuation
             Task {
-                _ = try await session.data(for: request)
+                await redirectHandler.registerContinuation(continuation, for: task.taskIdentifier)
+                task.resume()
             }
         }
     }
