@@ -70,8 +70,7 @@ public class ReachFiveApi {
         let deviceInfo: String = [Device.current.safeDescription, Device.current.systemName, Device.current.systemVersion].compactMap { $0 }.joined(separator: " ")
         let defaultParams: [String: String] = [
             "platform": "ios",
-            // TODO: read from the version.rb. Either directly or indirectly from Reach5.h, Info.plist...
-            "sdk": "8.2.0",
+            "sdk": getSdkVersion(),
             "device": deviceInfo,
         ]
 
@@ -82,6 +81,10 @@ public class ReachFiveApi {
         // safe force-unwrap because the contract is respected:
         // If the NSURLComponents has an authority component (user, password, host or port) and a path component, then the path must either begin with "/" or be an empty string.
         return components.url!
+    }
+
+    private func getSdkVersion() -> String {
+        return Bundle(for: ReachFiveApi.self).infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
     }
 
     /// Keep only non-nil values
@@ -151,7 +154,7 @@ public class ReachFiveApi {
                     method: .get
                 )
                 .redirect(using: Redirector.doNotFollow)
-                .validate(statusCode: 300...308) //TODO pas de 305/306
+                .validate(statusCode: 300...308)
                 .response { responseData in
                     let callbackURL = responseData.response?.allHeaderFields["Location"] as? String
                     guard let callbackURL else {

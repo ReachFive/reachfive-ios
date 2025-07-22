@@ -1,17 +1,12 @@
 import UIKit
 import Reach5
 
-//TODO
-//      - déplacer le bouton login with refresh ici pour que, même logué, on puisse afficher les passkey (qui sont expirées)
+//TODO:
+//      - déplacer le bouton login with refresh ici pour que, même logué, on puisse afficher les passkey (qui sont expirées), ou alors juste faire du withFreshToken lors du clic sur le bouton Manage Passkeys
 //      - faire du pull-to-refresh soit sur la table des clés soit carrément sur tout le profil (déclencher le refresh token)
 //      - ajouter une option conversion vers un mdp fort automatique et vers SIWA
 //      - voir les SLO liés et bouton pour les délier
-//      - supprimer le bouton de modification du numéro de téléphone et le mettre en icône crayon à côté de sa valeur affichée (seulement si elle est présente)
-//      - faire la même chose pour l'email et custom identifier
-//      - pour l'extraction du username, voir la conf backend si la feature SMS est activée.
 //      - marquer spécialement l'identifiant principal dans l'UI
-//      - ajouter un bouton + dans la table des clés pour en ajouter une (ou carrément supprimer le bouton "register passkey")
-//      - ajouter un bouton modifier à la table pour pouvoir plus visuellement supprimer des clés
 //      - Ajouter des infos sur le jeton dans une nouvelle page
 class ProfileController: UIViewController {
     var authToken: AuthToken?

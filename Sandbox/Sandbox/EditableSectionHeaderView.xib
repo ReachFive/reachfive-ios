@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="EditableSectionHeaderView" customModule="Sandbox" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="50"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="s3b-i2-aN9">
+                    <rect key="frame" x="20" y="0.0" width="374" height="50"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rS5-fX-g4g">
+                            <rect key="frame" x="0.0" y="0.0" width="258" height="50"/>
+                            <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fC8-aA-Lg3">
+                            <rect key="frame" x="266" y="0.0" width="50" height="50"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="50" id="xL9-wG-gL5"/>
+                            </constraints>
+                            <state key="normal" title=""/>
+                            <buttonConfiguration key="configuration" style="plain" image="plus" catalog="system"/>
+                            <connections>
+                                <action selector="addButtonAction" destination="iN0-l3-epB" eventType="touchUpInside" id="9h0-gG-0G1"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nED-2t-dG2">
+                            <rect key="frame" x="324" y="0.0" width="50" height="50"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="50" id="cDe-Lz-gQ2"/>
+                            </constraints>
+                            <state key="normal" title="Modify"/>
+                            <connections>
+                                <action selector="editButtonAction" destination="iN0-l3-epB" eventType="touchUpInside" id="B1f-cT-iOa"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                </stackView>
+            </subviews>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="s3b-i2-aN9" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="1Ue-gA-gJg"/>
+                <constraint firstAttribute="bottom" secondItem="s3b-i2-aN9" secondAttribute="bottom" id="5aP-aF-a4b"/>
+                <constraint firstAttribute="trailing" secondItem="s3b-i2-aN9" secondAttribute="trailing" constant="20" id="T3S-c6-Uca"/>
+                <constraint firstItem="s3b-i2-aN9" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="20" id="y5b-fA-g12"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="addButton" destination="fC8-aA-Lg3" id="5fV-0g-c3g"/>
+                <outlet property="editButton" destination="nED-2t-dG2" id="mG1-0d-c1e"/>
+                <outlet property="titleLabel" destination="rS5-fX-g4g" id="YdM-5h-i3g"/>
+            </connections>
+            <point key="canvasLocation" x="139" y="153"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="plus" catalog="system" width="128" height="113"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
