@@ -28,11 +28,11 @@ func webviewLogin(_ request: WebviewLoginRequest) async throws -> AuthToken <1>
 func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken <2>
 ----
 <1> The `async` keyword indicates the function performs asynchronous work (e.g., network requests), requiring `await` when called.
-<2> The `throws` keyword means it may throw a `ReachFiveError`, requiring `try` within a `do`/`catch` block.
+<2> The `throws` keyword means it may throw an error, usually a `ReachFiveError`, requiring `try` within a `do`/`catch` block.
 
 This replaces BrightFutures' `Future<AuthToken, ReachFiveError>`, where `.onSuccess` handles the `AuthToken` and `.onFailure` handles errors.
 
-== Replacing the success and failure management of the Future state with a `do-catch` statement
+== Replacing result handling of Future with `do/catch` and `try await`
 
 Swift's native concurrency uses asynchronous methods, with `do-catch` statements to handle errors, replacing BrightFutures.
 The `do` block processes successful results (like `.onSuccess`), and the `catch` block handles errors (like `.onFailure`).
