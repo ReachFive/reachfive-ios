@@ -1,14 +1,12 @@
 import Reach5
 
-Task {
-    do {
-        let credential = try await AppDelegate.reachfive().mfaVerify(
-            .PhoneNumber,
-            code: verificationCode,
-            authToken: profileAuthToken
-        )
-        // Do something
-    } catch {
-        // Return a ReachFive error
-    }
+do {
+    let credential = try await AppDelegate.reachfive().mfaVerify(
+        .PhoneNumber,
+        code: verificationCode,
+        authToken: profileAuthToken
+    )
+    // Do something
+} catch {
+    // Return a ReachFive error
 }

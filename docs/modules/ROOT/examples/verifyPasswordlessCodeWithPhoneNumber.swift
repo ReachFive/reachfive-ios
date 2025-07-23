@@ -5,11 +5,9 @@ let verifyAuthCodeRequest = VerifyAuthCodeRequest(
   verificationCode: verificationCodeInput
 )
 
-Task {
-    do {
-        let authToken = try await AppDelegate.reachfive().verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
-        // Do something
-    } catch {
-        // Return a ReachFive error
-    }
+do {
+    let authToken = try await AppDelegate.reachfive().verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
+    // Do something
+} catch {
+    // Return a ReachFive error
 }
