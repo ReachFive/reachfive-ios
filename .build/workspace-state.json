@@ -24,23 +24,6 @@
       {
         "basedOn" : null,
         "packageRef" : {
-          "identity" : "brightfutures",
-          "kind" : "remoteSourceControl",
-          "location" : "https://github.com/Thomvis/BrightFutures.git",
-          "name" : "BrightFutures"
-        },
-        "state" : {
-          "checkoutState" : {
-            "revision" : "fa66fa183dce7196d431244d0215748cd14c5758",
-            "version" : "8.2.0"
-          },
-          "name" : "sourceControlCheckout"
-        },
-        "subpath" : "BrightFutures"
-      },
-      {
-        "basedOn" : null,
-        "packageRef" : {
           "identity" : "cryptoswift",
           "kind" : "remoteSourceControl",
           "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
@@ -72,7 +55,10 @@
         },
         "subpath" : "DeviceKit"
       }
+    ],
+    "prebuilts" : [
+
     ]
   },
-  "version" : 6
+  "version" : 7
 }

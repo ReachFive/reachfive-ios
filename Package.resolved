@@ -1,5 +1,5 @@
 {
-  "originHash" : "019ddb26339af5e6e74c63113357a4743454af1870ef1d2f47b075968685daa1",
+  "originHash" : "b89773eed395d7f141a769787d68fda986d833cc34d25489a0b71452078c1dfb",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -8,15 +8,6 @@
       "state" : {
         "revision" : "513364f870f6bfc468f9d2ff0a95caccc10044c5",
         "version" : "5.10.2"
-      }
-    },
-    {
-      "identity" : "brightfutures",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Thomvis/BrightFutures.git",
-      "state" : {
-        "revision" : "fa66fa183dce7196d431244d0215748cd14c5758",
-        "version" : "8.2.0"
       }
     },
     {

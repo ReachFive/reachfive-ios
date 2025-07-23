@@ -6,34 +6,31 @@ class UpdatePasswordController: UIViewController {
     var authToken: AuthToken?
     @IBOutlet weak var newPassword: UITextField!
     @IBOutlet weak var username: UITextField!
-    
+
     override func viewWillAppear(_ animated: Bool) {
-        authToken = AppDelegate.storage.getToken()
-        if let authToken {
-            AppDelegate.reachfive()
-                .getProfile(authToken: authToken)
-                .onSuccess { profile in
-                    DispatchQueue.main.async {
-                        self.username.text = ProfileController.username(profile: profile)
-                    }
-                }
+        Task {
+            authToken = AppDelegate.storage.getToken()
+            if let authToken {
+                let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
+                self.username.text = ProfileController.username(profile: profile)
+            }
+
+            super.viewWillAppear(animated)
         }
-        
-        super.viewWillAppear(animated)
     }
-    
+
     @IBAction func update(_ sender: Any) {
-        if let authToken {
-            AppDelegate.reachfive()
-                .updatePassword(.FreshAccessTokenParams(authToken: authToken, password: newPassword.text ?? ""))
-                .onSuccess {
-                    let alert = AppDelegate.createAlert(title: "Update Password", message: "Success")
-                    self.present(alert, animated: true)
+        Task {
+            if let authToken {
+                do {
+                    try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
+                        try await AppDelegate.reachfive().updatePassword(.FreshAccessTokenParams(authToken: refreshableToken, password: newPassword.text ?? ""))
+                    }
+                    self.presentAlert(title: "Update Password", message: "Success")
+                } catch {
+                    self.presentErrorAlert(title: "Update Password failed", error)
                 }
-                .onFailure { error in
-                    let alert = AppDelegate.createAlert(title: "Update Password", message: "Error: \(error.message())")
-                    self.present(alert, animated: true)
-                }
+            }
         }
     }
 }

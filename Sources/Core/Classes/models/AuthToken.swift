@@ -1,4 +1,3 @@
-import BrightFutures
 import Foundation
 
 public class AuthToken: Codable {
@@ -8,7 +7,7 @@ public class AuthToken: Codable {
     public let tokenType: String?
     public let expiresIn: Int?
     public let user: OpenIdUser?
-    
+
     public init(
         idToken: String?,
         accessToken: String,
@@ -24,23 +23,16 @@ public class AuthToken: Codable {
         self.expiresIn = expiresIn
         self.user = user
     }
-    
-    public static func fromOpenIdTokenResponseFuture(
-        _ openIdTokenResponse: AccessTokenResponse
-    ) -> Future<AuthToken, ReachFiveError> {
-        Future(result: AuthToken.fromOpenIdTokenResponse(openIdTokenResponse: openIdTokenResponse))
-    }
-    
-    static func fromOpenIdTokenResponse(openIdTokenResponse: AccessTokenResponse) -> Result<AuthToken, ReachFiveError> {
-        if let token = openIdTokenResponse.idToken {
-            return fromIdToken(token).flatMap { user in
-                .success(withUser(openIdTokenResponse, user))
-            }
-        } else {
-            return .success(withUser(openIdTokenResponse, nil))
+
+    public static func fromOpenIdTokenResponse(_ openIdTokenResponse: AccessTokenResponse) throws -> AuthToken {
+        guard let token = openIdTokenResponse.idToken else {
+            return withUser(openIdTokenResponse, nil)
         }
+        
+        let user = try fromIdToken(token)
+        return withUser(openIdTokenResponse, user)
     }
-    
+
     static func withUser(_ accessTokenResponse: AccessTokenResponse, _ user: OpenIdUser?) -> AuthToken {
         AuthToken(
             idToken: accessTokenResponse.idToken,
@@ -51,21 +43,23 @@ public class AuthToken: Codable {
             user: user
         )
     }
-    
-    static func fromIdToken(_ idToken: String) -> Result<OpenIdUser, ReachFiveError> {
+
+    static func fromIdToken(_ idToken: String) throws -> OpenIdUser {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
         let parts = idToken.components(separatedBy: ".")
-        if parts.count == 3 {
+        guard
+            parts.count == 3,
             let data = parts[1].decodeBase64Url()
-            let user = Result(catching: {
-                try decoder.decode(OpenIdUser.CodingData.self, from: data!).openIdUser
-            })
-            return user.mapError { error in
-                .TechnicalError(reason: error.localizedDescription)
-            }
-        } else {
-            return .failure(.TechnicalError(reason: "idToken invalid"))
+        else {
+            throw ReachFiveError.TechnicalError(reason: "idToken invalid")
+        }
+        
+        do {
+            return try decoder.decode(OpenIdUser.CodingData.self, from: data).openIdUser
+        } catch {
+            throw ReachFiveError.TechnicalError(reason: error.localizedDescription)
         }
     }
 }

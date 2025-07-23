@@ -1,34 +1,36 @@
 import Foundation
-import BrightFutures
 
 public extension ReachFive {
-    
-    func logout() -> Future<(), ReachFiveError> {
-        providers
-            .map { $0.logout() }
-            .sequence()
-            .flatMap { _ in self.reachFiveApi.logout() }
+
+    func logout() async throws {
+        for provider in providers {
+            do {
+                try await provider.logout()
+            } catch {
+                // Continue logging out other providers
+            }
+        }
+        try await self.reachFiveApi.logout()
     }
-    
-    func refreshAccessToken(authToken: AuthToken) -> Future<AuthToken, ReachFiveError> {
+
+    func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken {
         let refreshRequest = RefreshRequest(
             clientId: sdkConfig.clientId,
-            refreshToken: authToken.refreshToken ?? "",
+            refreshToken: authToken.refreshToken,
             redirectUri: sdkConfig.scheme
         )
-        return reachFiveApi
-            .refreshAccessToken(refreshRequest)
-            .flatMap({ AuthToken.fromOpenIdTokenResponseFuture($0) })
+        let token = try await reachFiveApi.refreshAccessToken(refreshRequest)
+        return try AuthToken.fromOpenIdTokenResponse(token)
     }
-    
-    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) -> Future<AuthToken, ReachFiveError> {
+
+    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {
         let pkce = Pkce.generate()
         let scope = (scopes ?? scope).joined(separator: " ")
-        
-        return reachFiveApi.loginCallback(loginCallback: LoginCallback(sdkConfig: sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
-            .flatMap({ self.authWithCode(code: $0, pkce: pkce) })
+
+        let code = try await reachFiveApi.loginCallback(loginCallback: LoginCallback(sdkConfig: sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
+        return try await self.authWithCode(code: code, pkce: pkce)
     }
-    
+
     func buildAuthorizeURL(pkce: Pkce, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil, provider: String? = nil) -> URL {
         let scope = (scope ?? self.scope).joined(separator: " ")
         let options = [
@@ -43,18 +45,17 @@ public extension ReachFive {
             "nonce": nonce,
             "origin": origin,
         ]
-        
+
         return reachFiveApi.buildAuthorizeURL(queryParams: options)
     }
-    
-    func authWithCode(code: String, pkce: Pkce) -> Future<AuthToken, ReachFiveError> {
+
+    func authWithCode(code: String, pkce: Pkce) async throws -> AuthToken {
         let authCodeRequest = AuthCodeRequest(
             clientId: sdkConfig.clientId,
             code: code,
             redirectUri: sdkConfig.scheme,
             pkce: pkce)
-        return reachFiveApi
-            .authWithCode(authCodeRequest: authCodeRequest)
-            .flatMap({ AuthToken.fromOpenIdTokenResponseFuture($0) })
+        let token = try await reachFiveApi.authWithCode(authCodeRequest: authCodeRequest)
+        return try AuthToken.fromOpenIdTokenResponse(token)
     }
 }

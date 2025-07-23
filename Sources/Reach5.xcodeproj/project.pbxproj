@@ -737,7 +737,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Alamofire\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/BrightFutures\"",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/CryptoSwift\"",
 				);
 				INFOPLIST_FILE = Core/Info.plist;

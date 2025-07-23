@@ -1,6 +1,6 @@
 import UIKit
 import Reach5
-import Reach5Facebook
+//TODO: import Reach5Facebook
 import AppTrackingTransparency
 import AuthenticationServices
 
@@ -17,19 +17,19 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
 
         providers.append(contentsOf: AppDelegate.reachfive().getProviders())
         providersTableView.reloadData()
-        if providers.contains(where: { p in p.name == FacebookProvider.NAME }) {
-            ATTrackingManager.requestTrackingAuthorization { status in
-                let statut = switch status {
-                case ATTrackingManager.AuthorizationStatus.notDetermined: "notDetermined"
-                case ATTrackingManager.AuthorizationStatus.restricted:    "restricted"
-                case ATTrackingManager.AuthorizationStatus.denied:        "denied"
-                case ATTrackingManager.AuthorizationStatus.authorized:    "authorized"
-                @unknown default:                                         "unkown"
-                }
-
-                print("ATTrackingManager.requestTrackingAuthorization \(statut)")
-            }
-        }
+        //        if providers.contains(where: { p in p.name == FacebookProvider.NAME }) {
+        //            ATTrackingManager.requestTrackingAuthorization { status in
+        //                let statut = switch status {
+        //                case ATTrackingManager.AuthorizationStatus.notDetermined: "notDetermined"
+        //                case ATTrackingManager.AuthorizationStatus.restricted:    "restricted"
+        //                case ATTrackingManager.AuthorizationStatus.denied:        "denied"
+        //                case ATTrackingManager.AuthorizationStatus.authorized:    "authorized"
+        //                @unknown default:                                         "unkown"
+        //                }
+        //
+        //                print("ATTrackingManager.requestTrackingAuthorization \(statut)")
+        //            }
+        //        }
     }
 
     public func reloadProvidersData(providers: [Provider]) {
@@ -42,44 +42,25 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "providerCell")
-
         let provider = providers[indexPath.row]
-
-        cell?.textLabel?.text = provider.name
-
-        return cell!
-    }
-
-    func handleResult(result: Result<AuthToken, ReachFiveError>) {
-        switch result {
-        case .success(let authToken):
-            goToProfile(authToken)
-        case .failure(let error):
-            print(error)
-            let alert = AppDelegate.createAlert(title: "Login with provider", message: "Error: \(error.message())")
-            self.present(alert, animated: true)
-        }
+        return tableView.dequeueDefaultReusableCell(withIdentifier: "providerCell", for: indexPath, text: provider.name)
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
+        Task { @MainActor in
+            tableView.deselectRow(at: indexPath, animated: true)
 
-        let selectedProvider = providers[indexPath.row]
+            let selectedProvider = providers[indexPath.row]
 
-        let scope = ["openid", "email", "profile", "phone", "full_write", "offline_access"]
-
-        AppDelegate.reachfive()
-            .getProvider(name: selectedProvider.name)?
-            .login(
-                scope: scope,
-                origin: "LoginWithProvidersController.didSelectRowAt",
-                viewController: self
-            )
-            .onComplete { result in
-                self.handleResult(result: result)
+            let scope = ["openid", "email", "profile", "phone", "full_write", "offline_access"]
+            if let provider = AppDelegate.reachfive().getProvider(name: selectedProvider.name) {
+                await handleAuthToken(errorMessage: "Login with provider failed") {
+                    try await provider.login(scope: scope, origin: "LoginWithProvidersController.didSelectRowAt", viewController: self)
+                }
             }
+        }
     }
+
 
     func numberOfSections(in tableView: UITableView) -> Int {
         1

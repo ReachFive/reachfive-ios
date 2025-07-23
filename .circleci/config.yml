@@ -4,11 +4,12 @@
 # For XCode build version available
 # https://circleci.com/docs/using-macos/
 #
+# Setup Cocoapod session/token on CircleCi: https://fuller.li/posts/automated-cocoapods-releases-with-ci/
 version: 2.1
 jobs:
   build:
     macos:
-      xcode: "15.3.0"
+      xcode: "16.4.0"
     steps:
       - checkout
       - run:
@@ -23,7 +24,7 @@ jobs:
             pod lib lint Reach5.podspec
   build-for-release:
     macos:
-      xcode: "15.3.0"
+      xcode: "16.4.0"
     steps:
       - checkout
       - run:
@@ -38,7 +39,7 @@ jobs:
             pod spec lint Reach5.podspec
   publish:
     macos:
-      xcode: "15.3.0"
+      xcode: "16.4.0"
     steps:
       - checkout
       - run:
@@ -47,7 +48,7 @@ jobs:
       - run: pod trunk push Reach5.podspec
   build-sandbox:
     macos:
-      xcode: "15.3.0"
+      xcode: "16.4.0"
     working_directory: ~/repo/Sandbox
     steps:
       - checkout:

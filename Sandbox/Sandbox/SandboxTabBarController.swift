@@ -2,6 +2,7 @@ import Foundation
 import UIKit
 import Reach5
 
+@MainActor
 class SandboxTabBarController: UITabBarController {
     // I did not manage to regroup the management of the profile icon in one place
     // there are multiple ways to navigate betweeen the different views and they require different treatment
@@ -47,11 +48,15 @@ class SandboxTabBarController: UITabBarController {
         super.viewDidLoad()
         
         clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { _ in
-            self.didLogout()
+            Task { @MainActor in
+                self.didLogout()
+            }
         }
         
         setTokenObserver = NotificationCenter.default.addObserver(forName: .DidSetAuthToken, object: nil, queue: nil) { _ in
-            self.didLogin()
+            Task { @MainActor in
+                self.didLogin()
+            }
         }
         
         if #unavailable(iOS 16.0) {

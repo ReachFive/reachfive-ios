@@ -18,6 +18,10 @@
 		2AB299ED2C0E29E300D0C5C8 /* RecoveryStartController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */; };
 		2AB299EF2C0E29F900D0C5C8 /* RecoveryEndController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */; };
 		2AB299F12C0E2AB900D0C5C8 /* RecoveryVerificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */; };
+		2AD29AB32E2E931500B26535 /* EditableSectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */; };
+		2AD29AB52E2E9F9F00B26535 /* EditableSectionHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */; };
+		2AD29AB82E2ED7F100B26535 /* TrustedDeviceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */; };
+		2AD29AB92E2ED7F100B26535 /* TrustedDeviceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */; };
 		2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFF7DE8296F1EB900514B47 /* ActionController.swift */; };
 		3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3414A7CC22DDD39C00CF393A /* ProfileController.swift */; };
 		341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341731FD229D6B6400681CFD /* AppDelegate.swift */; };
@@ -50,6 +54,10 @@
 		2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryStartController.swift; sourceTree = "<group>"; };
 		2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEndController.swift; sourceTree = "<group>"; };
 		2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryVerificationController.swift; sourceTree = "<group>"; };
+		2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableSectionHeaderView.swift; sourceTree = "<group>"; };
+		2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditableSectionHeaderView.xib; sourceTree = "<group>"; };
+		2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedDeviceCell.swift; sourceTree = "<group>"; };
+		2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TrustedDeviceCell.xib; sourceTree = "<group>"; };
 		2AFF7DE8296F1EB900514B47 /* ActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionController.swift; sourceTree = "<group>"; };
 		2E55CD881F31583F8D3480D8 /* Pods_Sandbox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Sandbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3414A7CC22DDD39C00CF393A /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
@@ -111,6 +119,7 @@
 				2AFF7DE8296F1EB900514B47 /* ActionController.swift */,
 				341731FD229D6B6400681CFD /* AppDelegate.swift */,
 				2AA4B58F2975B3920001747C /* DemoController.swift */,
+				2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */,
 				2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */,
 				EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */,
 				3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */,
@@ -132,9 +141,12 @@
 				34797ABC22A9607D00ED093C /* SignupController.swift */,
 				EA91A17236291622417196AE /* SignupPasskeyController.swift */,
 				349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */,
+				2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */,
 				34173204229D6B6400681CFD /* Assets.xcassets */,
+				2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */,
 				34173206229D6B6400681CFD /* LaunchScreen.storyboard */,
 				34173201229D6B6400681CFD /* Main.storyboard */,
+				2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */,
 			);
 			path = Sandbox;
 			sourceTree = "<group>";
@@ -168,7 +180,6 @@
 				341731F7229D6B6400681CFD /* Frameworks */,
 				341731F8229D6B6400681CFD /* Resources */,
 				A514CE717C81A5C4759D5906 /* [CP] Embed Pods Frameworks */,
-				C99AE77E5935385B39D4FE64 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -222,6 +233,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				34173208229D6B6400681CFD /* LaunchScreen.storyboard in Resources */,
+				2AD29AB92E2ED7F100B26535 /* TrustedDeviceCell.xib in Resources */,
+				2AD29AB52E2E9F9F00B26535 /* EditableSectionHeaderView.xib in Resources */,
 				34173205229D6B6400681CFD /* Assets.xcassets in Resources */,
 				34173203229D6B6400681CFD /* Main.storyboard in Resources */,
 			);
@@ -238,9 +251,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -269,23 +286,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C99AE77E5935385B39D4FE64 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -294,6 +294,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34797ABD22A9607D00ED093C /* SignupController.swift in Sources */,
+				2AD29AB32E2E931500B26535 /* EditableSectionHeaderView.swift in Sources */,
 				3417FF7022FB11CD0009EC84 /* LoginWithPasswordController.swift in Sources */,
 				34173200229D6B6400681CFD /* LoginWithProvidersController.swift in Sources */,
 				2A52203B297F187D00815558 /* SandboxTabBarController.swift in Sources */,
@@ -317,6 +318,7 @@
 				2A33F30B2A016B1D00D05EB1 /* LoginWKWebviewController.swift in Sources */,
 				99FF44322B72884800DDCAAE /* PasskeyCredentialController.swift in Sources */,
 				2A33F30D2A01740600D05EB1 /* LoginCustomWebviewController.swift in Sources */,
+				2AD29AB82E2ED7F100B26535 /* TrustedDeviceCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
