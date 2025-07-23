@@ -15,16 +15,25 @@ class SignupController: UIViewController {
     }
 
     @IBAction func signup(_ sender: Any) {
-        Task { @MainActor in
-            let email = emailInput.text ?? ""
-            let password = passwordInput.text ?? ""
-            let name = nameInput.text ?? ""
+        let username = emailInput.text ?? ""
+        let password = passwordInput.text ?? ""
+        let name = nameInput.text ?? ""
 
-            let profile = ProfileSignupRequest(
+        let profile = if (username.contains("@")) {
+            ProfileSignupRequest(
                 password: password,
-                email: email,
+                email: username,
                 name: name
             )
+        } else {
+            ProfileSignupRequest(
+                password: password,
+                phoneNumber: username,
+                name: name
+            )
+        }
+
+        Task {
             await handleAuthToken(errorMessage: "Signup failed") {
                 try await AppDelegate.reachfive().signup(profile: profile, origin: origin)
             }
