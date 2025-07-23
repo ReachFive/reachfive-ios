@@ -1,9 +1,8 @@
-AppDelegate
-    .reachfive()
-    .requestPasswordReset(phoneNumber: "+33682234940")
-    .onSuccess { _ in
+Task {
+    do {
+        try await AppDelegate.reachfive().requestPasswordReset(phoneNumber: "+33682234940")
         // Do something
-    }
-    .onFailure { error in
+    } catch {
         // Return a ReachFive error
     }
+}

@@ -2,12 +2,11 @@ import Reach5
 
 let profileAuthToken: AuthToken = // Here paste the authorization token of the profile retrieved after login
 
-AppDelegate
-    .reachfive()
-    .getProfile(authToken: profileAuthToken)
-    .onSuccess { profile in
-      // Get the profile
+Task {
+    do {
+        let profile = try await AppDelegate.reachfive().getProfile(authToken: profileAuthToken)
+        // Get the profile
+    } catch {
+        // Return a ReachFive error
     }
-    .onFailure { error in
-      // Return a ReachFive error
-    }
+}

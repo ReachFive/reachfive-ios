@@ -1,12 +1,12 @@
 import Reach5
 
-val authToken: AuthToken = // The authentication token obtained from login or signup.
+let authToken: AuthToken = // The authentication token obtained from login or signup.
 
-AppDelegate.reachfive()
-      .refreshAccessToken(authToken)
-      .onSuccess{ refreshedAuthToken in
+Task {
+    do {
+        let refreshedAuthToken = try await AppDelegate.reachfive().refreshAccessToken(authToken)
         // Do something
-      }
-      .onFailure { error in
+    } catch {
         // Return a ReachFive error
-      }
+    }
+}

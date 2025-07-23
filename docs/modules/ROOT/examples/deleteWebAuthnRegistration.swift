@@ -1,9 +1,8 @@
-AppDelegate
-    .reachfive()
-    .deleteWebAuthnRegistration(id: id, authToken: profileAuthToken)
-    .onSuccess { _ in
+Task {
+    do {
+        try await AppDelegate.reachfive().deleteWebAuthnRegistration(id: id, authToken: profileAuthToken)
         // Do something
-    }
-    .onFailure { error in
+    } catch {
         // Return a ReachFive error
     }
+}

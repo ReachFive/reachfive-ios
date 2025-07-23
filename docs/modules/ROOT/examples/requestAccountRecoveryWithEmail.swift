@@ -1,12 +1,11 @@
-AppDelegate
-    .reachfive()
-    .requestAccountRecovery(
-        email: "john.doe@gmail.com",
-        redirectUrl: "reachfive-clientId://account-recovery",
-    )
-    .onSuccess { _ in
+Task {
+    do {
+        try await AppDelegate.reachfive().requestAccountRecovery(
+            email: "john.doe@gmail.com",
+            redirectUrl: "reachfive-clientId://account-recovery"
+        )
         // Do something
-    }
-    .onFailure { error in
+    } catch {
         // Return a ReachFive error
     }
+}

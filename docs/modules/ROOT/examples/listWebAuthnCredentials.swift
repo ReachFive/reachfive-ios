@@ -1,9 +1,8 @@
-AppDelegate
-    .reachfive()
-    .listWebAuthnCredentials(authToken: profileAuthToken)
-    .onSuccess { listCredentials in
-      // Get the list of devices
+Task {
+    do {
+        let listCredentials = try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: profileAuthToken)
+        // Get the list of devices
+    } catch {
+        // Return a ReachFive error
     }
-    .onFailure { error in
-      // Return a ReachFive error
-    }
+}

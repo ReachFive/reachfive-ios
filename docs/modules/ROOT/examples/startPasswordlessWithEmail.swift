@@ -1,10 +1,10 @@
 import Reach5
 
-AppDelegate.reachfive()
-  .startPasswordless(.Email(email: "john.doe@gmail.com", redirectUri: "reachfive-${clientId}://callback"))
-  .onSuccess { _ in
-      // Do something
-  }
-  .onFailure { error in
-      // Return a ReachFive error
-  }
+Task {
+    do {
+        try await AppDelegate.reachfive().startPasswordless(.Email(email: "john.doe@gmail.com")
+        // Do something
+    } catch {
+        // Return a ReachFive error
+    }
+}

@@ -1,12 +1,11 @@
-AppDelegate
-    .reachfive()
-    .requestPasswordReset(
-        email: "john.doe@gmail.com",
-        redirectUrl: "reachfive-clientId://password-reset"
-    )
-    .onSuccess { _ in
+Task {
+    do {
+        try await AppDelegate.reachfive().requestPasswordReset(
+            email: "john.doe@gmail.com",
+            redirectUrl: "reachfive-clientId://password-reset"
+        )
         // Do something
-    }
-    .onFailure { error in
+    } catch {
         // Return a ReachFive error
     }
+}

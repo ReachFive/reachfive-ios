@@ -1,10 +1,10 @@
 import Reach5
 
-AppDelegate.reachfive()
-  .mfaDelete(trustedDeviceId deviceId: String, authToken: profileAuthToken)
-  .onSuccess { _ in
-      // Do something
-  }
-  .onFailure { error in
-      // Return a ReachFive error
-  }
+Task {
+    do {
+        try await AppDelegate.reachfive().mfaDelete(trustedDeviceId: deviceId, authToken: profileAuthToken)
+        // Do something
+    } catch {
+        // Return a ReachFive error
+    }
+}

@@ -1,17 +1,17 @@
 import Reach5
 
 let freshProfileAuthToken: AuthToken = // Here paste the authorization token of the profile retrieved after login (less than 5 min)
-AppDelegate
-    .reachfive()
-    .updatePassword(
-        .FreshAccessTokenParams(
-            authToken: freshProfileAuthToken,
-            password: "ZPf7LFtc"
+
+Task {
+    do {
+        try await AppDelegate.reachfive().updatePassword(
+            .FreshAccessTokenParams(
+                authToken: freshProfileAuthToken,
+                password: "ZPf7LFtc"
+            )
         )
-    )
-    .onSuccess { _ in
-    // Do something
+        // Do something
+    } catch {
+        // Return a ReachFive error
     }
-    .onFailure { error in
-    // Return a ReachFive error
-    }
+}

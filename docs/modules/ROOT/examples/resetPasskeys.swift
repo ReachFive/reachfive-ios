@@ -1,11 +1,8 @@
-AppDelegate
-    .reachfive()
-    .resetPasskeys(withRequest: ResetPasskeyRequest(anchor: window, email: email, friendlyName: friendlyName), verificationCode: verificationCode)
-    
-    // on success
-    .onSuccess { 
+Task {
+    do {
+        try await AppDelegate.reachfive().resetPasskeys(withRequest: ResetPasskeyRequest(verificationCode: verificationCode, friendlyName: friendlyName, anchor: window, email: email))
         // handle success
+    } catch {
+        // return ReachFive error on failure
     }
-    // return ReachFive error on failure
-    .onFailure { error in
-    }
+}

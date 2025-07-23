@@ -1,12 +1,11 @@
-AppDelegate
-    .reachfive()
-    .requestAccountRecovery(
-        phoneNumber: "+33682234940",
-        redirectUrl: "https://example-password-reset.com"
-    )
-    .onSuccess { _ in
+Task {
+    do {
+        try await AppDelegate.reachfive().requestAccountRecovery(
+            phoneNumber: "+33682234940",
+            redirectUrl: "https://example-password-reset.com"
+        )
         // Do something
-    }
-    .onFailure { error in
+    } catch {
         // Return a ReachFive error
     }
+}
