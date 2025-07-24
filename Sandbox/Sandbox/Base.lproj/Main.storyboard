@@ -824,11 +824,28 @@
                         <segue destination="ZDb-7x-mVl" kind="relationship" relationship="viewControllers" id="Pzw-21-BQx"/>
                         <segue destination="MTQ-Xb-hzf" kind="relationship" relationship="viewControllers" id="CyL-N2-NK0"/>
                         <segue destination="85A-IF-9ED" kind="relationship" relationship="viewControllers" id="o6E-CP-l6n"/>
+                        <segue destination="t2d-3p-DRa" kind="relationship" relationship="viewControllers" id="b1e-Wp-g2g"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4MJ-fW-IcH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-2020" y="113"/>
+        </scene>
+        <!--Settings-->
+        <scene sceneID="c2f-3g-s9J">
+            <objects>
+                <viewController id="t2d-3p-DRa" customClass="SettingsViewController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="5fI-Nq-cgr">
+                        <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="y9X-fU-A2A"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Settings" image="gearshape" catalog="system" id="h4g-f3-bI9"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lXf-d3-s3K" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2853" y="864"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="IZ8-Ke-q7Q">
