@@ -160,7 +160,7 @@ extension ProfileController: UITableViewDataSource {
                 //TODO: Vérifier le numéro de téléphone
                 let deleteAction = UIAction(title: "Delete", image: UIImage(systemName: "minus.circle.fill")) { action in
                     Task {
-                        //TODO: Si la fonctionnalité SMS est activée, on nepeut pas utiliser cette méthode
+                        //TODO: Si la fonctionnalité SMS est activée, on ne peut pas utiliser cette méthode
                         await self.updateProfileField(titre: "Delete Phone number", authToken: token, update: ProfileUpdate(phoneNumber: .Delete))
                     }
                 }

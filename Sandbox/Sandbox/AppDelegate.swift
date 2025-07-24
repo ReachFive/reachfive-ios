@@ -20,6 +20,7 @@ import UIKit
 // Mettre une nouvelle page dans une quatrième tabs ou dans l'app réglages:
 // - Paramétrage : scopes, origin, utilisation du refresh au démarrage ?
 // cf. wireframe de JC pour d'autres idées : https://miro.com/app/board/uXjVOMB0pG4=/
+//   - notamment : affichage des jetons quand on est connecté et demande d'introspection
 // Pouvoir sélectionner entre plusieurs confs ReachFive
 // - ensuite en choisir une avec Xcode Custom Environment Variables : https://derrickho328.medium.com/xcode-custom-environment-variables-681b5b8674ec
 // - Indiquer sur quel environnement on est connecté en l'affichant en titre de la page des fonctions

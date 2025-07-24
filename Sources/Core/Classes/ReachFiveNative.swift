@@ -71,7 +71,7 @@ public extension ReachFive {
     func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws {
         let domain = sdkConfig.domain
         let originWebAuthn = request.originWebAuthn ?? "https://\(domain)"
-        //TODO supprimer l'ancienne passkey du server
+        //TODO supprimer l'ancienne clé du server
         return try await credentialManager.registerNewPasskey(withRequest: NewPasskeyRequest(anchor: request.anchor, friendlyName: request.friendlyName, originWebAuthn: originWebAuthn, origin: request.origin), authToken: authToken)
     }
 
