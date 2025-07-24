@@ -373,7 +373,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Or" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iWT-4W-N9R">
-                                <rect key="frame" x="210.66666666666663" y="264.66666666666669" width="19.000000000000028" height="20"/>
+                                <rect key="frame" x="210.66666666666666" y="264.66666666666669" width="19" height="20"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -384,7 +384,7 @@
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="new-password"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yTN-Ql-5u8">
-                                <rect key="frame" x="119.33333333333331" y="358.66666666666669" width="201.66666666666669" height="40.333333333333314"/>
+                                <rect key="frame" x="119.33333333333333" y="358.66666666666669" width="201.66666666666669" height="40.333333333333314"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Create a new password"/>
                                 <connections>
@@ -392,7 +392,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Passkeys! Passkeys! Passkeys!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="77k-fD-EBS">
-                                <rect key="frame" x="93.666666666666686" y="144" width="252.66666666666663" height="20"/>
+                                <rect key="frame" x="93.666666666666671" y="144" width="252.66666666666663" height="20"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -496,7 +496,7 @@
                                 <textInputTraits key="textInputTraits" keyboardType="numberPad" textContentType="one-time-code"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TzZ-In-Hng">
-                                <rect key="frame" x="177.66666666666663" y="245.99999999999997" width="84.666666666666686" height="40.666666666666657"/>
+                                <rect key="frame" x="177.66666666666666" y="245.99999999999997" width="84.666666666666657" height="40.666666666666657"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Validate"/>
                                 <connections>
@@ -536,42 +536,42 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email or phone number" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aQ1-Vf-wGZ">
-                                <rect key="frame" x="16" y="173" width="176" height="21"/>
+                                <rect key="frame" x="20" y="179" width="176" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ISz-2N-3VB" userLabel="EmailInput">
-                                <rect key="frame" x="16" y="202" width="361" height="34"/>
+                                <rect key="frame" x="20" y="208" width="400" height="34"/>
                                 <accessibility key="accessibilityConfiguration" identifier="email"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="email"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yJj-t5-vvU">
-                                <rect key="frame" x="16" y="244" width="73.333333333333329" height="20"/>
+                                <rect key="frame" x="20" y="250" width="73.333333333333329" height="20"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mSo-wZ-GWD" userLabel="PasswordInput">
-                                <rect key="frame" x="16" y="272" width="361" height="34"/>
+                                <rect key="frame" x="20" y="278" width="400" height="34"/>
                                 <accessibility key="accessibilityConfiguration" identifier="password"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="new-password"/>
                             </textField>
                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VZ1-aC-hs5">
-                                <rect key="frame" x="16" y="314" width="45" height="20"/>
+                                <rect key="frame" x="20" y="320" width="45" height="20"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="8vr-zU-Z2f">
-                                <rect key="frame" x="16" y="342" width="361" height="34"/>
+                                <rect key="frame" x="20" y="348" width="400" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="words" textContentType="family-name"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Zm-rg-VoC">
-                                <rect key="frame" x="16" y="384" width="48" height="30"/>
+                                <rect key="frame" x="20" y="390" width="48" height="30"/>
                                 <accessibility key="accessibilityConfiguration" identifier="signup"/>
                                 <state key="normal" title="Signup"/>
                                 <connections>
@@ -714,7 +714,7 @@
                                 </connections>
                             </button>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kej-VG-Gqk">
-                                <rect key="frame" x="126.66666666666669" y="679" width="186.66666666666663" height="40.666666666666629"/>
+                                <rect key="frame" x="126.66666666666667" y="679" width="186.66666666666663" height="40.666666666666629"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="tinted" title="Manage MFA devices"/>
                                 <connections>
@@ -722,7 +722,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lsY-vN-hQ5">
-                                <rect key="frame" x="179.33333333333337" y="734.66666666666663" width="81.666666666666629" height="40.333333333333371"/>
+                                <rect key="frame" x="179.33333333333334" y="734.66666666666663" width="81.666666666666657" height="40.333333333333371"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Log out"/>
                                 <connections>
@@ -845,7 +845,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lXf-d3-s3K" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2853" y="864"/>
+            <point key="canvasLocation" x="-3179" y="864"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="IZ8-Ke-q7Q">
@@ -1164,11 +1164,11 @@
                                         <rect key="frame" x="0.0" y="973.33335113525391" width="440" height="23.5"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="pu5-LB-WX8" id="nqJ-30-4Ye">
-                                            <rect key="frame" x="0.0" y="0.0" width="937.66666666666663" height="23.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="421.66666666666669" height="23.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" text="Login with providers" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="tqo-VF-eV4">
-                                                    <rect key="frame" x="8" y="0.0" width="921.66666666666663" height="23.5"/>
+                                                    <rect key="frame" x="8" y="0.0" width="405.66666666666669" height="23.5"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
@@ -1184,11 +1184,11 @@
                                         <rect key="frame" x="0.0" y="996.83335113525391" width="440" height="23.5"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="8ne-t0-YIZ" id="9tn-vu-4LS">
-                                            <rect key="frame" x="0.0" y="0.0" width="956" height="23.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="440" height="23.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" text="Login with refresh token" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Xwt-4z-xho">
-                                                    <rect key="frame" x="8" y="0.0" width="940" height="23.5"/>
+                                                    <rect key="frame" x="8" y="0.0" width="424" height="23.5"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
@@ -1205,11 +1205,11 @@
                                         <rect key="frame" x="0.0" y="1098.3333511352539" width="440" height="23.5"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="qFg-CJ-and" id="pYJ-U8-SPH">
-                                            <rect key="frame" x="0.0" y="0.0" width="937.66666666666663" height="23.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="421.66666666666669" height="23.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" text="Recover Account" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7v3-6C-fQ8">
-                                                    <rect key="frame" x="8" y="0.0" width="921.66666666666663" height="23.5"/>
+                                                    <rect key="frame" x="8" y="0.0" width="405.66666666666669" height="23.5"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
@@ -1336,7 +1336,7 @@
                                 </connections>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fWT-2J-M9y">
-                                <rect key="frame" x="187.33333333333337" y="414" width="65.666666666666629" height="40.666666666666686"/>
+                                <rect key="frame" x="187.33333333333334" y="414" width="65.666666666666657" height="40.666666666666686"/>
                                 <accessibility key="accessibilityConfiguration" identifier="signup"/>
                                 <state key="normal" title="Login"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Login"/>
@@ -1585,7 +1585,7 @@
                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" returnKeyType="next" textContentType="username"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xzw-kf-Pwc">
-                                <rect key="frame" x="187.33333333333337" y="544" width="65.666666666666629" height="40.666666666666629"/>
+                                <rect key="frame" x="187.33333333333334" y="544" width="65.666666666666657" height="40.666666666666629"/>
                                 <accessibility key="accessibilityConfiguration" identifier="signup"/>
                                 <state key="normal" title="Login"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Login"/>
@@ -1807,6 +1807,7 @@
     <resources>
         <image name="Reach5" width="821.427978515625" height="321.42800903320312"/>
         <image name="faceid" catalog="system" width="128" height="115"/>
+        <image name="gearshape" catalog="system" width="128" height="123"/>
         <image name="list.bullet.clipboard" catalog="system" width="98" height="128"/>
         <image name="person.crop.circle.badge.xmark" catalog="system" width="128" height="114"/>
         <image name="person.crop.circle.fill.badge.xmark" catalog="system" width="128" height="114"/>
