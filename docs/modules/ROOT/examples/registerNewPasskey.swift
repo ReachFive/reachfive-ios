@@ -1,10 +1,6 @@
-AppDelegate
-    .reachfive()
-    .registerNewPasskey(withRequest: NewPasskeyRequest(anchor: window, friendlyName: friendlyName), authToken: authToken)
-    
+do {
+    try await AppDelegate.reachfive().registerNewPasskey(withRequest: NewPasskeyRequest(anchor: window, friendlyName: friendlyName), authToken: authToken)
     // get auth token on success
-    .onSuccess { authToken in
-    }
+} catch {
     // return ReachFive error on failure
-    .onFailure { error in
-    }
+}

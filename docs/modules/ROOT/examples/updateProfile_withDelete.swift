@@ -2,15 +2,12 @@ import Reach5
 
 let profileAuthToken: AuthToken = // Here paste the authorization token of the profile retrieved after login
 
-AppDelegate
-  .reachfive()
-  .updateProfile(
-      authToken: profileAuthToken,
-      profileUpdate: ProfileUpdate(phoneNumber: .Delete)
-  )
-  .onSuccess { updatedProfile in
+do {
+    let updatedProfile = try await AppDelegate.reachfive().updateProfile(
+        authToken: profileAuthToken,
+        profileUpdate: ProfileUpdate(phoneNumber: .Delete)
+    )
     // Get the updated profile
-  }
-  .onFailure { error in
+} catch {
     // Return a ReachFive error
-  }
+}

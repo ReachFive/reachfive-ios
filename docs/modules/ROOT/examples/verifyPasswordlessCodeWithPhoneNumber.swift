@@ -4,11 +4,10 @@ let verifyAuthCodeRequest = VerifyAuthCodeRequest(
   phoneNumber: phoneNumberInput,
   verificationCode: verificationCodeInput
 )
-AppDelegate.reachfive()
-  .verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
-  .onSuccess { _ in
+
+do {
+    let authToken = try await AppDelegate.reachfive().verifyPasswordlessCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
     // Do something
-  }
-  .onFailure { error in
+} catch {
     // Return a ReachFive error
-  }
+}

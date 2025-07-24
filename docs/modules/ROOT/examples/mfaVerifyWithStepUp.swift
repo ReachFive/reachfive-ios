@@ -1,13 +1,14 @@
 import Reach5
 
-AppDelegate.reachfive()
-  .mfaStart(stepUp(
-        challengeId: "m3DaoT...7Rzp1m",
-        verificationCode: "123456",
-        trustDevice: true))
-  .onSuccess { _ in
-      // Do something
-  }
-  .onFailure { error in
-      // Return a ReachFive error
-  }
+do {
+    let authToken = try await AppDelegate.reachfive().mfaVerify(
+        stepUp: VerifyStepUp(
+            challengeId: "m3DaoT...7Rzp1m",
+            verificationCode: "123456",
+            trustDevice: true
+        )
+    )
+    // Do something
+} catch {
+    // Return a ReachFive error
+}

@@ -2,13 +2,11 @@ import Reach5
 
 let providerName: String = // Here paste the name of the provider
 
-AppDelegate
-    .reachfive()
-    .getProvider(name: providerName)?
-    .logout()
-    .onSuccess { _ in
+do {
+    if let provider = AppDelegate.reachfive().getProvider(name: providerName) {
+        try await provider.logout()
         // Do something
     }
-    .onFailure { error in
-        // Return a ReachFive error
-    }
+} catch {
+    // Return a ReachFive error
+}

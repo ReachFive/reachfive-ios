@@ -1,10 +1,6 @@
-AppDelegate
-    .reachfive()
-    .beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window))
-    
+do {
+    let authToken = try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window))
     // get auth token on success
-    .onSuccess { authToken in
-    }
+} catch {
     // return ReachFive error on failure
-    .onFailure { error in
-    }
+}
