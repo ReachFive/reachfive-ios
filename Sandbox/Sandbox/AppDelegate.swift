@@ -58,61 +58,103 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     #if targetEnvironment(macCatalyst)
     static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
     static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
-    let reachfive = macLocal
+    static let reachfive = macLocal
     #else
     static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
     static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
     #if targetEnvironment(simulator)
-    let reachfive = local
+    static let reachfive = local
     #else
-    let reachfive = remote
+    static let reachfive = remote
     #endif
     #endif
 
     @MainActor
     static func reachfive() -> ReachFive {
-        let app = UIApplication.shared.delegate as! AppDelegate
-        return app.reachfive
+        return reachfive
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         print("application:didFinishLaunchingWithOptions:\(launchOptions ?? [:])")
 
-        reachfive.addPasswordlessCallback { result in
+        AppDelegate.reachfive.addPasswordlessCallback { result in
             print("addPasswordlessCallback \(result)")
             NotificationCenter.default.post(name: .DidReceiveLoginCallback, object: nil, userInfo: ["result": result])
         }
-        reachfive.addMfaCredentialRegistrationCallback { result in
+        AppDelegate.reachfive.addMfaCredentialRegistrationCallback { result in
             print("addMfaCredentialRegistrationCallback \(result)")
             NotificationCenter.default.post(name: .DidReceiveMfaVerifyEmail, object: nil, userInfo: ["result": result])
         }
-        reachfive.addEmailVerificationCallback { result in
+        AppDelegate.reachfive.addEmailVerificationCallback { result in
             print("addEmailVerificationCallback \(result)")
             NotificationCenter.default.post(name: .DidReceiveEmailVerificationCallback, object: nil, userInfo: ["result": result])
         }
 
-        let appleIDProvider = ASAuthorizationAppleIDProvider()
-        // Ceci est l'id tel que renvoyé par Apple dans idToken.sub ou AppleIDCredential.user
-        appleIDProvider.getCredentialState(forUserID: "000707.3cc381460bce4bcc96e6fd5abdc1f121.1742") { (credentialState, error) in
-            switch credentialState {
-            case .authorized: print("Apple Id state: authorized")
-            case .revoked: print("Apple Id state: revoked")
-            case .notFound: print("Apple Id state: not found")
-            case .transferred: print("Apple Id state: transferred")
-            default:
-                break
+        let defaults = UserDefaults.standard
+        let selectedStartupActions = defaults.dictionary(forKey: "selectedStartupActions") as? [String: Bool] ?? [:]
+
+        if selectedStartupActions["Use refreshAccessToken at startup"] == true, let token = Self.storage.getToken() {
+            Task {
+                do {
+                    let authToken = try await AppDelegate.reachfive.refreshAccessToken(authToken: token)
+                    await self.goToProfile(authToken: authToken)
+                } catch {
+                    print("Refresh token failed: \(error)")
+                }
             }
         }
 
-        return reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
+        if selectedStartupActions["Use login with request at startup"] == true {
+            Task {
+                do {
+                    let selectedScopes = (defaults.stringArray(forKey: "selectedScopes") ?? []).joined(separator: " ")
+                    let loginRequest = LoginRequest(scope: selectedScopes.isEmpty ? nil : selectedScopes)
+                    if let window = self.window, let rootViewController = window.rootViewController {
+                        let authToken = try await AppDelegate.reachfive.login(withRequest: loginRequest, usingModalAuthorizationFor: rootViewController)
+                        await self.goToProfile(authToken: authToken)
+                    }
+                } catch {
+                    print("Login with request failed: \(error)")
+                }
+            }
+        }
+
+        if selectedStartupActions["Use Apple ID credential state at startup"] == true {
+            // The user ID should be stored securely after the first login
+            let appleIDProvider = ASAuthorizationAppleIDProvider()
+            // This user ID is hardcoded for now. A real implementation should store it after login.
+            appleIDProvider.getCredentialState(forUserID: "000707.3cc381460bce4bcc96e6fd5abdc1f121.1742") { (credentialState, error) in
+                if credentialState == .authorized {
+                    print("Apple ID user is authorized.")
+                    // To navigate to profile, we need a valid auth token.
+                    // This would typically be retrieved from secure storage.
+                    if let token = Self.storage.getToken() {
+                        Task {
+                            await self.goToProfile(authToken: token)
+                        }
+                    }
+                }
+            }
+        }
+
+        return AppDelegate.reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    @MainActor
+    func goToProfile(authToken: AuthToken) {
+        print("Navigating to profile page")
+        Self.storage.setToken(authToken)
+        if let tabBarController = window?.rootViewController as? UITabBarController {
+            tabBarController.selectedIndex = 2 // profile is third from left
+        }
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        reachfive.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        AppDelegate.reachfive.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        reachfive.application(app, open: url, options: options)
+        AppDelegate.reachfive.application(app, open: url, options: options)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -135,7 +177,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidBecomeActive(_ application: UIApplication) {
         print("applicationDidBecomeActive")
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        reachfive.applicationDidBecomeActive(application)
+        AppDelegate.reachfive.applicationDidBecomeActive(application)
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
@@ -231,7 +273,7 @@ extension UIViewController {
         return UIAlertAction(title: type.rawValue, style: .default) { _ in
             Task {
                 await self.handleAuthToken {
-                    let resp = try await AppDelegate().reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken))
+                    let resp = try await AppDelegate.reachfive.mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken))
                     return try await self.handleStartVerificationCode(resp, authType: type)
                 }
             }
