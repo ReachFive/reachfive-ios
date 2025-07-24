@@ -25,8 +25,4 @@ Pod::Spec.new do |spec|
     /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Sources/Core/Info.plist
   CMD
 
-  spec.dependency 'Alamofire', '~> 5.8'
-  spec.dependency 'CryptoSwift', '~> 1.8'
-  spec.dependency 'DeviceKit', '~> 5.1'
-
 end

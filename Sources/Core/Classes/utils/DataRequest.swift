@@ -1,83 +1,89 @@
 import Foundation
-import Alamofire
 
-extension DataRequest {
+class DataRequest {
+    private let request: URLRequest
+    private let session: URLSession
+    private let redirectHandler: RedirectHandler
+    private let decoder: JSONDecoder
+    private let logger = Logger.shared
+
+    init(request: URLRequest, session: URLSession, redirectHandler: RedirectHandler, decoder: JSONDecoder) {
+        self.request = request
+        self.session = session
+        self.redirectHandler = redirectHandler
+        self.decoder = decoder
+    }
 
     private func isSuccess(_ status: Int) -> Bool {
         status >= 200 && status < 300
     }
 
-    private func parseJson<T: Decodable>(json: Data, type: T.Type, decoder: JSONDecoder) throws(ReachFiveError) -> T {
+    private func parseJson<T: Decodable>(json: Data, type: T.Type) throws -> T {
         do {
-            return try decoder.decode(type, from: json)
+            let parsed = try decoder.decode(type, from: json)
+            logger.log(parsedResponse: parsed)
+            return parsed
         } catch {
-            throw .TechnicalError(reason: error.localizedDescription)
+            logger.log(error: error)
+            throw ReachFiveError.TechnicalError(reason: error.localizedDescription)
         }
     }
 
     private func handleResponseStatus(status: Int, apiError: ApiError) -> ReachFiveError {
-        if status == 400 {
-            return .RequestError(apiError: apiError)
+        let error: ReachFiveError = if status == 400 {
+            .RequestError(apiError: apiError)
+        } else if status == 401 {
+            .AuthFailure(reason: "Unauthorized", apiError: apiError)
+        } else {
+            .TechnicalError(
+                reason: "Response with \(status) error code",
+                apiError: apiError
+            )
         }
-        if status == 401 {
-            return .AuthFailure(reason: "Unauthorized", apiError: apiError)
-        }
-        return .TechnicalError(
-            reason: "Response with \(status) error code",
-            apiError: apiError
-        )
+        logger.log(error: error)
+        return error
     }
 
-    func responseJson(decoder: JSONDecoder) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
-            responseData { responseData in
-                switch responseData.result {
-                case let .failure(error):
-                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
+    private func processHttpResponse<T>(data: Data, response: URLResponse, onSuccess: (Data) throws -> T) throws -> T {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            let error = ReachFiveError.TechnicalError(reason: "Request without response")
+            logger.log(error: error)
+            throw error
+        }
 
-                case let .success(data):
-                    guard let response = responseData.response else {
-                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request without response"))
-                        return
-                    }
+        logger.log(response: httpResponse, data: data)
 
-                    let status = response.statusCode
-                    continuation.resume {
-                        if !self.isSuccess(status) {
-                            let apiError = try self.parseJson(json: data, type: ApiError.self, decoder: decoder)
-                            throw self.handleResponseStatus(status: status, apiError: apiError)
-                        }
-                    }
-                }
-            }
+        let status = httpResponse.statusCode
+        guard isSuccess(status) else {
+            let apiError = try parseJson(json: data, type: ApiError.self)
+            throw handleResponseStatus(status: status, apiError: apiError)
+        }
+
+        return try onSuccess(data)
+    }
+
+    func responseJson() async throws {
+        logger.log(request: request)
+        let (data, response) = try await session.data(for: request)
+        try processHttpResponse(data: data, response: response) { _ in }
+    }
+
+    func responseJson<T: Decodable>(type: T.Type) async throws -> T {
+        logger.log(request: request)
+        let (data, response) = try await session.data(for: request)
+        return try processHttpResponse(data: data, response: response) { data in
+            try parseJson(json: data, type: T.self)
         }
     }
 
-    func responseJson<T: Decodable>(type: T.Type, decoder: JSONDecoder) async throws -> T {
+    func redirect() async throws -> URL {
+        logger.log(request: request)
+        let task = session.dataTask(with: request)
         return try await withCheckedThrowingContinuation { continuation in
-            responseData { responseData in
-                switch responseData.result {
-                case let .failure(error):
-                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: error.localizedDescription))
-
-                case let .success(data):
-                    guard let response = responseData.response else {
-                        continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request without response"))
-                        return
-                    }
-
-                    let status = response.statusCode
-                    continuation.resume {
-                        guard self.isSuccess(status) else {
-                            let apiError = try self.parseJson(json: data, type: ApiError.self, decoder: decoder)
-                            throw self.handleResponseStatus(status: status, apiError: apiError)
-                        }
-
-                        return try self.parseJson(json: data, type: T.self, decoder: decoder)
-                    }
-                }
+            Task {
+                await redirectHandler.registerContinuation(continuation, for: task.taskIdentifier)
+                task.resume()
             }
         }
     }
 }
-
