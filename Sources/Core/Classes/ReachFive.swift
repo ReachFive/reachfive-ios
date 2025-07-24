@@ -28,7 +28,7 @@ public class ReachFive: NSObject {
     let providersCreators: Array<ProviderCreator>
     let reachFiveApi: ReachFiveApi
     var providers: [Provider] = []
-    internal var scope: [String] = []
+    public internal(set) var scope: [String] = []
     internal var clientConfig: ClientConfigResponse? = nil
     public let storage: Storage
     let credentialManager: CredentialManager

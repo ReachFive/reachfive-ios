@@ -11,7 +11,7 @@ import WebKit
 
 class SettingsViewController: UIViewController {
 
-    private let tableView = UITableView(frame: .zero, style: .grouped)
+    @IBOutlet weak var tableView: UITableView!
 
     private enum Section: Int, CaseIterable {
         case environment
@@ -20,7 +20,7 @@ class SettingsViewController: UIViewController {
         case cookies
     }
 
-    private var availableScopes = ReachFive.Scope.allCases
+    private var availableScopes: [String] = []
     private var selectedScopes: [String] = []
 
     private let startupActions = [
@@ -37,22 +37,17 @@ class SettingsViewController: UIViewController {
         title = "Settings"
         setupTableView()
         loadSettings()
+        let cookiesHeaderNib = UINib(nibName: "EditableSectionHeaderView", bundle: nil)
+        tableView.register(cookiesHeaderNib, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         loadCookies()
+        loadScopes()
     }
 
     private func setupTableView() {
-        view.addSubview(tableView)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
@@ -60,7 +55,7 @@ class SettingsViewController: UIViewController {
 
     private func loadSettings() {
         let defaults = UserDefaults.standard
-        selectedScopes = defaults.stringArray(forKey: "selectedScopes") ?? []
+        selectedScopes = defaults.stringArray(forKey: "selectedScopes") ?? availableScopes
         selectedStartupActions = defaults.dictionary(forKey: "selectedStartupActions") as? [String: Bool] ?? [:]
     }
 
@@ -71,11 +66,18 @@ class SettingsViewController: UIViewController {
     }
 
     private func loadCookies() {
-        WKWebsiteDataStore.default().httpCookieStore.getAllCookies { [weak self] cookies in
-            DispatchQueue.main.async {
-                self?.cookies = cookies
-                self?.tableView.reloadSections(IndexSet(integer: Section.cookies.rawValue), with: .automatic)
-            }
+        let sessionCookies = HTTPCookieStorage.shared.cookies?.filter({ $0.domain == AppDelegate.reachfive().sdkConfig.domain }) ?? []
+
+        DispatchQueue.main.async {
+            self.cookies = sessionCookies
+            self.tableView.reloadSections(IndexSet(integer: Section.cookies.rawValue), with: .automatic)
+        }
+    }
+
+    private func loadScopes() {
+        DispatchQueue.main.async {
+            self.availableScopes = AppDelegate.reachfive().scope
+            self.tableView.reloadSections(IndexSet(integer: Section.scopes.rawValue), with: .automatic)
         }
     }
 }
@@ -110,7 +112,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         case .startupActions:
             return "Startup Actions"
         case .cookies:
-            return "Cookies"
+            return "" //Title set in viewForHeaderInSection
         }
     }
 
@@ -121,24 +123,26 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
 
         switch section {
         case .environment:
-            let config = AppDelegate.reachfive.sdkConfig
-            cell.textLabel?.text = "Domain: \(config.domain)"
+            let config = AppDelegate.reachfive().sdkConfig
+            cell.textLabel?.text = config.domain
             cell.textLabel?.numberOfLines = 0
         case .scopes:
             let scope = availableScopes[indexPath.row]
-            cell.textLabel?.text = scope.rawValue
-            cell.accessoryType = selectedScopes.contains(scope.rawValue) ? .checkmark : .none
+            cell.textLabel?.text = scope
+            cell.accessoryType = selectedScopes.contains(scope) ? .checkmark : .none
         case .startupActions:
             let action = startupActions[indexPath.row]
             cell.textLabel?.text = action
             cell.accessoryType = selectedStartupActions[action] == true ? .checkmark : .none
+            cell.textLabel?.textColor = .black
         case .cookies:
+            //TODO: pourquoi le cookie accessoryType.checkmark change de statut à chaque fois qu'on voit la page ?
             if cookies.isEmpty {
                 cell.textLabel?.text = "No cookies found."
                 cell.textLabel?.textColor = .gray
             } else {
                 let cookie = cookies[indexPath.row]
-                cell.textLabel?.text = "\(cookie.name): \(cookie.value)"
+                cell.textLabel?.text = cookie.name
                 cell.textLabel?.textColor = .black
             }
         }
@@ -150,7 +154,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
 
         switch section {
         case .scopes:
-            let scope = availableScopes[indexPath.row].rawValue
+            let scope = availableScopes[indexPath.row]
             if let index = selectedScopes.firstIndex(of: scope) {
                 selectedScopes.remove(at: index)
             } else {
@@ -162,48 +166,50 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             let action = startupActions[indexPath.row]
             selectedStartupActions[action] = !(selectedStartupActions[action] ?? false)
             saveSettings()
-            tableView.reloadRows(at: [indexPath], with: .automatic)
+            tableView.reloadRows(at: [indexPath], with: .none) //TODO: pourquoi ça bouge alors qu'il n'y a pas d'animation ?
         default:
             break
         }
     }
-    
+
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard let section = Section(rawValue: section) else { return nil }
-        
+
         if section == .cookies {
-            let headerView = UIView()
-            
-            let titleLabel = UILabel()
-            titleLabel.text = "Cookies"
-            titleLabel.font = UIFont.boldSystemFont(ofSize: 17)
-            
-            let refreshButton = UIButton(type: .system)
-            refreshButton.setTitle("Refresh", for: .normal)
-            refreshButton.addTarget(self, action: #selector(refreshCookies), for: .touchUpInside)
-            
-            let stackView = UIStackView(arrangedSubviews: [titleLabel, refreshButton])
-            stackView.axis = .horizontal
-            stackView.distribution = .equalSpacing
-            stackView.alignment = .center
-            stackView.translatesAutoresizingMaskIntoConstraints = false
-            
-            headerView.addSubview(stackView)
-            
-            NSLayoutConstraint.activate([
-                stackView.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-                stackView.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-                stackView.topAnchor.constraint(equalTo: headerView.topAnchor),
-                stackView.bottomAnchor.constraint(equalTo: headerView.bottomAnchor)
-            ])
-            
+            guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: EditableSectionHeaderView.reuseIdentifier) as? EditableSectionHeaderView else {
+                return nil
+            }
+
+            headerView.configure(
+                title: "Cookies",
+                onEdit: { button in
+                    let isEditing = !tableView.isEditing
+                    tableView.setEditing(isEditing, animated: true)
+                    button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
+                }
+            )
+            headerView.setEditButtonHidden(cookies.isEmpty)
+
             return headerView
         }
-        
+
         return nil
     }
-    
-    @objc private func refreshCookies() {
-        loadCookies()
+
+    // The commit editing style function enables the swipe-to-delete functionality and responds to the delete action.
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        guard editingStyle == .delete,
+                let section = Section(rawValue: indexPath.section),
+                section == .cookies else { return }
+
+        Task { @MainActor in
+            HTTPCookieStorage.shared.deleteCookie(cookies[indexPath.row])
+            self.cookies.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        }
+    }
+
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        Section(rawValue: indexPath.section) == .cookies
     }
 }

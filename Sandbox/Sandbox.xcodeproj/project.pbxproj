@@ -22,6 +22,7 @@
 		2AD29AB52E2E9F9F00B26535 /* EditableSectionHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */; };
 		2AD29AB82E2ED7F100B26535 /* TrustedDeviceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */; };
 		2AD29AB92E2ED7F100B26535 /* TrustedDeviceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */; };
+		2AD29AE72E32AFA000B26535 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */; };
 		2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFF7DE8296F1EB900514B47 /* ActionController.swift */; };
 		3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3414A7CC22DDD39C00CF393A /* ProfileController.swift */; };
 		341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341731FD229D6B6400681CFD /* AppDelegate.swift */; };
@@ -58,6 +59,7 @@
 		2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditableSectionHeaderView.xib; sourceTree = "<group>"; };
 		2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedDeviceCell.swift; sourceTree = "<group>"; };
 		2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TrustedDeviceCell.xib; sourceTree = "<group>"; };
+		2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		2AFF7DE8296F1EB900514B47 /* ActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionController.swift; sourceTree = "<group>"; };
 		2E55CD881F31583F8D3480D8 /* Pods_Sandbox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Sandbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3414A7CC22DDD39C00CF393A /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 				EA91A17236291622417196AE /* SignupPasskeyController.swift */,
 				349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */,
 				2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */,
+				2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */,
 				34173204229D6B6400681CFD /* Assets.xcassets */,
 				2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */,
 				34173206229D6B6400681CFD /* LaunchScreen.storyboard */,
@@ -315,6 +318,7 @@
 				99FF44322B72884800DDCAAE /* PasskeyCredentialController.swift in Sources */,
 				2A33F30D2A01740600D05EB1 /* LoginCustomWebviewController.swift in Sources */,
 				2AD29AB82E2ED7F100B26535 /* TrustedDeviceCell.swift in Sources */,
+				2AD29AE72E32AFA000B26535 /* SettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
