@@ -11,11 +11,23 @@ class LoginWithPasswordController: UIViewController {
     @IBOutlet weak var customIdentifierInput: UITextField!
     @IBOutlet weak var passwordInput: UITextField!
     @IBOutlet weak var error: UILabel!
+    @IBOutlet weak var scopesTableView: UITableView!
+
     var tokenNotification: NSObjectProtocol?
+
+    private var availableScopes: [String] = []
+    private var selectedScopes: [String] = []
 
     override func viewDidLoad() {
         print("LoginWithPasswordController.viewDidLoad")
         super.viewDidLoad()
+
+        scopesTableView.dataSource = self
+        scopesTableView.delegate = self
+        scopesTableView.register(UITableViewCell.self, forCellReuseIdentifier: "scopeCell")
+
+        loadScopes()
+
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
                 Task { @MainActor in
@@ -28,6 +40,12 @@ class LoginWithPasswordController: UIViewController {
         }
     }
 
+    private func loadScopes() {
+        self.availableScopes = AppDelegate.reachfive().scope
+        self.selectedScopes = SettingsViewController.selectedScopes
+        self.scopesTableView.reloadData()
+    }
+
     @IBAction func login(_ sender: Any) {
         let email = emailInput.text
         let phoneNumber = phoneNumberInput.text
@@ -37,8 +55,47 @@ class LoginWithPasswordController: UIViewController {
         Task {
             await handleLoginFlow {
                 try await AppDelegate.reachfive()
-                    .loginWithPassword(email: email, phoneNumber: phoneNumber, customIdentifier: customIdentifier, password: password, origin: "LoginWithPasswordController.loginWithPassword")
+                    .loginWithPassword(
+                        email: email,
+                        phoneNumber: phoneNumber,
+                        customIdentifier: customIdentifier,
+                        password: password,
+                        scope: selectedScopes,
+                        origin: "LoginWithPasswordController.loginWithPassword"
+                    )
             }
         }
+    }
+}
+
+extension LoginWithPasswordController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return availableScopes.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "scopeCell", for: indexPath)
+        let scope = availableScopes[indexPath.row]
+        cell.textLabel?.text = scope
+        cell.accessoryType = selectedScopes.contains(scope) ? .checkmark : .none
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        "Scopes"
+    }
+}
+
+extension LoginWithPasswordController: UITableViewDelegate {
+
+    //TODO: select all/none
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let scope = availableScopes[indexPath.row]
+        if let index = selectedScopes.firstIndex(of: scope) {
+            selectedScopes.remove(at: index)
+        } else {
+            selectedScopes.append(scope)
+        }
+        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 }

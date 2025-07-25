@@ -1,34 +1,26 @@
-//
-//  SettingsViewController.swift
-//  Sandbox
-//
-//  Created by François on 24/07/2025.
-//
-
 import UIKit
 import Reach5
 import WebKit
 
 class SettingsViewController: UIViewController {
 
+    @IBOutlet weak var environmentDomain: UILabel!
     @IBOutlet weak var tableView: UITableView!
 
     private enum Section: Int, CaseIterable {
-        case environment
         case scopes
         case startupActions
         case cookies
     }
 
     private var availableScopes: [String] = []
-    private var selectedScopes: [String] = []
+    public static var selectedScopes: [String] = []  //TODO: utiliser partout ces scopes là
 
     private let startupActions = [
         "Use refreshAccessToken at startup",
-        "Use login with request at startup",
-        "Use Apple ID credential state at startup"
+        "Use login with request at startup"
     ]
-    private var selectedStartupActions: [String: Bool] = [:]
+    private var selectedStartupAction: String?
 
     private var cookies: [HTTPCookie] = []
 
@@ -39,6 +31,9 @@ class SettingsViewController: UIViewController {
         loadSettings()
         let cookiesHeaderNib = UINib(nibName: "EditableSectionHeaderView", bundle: nil)
         tableView.register(cookiesHeaderNib, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
+
+        let config = AppDelegate.reachfive().sdkConfig
+        environmentDomain.text = config.domain
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -55,14 +50,17 @@ class SettingsViewController: UIViewController {
 
     private func loadSettings() {
         let defaults = UserDefaults.standard
-        selectedScopes = defaults.stringArray(forKey: "selectedScopes") ?? availableScopes
-        selectedStartupActions = defaults.dictionary(forKey: "selectedStartupActions") as? [String: Bool] ?? [:]
+        SettingsViewController.selectedScopes = defaults.stringArray(forKey: "selectedScopes") ?? availableScopes
+        //TODO: ces actions seront faite dans applicationDidBecomeActive ou applicationWillEnterForeground, pas dans didFinishLaunchingWithOptions
+        //TODO: sur iOS, ajouter ces actions en tant que "Home screen quick action", sur Mac Catalyst, remplacer cette section par un popup button
+        //TODO: sur Mac Catalyst, remplacer cette section par un popup button
+        selectedStartupAction = defaults.string(forKey: "selectedStartupAction")
     }
 
     private func saveSettings() {
         let defaults = UserDefaults.standard
-        defaults.set(selectedScopes, forKey: "selectedScopes")
-        defaults.set(selectedStartupActions, forKey: "selectedStartupActions")
+        defaults.set(SettingsViewController.selectedScopes, forKey: "selectedScopes")
+        defaults.set(selectedStartupAction, forKey: "selectedStartupAction")
     }
 
     private func loadCookies() {
@@ -91,8 +89,6 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let section = Section(rawValue: section) else { return 0 }
         switch section {
-        case .environment:
-            return 1
         case .scopes:
             return availableScopes.count
         case .startupActions:
@@ -105,8 +101,6 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         guard let section = Section(rawValue: section) else { return nil }
         switch section {
-        case .environment:
-            return "Environment"
         case .scopes:
             return "Scopes"
         case .startupActions:
@@ -122,28 +116,21 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         guard let section = Section(rawValue: indexPath.section) else { return cell }
 
         switch section {
-        case .environment:
-            let config = AppDelegate.reachfive().sdkConfig
-            cell.textLabel?.text = config.domain
-            cell.textLabel?.numberOfLines = 0
         case .scopes:
             let scope = availableScopes[indexPath.row]
             cell.textLabel?.text = scope
-            cell.accessoryType = selectedScopes.contains(scope) ? .checkmark : .none
+            cell.accessoryType = SettingsViewController.selectedScopes.contains(scope) ? .checkmark : .none
         case .startupActions:
             let action = startupActions[indexPath.row]
             cell.textLabel?.text = action
-            cell.accessoryType = selectedStartupActions[action] == true ? .checkmark : .none
-            cell.textLabel?.textColor = .black
+            cell.accessoryType = selectedStartupAction == action ? .checkmark : .none
         case .cookies:
             //TODO: pourquoi le cookie accessoryType.checkmark change de statut à chaque fois qu'on voit la page ?
             if cookies.isEmpty {
                 cell.textLabel?.text = "No cookies found."
-                cell.textLabel?.textColor = .gray
             } else {
                 let cookie = cookies[indexPath.row]
                 cell.textLabel?.text = cookie.name
-                cell.textLabel?.textColor = .black
             }
         }
         return cell
@@ -155,18 +142,22 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         switch section {
         case .scopes:
             let scope = availableScopes[indexPath.row]
-            if let index = selectedScopes.firstIndex(of: scope) {
-                selectedScopes.remove(at: index)
+            if let index = SettingsViewController.selectedScopes.firstIndex(of: scope) {
+                SettingsViewController.selectedScopes.remove(at: index)
             } else {
-                selectedScopes.append(scope)
+                SettingsViewController.selectedScopes.append(scope)
             }
             saveSettings()
             tableView.reloadRows(at: [indexPath], with: .automatic)
         case .startupActions:
             let action = startupActions[indexPath.row]
-            selectedStartupActions[action] = !(selectedStartupActions[action] ?? false)
+            if selectedStartupAction == action {
+                selectedStartupAction = nil
+            } else {
+                selectedStartupAction = action
+            }
             saveSettings()
-            tableView.reloadRows(at: [indexPath], with: .none) //TODO: pourquoi ça bouge alors qu'il n'y a pas d'animation ?
+            tableView.reloadSections(IndexSet(integer: indexPath.section), with: .none)
         default:
             break
         }

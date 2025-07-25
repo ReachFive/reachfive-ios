@@ -17,13 +17,10 @@ import UIKit
 #endif
 
 //TODO:
-// Mettre une nouvelle page dans une quatrième tabs ou dans l'app réglages:
-// - Paramétrage : scopes, origin, utilisation du refresh au démarrage ?
 // cf. wireframe de JC pour d'autres idées : https://miro.com/app/board/uXjVOMB0pG4=/
 //   - notamment : affichage des jetons quand on est connecté et demande d'introspection
 // Pouvoir sélectionner entre plusieurs confs ReachFive
 // - ensuite en choisir une avec Xcode Custom Environment Variables : https://derrickho328.medium.com/xcode-custom-environment-variables-681b5b8674ec
-// - Indiquer sur quel environnement on est connecté en l'affichant en titre de la page des fonctions
 // Essayer d'améliorer la navigation pour qu'il n'y ait pas tous ces retours en arrière inutiles quand on navigue les onglets à la main
 // Apparemment sur Mac Catalyst pour que le remplissage automatique des mots de passe fonctionne il faut mettre "l'appid" dans apple-app-site-association. cf. https://developer.apple.com/videos/play/wwdc2019/516?time=289
 // register for revocation notification dans l'app (https://developer.apple.com/videos/play/wwdc2022/10122/?time=738)
@@ -56,7 +53,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     static let providers: [ProviderCreator] = [/*GoogleProvider(variant: "one_tap"), FacebookProvider(),*/ AppleProvider(variant: "natif")]
     #if targetEnvironment(macCatalyst)
-    static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
+    static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: true))
     static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
     let reachfive = macLocal
     #else
@@ -89,6 +86,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         reachfive.addEmailVerificationCallback { result in
             print("addEmailVerificationCallback \(result)")
             NotificationCenter.default.post(name: .DidReceiveEmailVerificationCallback, object: nil, userInfo: ["result": result])
+        }
+
+        Task.detached {
+            let _ = try await self.reachfive.initialize()
+            SettingsViewController.selectedScopes = UserDefaults.standard.stringArray(forKey: "selectedScopes") ?? self.reachfive.scope
         }
 
         let initialization = reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
