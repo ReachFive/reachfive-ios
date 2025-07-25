@@ -86,8 +86,8 @@ AppDelegate.reachfive()
 
 == Explicit main thread binding
 
-Reach5, up to version 8, used the default threading behaviour from BrightFuture, which runs a block of code in the main queue if the calling method is on the main thread, and from the global queue if the caller is not on the main thread.
-*Reach5Future SDK* offers the same API as Reach5 version 8, but with the same underlying implementation as Reach5 version 9, which uses async/await.
+{company} SDK, up to version 8, used the default threading behaviour from BrightFuture, which runs a block of code in the main queue if the calling method is on the main thread, and from the global queue if the caller is not on the main thread.
+*Reach5Future SDK* offers the same API as {company} SDK version 8, but with the same underlying implementation as {company} SDK version 9, which uses async/await.
 
 This new underlying system may make different choices of execution queue in some context. Thus, you may need to add explicit thread management directives in your code, with standard tools like `@MainActor`, or with BrightFuture directives.
 
