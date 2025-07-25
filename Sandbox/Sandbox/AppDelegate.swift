@@ -88,35 +88,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             NotificationCenter.default.post(name: .DidReceiveEmailVerificationCallback, object: nil, userInfo: ["result": result])
         }
 
-        Task.detached {
+        Task {
             let _ = try await self.reachfive.initialize()
             SettingsViewController.selectedScopes = UserDefaults.standard.stringArray(forKey: "selectedScopes") ?? self.reachfive.scope
-        }
 
-        let initialization = reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
+            if let window = self.window, let rootViewController = window.rootViewController {
+                let defaults = UserDefaults.standard
+                let selectedStartupActions = defaults.string(forKey: "selectedStartupAction")
+                print("selectedStartupActions \(selectedStartupActions)")
 
-        let defaults = UserDefaults.standard
-        let selectedStartupActions = defaults.dictionary(forKey: "selectedStartupActions") as? [String: Bool] ?? [:]
-
-        if let window = self.window, let rootViewController = window.rootViewController {
-
-            if selectedStartupActions["Use refreshAccessToken at startup"] == true, let token = Self.storage.getToken() {
-                Task {
-                    await rootViewController.handleAuthToken {
-                        try await reachfive.refreshAccessToken(authToken: token)
-                    }
-                }
-            }
-
-            if #available(iOS 16, *) {
-                if selectedStartupActions["Use login with request at startup"] == true {
+                switch selectedStartupActions {
+                case "Use refreshAccessToken at startup":
                     Task {
-                        await rootViewController.handleLoginFlow {
-                            let selectedScopes = defaults.stringArray(forKey: "selectedScopes") ?? []
-                            let loginRequest = NativeLoginRequest(anchor: window, scopes: selectedScopes, origin: #function)
-                            return try await reachfive.login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey, .Password, .SignInWithApple], display: .IfImmediatelyAvailableCredentials)
+                        guard let token = Self.storage.getToken() else { return }
+                        await rootViewController.handleAuthToken {
+                            try await self.reachfive.refreshAccessToken(authToken: token)
                         }
                     }
+                case "Use login with request at startup":
+                    if #available(iOS 16, *) {
+                        Task {
+                            await rootViewController.handleLoginFlow {
+                                let loginRequest = NativeLoginRequest(anchor: window, scopes: SettingsViewController.selectedScopes, origin: #function)
+                                return try await self.reachfive.login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey, .Password, .SignInWithApple], display: .IfImmediatelyAvailableCredentials)
+                            }
+                        }
+                    }
+                default: break
                 }
             }
         }
@@ -134,7 +132,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
-        return initialization
+        return reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {

@@ -31,6 +31,9 @@ class SettingsViewController: UIViewController {
         loadSettings()
         let cookiesHeaderNib = UINib(nibName: "EditableSectionHeaderView", bundle: nil)
         tableView.register(cookiesHeaderNib, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsScopeCell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsStartupCell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsCookieCell")
 
         let config = AppDelegate.reachfive().sdkConfig
         environmentDomain.text = config.domain
@@ -78,7 +81,7 @@ class SettingsViewController: UIViewController {
             self.tableView.reloadSections(IndexSet(integer: Section.scopes.rawValue), with: .automatic)
         }
     }
-    
+
     @objc func switchChanged(_ sender: UISwitch) {
         let scope = availableScopes[sender.tag]
         if sender.isOn {
@@ -123,27 +126,33 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.selectionStyle = .none
+        let cellIdentifier = switch indexPath.section {
+        case Section.scopes.rawValue: "settingsScopeCell"
+        case Section.startupActions.rawValue: "settingsStartupCell"
+        case Section.cookies.rawValue: "settingsCookieCell"
+        default: "cell"
+        }
+
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
         guard let section = Section(rawValue: indexPath.section) else { return cell }
 
         switch section {
         case .scopes:
+            cell.selectionStyle = .none
             let scope = availableScopes[indexPath.row]
             cell.textLabel?.text = scope
-            
+
             let switchView = UISwitch(frame: .zero)
             switchView.setOn(SettingsViewController.selectedScopes.contains(scope), animated: false)
             switchView.tag = indexPath.row
             switchView.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
-            
+
             cell.accessoryView = switchView
         case .startupActions:
             let action = startupActions[indexPath.row]
             cell.textLabel?.text = action
             cell.accessoryType = selectedStartupAction == action ? .checkmark : .none
         case .cookies:
-            //TODO: pourquoi le cookie accessoryType.checkmark change de statut à chaque fois qu'on voit la page ?
             if cookies.isEmpty {
                 cell.textLabel?.text = "No cookies found."
             } else {
