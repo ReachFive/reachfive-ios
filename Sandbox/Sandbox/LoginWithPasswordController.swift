@@ -66,6 +66,17 @@ class LoginWithPasswordController: UIViewController {
             }
         }
     }
+    
+    @objc func switchChanged(_ sender: UISwitch) {
+        let scope = availableScopes[sender.tag]
+        if sender.isOn {
+            if !selectedScopes.contains(scope) {
+                selectedScopes.append(scope)
+            }
+        } else {
+            selectedScopes.removeAll { $0 == scope }
+        }
+    }
 }
 
 extension LoginWithPasswordController: UITableViewDataSource {
@@ -77,7 +88,15 @@ extension LoginWithPasswordController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "scopeCell", for: indexPath)
         let scope = availableScopes[indexPath.row]
         cell.textLabel?.text = scope
-        cell.accessoryType = selectedScopes.contains(scope) ? .checkmark : .none
+        cell.selectionStyle = .none
+        
+        let switchView = UISwitch(frame: .zero)
+        switchView.setOn(selectedScopes.contains(scope), animated: false)
+        switchView.tag = indexPath.row
+        switchView.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
+        
+        cell.accessoryView = switchView
+        
         return cell
     }
 
@@ -90,12 +109,6 @@ extension LoginWithPasswordController: UITableViewDelegate {
 
     //TODO: select all/none
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let scope = availableScopes[indexPath.row]
-        if let index = selectedScopes.firstIndex(of: scope) {
-            selectedScopes.remove(at: index)
-        } else {
-            selectedScopes.append(scope)
-        }
-        tableView.reloadRows(at: [indexPath], with: .automatic)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }

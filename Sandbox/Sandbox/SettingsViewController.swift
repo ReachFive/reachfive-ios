@@ -78,6 +78,18 @@ class SettingsViewController: UIViewController {
             self.tableView.reloadSections(IndexSet(integer: Section.scopes.rawValue), with: .automatic)
         }
     }
+    
+    @objc func switchChanged(_ sender: UISwitch) {
+        let scope = availableScopes[sender.tag]
+        if sender.isOn {
+            if !SettingsViewController.selectedScopes.contains(scope) {
+                SettingsViewController.selectedScopes.append(scope)
+            }
+        } else {
+            SettingsViewController.selectedScopes.removeAll { $0 == scope }
+        }
+        saveSettings()
+    }
 }
 
 extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
@@ -119,7 +131,13 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         case .scopes:
             let scope = availableScopes[indexPath.row]
             cell.textLabel?.text = scope
-            cell.accessoryType = SettingsViewController.selectedScopes.contains(scope) ? .checkmark : .none
+            
+            let switchView = UISwitch(frame: .zero)
+            switchView.setOn(SettingsViewController.selectedScopes.contains(scope), animated: false)
+            switchView.tag = indexPath.row
+            switchView.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
+            
+            cell.accessoryView = switchView
         case .startupActions:
             let action = startupActions[indexPath.row]
             cell.textLabel?.text = action
@@ -137,18 +155,12 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         guard let section = Section(rawValue: indexPath.section) else { return }
 
         switch section {
         case .scopes:
-            let scope = availableScopes[indexPath.row]
-            if let index = SettingsViewController.selectedScopes.firstIndex(of: scope) {
-                SettingsViewController.selectedScopes.remove(at: index)
-            } else {
-                SettingsViewController.selectedScopes.append(scope)
-            }
-            saveSettings()
-            tableView.reloadRows(at: [indexPath], with: .automatic)
+            break
         case .startupActions:
             let action = startupActions[indexPath.row]
             if selectedStartupAction == action {
