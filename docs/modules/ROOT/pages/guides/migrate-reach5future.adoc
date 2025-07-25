@@ -86,28 +86,23 @@ AppDelegate.reachfive()
 
 == Explicit main thread binding
 
-Unlike Swift's native concurrency, where thread management is explicit, BrightFutures often abstracts thread management.
-However, when using the *Reach5Future SDK* for operations that update UI elements (e.g., displaying a profile in `goToProfile`), you may need to explicitly ensure these updates occur on the main thread using tools like @MainActor to avoid crashes or UI hangs.
+Reach5, up to version 8, used the default threading behaviour from BrightFuture, which runs a block of code in the main queue if the calling method is on the main thread, and from the global queue if the caller is not on the main thread.
+*Reach5Future SDK* offers the same API as Reach5 version 8, but with the same underlying implementation as Reach5 version 9, which uses async/await.
+
+This new underlying system may make different choices of execution queue in some context. Thus, you may need to add explicit thread management directives in your code, with standard tools like `@MainActor`, or with BrightFuture directives.
 
 .Example
 [source,swift]
 ----
-AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(
-    state: "zf3ifjfmdkj",
-    nonce: "n-0S6_PzA3Ze",
-    scope: ["openid", "profile", "email"],
-    presentationContextProvider: self
-))
-.onSuccess { authToken in
-    DispatchQueue.main.async {
-        goToProfile(authToken) // Ensure UI update on main thread
+let nativeRequest = NativeLoginRequest(anchor: window, origin: "Password Manager")
+AppDelegate.reachfive()
+    .login(withRequest: nativeRequest, usingModalAuthorizationFor: [.Password], display: .Always)
+    .onSuccess(DispatchQueue.main.context) { loginFlow in
+        self.handleLoginFlow(flow: loginFlow) // update the UI, we're on the main thread
     }
-}
-.onFailure { error in
-    DispatchQueue.main.async {
-        print("Error: \((error as? ReachFiveError)?.localizedDescription ?? error.localizedDescription)")
+    .onFailure(DispatchQueue.global().context) { error in
+        print(error.message()) // not on main thread
     }
-}
 ----
 
 == Mixed approaches
@@ -119,45 +114,34 @@ You can call `Future`-based methods from the *Reach5Future SDK* alongside `async
 .Example
 [source,swift]
 ----
-// Using Reach5Future SDK with BrightFutures
-AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(
-    state: "zf3ifjfmdkj",
-    nonce: "n-0S6_PzA3Ze",
-    scope: ["openid", "profile", "email"],
-    presentationContextProvider: self
-))
-.onSuccess { authToken in
-    DispatchQueue.main.async {
-        goToProfile(authToken) // Ensure UI update on main thread
+@IBAction func login(_ sender: Any) {
+    let password = …
+    let username = …
+
+    // Calling an async method
+    guard password.isEmpty else {
+        Task { await loginWithPassword(username: username, password: password) }
+        return
     }
-}
-.onFailure { error in
-    DispatchQueue.main.async {
-        print("Error: \((error as? ReachFiveError)?.localizedDescription ?? error.localizedDescription)")
+
+    // Using Reach5Future SDK with BrightFutures
+    let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
+    AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+    .onSuccess(callback: handleLoginFlow)
+    .onFailure { error in
+        presentErrorAlert(title: "Login failed", error.message())
     }
 }
 
-// Using main ReachFive SDK with async throws and do-catch
-do {
-    let authToken = try await AppDelegate.reachfive().webviewLogin(
-        WebviewLoginRequest(
-            state: "zf3ifjfmdkj",
-            nonce: "n-0S6_PzA3Ze",
-            scope: ["openid", "profile", "email"],
-            presentationContextProvider: self
-        )
-    )
-    // Handle the successful authentication token
-    Task { @MainActor in
-        goToProfile(authToken) // Ensure UI update on main thread
-    }
-} catch {
-    // Handle the error
-    Task { @MainActor in
-        print("Error: \(error.localizedDescription)")
-        AppDelegate.storage.removeToken()
+// Using main ReachFive SDK with async/await
+func loginWithPassword(username: String, password: String) async {
+    let origin = "DemoController.loginWithPassword"
+    await handleLoginFlow {
+        if username.contains("@") {
+            try await AppDelegate.reachfive().loginWithPassword(email: username, password: password, origin: origin)
+        } else {
+            try await AppDelegate.reachfive().loginWithPassword(phoneNumber: username, password: password, origin: origin)
+        }
     }
 }
 ----
-
-[TBD by developer: Confirm whether specific methods in Reach5Future SDK differ from the main SDK or require unique handling when mixing with async/await.]
