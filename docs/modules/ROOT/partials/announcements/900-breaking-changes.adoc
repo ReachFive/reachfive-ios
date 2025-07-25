@@ -1,0 +1,31 @@
+= Breaking changes for `iOS 9.0.0`
+
+There are several updates with our iOS SDK release that are considered breaking due to the migration from BrightFutures to Swift's native concurrency. 
+Read the following for an overview of the changes.
+
+[discrete]
+== Swift concurrency or Reach5Future SDK
+
+* The main {company} iOS SDK now uses `async throws` and `do-catch` for asynchronous operations.
++
+See xref:guides/migrate-futures.adoc[] for details on migrating from BrightFutures to Swift's native concurrency.
+* We have introduced the *Reach5Future SDK* compatibility bridge to maintain support for BrightFutures-based methods, allowing customers to continue using `Future` without immediate migration.
++
+See xref:guides/migrate-reach5future.adoc[] for details on using the *Reach5Future SDK*.
+
+You should choose between integrating the main SDK (Swift concurrency) or the *Reach5Future SDK* (BrightFutures compatibility) based on your project's needs.
+
+[discrete]
+== `ReachFiveError.message()` is deprecated
+
+* The `ReachFiveError.message()` method is deprecated in both the main SDK and *Reach5Future SDK*.
+* Use `Error.localizedDescription` or cast errors to `ReachFiveError` to access localized error descriptions in the `catch` clause or `.onFailure`.
+
+[discrete]
+== Integration checklist
+
+[%interactive]
+* [ ] Choose your SDK
+* [ ] Update error handling
+* [ ] Ensure UI updates (e.g., in `goToProfile`) are performed on the main thread.
+* [ ] Check compilation: For *Reach5Future SDK*, explicitly specify return types in nested `.map` or `.flatMap` callbacks to avoid compilation errors.

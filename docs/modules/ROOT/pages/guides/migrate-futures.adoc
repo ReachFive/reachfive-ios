@@ -9,7 +9,7 @@ The `.onSuccess` and `.onFailure` methods are one of the main ways to handle suc
 
 BrightFutures development stopped due to Swift's native concurrency features (see link:https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/[Swift docs: Concurrency^]), which offer a standardized alternative for asynchronous operations.
 
-BrightFutures was used for asynchronous operations like `webviewLogin`, which initiates a web-based login flow and returns an authentication token or a {company} error.
+BrightFutures was used for asynchronous operations like `refreshAccessToken`, which uses exchange a refresh token and returns an authentication token or a {company} error.
 
 
 The _Reach5Future SDK_ will be released to maintain compatibility with BrightFutures' `Future` for existing users.
@@ -20,12 +20,12 @@ The main {company} iOS SDK will adopt `async`/`await` for future development.
 == Using `async throws` for Asynchronous Operations
 
 Swift's native concurrency introduces `async throws` to declare functions that are both asynchronous and capable of throwing errors.
-For example, the {company} SDK's `webviewLogin` and `refreshAccessToken` methods are declared as:
+For example, the {company} SDK's `refreshAccessToken` and `registerNewPasskey` methods are declared as:
 
 [source,swift]
 ----
-func webviewLogin(_ request: WebviewLoginRequest) async throws -> AuthToken <1>
-func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken <2>
+func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken <1>
+func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws <2>
 ----
 <1> The `async` keyword indicates the function performs asynchronous work (e.g., network requests), requiring `await` when called.
 <2> The `throws` keyword means it may throw an error, usually a `ReachFiveError`, requiring `try` within a `do`/`catch` block.
@@ -38,9 +38,9 @@ Swift's native concurrency uses asynchronous methods, with `do-catch` statements
 The `do` block processes successful results (like `.onSuccess`), and the `catch` block handles errors (like `.onFailure`).
 When calling an `async throws` function, `try await` is used within a `do` clause to capture the result or throw an error to the `catch` clause.
 
-=== Example: Migrating `webviewLogin`
+=== Example: Migrating `refreshAccessToken`
 
-Below is the `webviewLogin` method in BrightFutures and its Swift concurrency equivalent, using `async throws` and `do-catch`.
+Below is the `refreshAccessToken` method in BrightFutures and its Swift concurrency equivalent, using `async throws` and `do-catch`.
 
 [tabs]
 ====
@@ -49,18 +49,16 @@ BrightFutures::
 --
 [source,swift]
 ----
-AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(
-    state: "zf3ifjfmdkj",
-    nonce: "n-0S6_PzA3Ze",
-    scope: ["openid", "profile", "email"],
-    presentationContextProvider: self
-    ))
-    .onSuccess { authToken in <1>
+AppDelegate.reachfive()
+    .refreshAccessToken(authToken: staleToken)
+    .onSuccess { freshToken in <1>
         // Use the profile's authentication token
-        goToProfile(authToken)
+        goToProfile(freshToken)
     }
     .onFailure { error in <1>
-    // Return a ReachFive error
+        // The error has type ReachFiveError
+        print(error.message())
+        AppDelegate.storage.removeToken()
     }
 ----
 <1> This uses `.onSuccess` to handle the `AuthToken` and `.onFailure` to manage errors.
@@ -71,35 +69,30 @@ Swift Concurrency::
 [source,swift]
 ----
 do { <1>
-    let authToken = try await AppDelegate.reachfive().webviewLogin(
-        WebviewLoginRequest(
-            state: "zf3ifjfmdkj",
-            nonce: "n-0S6_PzA3Ze",
-            scope: ["openid", "profile", "email"],
-            presentationContextProvider: self
-        )
-    )
-    // Handle the successful authentication token (like .onSuccess)
+    let freshToken = try await AppDelegate.reachfive().refreshAccessToken(authToken: staleToken)
     Task { @MainActor in <2>
-        goToProfile(authToken)
+        goToProfile(freshToken)
     }
 } catch { <3>
-// Handle the error (like .onFailure)
+    // The error has type Error
+    print(error.localizedDescription) <4>
+    AppDelegate.storage.removeToken()
 }
 ----
 <1> The `do` block uses `try await` to call `async throws` methods, handling the successful `AuthToken` and navigation to the profile page.
 <2> `Task { @MainActor in ... }` creates an asynchronous context on the main thread, ensuring UI updates are safe.
 This is required when calling `async` methods from a synchronous context, such as a UIKit or AppKit event handler, and when you need to update UI elements.
-<3> The `catch` block manages errors from any `async throws` method.
+<3> The `catch` block manages errors from any `throws` method.
+<4> Migrate usage of ReachFiveError.message() to Error.localizedDescription, or cast the error
 --
 ====
 
 == Thread Management for UI Operations
 
-When using Swift concurrency, asynchronous operations like `webviewLogin` must be wrapped in a `Task` when called from a synchronous context, such as a UIKit or AppKit event handler.
-For operations that update UI elements (e.g., displaying the profile in `goToProfile`), the `Task` should be created with `@MainActor` to ensure thread safety, as UI updates in iOS must occur on the main thread.
+When using Swift concurrency, asynchronous operations like `refreshAccessToken` must be wrapped in a `Task` when called from a synchronous context, such as a UIKit or AppKit event handler.
+For operations that update UI elements (e.g., displaying the profile in `goToProfile`), the `Task` should be annotated with `@MainActor` to ensure thread safety, as UI updates in iOS must occur on the main thread.
 
-Unlike BrightFutures, where thread management was often abstracted by the library, Swift concurrency requires integrators to be more explicit about threading.
+Unlike BrightFutures, which use a default threading behaviour where methods that started from the main thread would execute all their asynchronous operations also in the main thread, Swift concurrency uses background threads a lot more. This requires integrators to be more explicit about threading.
 The example above uses `Task { @MainActor in ... }` to ensure `goToProfile` occur on the main thread, aligning with the `async throws` pattern.
 
 == Key Differences and Benefits
