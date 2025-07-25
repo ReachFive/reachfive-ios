@@ -60,7 +60,8 @@ AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(
         goToProfile(authToken)
     }
     .onFailure { error in <1>
-    // Return a ReachFive error
+    // The error has type ReachFiveError
+        print(error.message())
     }
 ----
 <1> This uses `.onSuccess` to handle the `AuthToken` and `.onFailure` to manage errors.
@@ -84,13 +85,15 @@ do { <1>
         goToProfile(authToken)
     }
 } catch { <3>
-// Handle the error (like .onFailure)
+    // The error has type Error
+    print(error.localizedDescription) <4>
 }
 ----
 <1> The `do` block uses `try await` to call `async throws` methods, handling the successful `AuthToken` and navigation to the profile page.
 <2> `Task { @MainActor in ... }` creates an asynchronous context on the main thread, ensuring UI updates are safe.
 This is required when calling `async` methods from a synchronous context, such as a UIKit or AppKit event handler, and when you need to update UI elements.
 <3> The `catch` block manages errors from any `async throws` method.
+<4> Migrate usage of ReachFiveError.message() to Error.localizedDescription, or cast the error
 --
 ====
 
