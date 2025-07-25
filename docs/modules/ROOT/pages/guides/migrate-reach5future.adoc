@@ -1,0 +1,141 @@
+= Migrating to the Reach5Future SDK compatibility bridge
+
+The *Reach5Future SDK* is a compatibility bridge for our iOS SDK customers who rely on BrightFutures for asynchronous operations and are not ready to adopt Swift's native concurrency features. 
+It ensures continued support for `Future`-based methods like `.onSuccess` and `.onFailure`, maintaining compatibility with existing codebases. 
+
+Our main iOS SDK is transitioning to `async throws` and `do-catch` for future development, offering a modern, standardized approach to asynchronous programming. 
+
+The *Reach5Future SDK* allows a gradual migration, enabling customers to maintain their BrightFutures-based implementations while optionally integrating Swift concurrency in the same project.
+
+== Installation Instructions
+
+To use the *Reach5Future SDK*, integrate it into your project alongside or in place of the main {company} iOS SDK. 
+The compatibility bridge is provided as a separate module to ensure BrightFutures-based methods remain functional.
+
+[source]
+----
+[TBD by developer: Specify installation steps, e.g., adding Reach5Future SDK via CocoaPods, Swift Package Manager, or other dependency manager, including version requirements and module import instructions.]
+----
+
+IMPORTANT: Ensure your project includes BrightFutures as a dependency, as the *Reach5Future SDK* relies on it for `Future`-based operations.
+
+== Handling compilation errors
+
+When using the *Reach5Future SDK*, you may encounter compilation errors related to ambiguous return types in callbacks, particularly with `.onSuccess` and `.onFailure`. 
+To resolve this, explicitly specify the return type of the callback methods.
+
+For example, when calling `webviewLogin`, annotate the callback parameters and return type:
+
+[source,swift]
+----
+AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(
+    state: "zf3ifjfmdkj",
+    nonce: "n-0S6_PzA3Ze",
+    scope: ["openid", "profile", "email"],
+    presentationContextProvider: self
+))
+.onSuccess { (authToken: AuthToken) -> Void in
+    // Use the profile's authentication token
+}
+.onFailure { (error: ReachFiveError) -> Void in
+    // Handle ReachFive error
+}
+----
+
+[TBD by developer: Provide specific examples of common compilation errors, such as exact error messages and their resolutions, or additional method signatures requiring explicit types.]
+
+== Explicit main thread binding
+
+Unlike Swift's native concurrency, where thread management is explicit, BrightFutures often abstracts thread management. 
+However, when using the *Reach5Future SDK* for operations that update UI elements (e.g., displaying a profile in `goToProfile`), you must explicitly ensure these updates occur on the main thread using `DispatchQueue.main.async` to avoid crashes or undefined behavior.
+
+.Example
+[source,swift]
+----
+AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(
+    state: "zf3ifjfmdkj",
+    nonce: "n-0S6_PzA3Ze",
+    scope: ["openid", "profile", "email"],
+    presentationContextProvider: self
+))
+.onSuccess { authToken in
+    DispatchQueue.main.async {
+        goToProfile(authToken) // Ensure UI update on main thread
+    }
+}
+.onFailure { error in
+    DispatchQueue.main.async {
+        print("Error: \((error as? ReachFiveError)?.localizedDescription ?? error.localizedDescription)")
+    }
+}
+----
+
+== Migrating `ReachFiveError` handling
+
+In the *Reach5Future SDK*, the `ReachFiveError.message()` method is deprecated in favor of `ReachFiveError.localizedDescription`, which provides a localized, user-friendly error description. 
+
+When handling errors in `.onFailure`, update your code to use `localizedDescription` or cast the error to `ReachFiveError`.
+
+.Example
+[source,swift]
+----
+.onFailure { error in
+    DispatchQueue.main.async {
+        let message = (error as? ReachFiveError)?.localizedDescription ?? error.localizedDescription
+        print("Error: \(message)")
+        AppDelegate.storage.removeToken()
+    }
+}
+----
+
+== Mixed approaches
+
+The *Reach5Future SDK* allows mixing BrightFutures' `Future`-based methods with Swift's `async throws` and `do-catch` in the same file, enabling a gradual migration to our main iOS SDK's concurrency model. 
+
+You can call `Future`-based methods from the *Reach5Future SDK* alongside `async throws` methods from the main SDK, wrapping `async` calls in a `Task` with `@MainActor` for synchronous contexts and UI updates.
+
+.Example
+[source,swift]
+----
+// Using Reach5Future SDK with BrightFutures
+AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(
+    state: "zf3ifjfmdkj",
+    nonce: "n-0S6_PzA3Ze",
+    scope: ["openid", "profile", "email"],
+    presentationContextProvider: self
+))
+.onSuccess { authToken in
+    DispatchQueue.main.async {
+        goToProfile(authToken) // Ensure UI update on main thread
+    }
+}
+.onFailure { error in
+    DispatchQueue.main.async {
+        print("Error: \((error as? ReachFiveError)?.localizedDescription ?? error.localizedDescription)")
+    }
+}
+
+// Using main ReachFive SDK with async throws and do-catch
+do {
+    let authToken = try await AppDelegate.reachfive().webviewLogin(
+        WebviewLoginRequest(
+            state: "zf3ifjfmdkj",
+            nonce: "n-0S6_PzA3Ze",
+            scope: ["openid", "profile", "email"],
+            presentationContextProvider: self
+        )
+    )
+    // Handle the successful authentication token
+    Task { @MainActor in
+        goToProfile(authToken) // Ensure UI update on main thread
+    }
+} catch {
+    // Handle the error
+    Task { @MainActor in
+        print("Error: \(error.localizedDescription)")
+        AppDelegate.storage.removeToken()
+    }
+}
+----
+
+[TBD by developer: Confirm whether specific methods in Reach5Future SDK differ from the main SDK or require unique handling when mixing with async/await.]

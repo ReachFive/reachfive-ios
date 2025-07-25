@@ -8,6 +8,7 @@
 ** xref:guides/account-recovery.adoc[]
 ** xref:guides/passkeys.adoc[]
 ** xref:guides/migrate-futures.adoc[]
+** xref:guides/migrate-reach5future.adoc[]
 
 .Configuration icon:cogs[]
 ** `application`()
