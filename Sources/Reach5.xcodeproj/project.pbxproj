@@ -51,7 +51,6 @@
 		34689A9E22CE4666002970F9 /* VerifyPhoneNumberRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34689A9D22CE4666002970F9 /* VerifyPhoneNumberRequest.swift */; };
 		34689AA122CE5D08002970F9 /* UpdateEmailRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34689AA022CE5D08002970F9 /* UpdateEmailRequest.swift */; };
 		3474D28B22D32F3A005112C1 /* RequestPasswordResetRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3474D28A22D32F3A005112C1 /* RequestPasswordResetRequest.swift */; };
-		347FDB47229BE84500660687 /* Reach5.h in Headers */ = {isa = PBXBuildFile; fileRef = 347FDB45229BE84500660687 /* Reach5.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		347FDB54229BE8F800660687 /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347FDB53229BE8F800660687 /* Provider.swift */; };
 		347FDB65229C02A800660687 /* SdkConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347FDB64229C02A800660687 /* SdkConfig.swift */; };
 		347FDB67229C02FE00660687 /* ReachFive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347FDB66229C02FE00660687 /* ReachFive.swift */; };
@@ -148,7 +147,6 @@
 		34689AA022CE5D08002970F9 /* UpdateEmailRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateEmailRequest.swift; sourceTree = "<group>"; };
 		3474D28A22D32F3A005112C1 /* RequestPasswordResetRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestPasswordResetRequest.swift; sourceTree = "<group>"; };
 		347FDB42229BE84500660687 /* Reach5.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Reach5.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		347FDB45229BE84500660687 /* Reach5.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Reach5.h; sourceTree = "<group>"; };
 		347FDB46229BE84500660687 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		347FDB53229BE8F800660687 /* Provider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
 		347FDB64229C02A800660687 /* SdkConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdkConfig.swift; sourceTree = "<group>"; };
@@ -304,7 +302,6 @@
 		347FDB44229BE84500660687 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				347FDB45229BE84500660687 /* Reach5.h */,
 				347FDB46229BE84500660687 /* Info.plist */,
 				2A2D5B102BA4C59300245439 /* PrivacyInfo.xcprivacy */,
 				34173218229D801500681CFD /* Classes */,
@@ -419,7 +416,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				347FDB47229BE84500660687 /* Reach5.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
