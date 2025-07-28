@@ -3,6 +3,17 @@
 
 ## Unreleased
 
+## v9.0.0
+### Breaking changes
+- Use Swift's native concurrency model instead of Futures. See the migration guide at https://developer.reachfive.com/sdk-ios/guides/migrate-futures.html
+- New SDK `Reach5Future` to enable a gradual migration. See the use guide at https://developer.reachfive.com/sdk-ios/guides/migrate-reach5future.html
+
+### New features
+- New option to view the network activity as logs in the console. This can be enabled by setting the `loggingEnabled` property of the new `SdkInternalConfig` to `true`.
+
+### Other changes
+- The other dependencies have also been removed, notably Alamofire. The SDK now uses the native `URLSession` for all network calls.
+
 ## v8.2.0
 ### New features
 - Add method `sendEmailVerification` and `verifyEmail` to verify email identifier

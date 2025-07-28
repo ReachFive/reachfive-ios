@@ -12,7 +12,8 @@ let package = Package(
     targets: [
         .target(
             name: "Reach5",
-            resources: [.copy("Core/PrivacyInfo.xcprivacy")]
+            path: "Sources/Core",
+            resources: [.copy("PrivacyInfo.xcprivacy")]
         )
     ]
 )
