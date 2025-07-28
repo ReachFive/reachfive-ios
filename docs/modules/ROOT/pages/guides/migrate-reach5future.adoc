@@ -1,0 +1,147 @@
+= Migrating to the Reach5Future SDK compatibility bridge
+
+The *Reach5Future SDK* is a compatibility bridge for our iOS SDK customers who rely on BrightFutures for asynchronous operations and want to adopt Swift's native concurrency features one step at a time.
+It ensures continued support for `Future`-based methods like `.onSuccess` and `.onFailure`, maintaining compatibility with existing codebases.
+
+Our main iOS SDK is transitioning to `async throws` for future development, offering a modern, standardized approach to asynchronous programming.
+
+The *Reach5Future SDK* allows a gradual migration, enabling customers to maintain their BrightFutures-based implementations while optionally integrating Swift concurrency in the same project.
+
+== Installation Instructions
+
+To use the *Reach5Future SDK*, integrate it into your project alongside or in place of the main {company} iOS SDK.
+The compatibility bridge is provided as a separate module to ensure BrightFutures-based methods remain functional.
+
+[source]
+==== Installation
+
+[tabs]
+====
+Cocoapods::
++
+--
+
+. Add this line to your `Podfile` file, replacing `x` with the latest version:
++
+[source]
+----
+pod 'Reach5Future', '~> x'
+----
+
+. Then run:
++
+[source, javascript]
+----
+pod install
+----
+--
+Swift Package Manager::
++
+--
+Add the package dependency with XCode using this package URL:
+
+[source]
+----
+https://github.com/ReachFive/reachfive-ios-future.git
+----
+
+Or directly add this to the dependencies in `Package.swift`
+
+[source,swift,subs="attributes"]
+----
+dependencies: [
+    .package(url: "https://github.com/ReachFive/reachfive-ios-future.git", .upToNextMajor(from: "x"))
+]
+----
+
+--
+====
+
+== Handling compilation errors
+
+When using the *Reach5Future SDK*, you may encounter compilation errors related to ambiguous return types in callbacks, particularly in nested `.map` and `.flatMap`.
+To resolve this, explicitly specify the return type of the callback methods.
+
+In this example, we try to register a new credential with a potentially stale token, and refresh it if necessary.
+
+[source,swift]
+----
+AppDelegate.reachfive()
+    .mfaStart(registering: credential, authToken: authToken)
+    .recoverWith { error in
+        guard case .AuthFailure(_, let apiError) = error, apiError?.errorMessageKey == "error.accessToken.freshness"
+        else {
+            return Future(error: error)
+        }
+
+        // Automatically refresh the token if it is stale
+        return AppDelegate.reachfive()
+            .refreshAccessToken(authToken: authToken).flatMap { (freshToken: AuthToken) -> Future<MfaStartRegistrationResponse, ReachFiveError> in <1>
+                AppDelegate.storage.setToken(freshToken)
+                return AppDelegate.reachfive().mfaStart(registering: credential, authToken: freshToken)
+            }
+    }
+----
+<1> Specify the return type explicitly to resolve the potential ambiguity in the callback.
+
+== Explicit main thread binding
+
+{company} SDK, up to version 8, used the default threading behaviour from BrightFuture, which runs a block of code in the main queue if the calling method is on the main thread, and from the global queue if the caller is not on the main thread.
+*Reach5Future SDK* offers the same API as {company} SDK version 8, but with the same underlying implementation as {company} SDK version 9, which uses async/await.
+
+This new underlying system may make different choices of execution queue in some context. Thus, you may need to add explicit thread management directives in your code, with standard tools like `@MainActor`, or with BrightFuture directives.
+
+.Example
+[source,swift]
+----
+let nativeRequest = NativeLoginRequest(anchor: window, origin: "Password Manager")
+AppDelegate.reachfive()
+    .login(withRequest: nativeRequest, usingModalAuthorizationFor: [.Password], display: .Always)
+    .onSuccess(DispatchQueue.main.context) { loginFlow in
+        self.handleLoginFlow(flow: loginFlow) // update the UI, we're on the main thread
+    }
+    .onFailure(DispatchQueue.global().context) { error in
+        print(error.message()) // not on main thread
+    }
+----
+
+== Mixed approaches
+
+The *Reach5Future SDK* allows mixing BrightFutures' `Future`-based methods with Swift's `async throws` and `do-catch` in the same file, enabling a gradual migration to our main iOS SDK's concurrency model.
+
+You can call `Future`-based methods from the *Reach5Future SDK* alongside `async throws` methods from the main SDK, wrapping `async` calls in a `Task` with `@MainActor` for synchronous contexts and UI updates.
+
+.Example
+[source,swift]
+----
+@IBAction func login(_ sender: Any) {
+    let password = …
+    let username = …
+
+    // Calling an async method
+    guard password.isEmpty else {
+        Task { await loginWithPassword(username: username, password: password) }
+        return
+    }
+
+    // Using Reach5Future SDK with BrightFutures
+    let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
+    AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+    .onSuccess(callback: handleLoginFlow)
+    .onFailure { error in
+        presentErrorAlert(title: "Login failed", error.message())
+    }
+}
+
+// Using main ReachFive SDK with async/await
+func loginWithPassword(username: String, password: String) async {
+    let origin = "DemoController.loginWithPassword"
+    await handleLoginFlow {
+        if username.contains("@") {
+            try await AppDelegate.reachfive().loginWithPassword(email: username, password: password, origin: origin)
+        } else {
+            try await AppDelegate.reachfive().loginWithPassword(phoneNumber: username, password: password, origin: origin)
+        }
+    }
+}
+----
