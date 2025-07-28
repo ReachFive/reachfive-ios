@@ -37,7 +37,8 @@ include::partial$params.adoc[tag="profile"]
 
 == Response
 
-Type: `<<<Profile>>, <<ReachFiveError>>>`
+* *Type*: <<Profile>>
+* *Error*: <<ReachFiveError>>
 
 Return the profile with the updated data. If parameters are not valid or if the `full_write` scope is missing, the promise will be rejected and will return a `ReachFiveError`.
 

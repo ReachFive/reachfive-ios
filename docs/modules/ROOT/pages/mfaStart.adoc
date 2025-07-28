@@ -61,7 +61,8 @@ include::partial$params.adoc[tags="authtoken,Credential"]
 
 == Response
 
-`Future<MfaStartRegistrationResponse, ReachFiveError>`
+* *Type*: MfaStartRegistrationResponse
+* *Error*: <<ReachFiveError>>
 
 === Credential verified
 

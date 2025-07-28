@@ -31,7 +31,7 @@ include::partial$params.adoc[tags="authtoken"]
 
 == Response
 
-`Future<Void, ReachFiveError>`
+*Error*: <<ReachFiveError>>
 
 === Error response
 

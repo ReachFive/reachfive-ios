@@ -34,7 +34,8 @@ include::partial$params.adoc[tag="withRequest"]
 
 == Response
 
-Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+* *Type*: <<<AuthToken>>
+* *Error*: <<ReachFiveError>>
 
 This method returns the authorization token when successfully logged in or a {company} error if unsuccessful.
 

@@ -29,6 +29,6 @@ include::partial$params.adoc[tags="webAuthnId,authtoken"]
 
 == Response
 
-Type: `Future<(), ReachFiveError>`
+*Error*: <<ReachFiveError>>
 
 include::partial$models.adoc[tag=reachfiveerror]

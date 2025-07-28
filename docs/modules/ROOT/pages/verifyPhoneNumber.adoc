@@ -42,7 +42,7 @@ include::partial$params.adoc[tag="verificationcode"]
 
 == Response
 
-Type: `Future<(), <<ReachFiveError>>>`
+*Error*: <<ReachFiveError>>
 
 If the `full_write` scope is missing or if the verification code is incorrect, the promise will be rejected and will return a `ReachFiveError`.
 

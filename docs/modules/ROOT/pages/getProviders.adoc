@@ -26,6 +26,6 @@ include::example${docname}.swift[]
 
 == Response
 
-Type: `<<Provider, Provider[]>>`
+*Type*: <<Provider, Provider[]>>
 
 include::partial$models.adoc[tag=provider]

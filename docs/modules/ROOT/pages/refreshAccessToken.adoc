@@ -39,7 +39,8 @@ include::partial$params.adoc[tag="authtoken"]
 
 == Response
 
-Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+* *Type*: <<AuthToken>>
+* *Error*: <<ReachFiveError>>
 
 If the credentials are valid, the promise will return the profile's authentication token. Otherwise it will be rejected and will return a `ReachFiveError`.
 

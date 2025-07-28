@@ -33,7 +33,8 @@ include::partial$params.adoc[tag="authtoken"]
 
 == Response
 
-Type: `Future<[DeviceCredential], ReachFiveError>`
+* *Type*: [<<DeviceCredential>>]
+* *Error*: <<ReachFiveError>>
 
 It will return the list of devices credentials, otherwise you'll get a `ReachFiveError`.
 

@@ -40,15 +40,16 @@ NOTE: Both the international format and the national conventions of the account'
 
 == Response
 
-Type: `Future<<<Profile>>, <<ReachFiveError>>>`
+* *Type*: <<Profile>>
+* *Error*: <<ReachFiveError>>
 
 It will return the profile with the updated phone number.
 
 The promise will be rejected and will return a `ReachFiveError` if:
 
-- The parameters are invalid,
-- The `full_write` scope is missing,
-- The SMS template is incomplete.
+* The parameters are invalid,
+* The `full_write` scope is missing,
+* The SMS template is incomplete.
 
 include::partial$models.adoc[tag=profile]
 

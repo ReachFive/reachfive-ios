@@ -72,7 +72,8 @@ include::partial$params.adoc[tag="prefersEphemeralWebBrowserSession"]
 
 == Response
 
-Type: `Future<<<AuthToken>>, <<ReachFiveError>>>`
+* *Type*: <<AuthToken>>
+* *Error*: <<ReachFiveError>>
 
 include::partial$models.adoc[tag=authtoken]
 
