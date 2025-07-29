@@ -14,7 +14,6 @@
 		2A33F30D2A01740600D05EB1 /* LoginCustomWebviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */; };
 		2A52203B297F187D00815558 /* SandboxTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A52203A297F187D00815558 /* SandboxTabBarController.swift */; };
 		2A9C6BCA298AC2CE00BBD80F /* Pods_Sandbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E55CD881F31583F8D3480D8 /* Pods_Sandbox.framework */; };
-		2AA4B5902975B3920001747C /* DemoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA4B58F2975B3920001747C /* DemoController.swift */; };
 		2AB299ED2C0E29E300D0C5C8 /* RecoveryStartController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */; };
 		2AB299EF2C0E29F900D0C5C8 /* RecoveryEndController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */; };
 		2AB299F12C0E2AB900D0C5C8 /* RecoveryVerificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */; };
@@ -23,6 +22,7 @@
 		2AD29AB82E2ED7F100B26535 /* TrustedDeviceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */; };
 		2AD29AB92E2ED7F100B26535 /* TrustedDeviceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */; };
 		2AD29AE72E32AFA000B26535 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */; };
+		2AE326BD2E3931D1007D6763 /* DemoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE326BC2E3931D1007D6763 /* DemoController.swift */; };
 		2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFF7DE8296F1EB900514B47 /* ActionController.swift */; };
 		3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3414A7CC22DDD39C00CF393A /* ProfileController.swift */; };
 		341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341731FD229D6B6400681CFD /* AppDelegate.swift */; };
@@ -51,7 +51,6 @@
 		2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWKWebviewController.swift; sourceTree = "<group>"; };
 		2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginCustomWebviewController.swift; sourceTree = "<group>"; };
 		2A52203A297F187D00815558 /* SandboxTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxTabBarController.swift; sourceTree = "<group>"; };
-		2AA4B58F2975B3920001747C /* DemoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoController.swift; sourceTree = "<group>"; };
 		2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryStartController.swift; sourceTree = "<group>"; };
 		2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEndController.swift; sourceTree = "<group>"; };
 		2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryVerificationController.swift; sourceTree = "<group>"; };
@@ -60,6 +59,7 @@
 		2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedDeviceCell.swift; sourceTree = "<group>"; };
 		2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TrustedDeviceCell.xib; sourceTree = "<group>"; };
 		2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		2AE326BC2E3931D1007D6763 /* DemoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoController.swift; sourceTree = "<group>"; };
 		2AFF7DE8296F1EB900514B47 /* ActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionController.swift; sourceTree = "<group>"; };
 		2E55CD881F31583F8D3480D8 /* Pods_Sandbox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Sandbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3414A7CC22DDD39C00CF393A /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
@@ -95,6 +95,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2AE326BB2E39313A007D6763 /* Tabs */ = {
+			isa = PBXGroup;
+			children = (
+				2AE326BC2E3931D1007D6763 /* DemoController.swift */,
+				2AFF7DE8296F1EB900514B47 /* ActionController.swift */,
+				2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */,
+				2A52203A297F187D00815558 /* SandboxTabBarController.swift */,
+			);
+			path = Tabs;
+			sourceTree = "<group>";
+		};
 		341731F1229D6B6400681CFD = {
 			isa = PBXGroup;
 			children = (
@@ -116,11 +127,10 @@
 		341731FC229D6B6400681CFD /* Sandbox */ = {
 			isa = PBXGroup;
 			children = (
+				2AE326BB2E39313A007D6763 /* Tabs */,
 				2A18F2C4293E6C6F007C824C /* Sandbox.entitlements */,
 				34173209229D6B6400681CFD /* Info.plist */,
-				2AFF7DE8296F1EB900514B47 /* ActionController.swift */,
 				341731FD229D6B6400681CFD /* AppDelegate.swift */,
-				2AA4B58F2975B3920001747C /* DemoController.swift */,
 				2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */,
 				2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */,
 				EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */,
@@ -138,13 +148,11 @@
 				2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */,
 				2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */,
 				2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */,
-				2A52203A297F187D00815558 /* SandboxTabBarController.swift */,
 				EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */,
 				34797ABC22A9607D00ED093C /* SignupController.swift */,
 				EA91A17236291622417196AE /* SignupPasskeyController.swift */,
 				349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */,
 				2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */,
-				2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */,
 				34173204229D6B6400681CFD /* Assets.xcassets */,
 				2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */,
 				34173206229D6B6400681CFD /* LaunchScreen.storyboard */,
@@ -254,9 +262,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -308,11 +320,11 @@
 				2A1079E929721DAC00431655 /* NativePasswordController.swift in Sources */,
 				2AB299F12C0E2AB900D0C5C8 /* RecoveryVerificationController.swift in Sources */,
 				341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */,
+				2AE326BD2E3931D1007D6763 /* DemoController.swift in Sources */,
 				3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */,
 				3417FF6E22FB06E50009EC84 /* PasswordlessController.swift in Sources */,
 				EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */,
 				EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */,
-				2AA4B5902975B3920001747C /* DemoController.swift in Sources */,
 				EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */,
 				2A33F30B2A016B1D00D05EB1 /* LoginWKWebviewController.swift in Sources */,
 				99FF44322B72884800DDCAAE /* PasskeyCredentialController.swift in Sources */,
