@@ -23,6 +23,7 @@
 		2AD29AB92E2ED7F100B26535 /* TrustedDeviceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */; };
 		2AD29AE72E32AFA000B26535 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */; };
 		2AE326BD2E3931D1007D6763 /* DemoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE326BC2E3931D1007D6763 /* DemoController.swift */; };
+		2AE326C02E3932F7007D6763 /* MfaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE326BF2E3932F7007D6763 /* MfaController.swift */; };
 		2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFF7DE8296F1EB900514B47 /* ActionController.swift */; };
 		3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3414A7CC22DDD39C00CF393A /* ProfileController.swift */; };
 		341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341731FD229D6B6400681CFD /* AppDelegate.swift */; };
@@ -34,7 +35,6 @@
 		3417FF7022FB11CD0009EC84 /* LoginWithPasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */; };
 		34797ABD22A9607D00ED093C /* SignupController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34797ABC22A9607D00ED093C /* SignupController.swift */; };
 		349E16EC230BEBBF002EA06B /* UpdatePasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */; };
-		99B0FBD52B6A782D00A3E490 /* MfaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99B0FBD42B6A782D00A3E490 /* MfaController.swift */; };
 		99E4472F2B863AB300EC7559 /* ProfileContentTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */; };
 		99FF44322B72884800DDCAAE /* PasskeyCredentialController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */; };
 		EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91A17236291622417196AE /* SignupPasskeyController.swift */; };
@@ -60,6 +60,7 @@
 		2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TrustedDeviceCell.xib; sourceTree = "<group>"; };
 		2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		2AE326BC2E3931D1007D6763 /* DemoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoController.swift; sourceTree = "<group>"; };
+		2AE326BF2E3932F7007D6763 /* MfaController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MfaController.swift; sourceTree = "<group>"; };
 		2AFF7DE8296F1EB900514B47 /* ActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionController.swift; sourceTree = "<group>"; };
 		2E55CD881F31583F8D3480D8 /* Pods_Sandbox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Sandbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3414A7CC22DDD39C00CF393A /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
@@ -74,7 +75,6 @@
 		3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWithPasswordController.swift; sourceTree = "<group>"; };
 		34797ABC22A9607D00ED093C /* SignupController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupController.swift; sourceTree = "<group>"; };
 		349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePasswordController.swift; sourceTree = "<group>"; };
-		99B0FBD42B6A782D00A3E490 /* MfaController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MfaController.swift; sourceTree = "<group>"; };
 		99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContentTableView.swift; sourceTree = "<group>"; };
 		99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyCredentialController.swift; sourceTree = "<group>"; };
 		C9C16455A16CA84067D7FF45 /* Pods-Sandbox.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sandbox.debug.xcconfig"; path = "Target Support Files/Pods-Sandbox/Pods-Sandbox.debug.xcconfig"; sourceTree = "<group>"; };
@@ -98,12 +98,24 @@
 		2AE326BB2E39313A007D6763 /* Tabs */ = {
 			isa = PBXGroup;
 			children = (
-				2AE326BC2E3931D1007D6763 /* DemoController.swift */,
 				2AFF7DE8296F1EB900514B47 /* ActionController.swift */,
-				2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */,
+				2AE326BC2E3931D1007D6763 /* DemoController.swift */,
 				2A52203A297F187D00815558 /* SandboxTabBarController.swift */,
+				2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */,
+				2AE326BE2E393265007D6763 /* Profile */,
 			);
 			path = Tabs;
+			sourceTree = "<group>";
+		};
+		2AE326BE2E393265007D6763 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				2AE326BF2E3932F7007D6763 /* MfaController.swift */,
+				99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */,
+				3414A7CC22DDD39C00CF393A /* ProfileController.swift */,
+				349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */,
+			);
+			path = Profile;
 			sourceTree = "<group>";
 		};
 		341731F1229D6B6400681CFD = {
@@ -137,21 +149,17 @@
 				3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */,
 				341731FF229D6B6400681CFD /* LoginWithProvidersController.swift */,
 				2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */,
-				99B0FBD42B6A782D00A3E490 /* MfaController.swift */,
 				2A1079E829721DAC00431655 /* NativePasswordController.swift */,
 				2A0757F8296F49B10072869F /* PasskeyAutoFillController.swift */,
 				99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */,
 				2A0757FA296F69E30072869F /* PasskeyNonDiscoverableController.swift */,
 				3417FF6D22FB06E50009EC84 /* PasswordlessController.swift */,
-				99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */,
-				3414A7CC22DDD39C00CF393A /* ProfileController.swift */,
 				2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */,
 				2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */,
 				2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */,
 				EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */,
 				34797ABC22A9607D00ED093C /* SignupController.swift */,
 				EA91A17236291622417196AE /* SignupPasskeyController.swift */,
-				349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */,
 				2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */,
 				34173204229D6B6400681CFD /* Assets.xcassets */,
 				2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */,
@@ -313,11 +321,11 @@
 				349E16EC230BEBBF002EA06B /* UpdatePasswordController.swift in Sources */,
 				2A0757FB296F69E30072869F /* PasskeyNonDiscoverableController.swift in Sources */,
 				2AB299EF2C0E29F900D0C5C8 /* RecoveryEndController.swift in Sources */,
-				99B0FBD52B6A782D00A3E490 /* MfaController.swift in Sources */,
 				99E4472F2B863AB300EC7559 /* ProfileContentTableView.swift in Sources */,
 				2AB299ED2C0E29E300D0C5C8 /* RecoveryStartController.swift in Sources */,
 				2A0757F9296F49B10072869F /* PasskeyAutoFillController.swift in Sources */,
 				2A1079E929721DAC00431655 /* NativePasswordController.swift in Sources */,
+				2AE326C02E3932F7007D6763 /* MfaController.swift in Sources */,
 				2AB299F12C0E2AB900D0C5C8 /* RecoveryVerificationController.swift in Sources */,
 				341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */,
 				2AE326BD2E3931D1007D6763 /* DemoController.swift in Sources */,
