@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd Sources && pod update && cd ../..
-cd reachfive-ios/Sandbox && pod update && cd ..
+cd Sources && pod update && cd ..
+cd Sandbox && pod update && cd ..
 swift package update
