@@ -129,6 +129,19 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		2AE326C22E3933C8007D6763 /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				2A18F2C4293E6C6F007C824C /* Sandbox.entitlements */,
+				34173209229D6B6400681CFD /* Info.plist */,
+				341731FD229D6B6400681CFD /* AppDelegate.swift */,
+				34173204229D6B6400681CFD /* Assets.xcassets */,
+				34173206229D6B6400681CFD /* LaunchScreen.storyboard */,
+				34173201229D6B6400681CFD /* Main.storyboard */,
+			);
+			path = Application;
+			sourceTree = "<group>";
+		};
 		341731F1229D6B6400681CFD = {
 			isa = PBXGroup;
 			children = (
@@ -150,11 +163,9 @@
 		341731FC229D6B6400681CFD /* Sandbox */ = {
 			isa = PBXGroup;
 			children = (
+				2AE326C22E3933C8007D6763 /* Application */,
 				2AE326BB2E39313A007D6763 /* Tabs */,
 				2AE326C12E39334E007D6763 /* Views */,
-				2A18F2C4293E6C6F007C824C /* Sandbox.entitlements */,
-				34173209229D6B6400681CFD /* Info.plist */,
-				341731FD229D6B6400681CFD /* AppDelegate.swift */,
 				2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */,
 				EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */,
 				3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */,
@@ -171,9 +182,6 @@
 				EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */,
 				34797ABC22A9607D00ED093C /* SignupController.swift */,
 				EA91A17236291622417196AE /* SignupPasskeyController.swift */,
-				34173204229D6B6400681CFD /* Assets.xcassets */,
-				34173206229D6B6400681CFD /* LaunchScreen.storyboard */,
-				34173201229D6B6400681CFD /* Main.storyboard */,
 			);
 			path = Sandbox;
 			sourceTree = "<group>";
