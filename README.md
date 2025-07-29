@@ -21,7 +21,6 @@ and other dependencies, for Social Login, as needed:
 ```
 pod 'Reach5Facebook'
 pod 'Reach5Google'
-pod 'Reach5WeChat'
 ```
 
 

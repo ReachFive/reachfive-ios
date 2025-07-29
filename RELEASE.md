@@ -6,7 +6,7 @@
     ```ruby
     $VERSION = 'x.x.x'
     ```
-3. Run [update.sh](update.sh) to install the new version of this library and update the dependencies in Cocoapod and SPM
+3. Run [update.sh](update.sh) to install the new version of this library and update the dependencies in CocoaPods and SPM
     ```shell
     ./update.sh
     ```

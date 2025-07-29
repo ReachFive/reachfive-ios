@@ -2,6 +2,8 @@
 
 
 ## Unreleased
+### New features
+- add new logout options
 
 ## v9.0.0
 ### Breaking changes
