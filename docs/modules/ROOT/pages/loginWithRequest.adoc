@@ -47,7 +47,7 @@ include::partial$params.adoc[tag="display"]
 
 == Response
 
-* *Type*: <LoginFlow.<<AchievedLogin>> | <<OngoingStepUp>>
+* *Type*: LoginFlow.<<AchievedLogin>> | <<OngoingStepUp>>
 * *Error*: <<ReachFiveError>>
 
 If the credentials are valid, the promise returns the profile's authentication token or continues the step-up process depending on the flow. 

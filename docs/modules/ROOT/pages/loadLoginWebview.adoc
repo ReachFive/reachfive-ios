@@ -47,7 +47,7 @@ include::partial$params.adoc[tags="reachfive"]
 
 == Response
 
-* *Type*: <<<AuthToken>>
+* *Type*: <<AuthToken>>
 * *Error*: <<ReachFiveError>>
 
 include::partial$models.adoc[tags="authtoken,reachfiveerror"]
