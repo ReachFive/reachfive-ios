@@ -114,6 +114,7 @@
 				99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */,
 				3414A7CC22DDD39C00CF393A /* ProfileController.swift */,
 				349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */,
+				99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -245,7 +246,6 @@
 				2AE326BB2E39313A007D6763 /* Tabs */,
 				2AE326C32E3A3FC7007D6763 /* Utils */,
 				2AE326C12E39334E007D6763 /* Views */,
-				99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */,
 			);
 			path = Sandbox;
 			sourceTree = "<group>";
