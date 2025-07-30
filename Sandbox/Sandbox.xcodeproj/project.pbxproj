@@ -174,6 +174,8 @@
 			children = (
 				EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */,
 				2A0757F8296F49B10072869F /* PasskeyAutoFillController.swift */,
+				2A0757FA296F69E30072869F /* PasskeyNonDiscoverableController.swift */,
+				EA91A17236291622417196AE /* SignupPasskeyController.swift */,
 			);
 			path = Passkey;
 			sourceTree = "<group>";
@@ -210,10 +212,8 @@
 				2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */,
 				2A1079E829721DAC00431655 /* NativePasswordController.swift */,
 				99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */,
-				2A0757FA296F69E30072869F /* PasskeyNonDiscoverableController.swift */,
 				3417FF6D22FB06E50009EC84 /* PasswordlessController.swift */,
 				34797ABC22A9607D00ED093C /* SignupController.swift */,
-				EA91A17236291622417196AE /* SignupPasskeyController.swift */,
 			);
 			path = Sandbox;
 			sourceTree = "<group>";
