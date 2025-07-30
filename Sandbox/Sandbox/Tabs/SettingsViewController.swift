@@ -22,7 +22,16 @@ class SettingsViewController: UIViewController {
     ]
     private var selectedStartupAction: String?
 
-    private var cookies: [HTTPCookie] = []
+    private var cookies: [HTTPCookie] = [] {
+        didSet {
+            Task { @MainActor in
+                if let header = self.tableView.headerView(forSection: Section.cookies.rawValue) as? EditableSectionHeaderView {
+                    header.setEditButtonHidden(self.cookies.isEmpty)
+                }
+            }
+        }
+    }
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -109,7 +118,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         case .startupActions:
             return startupActions.count
         case .cookies:
-            return cookies.count > 0 ? cookies.count : 1
+            return cookies.count
         }
     }
 
@@ -153,12 +162,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             cell.textLabel?.text = action
             cell.accessoryType = selectedStartupAction == action ? .checkmark : .none
         case .cookies:
-            if cookies.isEmpty {
-                cell.textLabel?.text = "No cookies found."
-            } else {
-                let cookie = cookies[indexPath.row]
-                cell.textLabel?.text = cookie.name
-            }
+            let cookie = cookies[indexPath.row]
+            cell.textLabel?.text = cookie.name
         }
         return cell
     }
