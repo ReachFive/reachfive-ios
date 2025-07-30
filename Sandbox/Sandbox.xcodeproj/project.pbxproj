@@ -154,6 +154,7 @@
 			isa = PBXGroup;
 			children = (
 				2AE326C72E3A414C007D6763 /* Passkey */,
+				2AE326C82E3A4399007D6763 /* Password */,
 				2AE326C52E3A4034007D6763 /* Recovery */,
 			);
 			path = Controllers;
@@ -178,6 +179,16 @@
 				EA91A17236291622417196AE /* SignupPasskeyController.swift */,
 			);
 			path = Passkey;
+			sourceTree = "<group>";
+		};
+		2AE326C82E3A4399007D6763 /* Password */ = {
+			isa = PBXGroup;
+			children = (
+				3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */,
+				34797ABC22A9607D00ED093C /* SignupController.swift */,
+				2A1079E829721DAC00431655 /* NativePasswordController.swift */,
+			);
+			path = Password;
 			sourceTree = "<group>";
 		};
 		341731F1229D6B6400681CFD = {
@@ -207,13 +218,10 @@
 				2AE326C32E3A3FC7007D6763 /* Utils */,
 				2AE326C12E39334E007D6763 /* Views */,
 				2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */,
-				3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */,
 				341731FF229D6B6400681CFD /* LoginWithProvidersController.swift */,
 				2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */,
-				2A1079E829721DAC00431655 /* NativePasswordController.swift */,
 				99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */,
 				3417FF6D22FB06E50009EC84 /* PasswordlessController.swift */,
-				34797ABC22A9607D00ED093C /* SignupController.swift */,
 			);
 			path = Sandbox;
 			sourceTree = "<group>";
