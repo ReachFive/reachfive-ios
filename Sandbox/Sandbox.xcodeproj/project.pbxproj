@@ -567,11 +567,11 @@
 			baseConfigurationReference = C9C16455A16CA84067D7FF45 /* Pods-Sandbox.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Sandbox/Sandbox.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Sandbox/Application/Sandbox.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2SHU255SWF;
-				INFOPLIST_FILE = Sandbox/Info.plist;
+				INFOPLIST_FILE = Sandbox/Application/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Sandbox;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -595,11 +595,11 @@
 			baseConfigurationReference = 1B4336D32015A6A13AA1DB17 /* Pods-Sandbox.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Sandbox/Sandbox.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Sandbox/Application/Sandbox.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2SHU255SWF;
-				INFOPLIST_FILE = Sandbox/Info.plist;
+				INFOPLIST_FILE = Sandbox/Application/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Sandbox;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
