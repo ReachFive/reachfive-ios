@@ -153,6 +153,7 @@
 		2AE326C42E3A4010007D6763 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				2AE326CB2E3A447F007D6763 /* Social */,
 				2AE326C72E3A414C007D6763 /* Passkey */,
 				2AE326C82E3A4399007D6763 /* Password */,
 				2AE326C92E3A440C007D6763 /* Passwordless */,
@@ -210,6 +211,14 @@
 			path = Web;
 			sourceTree = "<group>";
 		};
+		2AE326CB2E3A447F007D6763 /* Social */ = {
+			isa = PBXGroup;
+			children = (
+				341731FF229D6B6400681CFD /* LoginWithProvidersController.swift */,
+			);
+			path = Social;
+			sourceTree = "<group>";
+		};
 		341731F1229D6B6400681CFD = {
 			isa = PBXGroup;
 			children = (
@@ -236,7 +245,6 @@
 				2AE326BB2E39313A007D6763 /* Tabs */,
 				2AE326C32E3A3FC7007D6763 /* Utils */,
 				2AE326C12E39334E007D6763 /* Views */,
-				341731FF229D6B6400681CFD /* LoginWithProvidersController.swift */,
 				99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */,
 			);
 			path = Sandbox;
