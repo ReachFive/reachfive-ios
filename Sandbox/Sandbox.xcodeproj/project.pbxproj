@@ -150,6 +150,13 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		2AE326C42E3A4010007D6763 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
 		341731F1229D6B6400681CFD = {
 			isa = PBXGroup;
 			children = (
@@ -172,6 +179,7 @@
 			isa = PBXGroup;
 			children = (
 				2AE326C22E3933C8007D6763 /* Application */,
+				2AE326C42E3A4010007D6763 /* Controllers */,
 				2AE326BB2E39313A007D6763 /* Tabs */,
 				2AE326C32E3A3FC7007D6763 /* Utils */,
 				2AE326C12E39334E007D6763 /* Views */,
