@@ -99,6 +99,10 @@ public class ReachFiveApi {
         createUrl(path: "/oauth/authorize", params: queryParams)
     }
 
+    public func buildLogoutURL(queryParams: [String: String?]) -> URL {
+        createUrl(path: "/identity/v1/logout", params: queryParams)
+    }
+
     // MARK: - Configuration
 
     public func clientConfig() async throws -> ClientConfigResponse {

@@ -1,4 +1,5 @@
 import UIKit
+import AuthenticationServices
 import Reach5
 
 //TODO:
@@ -164,7 +165,8 @@ class ProfileController: UIViewController {
 
     @IBAction func logoutAction(_ sender: Any) {
         Task {
-            try? await AppDelegate.reachfive().logout()
+            //TODO: options dans l'interface pour choisir les differentes options de logout
+            try? await AppDelegate.reachfive().logout(webSessionLogout: WebSessionLogoutRequest(presentationContextProvider: self, origin: "ProfileController.logoutAction"))
             AppDelegate.storage.removeToken()
             self.navigationController?.popViewController(animated: true)
         }
@@ -181,5 +183,11 @@ class ProfileController: UIViewController {
             username = "Should have had an identifier"
         }
         return username
+    }
+}
+
+extension ProfileController: ASWebAuthenticationPresentationContextProviding {
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        view.window!
     }
 }

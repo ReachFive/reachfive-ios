@@ -2,7 +2,7 @@ import Foundation
 
 public extension ReachFive {
 
-    func logout() async throws {
+    func logout(webSessionLogout request: WebSessionLogoutRequest? = nil) async throws {
         for provider in providers {
             do {
                 try await provider.logout()
@@ -11,6 +11,19 @@ public extension ReachFive {
             }
         }
         try await self.reachFiveApi.logout()
+
+        if let request {
+            let options = [
+                "post_logout_redirect_uri": sdkConfig.redirectUri,
+                "origin": request.origin,
+            ]
+
+            let _ = try await webAuthenticationSession(
+                url: reachFiveApi.buildLogoutURL(queryParams: options),
+                callbackURLScheme: sdkConfig.baseScheme,
+                presentationContextProvider: request.presentationContextProvider,
+                prefersEphemeralWebBrowserSession: false)
+        }
     }
 
     func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken {
