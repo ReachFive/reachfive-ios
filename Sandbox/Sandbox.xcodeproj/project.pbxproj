@@ -275,6 +275,7 @@
 			buildConfigurationList = 3417320C229D6B6400681CFD /* Build configuration list for PBXNativeTarget "Sandbox" */;
 			buildPhases = (
 				C62175C50B8B62E891F5598C /* [CP] Check Pods Manifest.lock */,
+				2AE326D42E3CC04D007D6763 /* ShellScript */,
 				341731F6229D6B6400681CFD /* Sources */,
 				341731F7229D6B6400681CFD /* Frameworks */,
 				341731F8229D6B6400681CFD /* Resources */,
@@ -342,6 +343,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		2AE326D42E3CC04D007D6763 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd ..\n\"./set_version.sh\"\n";
+		};
 		A514CE717C81A5C4759D5906 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
