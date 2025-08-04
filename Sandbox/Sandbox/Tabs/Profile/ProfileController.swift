@@ -34,13 +34,8 @@ class ProfileController: UIViewController {
     var propertiesToDisplay: [Field] = []
     let mfaRegistrationAvailable = ["Email", "Phone Number"]
 
-    @IBOutlet weak var otherOptions: UITableView!
-
     @IBOutlet weak var profileTabBarItem: UITabBarItem!
     @IBOutlet var profileData: UITableView!
-    @IBOutlet weak var mfaButton: UIButton!
-    @IBOutlet weak var passkeyButton: UIButton!
-    @IBOutlet weak var editProfileButton: UIButton!
 
     override func viewDidLoad() {
         print("ProfileController.viewDidLoad")
@@ -113,9 +108,6 @@ class ProfileController: UIViewController {
                 let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
                 self.profile = profile
                 self.profileData.reloadData()
-                self.mfaButton.isHidden = false
-                self.editProfileButton.isHidden = false
-                self.passkeyButton.isHidden = false
 
                 await self.setStatusImage(authToken: authToken)
             } catch {
@@ -138,11 +130,9 @@ class ProfileController: UIViewController {
         // A fresh token is also needed for updating the profile and registering MFA credentials
         do {
             let _ = try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken)
-            self.passkeyButton.isEnabled = true
             self.profileTabBarItem.image = SandboxTabBarController.loggedIn
             self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
         } catch {
-            self.passkeyButton.isEnabled = false
             self.profileTabBarItem.image = SandboxTabBarController.loggedInButNotFresh
             self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
         }
@@ -157,13 +147,10 @@ class ProfileController: UIViewController {
         print("ProfileController.didLogout")
         authToken = nil
         profile = Profile()
-        passkeyButton.isHidden = true
-        mfaButton.isHidden = true
-        editProfileButton.isHidden = true
         self.profileData.reloadData()
     }
 
-    @IBAction func logoutAction(_ sender: Any) {
+    func logoutAction(_ sender: Any) {
         Task {
             //TODO: options dans l'interface pour choisir les differentes options de logout
             try? await AppDelegate.reachfive().logout(webSessionLogout: WebSessionLogoutRequest(presentationContextProvider: self, origin: "ProfileController.logoutAction"))

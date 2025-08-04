@@ -278,7 +278,7 @@
                                         <rect key="frame" x="0.0" y="50" width="442" height="52"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="HyK-Am-JUA" id="VRc-NK-UUF">
-                                            <rect key="frame" x="0.0" y="0.0" width="442" height="51.666667938232422"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="442" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -302,33 +302,33 @@
             <objects>
                 <viewController storyboardIdentifier="UpdatePasswordController" title="Update Password" id="GDD-43-cxV" customClass="UpdatePasswordController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="oh4-V5-P11">
-                        <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
+                        <rect key="frame" x="0.0" y="0.0" width="440" height="884"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Username" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WtW-hM-MYq" userLabel="Username label">
-                                <rect key="frame" x="20" y="188" width="78.333333333333329" height="20"/>
+                                <rect key="frame" x="20" y="82" width="78.333333333333329" height="20"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField opaque="NO" contentMode="scaleToFill" restorationIdentifier="username" enabled="NO" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="L7g-Ud-DNd" userLabel="Username field">
-                                <rect key="frame" x="20" y="218" width="400" height="34"/>
+                                <rect key="frame" x="20" y="112" width="400" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" textContentType="username"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qmz-jb-Bep" userLabel="New Password label">
-                                <rect key="frame" x="20" y="262" width="112" height="20"/>
+                                <rect key="frame" x="20" y="156" width="112" height="20"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="mTK-qf-v8M" userLabel="New Password field">
-                                <rect key="frame" x="20" y="292" width="400" height="34"/>
+                                <rect key="frame" x="20" y="186" width="400" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="new-password"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kzo-Al-lH7">
-                                <rect key="frame" x="20" y="346" width="51" height="30"/>
+                                <rect key="frame" x="20" y="240" width="51" height="30"/>
                                 <state key="normal" title="Update"/>
                                 <connections>
                                     <action selector="update:" destination="GDD-43-cxV" eventType="touchUpInside" id="gwV-pT-Pte"/>
@@ -689,70 +689,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="bMR-fb-yg6">
-                                <rect key="frame" x="0.0" y="168" width="440" height="400"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="bMR-fb-yg6">
+                                <rect key="frame" x="0.0" y="168" width="440" height="671"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="400" id="fTh-SD-dpK"/>
-                                </constraints>
-                                <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ToDisplayCell" id="IEz-c2-YxS">
-                                        <rect key="frame" x="0.0" y="50" width="440" height="52"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="IEz-c2-YxS" id="ugX-BO-dA6">
-                                            <rect key="frame" x="0.0" y="0.0" width="440" height="52"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                        </tableViewCellContentView>
-                                    </tableViewCell>
-                                </prototypes>
                             </tableView>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="60P-2D-hb5">
-                                <rect key="frame" x="167" y="568" width="106" height="40.666666666666629"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="tinted" title="Edit Profile"/>
-                                <connections>
-                                    <segue destination="ipV-ei-Nra" kind="show" id="VRD-3a-ISv"/>
-                                </connections>
-                            </button>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kDa-mS-HRu">
-                                <rect key="frame" x="140.33333333333337" y="623.66666666666663" width="159.66666666666663" height="40.333333333333371"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="tinted" title="Manage passkeys"/>
-                                <connections>
-                                    <segue destination="dix-k4-nE0" kind="show" id="fHe-aP-gJx"/>
-                                </connections>
-                            </button>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kej-VG-Gqk">
-                                <rect key="frame" x="126.66666666666667" y="679" width="186.66666666666663" height="40.666666666666629"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="tinted" title="Manage MFA devices"/>
-                                <connections>
-                                    <segue destination="oW2-ti-e1U" kind="show" id="3Fa-Qc-evo"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lsY-vN-hQ5">
-                                <rect key="frame" x="179.33333333333334" y="734.66666666666663" width="81.666666666666657" height="40.333333333333371"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Log out"/>
-                                <connections>
-                                    <action selector="logoutAction:" destination="85A-IF-9ED" eventType="touchUpInside" id="eaC-wu-1hp"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="ss7-L2-u8Z"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="60P-2D-hb5" firstAttribute="centerX" secondItem="ss7-L2-u8Z" secondAttribute="centerX" id="0MD-q9-pzy"/>
-                            <constraint firstItem="ss7-L2-u8Z" firstAttribute="trailing" secondItem="bMR-fb-yg6" secondAttribute="trailing" id="CBa-WX-6C0"/>
-                            <constraint firstItem="lsY-vN-hQ5" firstAttribute="centerX" secondItem="ss7-L2-u8Z" secondAttribute="centerX" id="HRI-Ay-ObQ"/>
-                            <constraint firstItem="lsY-vN-hQ5" firstAttribute="top" secondItem="kej-VG-Gqk" secondAttribute="bottom" constant="15" id="ItN-qZ-Jkn"/>
-                            <constraint firstItem="bMR-fb-yg6" firstAttribute="leading" secondItem="ss7-L2-u8Z" secondAttribute="leading" id="Sfd-DR-xxK"/>
-                            <constraint firstItem="60P-2D-hb5" firstAttribute="top" secondItem="bMR-fb-yg6" secondAttribute="bottom" id="bpr-7o-Fg7"/>
-                            <constraint firstItem="kej-VG-Gqk" firstAttribute="centerX" secondItem="ss7-L2-u8Z" secondAttribute="centerX" id="dkk-bv-Vkh"/>
-                            <constraint firstItem="kej-VG-Gqk" firstAttribute="top" secondItem="kDa-mS-HRu" secondAttribute="bottom" constant="15" id="fSx-EM-xoy"/>
                             <constraint firstItem="bMR-fb-yg6" firstAttribute="top" secondItem="ss7-L2-u8Z" secondAttribute="top" id="pGH-Bp-xc0"/>
-                            <constraint firstItem="kDa-mS-HRu" firstAttribute="centerX" secondItem="ss7-L2-u8Z" secondAttribute="centerX" id="qLp-PR-Akq"/>
-                            <constraint firstItem="kDa-mS-HRu" firstAttribute="top" secondItem="60P-2D-hb5" secondAttribute="bottom" constant="15" id="t61-r5-r47"/>
+                            <constraint firstItem="ss7-L2-u8Z" firstAttribute="bottom" secondItem="bMR-fb-yg6" secondAttribute="bottom" id="4vK-q5-tq8"/>
+                            <constraint firstItem="bMR-fb-yg6" firstAttribute="leading" secondItem="ss7-L2-u8Z" secondAttribute="leading" id="Sfd-DR-xxK"/>
+                            <constraint firstItem="ss7-L2-u8Z" firstAttribute="trailing" secondItem="bMR-fb-yg6" secondAttribute="trailing" id="pTh-NH-ZAy"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Profile" image="person.crop.circle.badge.xmark" catalog="system" selectedImage="person.crop.circle.fill.badge.xmark" id="ahA-UT-aB7"/>
@@ -765,9 +713,6 @@
                     </navigationItem>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="editProfileButton" destination="60P-2D-hb5" id="gu9-8d-1wM"/>
-                        <outlet property="mfaButton" destination="kej-VG-Gqk" id="N4c-tR-2Df"/>
-                        <outlet property="passkeyButton" destination="kDa-mS-HRu" id="lAp-cx-LDH"/>
                         <outlet property="profileData" destination="bMR-fb-yg6" id="iP6-eD-7E1"/>
                         <outlet property="profileTabBarItem" destination="ahA-UT-aB7" id="Tce-zb-ua4"/>
                     </connections>
@@ -1198,11 +1143,11 @@
                                         <rect key="frame" x="0.0" y="929.66668319702148" width="440" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="j4J-QU-Hz3" id="Y0w-Hy-f0G">
-                                            <rect key="frame" x="0.0" y="0.0" width="421.66666666666669" height="43.666666666666629"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="421.66666666666669" height="43.666667938232422"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Login with passwordless" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="p0b-ch-HOO">
-                                                    <rect key="frame" x="8" y="0.0" width="405.66666666666669" height="43.666666666666629"/>
+                                                    <rect key="frame" x="8" y="0.0" width="405.66666666666669" height="43.666667938232422"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
@@ -1740,7 +1685,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="J3t-FI-s0I">
-                                <rect key="frame" x="20" y="188" width="400" height="651"/>
+                                <rect key="frame" x="20" y="144" width="400" height="744"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="credentialCell" style="IBUITableViewCellStyleDefault" id="GvB-3P-rdM">
@@ -1781,14 +1726,14 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="xO1-vg-5iz">
-                                <rect key="frame" x="20" y="188" width="105" height="32"/>
+                                <rect key="frame" x="20" y="144" width="105" height="32"/>
                                 <segments>
                                     <segment title="Email"/>
                                     <segment title="SMS"/>
                                 </segments>
                             </segmentedControl>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cS0-d5-6IH">
-                                <rect key="frame" x="145" y="183.33333333333334" width="81.333333333333314" height="40.666666666666657"/>
+                                <rect key="frame" x="145" y="139.33333333333334" width="81.333333333333314" height="40.666666666666657"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="StepUp"/>
                                 <connections>
@@ -1796,7 +1741,7 @@
                                 </connections>
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="credentialsTableView-ID">
-                                <rect key="frame" x="0.0" y="239" width="440" height="180"/>
+                                <rect key="frame" x="0.0" y="195" width="440" height="180"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="180" id="credentialsTableViewHeightConstraint-ID"/>
@@ -1813,7 +1758,7 @@
                                 </prototypes>
                             </tableView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="trustedDevicesTableView-ID">
-                                <rect key="frame" x="0.0" y="429" width="440" height="410"/>
+                                <rect key="frame" x="0.0" y="385" width="440" height="454"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TrustedDeviceCell" id="trustedDeviceCell-ID">

@@ -7,6 +7,15 @@ struct Field {
     let value: String?
 }
 
+private enum Section: Int, CaseIterable {
+    case ContactInformation
+    case ProfileInformation
+    case ComplexData
+    case Token
+    case Metadata
+    case Logout
+}
+
 // TODO:
 // - remove enroll MFA identifier in menu when the identifier has already been enrolled. Requires listMfaCredentials
 extension ProfileController {
