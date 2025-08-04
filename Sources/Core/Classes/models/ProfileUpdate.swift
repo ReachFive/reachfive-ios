@@ -21,6 +21,15 @@ public enum Diff<Wrapped>: Diffable {
         }
     }
 
+    public var value: Wrapped? {
+        switch self {
+        case .Update(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
     public init(_ optional: Wrapped?) {
         switch optional {
         case .some(let value): self = .Update(value)
