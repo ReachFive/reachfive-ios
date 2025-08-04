@@ -144,6 +144,10 @@ extension ProfileController: UITableViewDelegate {
 }
 
 extension ProfileController: UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        Section.allCases.count
+    }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         print("\(#fileID):\(#line)", #function)
         print(profile, mfaCredentials, passkeys)
@@ -233,7 +237,11 @@ return "" }
 
     private func navigableCell(for indexPath: IndexPath) -> UITableViewCell {
         print("\(#fileID):\(#line)", #function)
-        let cell = profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ?? UITableViewCell(style: .value1, reuseIdentifier: "DisclosureCell")
+        print(profile, mfaCredentials, passkeys)
+        
+
+        let cell = /*profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ??*/ UITableViewCell(style: .value1, reuseIdentifier: "DisclosureCell")
+
         cell.accessoryType = .disclosureIndicator
         switch indexPath.row {
         case 0:
@@ -271,8 +279,8 @@ return "" }
     }
 
     private func tokenManagementCell(for indexPath: IndexPath) -> UITableViewCell {
-        print("\(#fileID):\(#line)", #function)
-        let cell = profileData.dequeueDefaultReusableCell(withIdentifier: "DisclosureCell", for: indexPath, text: "View & Manage Token")
+        let cell = /*profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ??*/ UITableViewCell(style: .default, reuseIdentifier: "DisclosureCell")
+        cell.textLabel?.text = "View & Manage Token"
         cell.accessoryType = .disclosureIndicator
         return cell
     }
@@ -280,7 +288,8 @@ return "" }
     private func metadataCell(for indexPath: IndexPath) -> UITableViewCell {
         print("\(#fileID):\(#line)", #function)
         let field = metadataFields[indexPath.row]
-        let cell = profileData.dequeueDefaultReusableCell(withIdentifier: "Value1Cell", for: indexPath, text: field.name)
+        let cell = profileData.dequeueReusableCell(withIdentifier: "Value1Cell") ?? UITableViewCell(style: .value1, reuseIdentifier: "Value1Cell")
+        cell.textLabel?.text = field.name
         cell.detailTextLabel?.text = field.valuef(profile) ?? "Not set"
         return cell
     }
@@ -428,4 +437,3 @@ return "" }
 //        }
 //    }
 }
-
