@@ -55,10 +55,11 @@ Cocoapods::
 
 . Add this line to your `Podfile` file, replacing `x` with the latest version:
 +
-[source]
+[source,subs="normal,callouts"]
 ----
-pod 'Reach5', '~> x'
+pod 'IdentitySdkFacebook', '~> {sdk-ios-latest-version}' <1>
 ----
+<1> `{sdk-ios-latest-version}` is the latest version of SDK.
 
 . Then run:
 +
@@ -127,12 +128,13 @@ Cocoapods::
 +
 --
 
-. Add this line to your `Podfile` file, replacing `x` with the latest version:
+. Add this line to your `Podfile` file.
 +
-[source]
+[source,subs="normal,callouts"]
 ----
-pod 'Reach5Facebook', '~> x'
+pod 'IdentitySdkFacebook', '~> {sdk-ios-facebook-latest-version}' <1>
 ----
+<1> `{sdk-ios-facebook-latest-version}` is the latest version of SDK.
 
 . Then run:
 +
@@ -218,12 +220,13 @@ Cocoapods::
 +
 --
 
-. Add this line to your `Podfile` file, replacing `x` with the latest version:
+. Add this line to your `Podfile` file.
 +
-[source]
+[source,subs="normal,callouts"]
 ----
-pod 'Reach5Google', '~> x'
+pod 'Reach5Google', '~> {sdk-ios-google-latest-version}' <1>
 ----
+<1> `{sdk-ios-google-latest-version}` is the latest version of SDK.
 
 . Then run:
 +
@@ -308,12 +311,13 @@ Cocoapods::
 +
 --
 
-. Add this line to your `Podfile` file, replacing `x` with the latest version:
+. Add this line to your `Podfile` file.
 +
-[source]
+[source,subs="normal,callouts"]
 ----
-pod 'Reach5WeChat', '~> x'
+pod 'Reach5WeChat', '~> {sdk-ios-wechat-latest-version}' <1>
 ----
+<1> `{sdk-ios-wechat-latest-version}` is the latest version of SDK.
 
 . Then run:
 +
