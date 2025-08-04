@@ -57,7 +57,7 @@ Cocoapods::
 +
 [source,subs="normal,callouts"]
 ----
-pod 'IdentitySdkFacebook', '~> {sdk-ios-latest-version}' <1>
+pod 'Reach5', '~> {sdk-ios-latest-version}' <1>
 ----
 <1> `{sdk-ios-latest-version}` is the latest version of SDK.
 
