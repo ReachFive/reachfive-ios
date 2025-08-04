@@ -315,7 +315,7 @@ Cocoapods::
 +
 [source,subs="normal,callouts"]
 ----
-pod 'Reach5WeChat', '~> {sdk-ios-wechat-latest-version}' <1>
+pod 'IdentitySdkWeChat', '~> {sdk-ios-wechat-latest-version}' <1>
 ----
 <1> `{sdk-ios-wechat-latest-version}` is the latest version of SDK.
 
