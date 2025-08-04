@@ -10,6 +10,12 @@
 		2A0757F9296F49B10072869F /* PasskeyAutoFillController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0757F8296F49B10072869F /* PasskeyAutoFillController.swift */; };
 		2A0757FB296F69E30072869F /* PasskeyNonDiscoverableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0757FA296F69E30072869F /* PasskeyNonDiscoverableController.swift */; };
 		2A1079E929721DAC00431655 /* NativePasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1079E829721DAC00431655 /* NativePasswordController.swift */; };
+		2A1957012E4111BF008393DB /* EditableProfileFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1956FB2E4111BF008393DB /* EditableProfileFieldCell.swift */; };
+		2A1957022E4111BF008393DB /* LogoutCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1956FD2E4111BF008393DB /* LogoutCell.swift */; };
+		2A1957032E4111BF008393DB /* ProfileContactInfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1956FF2E4111BF008393DB /* ProfileContactInfoCell.swift */; };
+		2A1957042E4111BF008393DB /* LogoutCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2A1956FE2E4111BF008393DB /* LogoutCell.xib */; };
+		2A1957052E4111BF008393DB /* ProfileContactInfoCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2A1957002E4111BF008393DB /* ProfileContactInfoCell.xib */; };
+		2A1957062E4111BF008393DB /* EditableProfileFieldCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2A1956FC2E4111BF008393DB /* EditableProfileFieldCell.xib */; };
 		2A33F30B2A016B1D00D05EB1 /* LoginWKWebviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */; };
 		2A33F30D2A01740600D05EB1 /* LoginCustomWebviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */; };
 		2A52203B297F187D00815558 /* SandboxTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A52203A297F187D00815558 /* SandboxTabBarController.swift */; };
@@ -48,6 +54,12 @@
 		2A0757FA296F69E30072869F /* PasskeyNonDiscoverableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyNonDiscoverableController.swift; sourceTree = "<group>"; };
 		2A1079E829721DAC00431655 /* NativePasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePasswordController.swift; sourceTree = "<group>"; };
 		2A18F2C4293E6C6F007C824C /* Sandbox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Sandbox.entitlements; sourceTree = "<group>"; };
+		2A1956FB2E4111BF008393DB /* EditableProfileFieldCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableProfileFieldCell.swift; sourceTree = "<group>"; };
+		2A1956FC2E4111BF008393DB /* EditableProfileFieldCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditableProfileFieldCell.xib; sourceTree = "<group>"; };
+		2A1956FD2E4111BF008393DB /* LogoutCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoutCell.swift; sourceTree = "<group>"; };
+		2A1956FE2E4111BF008393DB /* LogoutCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LogoutCell.xib; sourceTree = "<group>"; };
+		2A1956FF2E4111BF008393DB /* ProfileContactInfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContactInfoCell.swift; sourceTree = "<group>"; };
+		2A1957002E4111BF008393DB /* ProfileContactInfoCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProfileContactInfoCell.xib; sourceTree = "<group>"; };
 		2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWKWebviewController.swift; sourceTree = "<group>"; };
 		2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginCustomWebviewController.swift; sourceTree = "<group>"; };
 		2A52203A297F187D00815558 /* SandboxTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxTabBarController.swift; sourceTree = "<group>"; };
@@ -122,9 +134,15 @@
 		2AE326C12E39334E007D6763 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2A1956FB2E4111BF008393DB /* EditableProfileFieldCell.swift */,
+				2A1956FC2E4111BF008393DB /* EditableProfileFieldCell.xib */,
 				2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */,
-				2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */,
 				2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */,
+				2A1956FD2E4111BF008393DB /* LogoutCell.swift */,
+				2A1956FE2E4111BF008393DB /* LogoutCell.xib */,
+				2A1956FF2E4111BF008393DB /* ProfileContactInfoCell.swift */,
+				2A1957002E4111BF008393DB /* ProfileContactInfoCell.xib */,
+				2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */,
 				2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */,
 			);
 			path = Views;
@@ -337,6 +355,9 @@
 				2AD29AB52E2E9F9F00B26535 /* EditableSectionHeaderView.xib in Resources */,
 				34173205229D6B6400681CFD /* Assets.xcassets in Resources */,
 				34173203229D6B6400681CFD /* Main.storyboard in Resources */,
+				2A1957042E4111BF008393DB /* LogoutCell.xib in Resources */,
+				2A1957052E4111BF008393DB /* ProfileContactInfoCell.xib in Resources */,
+				2A1957062E4111BF008393DB /* EditableProfileFieldCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,9 +389,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -411,6 +436,9 @@
 				3417FF7022FB11CD0009EC84 /* LoginWithPasswordController.swift in Sources */,
 				34173200229D6B6400681CFD /* LoginWithProvidersController.swift in Sources */,
 				2A52203B297F187D00815558 /* SandboxTabBarController.swift in Sources */,
+				2A1957012E4111BF008393DB /* EditableProfileFieldCell.swift in Sources */,
+				2A1957022E4111BF008393DB /* LogoutCell.swift in Sources */,
+				2A1957032E4111BF008393DB /* ProfileContactInfoCell.swift in Sources */,
 				2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */,
 				349E16EC230BEBBF002EA06B /* UpdatePasswordController.swift in Sources */,
 				2A0757FB296F69E30072869F /* PasskeyNonDiscoverableController.swift in Sources */,
