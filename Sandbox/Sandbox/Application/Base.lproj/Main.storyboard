@@ -686,11 +686,9 @@
             <objects>
                 <viewController storyboardIdentifier="ProfileController" title="Profile" id="85A-IF-9ED" customClass="ProfileController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="r8i-df-pOX">
-                        <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="bMR-fb-yg6">
-                                <rect key="frame" x="0.0" y="168" width="440" height="671"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="bMR-fb-yg6">
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </tableView>
                         </subviews>
@@ -704,13 +702,7 @@
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Profile" image="person.crop.circle.badge.xmark" catalog="system" selectedImage="person.crop.circle.fill.badge.xmark" id="ahA-UT-aB7"/>
-                    <navigationItem key="navigationItem" title="Profile" id="Bus-r5-WAu">
-                        <barButtonItem key="rightBarButtonItem" title="Logout" id="2PB-cx-FAm">
-                            <connections>
-                                <action selector="logoutAction:" destination="85A-IF-9ED" id="P5U-KB-8PV"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Profile" id="Bus-r5-WAu" />
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="profileData" destination="bMR-fb-yg6" id="iP6-eD-7E1"/>
@@ -849,7 +841,7 @@
         <!--Navigation Controller-->
         <scene sceneID="IZ8-Ke-q7Q">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Gi6-Pt-F8W" sceneMemberID="viewController">
+                <navigationController id="Gi6-Pt-F8W" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="2AB-cK-I6M">
                         <rect key="frame" x="0.0" y="124" width="402" height="44"/>
