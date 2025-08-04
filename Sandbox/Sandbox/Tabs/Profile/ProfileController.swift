@@ -238,15 +238,6 @@ class ProfileController: UIViewController {
         }
     }
 
-    func logoutAction(revoke: Bool, webLogout: Bool) {
-        Task {
-            //TODO: options dans l'interface pour choisir les differentes options de logout
-            try? await AppDelegate.reachfive().logout(webSessionLogout: WebSessionLogoutRequest(presentationContextProvider: self, origin: "ProfileController.logoutAction"))
-            AppDelegate.storage.removeToken()
-            self.navigationController?.popViewController(animated: true)
-        }
-    }
-
     internal static func username(profile: Profile) -> String {
         let username: String
         // here the priority for phone number over email follows the backend rule
@@ -263,6 +254,16 @@ class ProfileController: UIViewController {
 
 // MARK: - Actions
 extension ProfileController {
+    func logoutAction(revoke: Bool, webLogout: Bool) {
+        Task {
+            //TODO: options dans l'interface pour choisir les differentes options de logout
+//             let = WebSessionLogoutRequest(presentationContextProvider: self, origin: "ProfileController.logoutAction")
+            try? await AppDelegate.reachfive().logout()
+            AppDelegate.storage.removeToken()
+            self.navigationController?.popViewController(animated: true)
+        }
+    }
+
     func emailActions() -> [UIAction] {
         var actions: [UIAction] = []
         guard let email = profile.email else {

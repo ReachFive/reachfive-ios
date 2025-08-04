@@ -46,6 +46,7 @@ class SandboxTabBarController: UITabBarController {
     override func viewDidLoad() {
         print("SandboxTabBarController.viewDidLoad")
         super.viewDidLoad()
+        self.delegate = self
         
         clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { _ in
             Task { @MainActor in
@@ -68,6 +69,11 @@ class SandboxTabBarController: UITabBarController {
             sandboxTabBar?.items?[2].selectedImage = SandboxTabBarController.tokenPresent
         }
     }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationItem.title = self.selectedViewController?.title
+    }
     
     func didLogout() {
         print("SandboxTabBarController.didLogout")
@@ -79,5 +85,11 @@ class SandboxTabBarController: UITabBarController {
         print("SandboxTabBarController.didLogin")
         sandboxTabBar?.items?[2].image = SandboxTabBarController.loggedIn
         sandboxTabBar?.items?[2].selectedImage = SandboxTabBarController.loggedIn
+    }
+}
+
+extension SandboxTabBarController: UITabBarControllerDelegate {
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        self.navigationItem.title = viewController.title
     }
 }
