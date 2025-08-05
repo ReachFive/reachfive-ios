@@ -18,6 +18,8 @@
 		2A1957062E4111BF008393DB /* EditableProfileFieldCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2A1956FC2E4111BF008393DB /* EditableProfileFieldCell.xib */; };
 		2A1957122E42143D008393DB /* TokenDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1957112E42143D008393DB /* TokenDetailsViewController.swift */; };
 		2A1957142E4214D9008393DB /* UIViewController+Handling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1957132E4214D9008393DB /* UIViewController+Handling.swift */; };
+		2A1957192E423904008393DB /* DecodedTokenView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2A1957182E423904008393DB /* DecodedTokenView.xib */; };
+		2A19571A2E423904008393DB /* DecodedTokenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1957172E423904008393DB /* DecodedTokenView.swift */; };
 		2A33F30B2A016B1D00D05EB1 /* LoginWKWebviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */; };
 		2A33F30D2A01740600D05EB1 /* LoginCustomWebviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */; };
 		2A52203B297F187D00815558 /* SandboxTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A52203A297F187D00815558 /* SandboxTabBarController.swift */; };
@@ -64,6 +66,8 @@
 		2A1957002E4111BF008393DB /* ProfileContactInfoCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProfileContactInfoCell.xib; sourceTree = "<group>"; };
 		2A1957112E42143D008393DB /* TokenDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenDetailsViewController.swift; sourceTree = "<group>"; };
 		2A1957132E4214D9008393DB /* UIViewController+Handling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Handling.swift"; sourceTree = "<group>"; };
+		2A1957172E423904008393DB /* DecodedTokenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecodedTokenView.swift; sourceTree = "<group>"; };
+		2A1957182E423904008393DB /* DecodedTokenView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DecodedTokenView.xib; sourceTree = "<group>"; };
 		2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWKWebviewController.swift; sourceTree = "<group>"; };
 		2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginCustomWebviewController.swift; sourceTree = "<group>"; };
 		2A52203A297F187D00815558 /* SandboxTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxTabBarController.swift; sourceTree = "<group>"; };
@@ -138,6 +142,8 @@
 		2AE326C12E39334E007D6763 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2A1957172E423904008393DB /* DecodedTokenView.swift */,
+				2A1957182E423904008393DB /* DecodedTokenView.xib */,
 				2A1956FB2E4111BF008393DB /* EditableProfileFieldCell.swift */,
 				2A1956FC2E4111BF008393DB /* EditableProfileFieldCell.xib */,
 				2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */,
@@ -359,6 +365,7 @@
 				34173208229D6B6400681CFD /* LaunchScreen.storyboard in Resources */,
 				2AD29AB92E2ED7F100B26535 /* TrustedDeviceCell.xib in Resources */,
 				2AD29AB52E2E9F9F00B26535 /* EditableSectionHeaderView.xib in Resources */,
+				2A1957192E423904008393DB /* DecodedTokenView.xib in Resources */,
 				34173205229D6B6400681CFD /* Assets.xcassets in Resources */,
 				34173203229D6B6400681CFD /* Main.storyboard in Resources */,
 				2A1957042E4111BF008393DB /* LogoutCell.xib in Resources */,
@@ -448,6 +455,7 @@
 				2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */,
 				349E16EC230BEBBF002EA06B /* UpdatePasswordController.swift in Sources */,
 				2A0757FB296F69E30072869F /* PasskeyNonDiscoverableController.swift in Sources */,
+				2A19571A2E423904008393DB /* DecodedTokenView.swift in Sources */,
 				2A1957142E4214D9008393DB /* UIViewController+Handling.swift in Sources */,
 				2AB299EF2C0E29F900D0C5C8 /* RecoveryEndController.swift in Sources */,
 				99E4472F2B863AB300EC7559 /* ProfileContentTableView.swift in Sources */,
