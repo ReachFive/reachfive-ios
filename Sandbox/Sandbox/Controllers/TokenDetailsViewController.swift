@@ -14,7 +14,7 @@ class TokenDetailsViewController: UIViewController {
     @IBOutlet weak var expiresInLabel: UILabel!
 
     // MARK: - IBOutlets for Decoded Token Views
-    
+
     // These container views will hold the dynamically created DecodedTokenView instances.
     // Please add these UIStackViews in your storyboard.
     @IBOutlet weak var idTokenDecodedContainer: UIStackView!
@@ -35,7 +35,7 @@ class TokenDetailsViewController: UIViewController {
     /// Configures the view with both raw and decoded token details.
     private func configureWithAuthToken() {
         guard let authToken = authToken else { return }
-        
+
         // Display the raw token strings.
         idTokenLabel.text = authToken.idToken ?? "N/A"
         accessTokenLabel.text = authToken.accessToken
@@ -51,7 +51,7 @@ class TokenDetailsViewController: UIViewController {
            let decodedView = DecodedTokenView.create(with: idTokenPayload) {
             idTokenDecodedContainer.addArrangedSubview(decodedView)
         }
-        
+
         // Decode and display the access token payload.
         if let accessTokenPayload = decodeTokenPayload(authToken.accessToken),
            let decodedView = DecodedTokenView.create(with: accessTokenPayload) {
@@ -64,7 +64,7 @@ class TokenDetailsViewController: UIViewController {
             refreshTokenDecodedContainer.addArrangedSubview(decodedView)
         }
     }
-    
+
     /// Removes all subviews from the decoded token container stack views.
     private func clearDecodedViews() {
         idTokenDecodedContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -77,12 +77,10 @@ class TokenDetailsViewController: UIViewController {
     /// - Returns: A dictionary representing the token's payload, or `nil` on failure.
     private func decodeTokenPayload(_ token: String?) -> [String: Any]? {
         guard let token = token else { return nil }
-        
+
         let segments = token.components(separatedBy: ".")
         guard segments.count == 3 else {
-            if #available(iOS 14.0, *) {
-                Logger.auth.error("Invalid token format: \(token)")
-            }
+            print("Invalid token format: \(token)")
             return nil
         }
 
@@ -94,11 +92,8 @@ class TokenDetailsViewController: UIViewController {
         if padding > 0 {
             base64String += String(repeating: "=", count: 4 - padding)
         }
-        
+
         guard let payloadData = Data(base64Encoded: base64String) else {
-            if #available(iOS 14.0, *) {
-                Logger.auth.error("Failed to decode base64 payload from token: \(token)")
-            }
             return nil
         }
 

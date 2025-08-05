@@ -719,141 +719,178 @@
         <scene sceneID="kFf-L1-bVd">
             <objects>
                 <viewController storyboardIdentifier="TokenDetailsViewController" id="cWd-8A-pXz" customClass="TokenDetailsViewController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="mN2-iP-qR7">
+                    <view key="view" contentMode="scaleToFill" id="unique-view-id-001">
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="xY1-zZ-aB3">
-                                <rect key="frame" x="16" y="140.00000000000003" width="370" height="408.66666666666674"/>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="unique-scrollview-id-001">
+                                <rect key="frame" x="0.0" y="124" width="402" height="667"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="jGz-9h-kL4">
-                                        <rect key="frame" x="0.0" y="0.0" width="370" height="41.333333333333336"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="unique-main-stack-id-001">
+                                        <rect key="frame" x="16" y="16" width="370" height="504"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ID Token" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rT3-pL-mN8">
-                                                <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
-                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aB1-c2-dE3">
-                                                <rect key="frame" x="0.0" y="24.333333333333343" width="370" height="17"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="unique-id-token-stack-001">
+                                                <rect key="frame" x="0.0" y="0.0" width="370" height="65.333333333333329"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ID Token" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-id-token-title-001">
+                                                        <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-id-token-value-001">
+                                                        <rect key="frame" x="0.0" y="28.333333333333336" width="370" height="17"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="unique-id-token-decoded-container-001" userLabel="ID Token Decoded Container">
+                                                        <rect key="frame" x="0.0" y="53.333333333333336" width="370" height="12"/>
+                                                        <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="12" id="unique-constraint-h-001"/>
+                                                        </constraints>
+                                                    </stackView>
+                                                </subviews>
+                                            </stackView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="unique-access-token-stack-001">
+                                                <rect key="frame" x="0.0" y="89.333333333333314" width="370" height="65.333333333333314"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Access Token" textAlignment="natural" lineBreakMode="tailTruncation"
+        baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-access-token-title-001">
+                                                        <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-access-token-value-001">
+                                                        <rect key="frame" x="0.0" y="28.333333333333314" width="370" height="17"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="unique-access-token-decoded-container-001" userLabel="Access Token Decoded Container">
+                                                        <rect key="frame" x="0.0" y="53.333333333333314" width="370" height="12"/>
+                                                        <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="12" id="unique-constraint-h-002"/>
+                                                        </constraints>
+                                                    </stackView>
+                                                </subviews>
+                                            </stackView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="unique-refresh-token-stack-001">
+                                                <rect key="frame" x="0.0" y="178.66666666666669" width="370" height="65.333333333333314"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Refresh Token" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-refresh-token-title-001">
+                                                        <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-refresh-token-value-001">
+                                                        <rect key="frame" x="0.0" y="28.333333333333314" width="370" height="17"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="unique-refresh-token-decoded-container-001" userLabel="Refresh Token Decoded Container">
+                                                        <rect key="frame" x="0.0" y="53.333333333333314" width="370" height="12"/>
+                                                        <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="12" id="unique-constraint-h-003"/>
+                                                        </constraints>
+                                                    </stackView>
+                                                </subviews>
+                                            </stackView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="unique-token-type-stack-001">
+                                                <rect key="frame" x="0.0" y="268" width="370" height="41.333333333333314"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Token Type" textAlignment="natural" lineBreakMode="tailTruncation"
+        baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-token-type-title-001">
+                                                        <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation"
+        baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-token-type-value-001">
+                                                        <rect key="frame" x="0.0" y="24.333333333333314" width="370" height="17"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                </subviews>
+                                            </stackView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="unique-expires-in-stack-001">
+                                                <rect key="frame" x="0.0" y="333.33333333333337" width="370" height="41.333333333333314"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Expires In" textAlignment="natural" lineBreakMode="tailTruncation"
+        baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-expires-in-title-001">
+                                                        <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
+                                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation"
+        baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="unique-expires-in-value-001">
+                                                        <rect key="frame" x="0.0" y="24.333333333333314" width="370" height="17"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                </subviews>
+                                            </stackView>
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="unique-spacer-view-001" userLabel="Spacer">
+                                                <rect key="frame" x="0.0" y="398.66666666666663" width="370" height="51.333333333333371"/>
+                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            </view>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="unique-revoke-button-001">
+                                                <rect key="frame" x="0.0" y="474" width="370" height="30"/>
+                                                <color key="backgroundColor" systemColor="systemRedColor"/>
+                                                <color key="tintColor" systemColor="systemRedColor"/>
+                                                <state key="normal" title="Revoke Token">
+                                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="revokeTokenTapped:" destination="cWd-8A-pXz" eventType="touchUpInside" id="unique-action-id-001"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                     </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="fG5-hJ-kL9">
-                                        <rect key="frame" x="0.0" y="57.333333333333343" width="370" height="41.333333333333343"/>
-                                        <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Access Token" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sW4-qK-pM1">
-                                                <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
-                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xY2-zZ-aB4">
-                                                <rect key="frame" x="0.0" y="24.333333333333314" width="370" height="17"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                        </subviews>
-                                    </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="zX7-yU-vW8">
-                                        <rect key="frame" x="0.0" y="114.66666666666664" width="370" height="41.333333333333329"/>
-                                        <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Refresh Token" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vC6-bN-mP5">
-                                                <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
-                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uD5-aM-lO4">
-                                                <rect key="frame" x="0.0" y="24.333333333333343" width="370" height="17"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                        </subviews>
-                                    </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="kL8-mJ-nI7">
-                                        <rect key="frame" x="0.0" y="172" width="370" height="41.333333333333343"/>
-                                        <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Token Type" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iO9-nK-pL6">
-                                                <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
-                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hJ7-lI-mK6">
-                                                <rect key="frame" x="0.0" y="24.333333333333314" width="370" height="17"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                        </subviews>
-                                    </stackView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="pM5-qL-rN4">
-                                        <rect key="frame" x="0.0" y="229.33333333333331" width="370" height="41.333333333333314"/>
-                                        <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Expires In" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oN4-rM-qO3">
-                                                <rect key="frame" x="0.0" y="0.0" width="370" height="20.333333333333332"/>
-                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mK3-jL-iH2">
-                                                <rect key="frame" x="0.0" y="24.333333333333371" width="370" height="17"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                <nil key="textColor"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                        </subviews>
-                                    </stackView>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eF4-dC-bA9">
-                                        <rect key="frame" x="0.0" y="286.66666666666669" width="370" height="30"/>
-                                        <state key="normal" title="Decode Access Token"/>
-                                        <connections>
-                                            <action selector="decodeAccessTokenTapped:" destination="cWd-8A-pXz" eventType="touchUpInside" id="qR1-sT-uV2"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dC3-bB-aA8">
-                                        <rect key="frame" x="0.0" y="332.66666666666669" width="370" height="30"/>
-                                        <state key="normal" title="Decode Refresh Token"/>
-                                        <connections>
-                                            <action selector="decodeRefreshTokenTapped:" destination="cWd-8A-pXz" eventType="touchUpInside" id="tS2-rU-vW3"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bA2-aA-zZ7">
-                                        <rect key="frame" x="0.0" y="378.66666666666663" width="370" height="30"/>
-                                        <color key="backgroundColor" systemColor="systemRedColor"/>
-                                        <color key="tintColor" systemColor="systemRedColor"/>
-                                        <state key="normal" title="Revoke Token">
-                                            <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        </state>
-                                        <connections>
-                                            <action selector="revokeTokenTapped:" destination="cWd-8A-pXz" eventType="touchUpInside" id="uV3-tW-xY4"/>
-                                        </connections>
-                                    </button>
                                 </subviews>
-                            </stackView>
+                                <viewLayoutGuide key="safeArea" id="unique-safe-area-id-001"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="unique-scrollview-id-001" firstAttribute="leading" secondItem="unique-safe-area-id-001" secondAttribute="leading" id="unique-constraint-pos-001"/>
+                                    <constraint firstItem="unique-scrollview-id-001" firstAttribute="top" secondItem="unique-safe-area-id-001" secondAttribute="top" id="unique-constraint-pos-002"/>
+                                    <constraint firstItem="unique-main-stack-id-001" firstAttribute="leading" secondItem="unique-scrollview-id-001" secondAttribute="leading" constant="16" id="unique-constraint-pos-003"/>
+                                    <constraint firstItem="unique-main-stack-id-001" firstAttribute="width" secondItem="unique-scrollview-id-001" secondAttribute="width" constant="-32" id="unique-constraint-pos-004"/>
+                                    <constraint firstItem="unique-scrollview-id-001" firstAttribute="trailing" secondItem="unique-safe-area-id-001" secondAttribute="trailing" id="unique-constraint-pos-005"/>
+                                    <constraint firstItem="unique-main-stack-id-001" firstAttribute="top" secondItem="unique-scrollview-id-001" secondAttribute="top" constant="16" id="unique-constraint-pos-006"/>
+                                    <constraint firstItem="unique-scrollview-id-001" firstAttribute="bottom" secondItem="unique-safe-area-id-001" secondAttribute="bottom" id="unique-constraint-pos-007"/>
+                                    <constraint firstItem="unique-main-stack-id-001" firstAttribute="trailing" secondItem="unique-scrollview-id-001" secondAttribute="trailing" constant="-16" id="unique-constraint-pos-008"/>
+                                    <constraint firstItem="unique-main-stack-id-001" firstAttribute="bottom" secondItem="unique-scrollview-id-001" secondAttribute="bottom" constant="-16" id="unique-constraint-pos-009"/>
+                                </constraints>
+                            </scrollView>
                         </subviews>
-                        <viewLayoutGuide key="safeArea" id="nI1-jH-kG0"/>
+                        <viewLayoutGuide key="safeArea" id="unique-safe-area-id-002"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="xY1-zZ-aB3" firstAttribute="top" secondItem="nI1-jH-kG0" secondAttribute="top" constant="16" id="pM4-qL-rN3"/>
-                            <constraint firstItem="nI1-jH-kG0" firstAttribute="trailing" secondItem="xY1-zZ-aB3" secondAttribute="trailing" constant="16" id="rN5-sM-tO2"/>
-                            <constraint firstItem="xY1-zZ-aB3" firstAttribute="leading" secondItem="nI1-jH-kG0" secondAttribute="leading" constant="16" id="tO6-uN-vM1"/>
+                            <constraint firstItem="unique-scrollview-id-001" firstAttribute="leading" secondItem="unique-safe-area-id-002" secondAttribute="leading" id="unique-constraint-pos-010"/>
+                            <constraint firstItem="unique-scrollview-id-001" firstAttribute="top" secondItem="unique-safe-area-id-002" secondAttribute="top" id="unique-constraint-pos-011"/>
+                            <constraint firstItem="unique-scrollview-id-001" firstAttribute="trailing" secondItem="unique-safe-area-id-002" secondAttribute="trailing" id="unique-constraint-pos-012"/>
+                            <constraint firstItem="unique-scrollview-id-001" firstAttribute="bottom" secondItem="unique-safe-area-id-002" secondAttribute="bottom" id="unique-constraint-pos-013"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="accessTokenLabel" destination="xY2-zZ-aB4" id="vW7-xY-zZ5"/>
-                        <outlet property="decodeRefreshTokenButton" destination="dC3-bB-aA8" id="wX8-yZ-aA6"/>
-                        <outlet property="expiresInLabel" destination="mK3-jL-iH2" id="xY9-zZ-aB7"/>
-                        <outlet property="idTokenLabel" destination="aB1-c2-dE3" id="yZ1-aA-bB8"/>
-                        <outlet property="refreshTokenLabel" destination="uD5-aM-lO4" id="zZ2-bB-cC9"/>
-                        <outlet property="tokenTypeLabel" destination="hJ7-lI-mK6" id="aA3-cC-dD1"/>
+                        <outlet property="accessTokenDecodedContainer" destination="unique-access-token-decoded-container-001" id="unique-conn-id-001"/>
+                        <outlet property="accessTokenLabel" destination="unique-access-token-value-001" id="unique-conn-id-002"/>
+                        <outlet property="expiresInLabel" destination="unique-expires-in-value-001" id="unique-conn-id-003"/>
+                        <outlet property="idTokenDecodedContainer" destination="unique-id-token-decoded-container-001" id="unique-conn-id-004"/>
+                        <outlet property="idTokenLabel" destination="unique-id-token-value-001" id="unique-conn-id-005"/>
+                        <outlet property="refreshTokenDecodedContainer" destination="unique-refresh-token-decoded-container-001" id="unique-conn-id-006"/>
+                        <outlet property="refreshTokenLabel" destination="unique-refresh-token-value-001" id="unique-conn-id-007"/>
+                        <outlet property="tokenTypeLabel" destination="unique-token-type-value-001" id="unique-conn-id-008"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lI2-mJ-nK1" sceneMemberID="firstResponder"/>
