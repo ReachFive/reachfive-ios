@@ -13,6 +13,11 @@ class DecodedTokenView: UIView {
     @IBOutlet weak var iatLabel: UILabel!
     @IBOutlet weak var jtiLabel: UILabel!
     @IBOutlet weak var amrLabel: UILabel!
+    @IBOutlet weak var scopeLabel: UILabel!
+    @IBOutlet weak var enforcesScopeLabel: UILabel!
+    @IBOutlet weak var clientIdLabel: UILabel!
+    @IBOutlet weak var authTimeLabel: UILabel!
+    @IBOutlet weak var azpLabel: UILabel!
     
     // MARK: - IBOutlets for Container Stack Views
     
@@ -23,6 +28,11 @@ class DecodedTokenView: UIView {
     @IBOutlet weak var iatStackView: UIStackView!
     @IBOutlet weak var jtiStackView: UIStackView!
     @IBOutlet weak var amrStackView: UIStackView!
+    @IBOutlet weak var scopeStackView: UIStackView!
+    @IBOutlet weak var enforcesScopeStackView: UIStackView!
+    @IBOutlet weak var clientIdStackView: UIStackView!
+    @IBOutlet weak var authTimeStackView: UIStackView!
+    @IBOutlet weak var azpStackView: UIStackView!
     
     // MARK: - Configuration
 
@@ -32,7 +42,7 @@ class DecodedTokenView: UIView {
     func configure(with payload: [String: Any]) {
         // A helper to set text on a label and manage the visibility of its container stack view.
         func setText(for label: UILabel, stackView: UIStackView, value: Any?) {
-            if let value = value {
+            if let value {
                 label.text = String(describing: value)
                 stackView.isHidden = false
             } else {
@@ -44,11 +54,24 @@ class DecodedTokenView: UIView {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .long
+        
+        func setDate(for label: UILabel, stackView: UIStackView, timestamp: TimeInterval?) {
+            if let timestamp = timestamp {
+                let date = Date(timeIntervalSince1970: timestamp)
+                label.text = "\(dateFormatter.string(from: date)) (\(Int(timestamp)))"
+                stackView.isHidden = false
+            } else {
+                stackView.isHidden = true
+            }
+        }
 
         // Populate each field.
         setText(for: issLabel, stackView: issStackView, value: payload["iss"])
         setText(for: subLabel, stackView: subStackView, value: payload["sub"])
         setText(for: jtiLabel, stackView: jtiStackView, value: payload["jti"])
+        setText(for: clientIdLabel, stackView: clientIdStackView, value: payload["client_id"])
+        setText(for: azpLabel, stackView: azpStackView, value: payload["azp"])
+        setText(for: enforcesScopeLabel, stackView: enforcesScopeStackView, value: (payload["enforces_scope"] as? Int == 1))
 
         // Handle audience, which can be a string or an array of strings.
         if let aud = payload["aud"] as? [String] {
@@ -63,23 +86,20 @@ class DecodedTokenView: UIView {
         } else {
             amrStackView.isHidden = true
         }
-
-        // Handle timestamp fields by converting them to human-readable dates.
-        if let expTimestamp = payload["exp"] as? TimeInterval {
-            let date = Date(timeIntervalSince1970: expTimestamp)
-            expLabel.text = "\(dateFormatter.string(from: date)) (\(Int(expTimestamp)))"
-            expStackView.isHidden = false
-        } else {
-            expStackView.isHidden = true
-        }
         
-        if let iatTimestamp = payload["iat"] as? TimeInterval {
-            let date = Date(timeIntervalSince1970: iatTimestamp)
-            iatLabel.text = "\(dateFormatter.string(from: date)) (\(Int(iatTimestamp)))"
-            iatStackView.isHidden = false
+        // Handle scope, which can be an array of strings or a single space-separated string.
+        if let scopeArray = payload["scope"] as? [String] {
+            setText(for: scopeLabel, stackView: scopeStackView, value: scopeArray.joined(separator: ", "))
+        } else if let scopeString = payload["scope"] as? String {
+            setText(for: scopeLabel, stackView: scopeStackView, value: scopeString.replacingOccurrences(of: " ", with: ", "))
         } else {
-            iatStackView.isHidden = true
+            scopeStackView.isHidden = true
         }
+
+        // Handle timestamp fields.
+        setDate(for: expLabel, stackView: expStackView, timestamp: payload["exp"] as? TimeInterval)
+        setDate(for: iatLabel, stackView: iatStackView, timestamp: payload["iat"] as? TimeInterval)
+        setDate(for: authTimeLabel, stackView: authTimeStackView, timestamp: payload["auth_time"] as? TimeInterval)
     }
     
     // MARK: - Factory Method
@@ -88,23 +108,13 @@ class DecodedTokenView: UIView {
     /// - Parameter payload: The token payload to display.
     /// - Returns: A configured `DecodedTokenView` instance, or `nil` if the payload is empty or the XIB cannot be loaded.
     static func create(with payload: [String: Any]?) -> DecodedTokenView? {
-        print("create DecodedTokenView for \(payload ?? [:])")
         guard let payload = payload, !payload.isEmpty else { return nil }
         
         guard let view = Bundle.main.loadNibNamed("DecodedTokenView", owner: nil, options: nil)?.first as? DecodedTokenView else {
-            if #available(iOS 14.0, *) {
-                Logger.ui.error("Failed to load DecodedTokenView from XIB.")
-            }
             return nil
         }
         
         view.configure(with: payload)
         return view
     }
-}
-
-@available(iOS 14.0, *)
-extension Logger {
-    private static var subsystem = Bundle.main.bundleIdentifier!
-    static let ui = Logger(subsystem: subsystem, category: "UI")
 }

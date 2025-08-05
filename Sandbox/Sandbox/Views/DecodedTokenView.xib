@@ -11,26 +11,26 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="DecodedTokenView" customModule="Sandbox" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="393" height="250"/>
+            <rect key="frame" x="0.0" y="0.0" width="393" height="400"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="main-stack-view-id">
-                    <rect key="frame" x="16" y="16" width="361" height="218"/>
+                    <rect key="frame" x="16" y="16" width="361" height="368"/>
                     <subviews>
                         <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="iss-stack-id">
                             <rect key="frame" x="0.0" y="0.0" width="361" height="18"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Issuer" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iss-title-label-id">
-                                    <rect key="frame" x="0.0" y="0.0" width="100" height="18"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
                                     <constraints>
-                                        <constraint firstAttribute="width" constant="100" id="iss-width-constraint"/>
+                                        <constraint firstAttribute="width" constant="120" id="iss-width-constraint"/>
                                     </constraints>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iss-value-label-id">
-                                    <rect key="frame" x="108" y="0.0" width="253" height="18"/>
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                     <nil key="highlightedColor"/>
@@ -41,16 +41,16 @@
                             <rect key="frame" x="0.0" y="26" width="361" height="18"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Subject" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sub-title-label-id">
-                                    <rect key="frame" x="0.0" y="0.0" width="100" height="18"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
                                     <constraints>
-                                        <constraint firstAttribute="width" constant="100" id="sub-width-constraint"/>
+                                        <constraint firstAttribute="width" constant="120" id="sub-width-constraint"/>
                                     </constraints>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sub-value-label-id">
-                                    <rect key="frame" x="108" y="0.0" width="253" height="18"/>
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                     <nil key="highlightedColor"/>
@@ -61,16 +61,56 @@
                             <rect key="frame" x="0.0" y="52" width="361" height="18"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Audience" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aud-title-label-id">
-                                    <rect key="frame" x="0.0" y="0.0" width="100" height="18"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
                                     <constraints>
-                                        <constraint firstAttribute="width" constant="100" id="aud-width-constraint"/>
+                                        <constraint firstAttribute="width" constant="120" id="aud-width-constraint"/>
                                     </constraints>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aud-value-label-id">
-                                    <rect key="frame" x="108" y="0.0" width="253" height="18"/>
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                    <color key="textColor" systemColor="secondaryLabelColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                        <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="client-id-stack-id">
+                            <rect key="frame" x="0.0" y="78" width="361" height="18"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Client ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="client-id-title-label-id">
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" constant="120" id="client-id-width-constraint"/>
+                                    </constraints>
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="client-id-value-label-id">
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                    <color key="textColor" systemColor="secondaryLabelColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                        <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="azp-stack-id">
+                            <rect key="frame" x="0.0" y="104" width="361" height="18"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Authorized Party" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="azp-title-label-id">
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" constant="120" id="azp-width-constraint"/>
+                                    </constraints>
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="azp-value-label-id">
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                     <nil key="highlightedColor"/>
@@ -78,19 +118,19 @@
                             </subviews>
                         </stackView>
                         <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="exp-stack-id">
-                            <rect key="frame" x="0.0" y="78" width="361" height="18"/>
+                            <rect key="frame" x="0.0" y="130" width="361" height="18"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Expires At" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="exp-title-label-id">
-                                    <rect key="frame" x="0.0" y="0.0" width="100" height="18"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
                                     <constraints>
-                                        <constraint firstAttribute="width" constant="100" id="exp-width-constraint"/>
+                                        <constraint firstAttribute="width" constant="120" id="exp-width-constraint"/>
                                     </constraints>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="exp-value-label-id">
-                                    <rect key="frame" x="108" y="0.0" width="253" height="18"/>
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                     <nil key="highlightedColor"/>
@@ -98,19 +138,39 @@
                             </subviews>
                         </stackView>
                         <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="iat-stack-id">
-                            <rect key="frame" x="0.0" y="104" width="361" height="18"/>
+                            <rect key="frame" x="0.0" y="156" width="361" height="18"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Issued At" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iat-title-label-id">
-                                    <rect key="frame" x="0.0" y="0.0" width="100" height="18"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
                                     <constraints>
-                                        <constraint firstAttribute="width" constant="100" id="iat-width-constraint"/>
+                                        <constraint firstAttribute="width" constant="120" id="iat-width-constraint"/>
                                     </constraints>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iat-value-label-id">
-                                    <rect key="frame" x="108" y="0.0" width="253" height="18"/>
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                    <color key="textColor" systemColor="secondaryLabelColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                        <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="auth-time-stack-id">
+                            <rect key="frame" x="0.0" y="182" width="361" height="18"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Auth Time" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="auth-time-title-label-id">
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" constant="120" id="auth-time-width-constraint"/>
+                                    </constraints>
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="auth-time-value-label-id">
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                     <nil key="highlightedColor"/>
@@ -118,19 +178,19 @@
                             </subviews>
                         </stackView>
                         <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="jti-stack-id">
-                            <rect key="frame" x="0.0" y="130" width="361" height="18"/>
+                            <rect key="frame" x="0.0" y="208" width="361" height="18"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="JWT ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jti-title-label-id">
-                                    <rect key="frame" x="0.0" y="0.0" width="100" height="18"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
                                     <constraints>
-                                        <constraint firstAttribute="width" constant="100" id="jti-width-constraint"/>
+                                        <constraint firstAttribute="width" constant="120" id="jti-width-constraint"/>
                                     </constraints>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jti-value-label-id">
-                                    <rect key="frame" x="108" y="0.0" width="253" height="18"/>
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                     <nil key="highlightedColor"/>
@@ -138,19 +198,59 @@
                             </subviews>
                         </stackView>
                         <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="amr-stack-id">
-                            <rect key="frame" x="0.0" y="156" width="361" height="18"/>
+                            <rect key="frame" x="0.0" y="234" width="361" height="18"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Auth Methods" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="amr-title-label-id">
-                                    <rect key="frame" x="0.0" y="0.0" width="100" height="18"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
                                     <constraints>
-                                        <constraint firstAttribute="width" constant="100" id="amr-width-constraint"/>
+                                        <constraint firstAttribute="width" constant="120" id="amr-width-constraint"/>
                                     </constraints>
                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="amr-value-label-id">
-                                    <rect key="frame" x="108" y="0.0" width="253" height="18"/>
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                    <color key="textColor" systemColor="secondaryLabelColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                        <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="scope-stack-id">
+                            <rect key="frame" x="0.0" y="260" width="361" height="18"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Scope" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="scope-title-label-id">
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" constant="120" id="scope-width-constraint"/>
+                                    </constraints>
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="scope-value-label-id">
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                    <color key="textColor" systemColor="secondaryLabelColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                        </stackView>
+                        <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="enforces-scope-stack-id">
+                            <rect key="frame" x="0.0" y="286" width="361" height="18"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" text="Enforces Scope" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="enforces-scope-title-label-id">
+                                    <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" constant="120" id="enforces-scope-width-constraint"/>
+                                    </constraints>
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="N/A" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="enforces-scope-value-label-id">
+                                    <rect key="frame" x="128" y="0.0" width="233" height="18"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                     <color key="textColor" systemColor="secondaryLabelColor"/>
                                     <nil key="highlightedColor"/>
@@ -158,7 +258,7 @@
                             </subviews>
                         </stackView>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="spacer-view-id">
-                            <rect key="frame" x="0.0" y="182" width="361" height="36"/>
+                            <rect key="frame" x="0.0" y="312" width="361" height="56"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
                     </subviews>
@@ -177,6 +277,14 @@
                 <outlet property="amrStackView" destination="amr-stack-id" id="amr-stack-outlet-id"/>
                 <outlet property="audLabel" destination="aud-value-label-id" id="aud-outlet-id"/>
                 <outlet property="audStackView" destination="aud-stack-id" id="aud-stack-outlet-id"/>
+                <outlet property="authTimeLabel" destination="auth-time-value-label-id" id="auth-time-outlet-id"/>
+                <outlet property="authTimeStackView" destination="auth-time-stack-id" id="auth-time-stack-outlet-id"/>
+                <outlet property="azpLabel" destination="azp-value-label-id" id="azp-outlet-id"/>
+                <outlet property="azpStackView" destination="azp-stack-id" id="azp-stack-outlet-id"/>
+                <outlet property="clientIdLabel" destination="client-id-value-label-id" id="client-id-outlet-id"/>
+                <outlet property="clientIdStackView" destination="client-id-stack-id" id="client-id-stack-outlet-id"/>
+                <outlet property="enforcesScopeLabel" destination="enforces-scope-value-label-id" id="enforces-scope-outlet-id"/>
+                <outlet property="enforcesScopeStackView" destination="enforces-scope-stack-id" id="enforces-scope-stack-outlet-id"/>
                 <outlet property="expLabel" destination="exp-value-label-id" id="exp-outlet-id"/>
                 <outlet property="expStackView" destination="exp-stack-id" id="exp-stack-outlet-id"/>
                 <outlet property="iatLabel" destination="iat-value-label-id" id="iat-outlet-id"/>
@@ -185,6 +293,8 @@
                 <outlet property="issStackView" destination="iss-stack-id" id="iss-stack-outlet-id"/>
                 <outlet property="jtiLabel" destination="jti-value-label-id" id="jti-outlet-id"/>
                 <outlet property="jtiStackView" destination="jti-stack-id" id="jti-stack-outlet-id"/>
+                <outlet property="scopeLabel" destination="scope-value-label-id" id="scope-outlet-id"/>
+                <outlet property="scopeStackView" destination="scope-stack-id" id="scope-stack-outlet-id"/>
                 <outlet property="subLabel" destination="sub-value-label-id" id="sub-outlet-id"/>
                 <outlet property="subStackView" destination="sub-stack-id" id="sub-stack-outlet-id"/>
             </connections>
