@@ -1,8 +1,7 @@
 import AuthenticationServices
 
-
 func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationContextProvider: ASWebAuthenticationPresentationContextProviding, prefersEphemeralWebBrowserSession: Bool) async throws -> URL {
-    
+
     return try await withCheckedThrowingContinuation { continuation in
         // Initialize the session.
         let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { callbackURL, error in
@@ -22,11 +21,11 @@ func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationC
             }
             continuation.resume(returning: callbackURL)
         }
-        
+
         // Set an appropriate context provider instance that determines the window that acts as a presentation anchor for the session
         session.presentationContextProvider = presentationContextProvider
         session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
-        
+
         // Start the Authentication Flow
         // if the result of this method is false then the error will already have been processed and the promise failed in the callback
         Task { @MainActor in

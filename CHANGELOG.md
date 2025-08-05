@@ -3,7 +3,7 @@
 
 ## Unreleased
 ### New features
-- add new logout options
+- add new logout options for revoking tokens and browser cookies
 
 ## v9.0.0
 ### Breaking changes
