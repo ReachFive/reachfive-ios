@@ -26,16 +26,6 @@ public extension ReachFive {
         }
     }
 
-    func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken {
-        let refreshRequest = RefreshRequest(
-            clientId: sdkConfig.clientId,
-            refreshToken: authToken.refreshToken,
-            redirectUri: sdkConfig.scheme
-        )
-        let token = try await reachFiveApi.refreshAccessToken(refreshRequest)
-        return try AuthToken.fromOpenIdTokenResponse(token)
-    }
-
     func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {
         let pkce = Pkce.generate()
         let scope = (scopes ?? scope).joined(separator: " ")

@@ -160,6 +160,11 @@ public class ReachFiveApi {
             .responseJson()
     }
 
+    public func revokeToken(revokeTokenRequest: RevokeTokenRequest) async throws {
+        try await networkClient.request(createUrl(path: "/oauth/revoke"), method: .post, parameters: revokeTokenRequest.dictionary())
+            .responseJson()
+    }
+
     // MARK: - Profile Management
 
     public func getProfile(authToken: AuthToken) async throws -> Profile {

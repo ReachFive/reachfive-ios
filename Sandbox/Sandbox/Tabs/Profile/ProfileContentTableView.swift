@@ -140,6 +140,16 @@ extension ProfileController {
 extension ProfileController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+
+        guard let section = Section(rawValue: indexPath.section) else { return }
+
+        if section == .Token {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let tokenDetailsVC = storyboard.instantiateViewController(withIdentifier: "TokenDetailsViewController") as? TokenDetailsViewController {
+                tokenDetailsVC.authToken = self.authToken
+                self.navigationController?.pushViewController(tokenDetailsVC, animated: true)
+            }
+        }
     }
 }
 
