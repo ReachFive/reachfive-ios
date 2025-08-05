@@ -23,6 +23,8 @@
 		2A33F30B2A016B1D00D05EB1 /* LoginWKWebviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */; };
 		2A33F30D2A01740600D05EB1 /* LoginCustomWebviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */; };
 		2A52203B297F187D00815558 /* SandboxTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A52203A297F187D00815558 /* SandboxTabBarController.swift */; };
+		2A65D1232E4253BE004B0004 /* MfaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A65D1212E4253BE004B0004 /* MfaController.swift */; };
+		2A65D1242E4253BE004B0004 /* PasskeyCredentialController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A65D1222E4253BE004B0004 /* PasskeyCredentialController.swift */; };
 		2A9C6BCA298AC2CE00BBD80F /* Pods_Sandbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E55CD881F31583F8D3480D8 /* Pods_Sandbox.framework */; };
 		2AB299ED2C0E29E300D0C5C8 /* RecoveryStartController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */; };
 		2AB299EF2C0E29F900D0C5C8 /* RecoveryEndController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */; };
@@ -33,7 +35,6 @@
 		2AD29AB92E2ED7F100B26535 /* TrustedDeviceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */; };
 		2AD29AE72E32AFA000B26535 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */; };
 		2AE326BD2E3931D1007D6763 /* DemoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE326BC2E3931D1007D6763 /* DemoController.swift */; };
-		2AE326C02E3932F7007D6763 /* MfaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE326BF2E3932F7007D6763 /* MfaController.swift */; };
 		2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFF7DE8296F1EB900514B47 /* ActionController.swift */; };
 		3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3414A7CC22DDD39C00CF393A /* ProfileController.swift */; };
 		341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341731FD229D6B6400681CFD /* AppDelegate.swift */; };
@@ -46,7 +47,6 @@
 		34797ABD22A9607D00ED093C /* SignupController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34797ABC22A9607D00ED093C /* SignupController.swift */; };
 		349E16EC230BEBBF002EA06B /* UpdatePasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */; };
 		99E4472F2B863AB300EC7559 /* ProfileContentTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */; };
-		99FF44322B72884800DDCAAE /* PasskeyCredentialController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */; };
 		EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91A17236291622417196AE /* SignupPasskeyController.swift */; };
 		EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */; };
 		EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */; };
@@ -71,6 +71,8 @@
 		2A33F30A2A016B1D00D05EB1 /* LoginWKWebviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWKWebviewController.swift; sourceTree = "<group>"; };
 		2A33F30C2A01740600D05EB1 /* LoginCustomWebviewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginCustomWebviewController.swift; sourceTree = "<group>"; };
 		2A52203A297F187D00815558 /* SandboxTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxTabBarController.swift; sourceTree = "<group>"; };
+		2A65D1212E4253BE004B0004 /* MfaController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MfaController.swift; sourceTree = "<group>"; };
+		2A65D1222E4253BE004B0004 /* PasskeyCredentialController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyCredentialController.swift; sourceTree = "<group>"; };
 		2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryStartController.swift; sourceTree = "<group>"; };
 		2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEndController.swift; sourceTree = "<group>"; };
 		2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryVerificationController.swift; sourceTree = "<group>"; };
@@ -80,7 +82,6 @@
 		2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TrustedDeviceCell.xib; sourceTree = "<group>"; };
 		2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		2AE326BC2E3931D1007D6763 /* DemoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoController.swift; sourceTree = "<group>"; };
-		2AE326BF2E3932F7007D6763 /* MfaController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MfaController.swift; sourceTree = "<group>"; };
 		2AFF7DE8296F1EB900514B47 /* ActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionController.swift; sourceTree = "<group>"; };
 		2E55CD881F31583F8D3480D8 /* Pods_Sandbox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Sandbox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3414A7CC22DDD39C00CF393A /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
@@ -96,7 +97,6 @@
 		34797ABC22A9607D00ED093C /* SignupController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupController.swift; sourceTree = "<group>"; };
 		349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePasswordController.swift; sourceTree = "<group>"; };
 		99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContentTableView.swift; sourceTree = "<group>"; };
-		99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyCredentialController.swift; sourceTree = "<group>"; };
 		C9C16455A16CA84067D7FF45 /* Pods-Sandbox.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sandbox.debug.xcconfig"; path = "Target Support Files/Pods-Sandbox/Pods-Sandbox.debug.xcconfig"; sourceTree = "<group>"; };
 		EA91A17236291622417196AE /* SignupPasskeyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignupPasskeyController.swift; sourceTree = "<group>"; };
 		EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecureStorage.swift; sourceTree = "<group>"; };
@@ -115,28 +115,28 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2A65D1202E4252BB004B0004 /* Profile subviews */ = {
+			isa = PBXGroup;
+			children = (
+				2A65D1212E4253BE004B0004 /* MfaController.swift */,
+				2A65D1222E4253BE004B0004 /* PasskeyCredentialController.swift */,
+				2A1957112E42143D008393DB /* TokenDetailsViewController.swift */,
+				349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */,
+			);
+			path = "Profile subviews";
+			sourceTree = "<group>";
+		};
 		2AE326BB2E39313A007D6763 /* Tabs */ = {
 			isa = PBXGroup;
 			children = (
 				2AFF7DE8296F1EB900514B47 /* ActionController.swift */,
 				2AE326BC2E3931D1007D6763 /* DemoController.swift */,
-				2A52203A297F187D00815558 /* SandboxTabBarController.swift */,
-				2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */,
-				2AE326BE2E393265007D6763 /* Profile */,
-			);
-			path = Tabs;
-			sourceTree = "<group>";
-		};
-		2AE326BE2E393265007D6763 /* Profile */ = {
-			isa = PBXGroup;
-			children = (
-				2AE326BF2E3932F7007D6763 /* MfaController.swift */,
-				99FF44312B72884800DDCAAE /* PasskeyCredentialController.swift */,
 				99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */,
 				3414A7CC22DDD39C00CF393A /* ProfileController.swift */,
-				349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */,
+				2A52203A297F187D00815558 /* SandboxTabBarController.swift */,
+				2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */,
 			);
-			path = Profile;
+			path = Tabs;
 			sourceTree = "<group>";
 		};
 		2AE326C12E39334E007D6763 /* Views */ = {
@@ -183,10 +183,10 @@
 		2AE326C42E3A4010007D6763 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				2A1957112E42143D008393DB /* TokenDetailsViewController.swift */,
 				2AE326C72E3A414C007D6763 /* Passkey */,
 				2AE326C82E3A4399007D6763 /* Password */,
 				2AE326C92E3A440C007D6763 /* Passwordless */,
+				2A65D1202E4252BB004B0004 /* Profile subviews */,
 				2AE326C52E3A4034007D6763 /* Recovery */,
 				2AE326CB2E3A447F007D6763 /* Social */,
 				2AE326CA2E3A4444007D6763 /* Web */,
@@ -462,17 +462,17 @@
 				2AB299ED2C0E29E300D0C5C8 /* RecoveryStartController.swift in Sources */,
 				2A0757F9296F49B10072869F /* PasskeyAutoFillController.swift in Sources */,
 				2A1079E929721DAC00431655 /* NativePasswordController.swift in Sources */,
-				2AE326C02E3932F7007D6763 /* MfaController.swift in Sources */,
 				2AB299F12C0E2AB900D0C5C8 /* RecoveryVerificationController.swift in Sources */,
 				341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */,
 				2AE326BD2E3931D1007D6763 /* DemoController.swift in Sources */,
 				3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */,
 				3417FF6E22FB06E50009EC84 /* PasswordlessController.swift in Sources */,
+				2A65D1232E4253BE004B0004 /* MfaController.swift in Sources */,
+				2A65D1242E4253BE004B0004 /* PasskeyCredentialController.swift in Sources */,
 				EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */,
 				EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */,
 				EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */,
 				2A33F30B2A016B1D00D05EB1 /* LoginWKWebviewController.swift in Sources */,
-				99FF44322B72884800DDCAAE /* PasskeyCredentialController.swift in Sources */,
 				2A33F30D2A01740600D05EB1 /* LoginCustomWebviewController.swift in Sources */,
 				2AD29AB82E2ED7F100B26535 /* TrustedDeviceCell.swift in Sources */,
 				2AD29AE72E32AFA000B26535 /* SettingsViewController.swift in Sources */,
