@@ -291,6 +291,7 @@ return "" }
     private func tokenManagementCell(for indexPath: IndexPath) -> UITableViewCell {
         let cell = /*profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ??*/ UITableViewCell(style: .default, reuseIdentifier: "DisclosureCell")
         cell.textLabel?.text = "View & Manage Token"
+        cell.detailTextLabel?.text = ""
         cell.accessoryType = .disclosureIndicator
         return cell
     }
@@ -324,7 +325,7 @@ return "" }
     }
 
     private func showWebLogoutInfo() {
-        presentAlert(title: "Web Logout", message: "This option will log you out from the web session, clearing any cookies set by the identity provider.")
+        presentAlert(title: "Web Logout", message: "This option open a browser window to log you out from the web session, clearing any cookies set in your browser.")
     }
 
 //    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {

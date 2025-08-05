@@ -134,10 +134,7 @@ class TokenDetailsViewController: UIViewController {
         let revokeAction = UIAlertAction(title: "Revoke", style: .destructive) { _ in
             Task {
                 do {
-                    try await AppDelegate.reachfive().revokeToken(authToken: authToken, tokenType: .accessToken)
-                    if authToken.refreshToken != nil {
-                        try await AppDelegate.reachfive().revokeToken(authToken: authToken, tokenType: .refreshToken)
-                    }
+                    try await AppDelegate.reachfive().revokeToken(authToken: authToken)
                     AppDelegate.storage.removeToken()
                     self.navigationController?.popViewController(animated: true)
                 } catch {

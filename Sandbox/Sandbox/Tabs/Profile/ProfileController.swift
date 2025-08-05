@@ -256,9 +256,15 @@ class ProfileController: UIViewController {
 extension ProfileController {
     func logoutAction(revoke: Bool, webLogout: Bool) {
         Task {
-            //TODO: options dans l'interface pour choisir les differentes options de logout
-//             let = WebSessionLogoutRequest(presentationContextProvider: self, origin: "ProfileController.logoutAction")
-            try? await AppDelegate.reachfive().logout()
+            
+            let request: WebSessionLogoutRequest? = if webLogout {
+                WebSessionLogoutRequest(presentationContextProvider: self, origin: "ProfileController.logoutAction")
+            } else { nil }
+            
+            let token: AuthToken? = if revoke {
+                authToken
+            } else { nil }
+            try? await AppDelegate.reachfive().logout(webSessionLogout: request, revoke: token)
             AppDelegate.storage.removeToken()
             self.navigationController?.popViewController(animated: true)
         }

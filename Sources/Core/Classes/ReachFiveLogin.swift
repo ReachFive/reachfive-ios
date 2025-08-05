@@ -2,7 +2,7 @@ import Foundation
 
 public extension ReachFive {
 
-    func logout(webSessionLogout request: WebSessionLogoutRequest? = nil) async throws {
+    func logout(webSessionLogout request: WebSessionLogoutRequest? = nil, revoke token: AuthToken? = nil) async throws {
         for provider in providers {
             do {
                 try await provider.logout()
@@ -23,6 +23,10 @@ public extension ReachFive {
                 callbackURLScheme: sdkConfig.baseScheme,
                 presentationContextProvider: request.presentationContextProvider,
                 prefersEphemeralWebBrowserSession: false)
+        }
+        
+        if let token {
+            try await revokeToken(authToken: token)
         }
     }
 

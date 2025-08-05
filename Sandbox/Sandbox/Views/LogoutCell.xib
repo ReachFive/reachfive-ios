@@ -36,7 +36,7 @@
                                         <rect key="frame" x="157.5" y="0.0" width="73.5" height="31"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </view>
-                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="l4g-f2-c1J">
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="l4g-f2-c1J">
                                         <rect key="frame" x="239" y="0.0" width="51" height="31"/>
                                     </switch>
                                 </subviews>
@@ -57,7 +57,7 @@
                                         <rect key="frame" x="134.5" y="0.0" width="96.5" height="31"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </view>
-                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b3g-f4-d2I">
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="b3g-f4-d2I">
                                         <rect key="frame" x="239" y="0.0" width="51" height="31"/>
                                     </switch>
                                 </subviews>
@@ -78,10 +78,10 @@
                     <constraint firstItem="2Yd-cK-dD3" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="16" id="5xK-g4-gqM"/>
                     <constraint firstAttribute="trailing" secondItem="sNf-zS-LgV" secondAttribute="trailing" constant="16" id="D3b-aA-gqM"/>
                     <constraint firstItem="sNf-zS-LgV" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="16" id="N4a-gG-d4f"/>
-                    <constraint firstAttribute="trailing" secondItem="2Yd-cK-dD3" secondAttribute="trailing" constant="16" id="hLg-aF-gqM"/>
-                    <constraint firstItem="2Yd-cK-dD3" firstAttribute="top" secondItem="sNf-zS-LgV" secondAttribute="bottom" constant="16" id="yF0-vE-gqL"/>
                     <constraint firstAttribute="bottom" secondItem="2Yd-cK-dD3" secondAttribute="bottom" constant="16" id="bottomConstraint"/>
+                    <constraint firstAttribute="trailing" secondItem="2Yd-cK-dD3" secondAttribute="trailing" constant="16" id="hLg-aF-gqM"/>
                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="160" id="minHeight"/>
+                    <constraint firstItem="2Yd-cK-dD3" firstAttribute="top" secondItem="sNf-zS-LgV" secondAttribute="bottom" constant="16" id="yF0-vE-gqL"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
