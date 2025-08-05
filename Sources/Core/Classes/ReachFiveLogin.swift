@@ -3,14 +3,11 @@ import Foundation
 public extension ReachFive {
 
     func logout(webSessionLogout request: WebSessionLogoutRequest? = nil, revoke token: AuthToken? = nil) async throws {
+        // Don't stop for errors along the way
+        
         for provider in providers {
-            do {
-                try await provider.logout()
-            } catch {
-                // Continue logging out other providers
-            }
+            try? await provider.logout()
         }
-        try await self.reachFiveApi.logout()
 
         if let request {
             let options = [
@@ -18,7 +15,7 @@ public extension ReachFive {
                 "origin": request.origin,
             ]
 
-            let _ = try await webAuthenticationSession(
+            let _ = try? await webAuthenticationSession(
                 url: reachFiveApi.buildLogoutURL(queryParams: options),
                 callbackURLScheme: sdkConfig.baseScheme,
                 presentationContextProvider: request.presentationContextProvider,
@@ -26,8 +23,10 @@ public extension ReachFive {
         }
         
         if let token {
-            try await revokeToken(authToken: token)
+            try? await revokeToken(authToken: token)
         }
+        
+        try await self.reachFiveApi.logout()
     }
 
     func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {
