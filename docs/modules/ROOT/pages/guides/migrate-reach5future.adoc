@@ -12,8 +12,7 @@ The *Reach5Future SDK* allows a gradual migration, enabling customers to maintai
 To use the *Reach5Future SDK*, integrate it into your project alongside or in place of the main {company} iOS SDK.
 The compatibility bridge is provided as a separate module to ensure BrightFutures-based methods remain functional.
 
-[source]
-==== Installation
+=== Installation
 
 [tabs]
 ====
@@ -21,12 +20,13 @@ Cocoapods::
 +
 --
 
-. Add this line to your `Podfile` file, replacing `x` with the latest version:
+. Add this line to your `Podfile` file.
 +
-[source]
+[source,subs="normal,callouts"]
 ----
-pod 'Reach5Future', '~> x'
+pod 'Reach5Future', '~> {sdk-ios-future-latest-version}' <1>
 ----
+<1> `{sdk-ios-future-latest-version}` is the latest version of the SDK.
 
 . Then run:
 +
@@ -50,7 +50,7 @@ Or directly add this to the dependencies in `Package.swift`
 [source,swift,subs="attributes"]
 ----
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios-future.git", .upToNextMajor(from: "x"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios-future.git", .upToNextMajor(from: "{sdk-ios-future-latest-version}"))
 ]
 ----
 
