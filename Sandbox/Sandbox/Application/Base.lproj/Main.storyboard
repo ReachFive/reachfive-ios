@@ -278,7 +278,7 @@
                                         <rect key="frame" x="0.0" y="50" width="404" height="52"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="HyK-Am-JUA" id="VRc-NK-UUF">
-                                            <rect key="frame" x="0.0" y="0.0" width="404" height="51.666667938232422"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="404" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -1888,51 +1888,19 @@
             </objects>
             <point key="canvasLocation" x="-2467" y="864"/>
         </scene>
-        <!--MFA credentials-->
+        <!--Trusted Devices-->
         <scene sceneID="g1b-tn-Acw">
             <objects>
-                <viewController id="oW2-ti-e1U" userLabel="MFA credentials" customClass="MfaController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="oW2-ti-e1U" userLabel="Trusted Devices" customClass="MfaController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="3J7-ip-0VJ">
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="xO1-vg-5iz">
-                                <rect key="frame" x="20" y="144" width="105" height="32"/>
-                                <segments>
-                                    <segment title="Email"/>
-                                    <segment title="SMS"/>
-                                </segments>
-                            </segmentedControl>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cS0-d5-6IH">
-                                <rect key="frame" x="145" y="139.33333333333334" width="81.333333333333314" height="40.666666666666657"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="StepUp"/>
-                                <connections>
-                                    <action selector="startStepUp:" destination="oW2-ti-e1U" eventType="touchUpInside" id="tap-ln-Lt7"/>
-                                </connections>
-                            </button>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="credentialsTableView-ID">
-                                <rect key="frame" x="0.0" y="195" width="402" height="180"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="180" id="credentialsTableViewHeightConstraint-ID"/>
-                                </constraints>
-                                <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="MfaCredentialCell" id="credentialCell-ID">
-                                        <rect key="frame" x="0.0" y="50" width="402" height="51.666667938232422"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="credentialCell-ID" id="credentialCellContentView-ID">
-                                            <rect key="frame" x="0.0" y="0.0" width="402" height="51.666667938232422"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                        </tableViewCellContentView>
-                                    </tableViewCell>
-                                </prototypes>
-                            </tableView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="trustedDevicesTableView-ID">
-                                <rect key="frame" x="0.0" y="385" width="402" height="372"/>
+                                <rect key="frame" x="0.0" y="124" width="402" height="633"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TrustedDeviceCell" id="trustedDeviceCell-ID">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TrustedDeviceCell" id="trustedDeviceCell-ID" customClass="TrustedDeviceCell" customModule="Sandbox" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="50" width="402" height="51.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="trustedDeviceCell-ID" id="trustedDeviceCellContentView-ID">
@@ -1946,26 +1914,15 @@
                         <viewLayoutGuide key="safeArea" id="d4u-HN-3F3"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="cS0-d5-6IH" firstAttribute="leading" secondItem="xO1-vg-5iz" secondAttribute="trailing" constant="20" id="1ma-z0-g6K"/>
-                            <constraint firstItem="cS0-d5-6IH" firstAttribute="centerY" secondItem="xO1-vg-5iz" secondAttribute="centerY" id="Uxe-2a-Tb4"/>
-                            <constraint firstItem="d4u-HN-3F3" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="cS0-d5-6IH" secondAttribute="trailing" id="Vhl-OO-XOd"/>
-                            <constraint firstItem="credentialsTableView-ID" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" id="credentialsTableViewLeadingConstraint-ID"/>
-                            <constraint firstItem="credentialsTableView-ID" firstAttribute="top" secondItem="xO1-vg-5iz" secondAttribute="bottom" constant="20" id="credentialsTableViewTopConstraint-ID"/>
-                            <constraint firstItem="credentialsTableView-ID" firstAttribute="trailing" secondItem="d4u-HN-3F3" secondAttribute="trailing" id="credentialsTableViewTrailingConstraint-ID"/>
-                            <constraint firstItem="xO1-vg-5iz" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" constant="20" id="kdT-QU-s9N"/>
-                            <constraint firstItem="xO1-vg-5iz" firstAttribute="top" secondItem="d4u-HN-3F3" secondAttribute="top" constant="20" id="stepUpStackViewTopConstraint-ID"/>
+                            <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="top" secondItem="d4u-HN-3F3" secondAttribute="top" id="GIo-cC-gVg"/>
                             <constraint firstItem="d4u-HN-3F3" firstAttribute="bottom" secondItem="trustedDevicesTableView-ID" secondAttribute="bottom" id="trustedDevicesTableViewBottomConstraint-ID"/>
                             <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="leading" secondItem="d4u-HN-3F3" secondAttribute="leading" id="trustedDevicesTableViewLeadingConstraint-ID"/>
-                            <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="top" secondItem="credentialsTableView-ID" secondAttribute="bottom" constant="10" id="trustedDevicesTableViewTopConstraint-ID"/>
                             <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="trailing" secondItem="d4u-HN-3F3" secondAttribute="trailing" id="trustedDevicesTableViewTrailingConstraint-ID"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="MFA Credentials" id="zJI-Nr-w8b" userLabel="MFA Phone Number Registration"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="credentialsTableView" destination="credentialsTableView-ID" id="dwO-5a-Wur"/>
-                        <outlet property="selectedStepUpType" destination="xO1-vg-5iz" id="U2h-gt-qDP"/>
-                        <outlet property="startStepUp" destination="cS0-d5-6IH" id="lFR-vh-Wxx"/>
                         <outlet property="trustedDevicesTableView" destination="trustedDevicesTableView-ID" id="trustedDevicesTableViewOutlet-ID"/>
                     </connections>
                 </viewController>

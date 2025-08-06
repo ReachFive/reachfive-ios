@@ -10,14 +10,21 @@ struct Field {
 enum Section: Int, CaseIterable {
     case ContactInformation
     case ProfileInformation
-    case ComplexData
+    case Security
     case Token
     case Metadata
     case Logout
 }
 
-// TODO:
-// - remove enroll MFA identifier in menu when the identifier has already been enrolled. Requires listMfaCredentials
+enum SecurityRows: Int, CaseIterable {
+    //TODO: case Password // show if there is one, and able to add/edit
+    case Passkeys
+    case TrustedDevices
+    case Addresses
+    case CustomFields
+    case Consents
+}
+
 extension ProfileController {
 
     static func format(date: Int) -> String {
@@ -159,8 +166,6 @@ extension ProfileController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print("\(#fileID):\(#line)", #function)
-        print(profile, mfaCredentials, passkeys)
         guard let section = Section(rawValue: section) else {
             print("section not found")
             return 0 }
@@ -170,7 +175,7 @@ extension ProfileController: UITableViewDataSource {
             let hasMfaPhoneNumber = mfaCredentials.contains { $0.type == .sms && $0.phoneNumber != profile.phoneNumber }
             return hasMfaPhoneNumber ? 3 : 2
         case .ProfileInformation: return editableFields.count // Editable fields
-        case .ComplexData: return 5 // Passkeys, Trusted Devices, Addresses, Custom Fields, Consents
+        case .Security: return SecurityRows.allCases.count
         case .Token: return 1
         case .Metadata: return metadataFields.count
         case .Logout: return 1
@@ -178,8 +183,6 @@ extension ProfileController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        print("\(#fileID):\(#line)", "tableView(_:cellForRowAt:\(indexPath.section), \(indexPath.row))")
-        print(profile, mfaCredentials, passkeys)
 
         guard let section = Section(rawValue: indexPath.section) else {
             print("section not found")
@@ -187,7 +190,7 @@ return UITableViewCell() }
         switch section {
         case .ContactInformation: return contactInfoCell(for: indexPath)
         case .ProfileInformation: return editableProfileCell(for: indexPath)
-        case .ComplexData: return navigableCell(for: indexPath)
+        case .Security: return navigableCell(for: indexPath)
         case .Token: return tokenManagementCell(for: indexPath)
         case .Metadata: return metadataCell(for: indexPath)
         case .Logout: return logoutCell(for: indexPath)
@@ -195,16 +198,14 @@ return UITableViewCell() }
     }
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        print("\(#fileID):\(#line)", #function)
-        print(profile, mfaCredentials, passkeys)
-
+        
         guard let section = Section(rawValue: section) else {
             print("section not found")
-return "" }
+            return "" }
         switch section {
         case .ContactInformation: return "Contact Information"
         case .ProfileInformation: return "Profile Information"
-        case .ComplexData: return "Security & Complex Data"
+        case .Security: return "Security & Complex Data"
         case .Token: return "Token"
         case .Metadata: return "Metadata"
         case .Logout: return "Logout"
@@ -212,7 +213,6 @@ return "" }
     }
 
     private func contactInfoCell(for indexPath: IndexPath) -> UITableViewCell {
-        print("\(#fileID):\(#line)", #function)
         let cell = profileData.dequeueReusableCell(withIdentifier: "ProfileContactInfoCell", for: indexPath) as! ProfileContactInfoCell
 
         switch indexPath.row {
@@ -220,7 +220,7 @@ return "" }
             let isEnrolled = mfaCredentials.contains { $0.type == .email }
             cell.configure(fieldName: "Email", value: profile.email, isVerified: profile.emailVerified ?? false, isMfaEnrolled: isEnrolled, actions: emailActions())
         case 1:
-            let isEnrolled = mfaCredentials.contains { $0.phoneNumber == profile.phoneNumber }
+            let isEnrolled = profile.phoneNumber != nil && mfaCredentials.contains { $0.phoneNumber == profile.phoneNumber }
             cell.configure(fieldName: "Phone Number", value: profile.phoneNumber, isVerified: profile.phoneNumberVerified ?? false, isMfaEnrolled: isEnrolled, actions: phoneNumberActions())
         case 2:
             if let mfaPhone = mfaCredentials.first(where: { $0.type == .sms && $0.phoneNumber != profile.phoneNumber }) {
@@ -233,7 +233,6 @@ return "" }
     }
 
     private func editableProfileCell(for indexPath: IndexPath) -> UITableViewCell {
-        print("\(#fileID):\(#line)", #function)
         let cell = profileData.dequeueReusableCell(withIdentifier: "EditableProfileFieldCell", for: indexPath) as! EditableProfileFieldCell
         let field = editableFields[indexPath.row]
         let value = updatedProfile?[keyPath: field.path].value
@@ -246,18 +245,18 @@ return "" }
     }
 
     private func navigableCell(for indexPath: IndexPath) -> UITableViewCell {
-        print("\(#fileID):\(#line)", #function)
-        print(profile, mfaCredentials, passkeys)
-        
-
         let cell = /*profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ??*/ UITableViewCell(style: .value1, reuseIdentifier: "DisclosureCell")
+        
+        guard let row = SecurityRows(rawValue: indexPath.row) else {
+            return cell
+        }
 
         cell.accessoryType = .disclosureIndicator
-        switch indexPath.row {
-        case 0:
+        switch row {
+        case .Passkeys:
             cell.textLabel?.text = "Passkeys"
             cell.detailTextLabel?.text = "\(passkeys.count)"
-        case 1:
+        case .TrustedDevices:
             cell.textLabel?.text = "Trusted Devices"
             cell.accessoryType = .none
             switch trustedDevicesState {
@@ -273,17 +272,15 @@ return "" }
             case .stepUpRequired:
                 cell.detailTextLabel?.text = "Step-up required"
             }
-        case 2:
+        case .Addresses:
             cell.textLabel?.text = "Addresses"
             cell.detailTextLabel?.text = "\(profile.addresses?.count ?? 0)"
-        case 3:
+        case .CustomFields:
             cell.textLabel?.text = "Custom Fields"
             cell.detailTextLabel?.text = "\(profile.customFields?.count ?? 0)"
-        case 4:
+        case .Consents:
             cell.textLabel?.text = "Consents"
             cell.detailTextLabel?.text = "\(profile.consents?.count ?? 0)"
-        default:
-            break
         }
         return cell
     }
@@ -297,7 +294,6 @@ return "" }
     }
 
     private func metadataCell(for indexPath: IndexPath) -> UITableViewCell {
-        print("\(#fileID):\(#line)", #function)
         let field = metadataFields[indexPath.row]
         let cell = profileData.dequeueReusableCell(withIdentifier: "Value1Cell") ?? UITableViewCell(style: .value1, reuseIdentifier: "Value1Cell")
         cell.textLabel?.text = field.name
@@ -306,7 +302,6 @@ return "" }
     }
 
     private func logoutCell(for indexPath: IndexPath) -> UITableViewCell {
-        print("\(#fileID):\(#line)", #function)
         let cell = profileData.dequeueReusableCell(withIdentifier: "LogoutCell", for: indexPath) as! LogoutCell
         cell.onLogoutTapped = { [weak self] revoke, webLogout in
             self?.logoutAction(revoke: revoke, webLogout: webLogout)

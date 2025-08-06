@@ -88,7 +88,6 @@ public class ProfileUpdate: DictionaryEncodable {
         nickname: Diff<String> = .NoOp,
         birthdate: Diff<String> = .NoOp,
         picture: Diff<String> = .NoOp,
-        externalId: Diff<String> = .NoOp,
         username: Diff<String> = .NoOp,
         gender: Diff<String> = .NoOp,
         email: Diff<String> = .NoOp,
