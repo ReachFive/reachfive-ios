@@ -2,6 +2,8 @@
 
 
 ## Unreleased
+
+## v9.1.0
 ### New features
 - add new logout options for revoking tokens and browser cookies
 
