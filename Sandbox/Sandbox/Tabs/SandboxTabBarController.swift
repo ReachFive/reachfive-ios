@@ -35,7 +35,7 @@ class SandboxTabBarController: UITabBarController {
         guard #available(iOS 15, *) else {
             return UIImage(systemName: "person.crop.circle.badge.plus")
         }
-        return UIImage(systemName: "person.crop.circle.badge")
+        return UIImage(systemName: "person.crop.circle.badge.clock")
     }
     
     @IBOutlet weak var sandboxTabBar: UITabBar?

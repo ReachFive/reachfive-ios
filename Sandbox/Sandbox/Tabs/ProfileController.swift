@@ -139,12 +139,10 @@ class ProfileController: UIViewController {
         }
         
         Task {
-            async let profileTask = AppDelegate.reachfive().getProfile(authToken: authToken)
-            async let passkeysTask = AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken)
             
             do {
-                let (profile, passkeys) = try await (profileTask, passkeysTask)
-                print("profile, mfaCredentialsResponse, passkeys loaded")
+                let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
+                let passkeys = await getPasskeysAndSetStatusImage(authToken: authToken)
                 self.profile = profile
                 self.updatedProfile = profile.asUpdate()
                 self.passkeys = passkeys
@@ -154,10 +152,7 @@ class ProfileController: UIViewController {
                 
                 Task { @MainActor in
                     self.profileData.reloadData()
-                    await self.setStatusImage(authToken: authToken)
                 }
-                
-                print("Profile fetched: \(profile)")
             } catch {
                 self.didLogout()
                 Task { @MainActor in
@@ -213,16 +208,22 @@ class ProfileController: UIViewController {
 
 
 //TODO: mettre un DataSate pour les passkeys (et le mfa?) qui peuvent ne pas être frais, ou alors faire un withFreshToken dans le fetchData
-    private func setStatusImage(authToken: AuthToken) async {
+    private func getPasskeysAndSetStatusImage(authToken: AuthToken) async -> [DeviceCredential] {
         // Use listWebAuthnCredentials to test if token is fresh
         // A fresh token is also needed for updating the profile and registering MFA credentials
         do {
-            let _ = try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken)
-            self.profileTabBarItem.image = SandboxTabBarController.loggedIn
-            self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+            let passkeys = try await AppDelegate.reachfive().listWebAuthnCredentials(authToken: authToken)
+            Task { @MainActor in
+                self.profileTabBarItem.image = SandboxTabBarController.loggedIn
+                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+            }
+            return passkeys
         } catch {
-            self.profileTabBarItem.image = SandboxTabBarController.loggedInButNotFresh
-            self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+            Task { @MainActor in
+                self.profileTabBarItem.image = SandboxTabBarController.loggedInButNotFresh
+                self.profileTabBarItem.selectedImage = self.profileTabBarItem.image
+            }
+            return []
         }
     }
 

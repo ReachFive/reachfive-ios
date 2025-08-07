@@ -147,15 +147,42 @@ extension ProfileController {
 extension ProfileController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        guard let authToken = self.authToken else { return }
 
         guard let section = Section(rawValue: indexPath.section) else { return }
 
-        if section == .Token {
+        switch section {
+        case .Security:
+            guard let row = SecurityRows(rawValue: indexPath.row) else { return }
+            
+            switch row {
+            case .Passkeys:
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let passkeyVC = storyboard.instantiateViewController(withIdentifier: "PasskeyCredentialController") as? PasskeyCredentialController {
+                    passkeyVC.authToken = authToken
+                    passkeyVC.devices = self.passkeys
+                    self.navigationController?.pushViewController(passkeyVC, animated: true)
+                }
+            case .TrustedDevices:
+                // When the trusted devices row is tapped, we navigate to the TrustedDevicesViewController
+                if case .loaded(let devices) = self.trustedDevicesState {
+                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                    if let trustedDevicesVC = storyboard.instantiateViewController(withIdentifier: "TrustedDevicesViewController") as? TrustedDevicesViewController {
+                        trustedDevicesVC.trustedDevices = devices
+                        self.navigationController?.pushViewController(trustedDevicesVC, animated: true)
+                    }
+                }
+            default:
+                break
+            }
+        case .Token:
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let tokenDetailsVC = storyboard.instantiateViewController(withIdentifier: "TokenDetailsViewController") as? TokenDetailsViewController {
-                tokenDetailsVC.authToken = self.authToken
+                tokenDetailsVC.authToken = authToken
                 self.navigationController?.pushViewController(tokenDetailsVC, animated: true)
             }
+        default:
+            break
         }
     }
 }

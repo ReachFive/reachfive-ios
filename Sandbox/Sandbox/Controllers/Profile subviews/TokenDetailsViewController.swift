@@ -3,7 +3,7 @@ import Reach5
 import os.log
 
 class TokenDetailsViewController: UIViewController {
-    var authToken: AuthToken?
+    var authToken: AuthToken = AuthToken(accessToken: "") // Just to appease the compiler, this fake value is overwritten when instantiating this from the profile controller
 
     // MARK: - IBOutlets for Raw Token Values
 
@@ -34,7 +34,6 @@ class TokenDetailsViewController: UIViewController {
 
     /// Configures the view with both raw and decoded token details.
     private func configureWithAuthToken() {
-        guard let authToken = authToken else { return }
 
         // Display the raw token strings.
         idTokenLabel.text = authToken.idToken ?? "N/A"
@@ -127,15 +126,12 @@ class TokenDetailsViewController: UIViewController {
 
     /// Revokes the tokens after user confirmation.
     @IBAction func revokeTokenTapped(_ sender: UIButton) {
-        guard let authToken = authToken else { return }
-
         let alert = UIAlertController(title: "Revoke Token", message: "Are you sure you want to revoke the tokens? This action cannot be undone.", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         let revokeAction = UIAlertAction(title: "Revoke", style: .destructive) { _ in
             Task {
                 do {
-                    try await AppDelegate.reachfive().revokeToken(authToken: authToken)
-                    AppDelegate.storage.removeToken()
+                    try await AppDelegate.reachfive().revokeToken(authToken: self.authToken)
                     self.navigationController?.popViewController(animated: true)
                 } catch {
                     self.presentErrorAlert(title: "Revocation Failed", error)
