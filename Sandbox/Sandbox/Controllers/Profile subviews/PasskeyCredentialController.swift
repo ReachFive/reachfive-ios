@@ -3,6 +3,7 @@ import UIKit
 
 class PasskeyCredentialController: UIViewController {
 
+    var authToken: AuthToken = AuthToken(accessToken: "") // Just to appease the compiler, this fake value is overwritten when instantiating this from the profile controller
     var devices: [DeviceCredential] = [] {
         didSet {
             Task { @MainActor in
@@ -26,17 +27,7 @@ class PasskeyCredentialController: UIViewController {
         credentialTableview.register(nib, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        print("PasskeyCredentialController.viewWillAppear")
-        super.viewWillAppear(animated)
-        Task {
-            if let authToken = AppDelegate.storage.getToken() {
-                await self.reloadCredentials(authToken: authToken)
-            }
-        }
-    }
-
-    private func reloadCredentials(authToken: AuthToken) async {
+    private func reloadCredentials() async {
         var listCredentials: [DeviceCredential] = []
         do {
             listCredentials = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
@@ -55,10 +46,6 @@ class PasskeyCredentialController: UIViewController {
     func registerNewPasskey() async {
         print("registerNewPasskey")
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-        guard let authToken = AppDelegate.storage.getToken() else {
-            print("not logged in")
-            return
-        }
         do {
             let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
             let friendlyName = ProfileController.username(profile: profile)
@@ -78,8 +65,8 @@ class PasskeyCredentialController: UIViewController {
                 Task {
                     let request = NewPasskeyRequest(anchor: window, friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey")
                     do {
-                        try await AppDelegate.reachfive().registerNewPasskey(withRequest: request, authToken: authToken)
-                        await self.reloadCredentials(authToken: authToken)
+                        try await AppDelegate.reachfive().registerNewPasskey(withRequest: request, authToken: self.authToken)
+                        await self.reloadCredentials()
                     } catch {
                         self.presentErrorAlert(title: "New passkey registration failed", error)
                     }
@@ -116,7 +103,7 @@ extension PasskeyCredentialController: UITableViewDelegate {
         }
 
         headerView.configure(
-            title: "Passkey Credentials",
+            title: "",
             onEdit: { [weak self] button in
                 guard let self else { return }
                 let isEditing = !self.credentialTableview.isEditing
@@ -143,12 +130,10 @@ extension PasskeyCredentialController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         Task { @MainActor in
             if editingStyle == .delete {
-                guard let authToken = AppDelegate.storage.getToken() else { return }
                 let element = devices[indexPath.row]
                 do {
                     try await AppDelegate.reachfive().deleteWebAuthnRegistration(id: element.id, authToken: authToken)
                     self.devices.remove(at: indexPath.row)
-                    print("did remove passkey \(element.friendlyName)")
                     tableView.deleteRows(at: [indexPath], with: .fade)
                 } catch {
                     self.presentErrorAlert(title: "Delete Passkey failed", error)

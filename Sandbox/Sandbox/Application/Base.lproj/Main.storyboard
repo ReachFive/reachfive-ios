@@ -278,7 +278,7 @@
                                         <rect key="frame" x="0.0" y="50" width="404" height="52"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="HyK-Am-JUA" id="VRc-NK-UUF">
-                                            <rect key="frame" x="0.0" y="0.0" width="404" height="51.666667938232422"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="404" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -1842,20 +1842,20 @@
         <!--Passkeys-->
         <scene sceneID="ifl-ae-YGk">
             <objects>
-                <viewController id="dix-k4-nE0" userLabel="Passkeys" customClass="PasskeyCredentialController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PasskeyCredentialController" id="dix-k4-nE0" userLabel="Passkeys" customClass="PasskeyCredentialController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="o8G-Tr-Fi1">
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="J3t-FI-s0I">
-                                <rect key="frame" x="20" y="144" width="366" height="662"/>
+                                <rect key="frame" x="0.0" y="124" width="402" height="682"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="credentialCell" style="IBUITableViewCellStyleDefault" id="GvB-3P-rdM">
-                                        <rect key="frame" x="0.0" y="50" width="366" height="51.666667938232422"/>
+                                        <rect key="frame" x="0.0" y="50" width="402" height="51.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="GvB-3P-rdM" id="vBk-3m-j72">
-                                            <rect key="frame" x="0.0" y="0.0" width="366" height="51.666667938232422"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="402" height="51.666667938232422"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -1865,10 +1865,10 @@
                         <viewLayoutGuide key="safeArea" id="I4u-wd-xM7"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="J3t-FI-s0I" firstAttribute="top" secondItem="I4u-wd-xM7" secondAttribute="top" constant="20" id="Kni-mh-xPt"/>
+                            <constraint firstItem="J3t-FI-s0I" firstAttribute="top" secondItem="I4u-wd-xM7" secondAttribute="top" id="Kni-mh-xPt"/>
                             <constraint firstItem="J3t-FI-s0I" firstAttribute="bottom" secondItem="I4u-wd-xM7" secondAttribute="bottom" id="L5z-Kw-QGx"/>
-                            <constraint firstItem="J3t-FI-s0I" firstAttribute="leading" secondItem="I4u-wd-xM7" secondAttribute="leading" constant="20" id="O7l-wu-Bb9"/>
-                            <constraint firstItem="J3t-FI-s0I" firstAttribute="trailing" secondItem="o8G-Tr-Fi1" secondAttribute="trailingMargin" id="PI8-od-MWd"/>
+                            <constraint firstItem="J3t-FI-s0I" firstAttribute="leading" secondItem="I4u-wd-xM7" secondAttribute="leading" id="O7l-wu-Bb9"/>
+                            <constraint firstItem="I4u-wd-xM7" firstAttribute="trailing" secondItem="J3t-FI-s0I" secondAttribute="trailing" id="V62-ak-wkr"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Passkeys" id="hhr-Mh-rkc"/>

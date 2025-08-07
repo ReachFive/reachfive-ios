@@ -9,12 +9,12 @@ public class AuthToken: Codable {
     public let user: OpenIdUser?
 
     public init(
-        idToken: String?,
+        idToken: String? = nil,
         accessToken: String,
-        refreshToken: String?,
-        tokenType: String?,
-        expiresIn: Int?,
-        user: OpenIdUser?
+        refreshToken: String? = nil,
+        tokenType: String? = nil,
+        expiresIn: Int? = nil,
+        user: OpenIdUser? = nil
     ) {
         self.idToken = idToken
         self.accessToken = accessToken
