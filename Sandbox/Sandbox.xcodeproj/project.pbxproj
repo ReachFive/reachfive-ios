@@ -25,6 +25,7 @@
 		2A52203B297F187D00815558 /* SandboxTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A52203A297F187D00815558 /* SandboxTabBarController.swift */; };
 		2A65D1232E4253BE004B0004 /* MfaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A65D1212E4253BE004B0004 /* MfaController.swift */; };
 		2A65D1242E4253BE004B0004 /* PasskeyCredentialController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A65D1222E4253BE004B0004 /* PasskeyCredentialController.swift */; };
+		2A65D1282E44BD90004B0004 /* TrustedDevicesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A65D1272E44BD90004B0004 /* TrustedDevicesViewController.swift */; };
 		2A9C6BCA298AC2CE00BBD80F /* Pods_Sandbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E55CD881F31583F8D3480D8 /* Pods_Sandbox.framework */; };
 		2AB299ED2C0E29E300D0C5C8 /* RecoveryStartController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */; };
 		2AB299EF2C0E29F900D0C5C8 /* RecoveryEndController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */; };
@@ -73,6 +74,7 @@
 		2A52203A297F187D00815558 /* SandboxTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxTabBarController.swift; sourceTree = "<group>"; };
 		2A65D1212E4253BE004B0004 /* MfaController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MfaController.swift; sourceTree = "<group>"; };
 		2A65D1222E4253BE004B0004 /* PasskeyCredentialController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyCredentialController.swift; sourceTree = "<group>"; };
+		2A65D1272E44BD90004B0004 /* TrustedDevicesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedDevicesViewController.swift; sourceTree = "<group>"; };
 		2AB299EC2C0E29E300D0C5C8 /* RecoveryStartController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryStartController.swift; sourceTree = "<group>"; };
 		2AB299EE2C0E29F900D0C5C8 /* RecoveryEndController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEndController.swift; sourceTree = "<group>"; };
 		2AB299F02C0E2AB900D0C5C8 /* RecoveryVerificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryVerificationController.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				2A65D1212E4253BE004B0004 /* MfaController.swift */,
 				2A65D1222E4253BE004B0004 /* PasskeyCredentialController.swift */,
 				2A1957112E42143D008393DB /* TokenDetailsViewController.swift */,
+				2A65D1272E44BD90004B0004 /* TrustedDevicesViewController.swift */,
 				349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */,
 			);
 			path = "Profile subviews";
@@ -470,6 +473,7 @@
 				2A65D1232E4253BE004B0004 /* MfaController.swift in Sources */,
 				2A65D1242E4253BE004B0004 /* PasskeyCredentialController.swift in Sources */,
 				EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */,
+				2A65D1282E44BD90004B0004 /* TrustedDevicesViewController.swift in Sources */,
 				EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */,
 				EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */,
 				2A33F30B2A016B1D00D05EB1 /* LoginWKWebviewController.swift in Sources */,

@@ -150,12 +150,31 @@ extension ProfileController: UITableViewDelegate {
 
         guard let section = Section(rawValue: indexPath.section) else { return }
 
-        if section == .Token {
+        switch section {
+        case .Security:
+            guard let row = SecurityRows(rawValue: indexPath.row) else { return }
+            
+            switch row {
+            case .TrustedDevices:
+                // When the trusted devices row is tapped, we navigate to the TrustedDevicesViewController
+                if case .loaded(let devices) = self.trustedDevicesState {
+                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                    if let trustedDevicesVC = storyboard.instantiateViewController(withIdentifier: "TrustedDevicesViewController") as? TrustedDevicesViewController {
+                        trustedDevicesVC.trustedDevices = devices
+                        self.navigationController?.pushViewController(trustedDevicesVC, animated: true)
+                    }
+                }
+            default:
+                break
+            }
+        case .Token:
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let tokenDetailsVC = storyboard.instantiateViewController(withIdentifier: "TokenDetailsViewController") as? TokenDetailsViewController {
                 tokenDetailsVC.authToken = self.authToken
                 self.navigationController?.pushViewController(tokenDetailsVC, animated: true)
             }
+        default:
+            break
         }
     }
 }

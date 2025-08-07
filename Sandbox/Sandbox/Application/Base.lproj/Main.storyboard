@@ -1891,7 +1891,7 @@
         <!--Trusted Devices-->
         <scene sceneID="g1b-tn-Acw">
             <objects>
-                <viewController id="oW2-ti-e1U" userLabel="Trusted Devices" customClass="MfaController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="TrustedDevicesViewController" id="oW2-ti-e1U" userLabel="Trusted Devices" customClass="TrustedDevicesViewController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="3J7-ip-0VJ">
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1920,7 +1920,7 @@
                             <constraint firstItem="trustedDevicesTableView-ID" firstAttribute="trailing" secondItem="d4u-HN-3F3" secondAttribute="trailing" id="trustedDevicesTableViewTrailingConstraint-ID"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="MFA Credentials" id="zJI-Nr-w8b" userLabel="MFA Phone Number Registration"/>
+                    <navigationItem key="navigationItem" title="Trusted Devices" id="zJI-Nr-w8b"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="trustedDevicesTableView" destination="trustedDevicesTableView-ID" id="trustedDevicesTableViewOutlet-ID"/>
