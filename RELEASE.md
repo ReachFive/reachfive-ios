@@ -6,7 +6,7 @@
     ```ruby
     $VERSION = 'x.x.x'
     ```
-3. Run [update.sh](update.sh) to install the new version of this library and update the dependencies in Cocoapod and SPM
+3. Run [update.sh](update.sh) to install the new version of this library and update the dependencies in CocoaPods and SPM
     ```shell
     ./update.sh
     ```
@@ -28,8 +28,10 @@
 
 9. The CI will automatically publish this new version
 
-10. Finally, draft a new release in the [Github releases tab](https://github.com/ReachFive/reachfive-ios/releases) (copy & paste the changelog in the release's description).
+10. Release Reach5Future
 
-11. If the new version needs a fork of the documentation, the branch `x.x.x` should exist in perpetuity for the purpose of this documentation.<br>
-    If, at step 7., the `x.x.x` branch was merged (not squashed) into master, then keep the branch open.<br>
+11. Finally, draft a new release in the [Github releases tab](https://github.com/ReachFive/reachfive-ios/releases) (copy & paste the changelog in the release's description).
+
+12. If the new version needs a fork of the documentation, the branch `x.x.x` should exist in perpetuity for the purpose of this documentation.<br>
+    If, at step 6., the `x.x.x` branch was merged (not squashed) into master, then keep the branch open.<br>
     If the branch was squashed, then delete the branch and recreate a new branch still named `x.x.x`.

@@ -117,7 +117,7 @@ public class SecureStorage: Storage {
 
     public func save<D: Codable>(key: String, value: D) {
         if let _ = set(value, forKey: key) {
-            //TODO: supprimer une fois que tous les usages sont mogrés aux fonctions spécifique des jetons
+            //TODO: supprimer une fois que tous les usages sont migrés aux fonctions spécifique des jetons
             if key == SecureStorage.authKey {
                 print("send SecureStorage.save.DidSetAuthToken")
                 NotificationCenter.default.post(name: .DidSetAuthToken, object: nil)

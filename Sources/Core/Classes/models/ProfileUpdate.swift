@@ -21,6 +21,15 @@ public enum Diff<Wrapped>: Diffable {
         }
     }
 
+    public var value: Wrapped? {
+        switch self {
+        case .Update(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
     public init(_ optional: Wrapped?) {
         switch optional {
         case .some(let value): self = .Update(value)
@@ -79,7 +88,6 @@ public class ProfileUpdate: DictionaryEncodable {
         nickname: Diff<String> = .NoOp,
         birthdate: Diff<String> = .NoOp,
         picture: Diff<String> = .NoOp,
-        externalId: Diff<String> = .NoOp,
         username: Diff<String> = .NoOp,
         gender: Diff<String> = .NoOp,
         email: Diff<String> = .NoOp,

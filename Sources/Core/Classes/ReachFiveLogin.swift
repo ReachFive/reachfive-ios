@@ -2,25 +2,31 @@ import Foundation
 
 public extension ReachFive {
 
-    func logout() async throws {
+    func logout(webSessionLogout request: WebSessionLogoutRequest? = nil, revoke token: AuthToken? = nil) async throws {
+        // Don't stop for errors along the way
+        
         for provider in providers {
-            do {
-                try await provider.logout()
-            } catch {
-                // Continue logging out other providers
-            }
+            try? await provider.logout()
         }
-        try await self.reachFiveApi.logout()
-    }
 
-    func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken {
-        let refreshRequest = RefreshRequest(
-            clientId: sdkConfig.clientId,
-            refreshToken: authToken.refreshToken,
-            redirectUri: sdkConfig.scheme
-        )
-        let token = try await reachFiveApi.refreshAccessToken(refreshRequest)
-        return try AuthToken.fromOpenIdTokenResponse(token)
+        if let request {
+            let options = [
+                "post_logout_redirect_uri": sdkConfig.redirectUri,
+                "origin": request.origin,
+            ]
+
+            let _ = try? await webAuthenticationSession(
+                url: reachFiveApi.buildLogoutURL(queryParams: options),
+                callbackURLScheme: sdkConfig.baseScheme,
+                presentationContextProvider: request.presentationContextProvider,
+                prefersEphemeralWebBrowserSession: false)
+        }
+        
+        if let token {
+            try? await revokeToken(authToken: token)
+        }
+        
+        try await self.reachFiveApi.logout()
     }
 
     func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {

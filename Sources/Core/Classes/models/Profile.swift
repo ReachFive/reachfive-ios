@@ -102,7 +102,6 @@ public class Profile: Codable, DictionaryEncodable {
             nickname: Diff(self.nickname),
             birthdate: Diff(self.birthdate),
             picture: Diff(self.picture),
-            externalId: Diff(self.externalId),
             username: Diff(self.username),
             gender: Diff(self.gender),
             email: Diff(self.email),

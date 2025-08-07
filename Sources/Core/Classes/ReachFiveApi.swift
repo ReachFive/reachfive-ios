@@ -99,6 +99,10 @@ public class ReachFiveApi {
         createUrl(path: "/oauth/authorize", params: queryParams)
     }
 
+    public func buildLogoutURL(queryParams: [String: String?]) -> URL {
+        createUrl(path: "/identity/v1/logout", params: queryParams)
+    }
+
     // MARK: - Configuration
 
     public func clientConfig() async throws -> ClientConfigResponse {
@@ -153,6 +157,11 @@ public class ReachFiveApi {
 
     public func logout() async throws {
         try await networkClient.request(createUrl(path: "/identity/v1/logout"))
+            .responseJson()
+    }
+
+    public func revokeToken(revokeTokenRequest: RevokeTokenRequest) async throws {
+        try await networkClient.request(createUrl(path: "/oauth/revoke"), method: .post, parameters: revokeTokenRequest.dictionary())
             .responseJson()
     }
 
