@@ -656,3 +656,20 @@ For more details, see link:https://developer.apple.com/documentation/uikit/uiapp
 | A block to execute if your app creates objects to perform the task the user was performing.
 // end::applicationRestorationHandler[]
 
+// tag::webSessionLogout[]
+|[[webSessionLogout,webSessionLogout]] webSessionLogout `WebSessionLogoutRequest?` 
+| _optional_ The web session logout request.
+
+Defaults to `nil`.
+
+If provided, triggers a web-based logout by opening a web authentication session to the server's logout endpoint (e.g., `/logout`). This clears browser cookies and redirects to a configured `post_logout_redirect_uri`.
+
+The URL must be defined in your {cc} settings at menu:Security[SSO > Allowed Callback URLs].
+// end::webSessionLogout[]
+
+// tag::revoke[]
+|[[revoke,revoke]] revoke `AuthToken?`
+| _optional_ The authentication token to revoke, invalidating the user's session. Use `nil` to skip token revocation.
+
+Defaults to `nil`.
+// end::revoke[]
