@@ -1,0 +1,33 @@
+= WebSessionLogoutRequest
+
+[.signature]
+[subs="normal"]
+----
+public class WebSessionLogoutRequest {
+    public init(<<presentationContextProvider>>: ASWebAuthenticationPresentationContextProviding, <<origin>>: String? = nil)
+}
+----
+
+== Description
+
+A configuration class for the `webSessionLogout` parameter of the xref:logout.adoc[] method in the {company} iOS SDK. 
+Use `WebSessionLogoutRequest` to enable web-based SSO logout, which opens a browser window to the server's logout endpoint (e.g., `/logout`), clears browser cookies, and redirects back to your app.
+
+This class is only needed for apps using web-based SSO. 
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[.options]
+[cols="1,3a"]
+|===
+
+include::partial$params.adoc[tags="presentationContextProvider,origin"]
+
+|===
