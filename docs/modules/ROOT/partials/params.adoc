@@ -684,7 +684,11 @@ Includes:
 
 // tag::revoke[]
 |[[revoke,revoke]] revoke `AuthToken?`
-| _optional_ The authentication token to revoke, invalidating the user's session. Use `nil` to skip token revocation.
+| _optional_ The authentication token to revoke, invalidating the user's session. 
+Use `nil` to skip token revocation.
 
 Defaults to `nil`.
+
+NOTE: The `logout` method invalidates any tokens found here.
+
 // end::revoke[]

@@ -12,8 +12,8 @@ Terminates the main SSO session, all provider sessions, and optionally revokes u
 
 * *Provider Sessions*: Logs out from all configured identity providers (e.g., Google, Facebook).
 * *Web Session Logout*: When a `<<WebSessionLogoutRequest>>` is provided via the `webSessionLogout` parameter, triggers a web-based logout by opening a web authentication session to the server's logout endpoint (e.g., `/logout`). 
-This clears browser cookies and redirects to a configured `post_logout_redirect_uri`.
 * *Token Revocation*: When an `AuthToken` is provided via the `revoke` parameter, revokes the specified token, invalidating the user's session.
+This applies to both access and refresh tokens.
 * *Main SSO Session*: Terminates the core SSO session.
 
 Both `webSessionLogout` and `revoke` are optional and default to `nil`. 
@@ -25,11 +25,11 @@ icon:apple[] For native app flows, use `logout(revoke:)` with an `AuthToken` to 
 
 icon:globe[] For web-based SSO flows, use `logout(webSessionLogout:)` to clear browser cookies and handle redirects.
 
-For web-based logout, the `post_logout_redirect_uri` must be configured in the {cc}'s SSO settings as an *Allowed logout callback URL*. 
+For web-based logout, the app's scheme must be configured in the {cc}'s SSO settings as an *Allowed logout callback URL*. 
 Failure to configure this will result in a “URI redirect not allowed” error.
-****
 
-include::docs:ROOT:partial$tokens/r_revoke-refresh-token-note.adoc[]
+*Example*: `reachfive-<CLIENT_ID>://callback`
+****
 
 == Examples
 
