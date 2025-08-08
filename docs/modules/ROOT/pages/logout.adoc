@@ -8,7 +8,7 @@ AppDelegate.reachfive().logout(<<webSessionLogout>> request: <<WebSessionLogoutR
 
 == Description
 
-Terminates the main SSO session, all provider sessions, and optionally revokes user tokens or initiates a web-based logout.
+Terminates the main xref:docs:ROOT:sso.adoc[SSO session], all provider sessions, and optionally revokes user tokens or initiates a web-based logout.
 
 * *Provider Sessions*: Logs out from all configured identity providers (e.g., Google, Facebook).
 * *Web Session Logout*: When a `<<WebSessionLogoutRequest>>` is provided via the `webSessionLogout` parameter, triggers a web-based logout by opening a web authentication session to the server's logout endpoint (e.g., `/logout`). 
