@@ -3,7 +3,7 @@
 [.signature]
 [subs="normal"]
 ----
-AppDelegate.reachfive().logout(<<webSessionLogout>> request: WebSessionLogoutRequest? = nil, <<revoke>> token: AuthToken? = nil) async throws
+AppDelegate.reachfive().logout(<<webSessionLogout>> request: <<WebSessionLogoutRequest>>? = nil, <<revoke>> token: AuthToken? = nil) async throws
 ----
 
 == Description
@@ -11,7 +11,7 @@ AppDelegate.reachfive().logout(<<webSessionLogout>> request: WebSessionLogoutReq
 Terminates the main SSO session, all provider sessions, and optionally revokes user tokens or initiates a web-based logout.
 
 * *Provider Sessions*: Logs out from all configured identity providers (e.g., Google, Facebook).
-* *Web Session Logout*: When a `WebSessionLogoutRequest` is provided via the `webSessionLogout` parameter, triggers a web-based logout by opening a web authentication session to the server's logout endpoint (e.g., `/logout`). 
+* *Web Session Logout*: When a `<<WebSessionLogoutRequest>>` is provided via the `webSessionLogout` parameter, triggers a web-based logout by opening a web authentication session to the server's logout endpoint (e.g., `/logout`). 
 This clears browser cookies and redirects to a configured `post_logout_redirect_uri`.
 * *Token Revocation*: When an `AuthToken` is provided via the `revoke` parameter, revokes the specified token, invalidating the user's session.
 * *Main SSO Session*: Terminates the core SSO session.
@@ -44,7 +44,7 @@ include::example${docname}.swift[]
 [cols="1,3a"]
 |===
 
-include::partial$params.adoc[tags="webSessionLogout,revoke"]
+include::partial$params.adoc[tags="webSessionLogout,revoke,WebSessionLogoutRequest"]
 
 |===
 

@@ -377,7 +377,7 @@ NOTE: This binds the tokens with the client and serves as a token validation par
 |[[presentationContextProvider,presentationContextProvider]] presentationContextProvider `string`
 |A delegate that provides a display context whereby the system is able to present an authentication session to the user.
 
-TIP: For more, see link:https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession/3237232-presentationcontextprovider[here^].
+TIP: For more, see link:https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession/3237232-presentationcontextprovider[Apple docs^].
 
 // end::presentationContextProvider[]
 
@@ -530,7 +530,8 @@ Allowed values are `female`, `male` and `other`.
 // end::profilesignuprequest[]
 
 // tag::origin[]
-|[[origin, origin]]origin `string` | The origin of the call.
+|[[origin, origin]]origin `string` 
+| The origin of the call.
 // end::origin[]
 
 // tag::redirecturl[]
@@ -662,10 +663,24 @@ For more details, see link:https://developer.apple.com/documentation/uikit/uiapp
 
 Defaults to `nil`.
 
-If provided, triggers a web-based logout by opening a web authentication session to the server's logout endpoint (e.g., `/logout`). This clears browser cookies and redirects to a configured `post_logout_redirect_uri`.
+If provided, triggers a <<WebSessionLogoutRequest, web-based logout>> by opening a web authentication session to the server's logout endpoint (e.g., `/logout`). 
+This clears browser cookies and redirects to a configured `post_logout_redirect_uri`.
 
 The URL must be defined in your {cc} settings at menu:Security[SSO > Allowed Callback URLs].
 // end::webSessionLogout[]
+
+// tag::WebSessionLogoutRequest[]
+|[[WebSessionLogoutRequest,WebSessionLogoutRequest]] WebSessionLogoutRequest
+| Use `WebSessionLogoutRequest` to enable web-based SSO logout, which opens a browser window to the server's logout endpoint (e.g., `/logout`), clears browser cookies, and redirects back to your app.
+
+This class is only needed for apps using web-based SSO. 
+
+Includes:
+
+* _required_ `presentationContextProvider`: A delegate that provides a display context whereby the system is able to present an authentication session to the user.
+* _optional_ `origin`: The origin of the call.
+
+// end::WebSessionLogoutRequest[]
 
 // tag::revoke[]
 |[[revoke,revoke]] revoke `AuthToken?`

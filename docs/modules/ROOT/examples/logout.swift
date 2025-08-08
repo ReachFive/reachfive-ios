@@ -18,11 +18,11 @@ do {
 
 // Web-based logout with redirect
 do {
-    let webLogoutRequest = WebSessionLogoutRequest(
+    let WebSessionLogoutRequest = WebSessionLogoutRequest(
         origin: "app_logout",
         presentationContextProvider: // Provide a context provider, e.g., a view controller
     )
-    try await AppDelegate.reachfive().logout(webSessionLogout: webLogoutRequest)
+    try await AppDelegate.reachfive().logout(webSessionLogout: WebSessionLogoutRequest)
     // Browser cookies are cleared, user is redirected
 } catch {
     // Handle ReachFiveError
