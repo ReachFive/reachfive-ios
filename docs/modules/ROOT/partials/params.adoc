@@ -663,14 +663,14 @@ For more details, see link:https://developer.apple.com/documentation/uikit/uiapp
 
 Defaults to `nil`.
 
-If provided, triggers a <<WebSessionLogoutRequest, web-based logout>> by opening a web authentication session to the server's logout endpoint (e.g., `/logout`). 
+If provided, triggers a <<WebSessionLogoutRequest, web-based logout>> by opening a web authentication session to the server's logout endpoint. 
 
 The URL must be defined in your {cc} settings at menu:Security[SSO > Allowed Callback URLs].
 // end::webSessionLogout[]
 
 // tag::WebSessionLogoutRequest[]
 |[[WebSessionLogoutRequest,WebSessionLogoutRequest]] WebSessionLogoutRequest
-| Use `WebSessionLogoutRequest` to enable web-based SSO logout, which opens a browser window to the server's logout endpoint (e.g., `/logout`), clears browser cookies, and redirects back to your app.
+| Use `WebSessionLogoutRequest` to enable web-based SSO logout, which opens a browser window to the server's logout endpoint.
 
 This class is only needed for apps using web-based SSO. 
 
