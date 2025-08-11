@@ -1,7 +1,7 @@
 name: sdk-ios
 title: iOS SDK
 version: master
-display_version: "9.0.0"
+display_version: "9.1.0"
 start_page: index.adoc
 nav:
 - modules/ROOT/nav.adoc
@@ -10,5 +10,5 @@ asciidoc:
   attributes:
     sdk-type: iOS
     min-ios-version: 13
-    sdk-ios-latest-version: 9.0.0@
+    sdk-ios-latest-version: 9.1.0@
     sdk-ios-version-badge: image:https://img.shields.io/cocoapods/v/Reach5.svg?style=flat&color=darkslategrey[]
