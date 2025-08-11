@@ -670,7 +670,7 @@ The URL must be defined in your {cc} settings at menu:Security[SSO > Allowed Cal
 
 // tag::WebSessionLogoutRequest[]
 |[[WebSessionLogoutRequest,WebSessionLogoutRequest]] WebSessionLogoutRequest
-| Use `WebSessionLogoutRequest` to enable web-based SSO logout, which opens a browser window to the server's logout endpoint (e.g., `/logout`), clears browser cookies, and redirects back to your app.
+| Use `WebSessionLogoutRequest` to enable web-based SSO logout, which opens a browser window to the server's logout endpoint (e.g., `/logout`).
 
 This class is only needed for apps using web-based SSO. 
 
