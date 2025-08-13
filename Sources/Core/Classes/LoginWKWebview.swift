@@ -15,7 +15,8 @@ public class LoginWKWebview: UIView {
         let pkce = Pkce.generate()
         self.reachfive = reachfive
         self.pkce = pkce
-
+        self.reachfive?.storage.save(key: reachfive.pkceKey, value: pkce)
+        
         let rect = CGRect(origin: .zero, size: frame.size)
         let webView = WKWebView(frame: rect, configuration: WKWebViewConfiguration())
         self.webView = webView

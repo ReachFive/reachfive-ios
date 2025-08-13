@@ -4,6 +4,8 @@ import Reach5
 import AuthenticationServices
 
 class ActionController: UITableViewController {
+    var tokenNotification: NSObjectProtocol?
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         Task { @MainActor in
             tableView.deselectRow(at: indexPath, animated: true)
@@ -46,6 +48,16 @@ class ActionController: UITableViewController {
             if indexPath.section == 3 {
                 // standard webview
                 if indexPath.row == 0 {
+                    tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
+                        if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
+                            Task { @MainActor in
+                                self.dismiss(animated: true)
+                                await self.handleAuthToken(errorMessage: "Step up failed") {
+                                    try result.get()
+                                }
+                            }
+                        }
+                    }
                     await handleAuthToken {
                         try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin"))
                     }
