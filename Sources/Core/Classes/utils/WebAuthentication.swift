@@ -1,5 +1,10 @@
 import AuthenticationServices
 
+// By marking this entire function with @MainActor, we ensure that the `session.start()`
+// call is made within the same structured concurrency context as the caller.
+// This avoids creating a detached, unstructured `Task` which would not propagate
+// cancellation and could lead to the authentication session starting unnecessarily
+// if the parent task was cancelled.
 @MainActor
 func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationContextProvider: ASWebAuthenticationPresentationContextProviding, prefersEphemeralWebBrowserSession: Bool) async throws -> URL {
 
@@ -7,7 +12,7 @@ func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationC
         // A flag to ensure the continuation is resumed only once.
         // ASWebAuthenticationSession's completion handler can be called multiple times in some edge cases.
         var hasResumed = false
-        
+
         // Initialize the session.
         let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { callbackURL, error in
             // Ensure that all logic is executed on the main thread to prevent race conditions.
@@ -17,7 +22,7 @@ func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationC
                     return
                 }
                 hasResumed = true
-                
+
                 if let error {
                     let r5Error: ReachFiveError = switch error._code {
                     case 1: .AuthCanceled
