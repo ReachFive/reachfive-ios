@@ -1,5 +1,6 @@
 import AuthenticationServices
 
+@MainActor
 func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationContextProvider: ASWebAuthenticationPresentationContextProviding, prefersEphemeralWebBrowserSession: Bool) async throws -> URL {
 
     return try await withCheckedThrowingContinuation { continuation in
@@ -40,20 +41,18 @@ func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationC
         session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
 
         // Start the Authentication Flow
-        Task { @MainActor in
-            if !session.start() {
-                // Log the error for debugging purposes.
-                #if DEBUG
-                print("WebAuthentication session failed to start.")
-                #endif
-                // If start() returns false, the completion handler might not be called.
-                // We need to resume the continuation with an error.
-                guard !hasResumed else {
-                    return
-                }
-                hasResumed = true
-                continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "ASWebAuthenticationSession failed to start"))
+        if !session.start() {
+            // Log the error for debugging purposes.
+            #if DEBUG
+            print("WebAuthentication session failed to start.")
+            #endif
+            // If start() returns false, the completion handler might not be called.
+            // We need to resume the continuation with an error.
+            guard !hasResumed else {
+                return
             }
+            hasResumed = true
+            continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "ASWebAuthenticationSession failed to start"))
         }
     }
 }
