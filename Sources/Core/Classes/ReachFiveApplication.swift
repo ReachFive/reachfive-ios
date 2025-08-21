@@ -17,7 +17,9 @@ public extension ReachFive {
                     let _ = provider.application(application, didFinishLaunchingWithOptions: launchOptions)
                 }
             } catch {
-                Logger.shared.log(error: error)
+                #if DEBUG
+                print(Logger.shared.message(for: error))
+                #endif
             }
         }
 
