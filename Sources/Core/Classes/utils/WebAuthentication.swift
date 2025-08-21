@@ -22,25 +22,13 @@ func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationC
                 case 3: .TechnicalError(reason: "Presentation Context Invalid")
                 default:.TechnicalError(reason: "Unknown Error \(error.localizedDescription)")
                 }
-                // Log the error for debugging purposes.
-                #if DEBUG
-                print("WebAuthentication failed with error: \(r5Error)")
-                #endif
                 continuation.resume(throwing: r5Error)
                 return
             }
             guard let callbackURL else {
-                // Log the error for debugging purposes.
-                #if DEBUG
-                print("WebAuthentication failed with no callback URL")
-                #endif
                 continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No callback URL"))
                 return
             }
-            #if DEBUG
-            print("WebAuthentication Continued with callback URL: \(callbackURL)")
-            #endif
-
             continuation.resume(returning: callbackURL)
         }
 
@@ -55,7 +43,7 @@ func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationC
                 #if DEBUG
                 print("WebAuthentication session failed to start.")
                 #endif
-                // If start() returns false, the completion handler is not called.
+                // If start() returns false, the completion handler might not be called.
                 // We need to resume the continuation with an error.
                 guard !hasResumed else {
                     return
