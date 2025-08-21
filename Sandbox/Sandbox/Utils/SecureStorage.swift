@@ -22,7 +22,7 @@ public class SecureStorage: Storage {
     //TODO: mettre tous les accès à la keychain dans une queue à part et renvoyer des Futures?
     public func getToken() -> AuthToken? {
         let refs: Set<String>? = get(key: SecureStorage.refKey)
-        print("getToken.refs \(refs)")
+//        print("getToken.refs \(refs)")
 
         return get(key: SecureStorage.authKey)
     }
@@ -31,24 +31,24 @@ public class SecureStorage: Storage {
     public func setToken(_ token: AuthToken) -> ()? {
         set(token, forKey: SecureStorage.authKey).flatMap { _ in
                 let refs: Set<String>? = get(key: SecureStorage.refKey)
-                print("setToken.refs \(refs)")
+//                print("setToken.refs \(refs)")
                 if var refs {
                     if refs.insert(bundleId).inserted {
-                        print("setToken.refs.inserted \(refs)")
+//                        print("setToken.refs.inserted \(refs)")
                         return set(refs, forKey: SecureStorage.refKey)
                     } else {
-                        print("setToken.refs.notInserted \(refs)")
+//                        print("setToken.refs.notInserted \(refs)")
                         return ()
                     }
                 } else {
                     let ref: Set = [bundleId]
-                    print("setToken.refs.added \(ref)")
+//                    print("setToken.refs.added \(ref)")
                     return set(ref, forKey: SecureStorage.refKey)
                 }
             }
             .flatMap { r in
                 if sendNotif {
-                    print("setToken.send .DidSetAuthToken")
+//                    print("setToken.send .DidSetAuthToken")
                     NotificationCenter.default.post(name: .DidSetAuthToken, object: nil, userInfo: ["token": token])
                 }
                 return r
@@ -93,8 +93,6 @@ public class SecureStorage: Storage {
             return nil
         }
 
-        print("save data: \(data)")
-
         let attributes = [kSecClass: kSecClassGenericPassword,
                           kSecAttrAccount: key,
                           kSecAttrService: serviceName,
@@ -105,7 +103,6 @@ public class SecureStorage: Storage {
         let status = SecItemAdd(attributes as CFDictionary, nil)
         guard status == errSecSuccess else {
             if status == errSecDuplicateItem { // duplicate detected (code -25299). User did not log out before logging again
-                print("duplicate detected, updating data instead")
                 return update(value, forKey: key)
             } else {
                 print(KeychainError.unhandledError(status: status))
@@ -185,9 +182,7 @@ public class SecureStorage: Storage {
         }
 
         do {
-            let decode: D = try JSONDecoder().decode(D.self, from: existingItem)
-            print("SecureStorage.get success")
-            return decode
+            return try JSONDecoder().decode(D.self, from: existingItem)
         } catch {
             print(KeychainError.jsonDeserializationError(error: error))
             return nil
