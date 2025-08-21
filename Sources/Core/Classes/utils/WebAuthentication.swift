@@ -3,8 +3,18 @@ import AuthenticationServices
 func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationContextProvider: ASWebAuthenticationPresentationContextProviding, prefersEphemeralWebBrowserSession: Bool) async throws -> URL {
 
     return try await withCheckedThrowingContinuation { continuation in
+        // A flag to ensure the continuation is resumed only once.
+        // ASWebAuthenticationSession's completion handler can be called multiple times in some edge cases.
+        var hasResumed = false
+        
         // Initialize the session.
         let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { callbackURL, error in
+            guard !hasResumed else {
+                // Already resumed, so we can ignore this call.
+                return
+            }
+            hasResumed = true
+            
             if let error {
                 let r5Error: ReachFiveError = switch error._code {
                 case 1: .AuthCanceled
@@ -12,13 +22,25 @@ func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationC
                 case 3: .TechnicalError(reason: "Presentation Context Invalid")
                 default:.TechnicalError(reason: "Unknown Error \(error.localizedDescription)")
                 }
+                // Log the error for debugging purposes.
+                #if DEBUG
+                print("WebAuthentication failed with error: \(r5Error)")
+                #endif
                 continuation.resume(throwing: r5Error)
                 return
             }
             guard let callbackURL else {
+                // Log the error for debugging purposes.
+                #if DEBUG
+                print("WebAuthentication failed with no callback URL")
+                #endif
                 continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No callback URL"))
                 return
             }
+            #if DEBUG
+            print("WebAuthentication Continued with callback URL: \(callbackURL)")
+            #endif
+
             continuation.resume(returning: callbackURL)
         }
 
@@ -27,9 +49,20 @@ func webAuthenticationSession(url: URL, callbackURLScheme: String, presentationC
         session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
 
         // Start the Authentication Flow
-        // if the result of this method is false then the error will already have been processed and the promise failed in the callback
         Task { @MainActor in
-            session.start()
+            if !session.start() {
+                // Log the error for debugging purposes.
+                #if DEBUG
+                print("WebAuthentication session failed to start.")
+                #endif
+                // If start() returns false, the completion handler is not called.
+                // We need to resume the continuation with an error.
+                guard !hasResumed else {
+                    return
+                }
+                hasResumed = true
+                continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "ASWebAuthenticationSession failed to start"))
+            }
         }
     }
 }
