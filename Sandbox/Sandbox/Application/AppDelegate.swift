@@ -54,11 +54,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static let providers: [ProviderCreator] = [/*GoogleProvider(variant: "one_tap"), FacebookProvider(),*/ AppleProvider(variant: "natif")]
     #if targetEnvironment(macCatalyst)
     static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: true))
-    static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
+    static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: true))
     let reachfive = macLocal
     #else
     static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
-    static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage)
+    static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: false))
     #if targetEnvironment(simulator)
     let reachfive = local
     #else
