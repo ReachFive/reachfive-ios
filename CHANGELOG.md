@@ -3,6 +3,10 @@
 
 ## Unreleased
 
+## v9.1.1
+### Other changes
+- Improve the handling of the web session
+
 ## v9.1.0
 ### New features
 - add new logout options for revoking tokens and browser cookies
