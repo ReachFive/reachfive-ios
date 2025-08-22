@@ -31,13 +31,7 @@ class Logger {
 
     func log(error: Error) {
         guard enabled else { return }
-        let message = switch error {
-        case let rfe as ReachFiveError:
-            rfe.description
-        default:
-            error.localizedDescription
-        }
-        print("❌ ERROR: \(message)")
+        print("❌ ERROR: \(message(for: error))")
     }
 }
 
@@ -49,6 +43,19 @@ extension Data {
         else { return nil }
 
         return prettyPrintedString
+    }
+}
+
+//MARK: Utility
+extension Logger {
+    func message(for error: Error) -> String {
+        let message = switch error {
+        case let rfe as ReachFiveError:
+            rfe.description
+        default:
+            error.localizedDescription
+        }
+        return "❌ ERROR: \(message)"
     }
 }
 

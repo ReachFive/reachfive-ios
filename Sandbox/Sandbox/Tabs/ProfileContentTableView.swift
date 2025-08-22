@@ -196,7 +196,6 @@ extension ProfileController: UITableViewDataSource {
         guard let section = Section(rawValue: section) else {
             print("section not found")
             return 0 }
-        print("found section")
         switch section {
         case .ContactInformation:
             let hasMfaPhoneNumber = mfaCredentials.contains { $0.type == .sms && $0.phoneNumber != profile.phoneNumber }
