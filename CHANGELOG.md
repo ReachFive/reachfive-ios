@@ -3,6 +3,10 @@
 
 ## Unreleased
 
+## v9.1.2
+### Bug fix
+Achieve step up in login webview by clicking on link received by email
+
 ## v9.1.1
 ### Other changes
 - Improve the handling of the web session
