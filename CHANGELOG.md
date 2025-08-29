@@ -4,7 +4,7 @@
 ## Unreleased
 
 ## v9.1.2
-### fix
+### Bug fix
 Achieve step up in login webview by clicking on link received by email
 
 ## v9.1.1
