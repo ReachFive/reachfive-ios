@@ -23,6 +23,13 @@ public class AuthToken: Codable {
         self.expiresIn = expiresIn
         self.user = user
     }
+    
+    public static func fromSignupResponse(_ signupResponse: SignupTokenResponse) throws -> AuthToken {
+        guard let accessToken = signupResponse.accessToken else {
+            throw ReachFiveError.TechnicalError(reason: "Missing access token")
+        }
+        return try fromOpenIdTokenResponse(AccessTokenResponse(idToken: signupResponse.idToken, accessToken: accessToken, refreshToken: signupResponse.refreshToken, code: nil, tokenType: signupResponse.tokenType, expiresIn: signupResponse.expiresIn, error: nil, errorDescription: nil))
+    }
 
     public static func fromOpenIdTokenResponse(_ openIdTokenResponse: AccessTokenResponse) throws -> AuthToken {
         guard let token = openIdTokenResponse.idToken else {

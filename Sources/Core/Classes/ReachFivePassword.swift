@@ -5,8 +5,13 @@ public enum LoginFlow {
     case OngoingStepUp(token: String, availableMfaCredentialItemTypes: [MfaCredentialItemType])
 }
 
+public enum SignupFlow {
+    case AchievedSignup(authToken: AuthToken)
+    case AwaitingEmailVerification
+}
+
 public extension ReachFive {
-    func signup(profile: ProfileSignupRequest, redirectUrl: String? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> AuthToken {
+    func signup(profile: ProfileSignupRequest, redirectUrl: String? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> SignupFlow {
         let signupRequest = SignupRequest(
             clientId: sdkConfig.clientId,
             data: profile,
@@ -15,7 +20,11 @@ public extension ReachFive {
             origin: origin
         )
         let token = try await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
-        return try AuthToken.fromOpenIdTokenResponse(token)
+        if(token.accessToken != nil) {
+            return try .AchievedSignup(authToken: AuthToken.fromSignupResponse(token))
+        } else {
+            return .AwaitingEmailVerification
+        }
     }
 
     func loginWithPassword(
