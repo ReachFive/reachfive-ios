@@ -8,8 +8,9 @@ public class StartMfaStepUpRequest: Codable, DictionaryEncodable {
     public let codeChallengeMethod: String
     public let scope: String?
     public let tkn: String?
+    public let action: String?
 
-    public init(clientId: String, redirectUri: String, pkce: Pkce, scope: String? = nil, tkn: String? = nil) {
+    public init(clientId: String, redirectUri: String, pkce: Pkce, scope: String? = nil, tkn: String? = nil, action: String? = nil) {
         self.clientId = clientId
         self.responseType = "code"
         self.redirectUri = redirectUri
@@ -17,6 +18,7 @@ public class StartMfaStepUpRequest: Codable, DictionaryEncodable {
         self.codeChallengeMethod = pkce.codeChallengeMethod
         self.scope = scope
         self.tkn = tkn
+        self.action = action
     }
 }
 
