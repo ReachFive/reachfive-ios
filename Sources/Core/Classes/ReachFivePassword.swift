@@ -6,8 +6,8 @@ public enum LoginFlow {
 }
 
 public enum SignupFlow {
-    case AchievedSignup(authToken: AuthToken)
-    case AwaitingEmailVerification
+    case AchievedLogin(authToken: AuthToken)
+    case AwaitingIdentifierVerification
 }
 
 public extension ReachFive {
@@ -21,9 +21,9 @@ public extension ReachFive {
         )
         let token = try await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
         if(token.accessToken != nil) {
-            return try .AchievedSignup(authToken: AuthToken.fromSignupResponse(token))
+            return try .AchievedLogin(authToken: AuthToken.fromSignupResponse(token))
         } else {
-            return .AwaitingEmailVerification
+            return .AwaitingIdentifierVerification
         }
     }
 

@@ -51,10 +51,10 @@ class SignupController: UIViewController {
         Task {
             let res = try await AppDelegate.reachfive().signup(profile: profile, redirectUrl: AppDelegate.reachfive().sdkConfig.emailVerificationUri, origin: origin)
             return switch res {
-            case .AchievedSignup(let authToken): await handleAuthToken(errorMessage: "Signup failed") {
+            case .AchievedLogin(let authToken): await handleAuthToken(errorMessage: "Signup failed") {
                 authToken
             }
-            case .AwaitingEmailVerification: presentAlert(title: "Email Verification", message: "Email Verification is required")
+            case .AwaitingIdentifierVerification: presentAlert(title: "Email Verification", message: "Email Verification is required")
             }
         }
     }
