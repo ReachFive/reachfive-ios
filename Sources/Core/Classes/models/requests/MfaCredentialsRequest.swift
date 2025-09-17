@@ -2,17 +2,21 @@ import Foundation
 
 public class MfaStartEmailRegistrationRequest: Codable, DictionaryEncodable {
     public let redirectUrl: String?
-
-    public init(redirectUrl: String? = nil) {
+    public let action: String?
+    
+    public init(redirectUrl: String? = nil, action: String? = nil) {
         self.redirectUrl = redirectUrl
+        self.action = action
     }
 }
 
 public class MfaStartPhoneRegistrationRequest: Codable, DictionaryEncodable {
     public let phoneNumber: String
-
-    public init(phoneNumber: String) {
+    public let action: String?
+    
+    public init(phoneNumber: String, action: String? = nil) {
         self.phoneNumber = phoneNumber
+        self.action = action
     }
 }
 
