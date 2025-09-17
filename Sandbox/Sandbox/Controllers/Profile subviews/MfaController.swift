@@ -276,9 +276,9 @@ class MfaAction {
         self.presentationAnchor = presentationAnchor
     }
 
-    func mfaStart(registering credential: Credential, authToken: AuthToken) async throws -> MfaCredentialItem {
+    func mfaStart(registering credential: Credential, authToken: AuthToken, action: String? = nil) async throws -> MfaCredentialItem {
         let resp = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
-            try await AppDelegate.reachfive().mfaStart(registering: credential, authToken: refreshableToken)
+            try await AppDelegate.reachfive().mfaStart(registering: credential, authToken: refreshableToken, action: action)
         }
         return try await self.handleStartVerificationCode(resp)
     }

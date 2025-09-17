@@ -355,8 +355,9 @@ extension ProfileController {
         }
 
         let mfaAction = MfaAction(presentationAnchor: self)
-        let stepUpFlow = StartStepUp.AuthTokenFlow(authType: type, authToken: authToken, scope: SettingsViewController.selectedScopes)
 
+        let stepUpFlow = StartStepUp.AuthTokenFlow(authType: type, authToken: authToken, scope: SettingsViewController.selectedScopes, action: "start_stepup_tab")
+        
         Task {
             do {
                 let freshToken = try await mfaAction.mfaStart(stepUp: stepUpFlow)
@@ -373,7 +374,7 @@ extension ProfileController {
         let mfaAction = MfaAction(presentationAnchor: self)
         Task {
             do {
-                let _ = try await mfaAction.mfaStart(registering: credential, authToken: token)
+                let _ = try await mfaAction.mfaStart(registering: credential, authToken: token, action: "enroll_mfa_tab")
                 await fetchMfaCredentials(token: token)
             } catch {
                 self.presentErrorAlert(title: "Enroll failed", error)
