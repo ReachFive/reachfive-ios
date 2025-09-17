@@ -20,11 +20,11 @@ public extension ReachFive {
             origin: origin
         )
         let token = try await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
-        if(token.accessToken != nil) {
-            return try .AchievedLogin(authToken: AuthToken.fromSignupResponse(token))
-        } else {
+        guard let accessToken = token.accessToken else {
             return .AwaitingIdentifierVerification
+
         }
+        return try .AchievedLogin(authToken: AuthToken.fromOpenIdTokenResponse(AccessTokenResponse(idToken: token.idToken, accessToken: accessToken, refreshToken: token.refreshToken, code: nil, tokenType: token.tokenType, expiresIn: token.expiresIn, error: nil, errorDescription: nil)))
     }
 
     func loginWithPassword(
