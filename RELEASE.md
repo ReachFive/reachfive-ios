@@ -12,26 +12,27 @@
     ```
 
 4. Update the [CHANGELOG.md](CHANGELOG.md) file
-5. Test the modifications on the SPM project DemoSharedCredentials. SPM tends to be stricter than Cocoapods when validating dependencies and code visibility.
+5. Test the modifications on the SPM project DemoSharedCredentials. SPM tends to be stricter than Cocoapods when validating dependencies and code visibility
+6. Ask to create a new release version in JIRA and link the ticket to it
 
-6. Submit and merge the pull request
+7. Submit and merge the pull request
 
-7. Add git tag `x.x.x` to the merge commit
+8. Add git tag `x.x.x` to the merge commit
     ```sh
     git tag x.x.x
     ```
 
-8. Push the tag
+9. Push the tag
     ```sh
     git push origin x.x.x
     ```
 
-9. The CI will automatically publish this new version
+10. The [CI](https://app.circleci.com/pipelines/github/ReachFive/reachfive-ios) will automatically publish this new version
 
-10. Release Reach5Future
+11. Release Reach5Future
 
-11. Finally, draft a new release in the [Github releases tab](https://github.com/ReachFive/reachfive-ios/releases) (copy & paste the changelog in the release's description).
+12. Finally, draft a new release in the [Github releases tab](https://github.com/ReachFive/reachfive-ios/releases) (copy & paste the changelog in the release's description)
 
-12. If the new version needs a fork of the documentation, the branch `x.x.x` should exist in perpetuity for the purpose of this documentation.<br>
+13. If the new version needs a fork of the documentation, the branch `x.x.x` should exist in perpetuity for the purpose of this documentation.<br>
     If, at step 6., the `x.x.x` branch was merged (not squashed) into master, then keep the branch open.<br>
-    If the branch was squashed, then delete the branch and recreate a new branch still named `x.x.x`.
+    If the branch was squashed, then delete the branch and recreate a new branch still named `x.x.x`
