@@ -3,20 +3,24 @@ import Foundation
 public class MfaStartEmailRegistrationRequest: Codable, DictionaryEncodable {
     public let redirectUrl: String?
     public let action: String?
+    public let trustDevice: Bool
     
-    public init(redirectUrl: String? = nil, action: String? = nil) {
+    public init(redirectUrl: String? = nil, action: String? = nil, trustDevice: Bool = false) {
         self.redirectUrl = redirectUrl
         self.action = action
+        self.trustDevice = trustDevice
     }
 }
 
 public class MfaStartPhoneRegistrationRequest: Codable, DictionaryEncodable {
     public let phoneNumber: String
     public let action: String?
+    public let trustDevice: Bool
     
-    public init(phoneNumber: String, action: String? = nil) {
+    public init(phoneNumber: String, action: String? = nil, trustDevice: Bool = false) {
         self.phoneNumber = phoneNumber
         self.action = action
+        self.trustDevice = trustDevice
     }
 }
 

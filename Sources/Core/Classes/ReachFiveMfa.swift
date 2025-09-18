@@ -80,13 +80,13 @@ public extension ReachFive {
         self.mfaCredentialRegistrationCallback = mfaCredentialRegistrationCallback
     }
 
-    func mfaStart(registering credential: Credential, authToken: AuthToken, action: String? = nil) async throws -> MfaStartRegistrationResponse {
+    func mfaStart(registering credential: Credential, authToken: AuthToken, action: String? = nil, trustDevice: Bool = false) async throws -> MfaStartRegistrationResponse {
         let registration =
             switch credential {
             case let .Email(redirectUrl):
-                try await reachFiveApi.startMfaEmailRegistration(MfaStartEmailRegistrationRequest(redirectUrl: redirectUrl ?? sdkConfig.mfaUri, action: action), authToken: authToken)
+                try await reachFiveApi.startMfaEmailRegistration(MfaStartEmailRegistrationRequest(redirectUrl: redirectUrl ?? sdkConfig.mfaUri, action: action, trustDevice: trustDevice), authToken: authToken)
             case let .PhoneNumber(phoneNumber):
-                try await reachFiveApi.startMfaPhoneRegistration(MfaStartPhoneRegistrationRequest(phoneNumber: phoneNumber, action: action), authToken: authToken)
+                try await reachFiveApi.startMfaPhoneRegistration(MfaStartPhoneRegistrationRequest(phoneNumber: phoneNumber, action: action, trustDevice: trustDevice), authToken: authToken)
             }
 
         if let credential = registration.credential, registration.status == "enabled" {
