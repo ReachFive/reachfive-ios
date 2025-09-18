@@ -102,6 +102,7 @@
 		9943B0852B6953C5007AD120 /* ReachFiveMfa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9943B0842B6953C5007AD120 /* ReachFiveMfa.swift */; };
 		9943B0872B6954F1007AD120 /* MfaCredentialsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9943B0862B6954F1007AD120 /* MfaCredentialsRequest.swift */; };
 		9958690C2C32DDDC005CD5C4 /* TrustedDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9958690B2C32DDDC005CD5C4 /* TrustedDevice.swift */; };
+		99DD57C22E72E19A00EE4D1C /* SignupTokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -203,6 +204,7 @@
 		9943B0842B6953C5007AD120 /* ReachFiveMfa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveMfa.swift; sourceTree = "<group>"; };
 		9943B0862B6954F1007AD120 /* MfaCredentialsRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MfaCredentialsRequest.swift; sourceTree = "<group>"; };
 		9958690B2C32DDDC005CD5C4 /* TrustedDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedDevice.swift; sourceTree = "<group>"; };
+		99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupTokenResponse.swift; sourceTree = "<group>"; };
 		DBD028BD86E6BB22BBAD012C /* Pods_Reach5.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Reach5.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11E5406A766337B2CE86F9C /* Pods-Reach5.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Reach5.debug.xcconfig"; path = "Target Support Files/Pods-Reach5/Pods-Reach5.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -324,6 +326,7 @@
 		34E18B8D22A6C13100952EBD /* models */ = {
 			isa = PBXGroup;
 			children = (
+				99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */,
 				34E18B8B22A6BEC900952EBD /* AccessTokenResponse.swift */,
 				34689A9622CDFB5F002970F9 /* AuthToken.swift */,
 				72DDB78D22EF354300048262 /* ClientConfigResponse.swift */,
@@ -615,6 +618,7 @@
 				34E18B8F22A6C32500952EBD /* LoginRequest.swift in Sources */,
 				8433EA3A25F1229F00329358 /* DeviceCredential.swift in Sources */,
 				34689A9922CDFC24002970F9 /* LoginProviderRequest.swift in Sources */,
+				99DD57C22E72E19A00EE4D1C /* SignupTokenResponse.swift in Sources */,
 				2AE533212994638100EF97E0 /* NewPasskeyRequest.swift in Sources */,
 				9958690C2C32DDDC005CD5C4 /* TrustedDevice.swift in Sources */,
 				3404A40822CB9B7E002FFEDB /* ReachFiveError.swift in Sources */,

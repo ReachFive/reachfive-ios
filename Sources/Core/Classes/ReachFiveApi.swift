@@ -122,9 +122,9 @@ public class ReachFiveApi {
             .responseJson(type: AccessTokenResponse.self)
     }
 
-    public func signupWithPassword(signupRequest: SignupRequest) async throws -> AccessTokenResponse {
+    public func signupWithPassword(signupRequest: SignupRequest) async throws -> SignupTokenResponse {
         try await networkClient.request(createUrl(path: "/identity/v1/signup-token"), method: .post, parameters: signupRequest.dictionary())
-            .responseJson(type: AccessTokenResponse.self)
+            .responseJson(type: SignupTokenResponse.self)
     }
 
     public func loginWithPassword(loginRequest: LoginRequest) async throws -> TknMfa {

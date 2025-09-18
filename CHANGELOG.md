@@ -3,6 +3,9 @@
 
 ## Unreleased
 
+### Breaking changes
+- Support new option to prevent login with unverified identifier after a signup. Method signup returns a `SignupFlow` that can be an `AchievedLogin(authToken: AuthToken)` or an `AwaitingIdentifierVerification`
+
 ## v9.1.2
 ### Bug fix
 Achieve step up in login webview by clicking on link received by email
