@@ -26,9 +26,11 @@ public class MfaStartPhoneRegistrationRequest: Codable, DictionaryEncodable {
 
 public class MfaVerifyEmailRegistrationPostRequest: Codable, DictionaryEncodable {
     public let verificationCode: String
-
-    public init(_ verificationCode: String) {
+    public let trustDevice: Bool
+    
+    public init(_ verificationCode: String, trustDevice: Bool = false) {
         self.verificationCode = verificationCode
+        self.trustDevice = trustDevice
     }
 }
 
@@ -44,9 +46,11 @@ public class MfaVerifyEmailRegistrationGetRequest: Codable, DictionaryEncodable 
 
 public class MfaVerifyPhoneRegistrationRequest: Codable, DictionaryEncodable {
     public let verificationCode: String
-
-    public init(_ verificationCode: String) {
+    public let trustDevice: Bool
+    
+    public init(_ verificationCode: String, trustDevice: Bool = false) {
         self.verificationCode = verificationCode
+        self.trustDevice = trustDevice
     }
 }
 

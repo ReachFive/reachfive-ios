@@ -58,15 +58,17 @@ public class ContinueRegistration {
     public let credentialType: CredentialType
     private let reachfive: ReachFive
     private let authToken: AuthToken
-
-    fileprivate init(credentialType: CredentialType, reachfive: ReachFive, authToken: AuthToken) {
+    private let trustDevice: Bool
+    
+    fileprivate init(credentialType: CredentialType, reachfive: ReachFive, authToken: AuthToken, trustDevice: Bool = false) {
         self.credentialType = credentialType
         self.authToken = authToken
         self.reachfive = reachfive
+        self.trustDevice = trustDevice
     }
 
-    public func verify(code: String, freshAuthToken: AuthToken? = nil) async throws -> MfaCredentialItem {
-        try await reachfive.mfaVerify(credentialType, code: code, authToken: freshAuthToken ?? authToken)
+    public func verify(code: String, freshAuthToken: AuthToken? = nil, freshTrustDevice: Bool? = nil) async throws -> MfaCredentialItem {
+        try await reachfive.mfaVerify(credentialType, code: code, authToken: freshAuthToken ?? authToken, trustDevice: freshTrustDevice ?? trustDevice)
     }
 }
 
@@ -92,16 +94,16 @@ public extension ReachFive {
         if let credential = registration.credential, registration.status == "enabled" {
             return .Success(credential)
         }
-        return .VerificationNeeded(ContinueRegistration(credentialType: credential.credentialType, reachfive: self, authToken: authToken))
+        return .VerificationNeeded(ContinueRegistration(credentialType: credential.credentialType, reachfive: self, authToken: authToken, trustDevice: trustDevice))
     }
 
-    func mfaVerify(_ credentialType: CredentialType, code: String, authToken: AuthToken) async throws -> MfaCredentialItem {
+    func mfaVerify(_ credentialType: CredentialType, code: String, authToken: AuthToken, trustDevice: Bool = false) async throws -> MfaCredentialItem {
         switch credentialType {
         case .Email:
-            let request = MfaVerifyEmailRegistrationPostRequest(code)
+            let request = MfaVerifyEmailRegistrationPostRequest(code, trustDevice: trustDevice)
             return try await reachFiveApi.verifyMfaEmailRegistrationPost(request, authToken: authToken)
         case .PhoneNumber:
-            let request = MfaVerifyPhoneRegistrationRequest(code)
+            let request = MfaVerifyPhoneRegistrationRequest(code, trustDevice: trustDevice)
             return try await reachFiveApi.verifyMfaPhoneRegistration(request, authToken: authToken)
         }
     }
