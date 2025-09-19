@@ -277,10 +277,31 @@ class MfaAction {
     }
 
     func mfaStart(registering credential: Credential, authToken: AuthToken, action: String? = nil) async throws -> MfaCredentialItem {
-        let resp = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
-            try await AppDelegate.reachfive().mfaStart(registering: credential, authToken: refreshableToken, action: action)
+        try await withCheckedThrowingContinuation { continuation in
+            Task { @MainActor in
+                try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
+                    let alert = UIAlertController(title: "Start registration mfa", message: "Start registration mfa", preferredStyle: .alert)
+                    
+                    func submitStartRegistrationTrustDevice(withTrustDevice trustDevice: Bool) {
+                        Task {
+                            continuation.resume {
+                                let resp = try await AppDelegate.reachfive().mfaStart(registering: credential, authToken: refreshableToken, action: action, trustDevice: trustDevice)
+                                return try await self.handleStartVerificationCode(resp)
+                            }
+                        }
+                    }
+                    let startRegistrationTrustDevice = UIAlertAction(title: "Trust device", style: .default) { _ in
+                        submitStartRegistrationTrustDevice(withTrustDevice: true)
+                    }
+                    let startRegistrationNoTrustDevice = UIAlertAction(title: "Don't trust device", style: .default) { _ in
+                        submitStartRegistrationTrustDevice(withTrustDevice: false)
+                    }
+                    alert.addAction(startRegistrationTrustDevice)
+                    alert.addAction(startRegistrationNoTrustDevice)
+                    presentationAnchor.present(alert, animated: true)
+                }
+            }
         }
-        return try await self.handleStartVerificationCode(resp)
     }
 
     func mfaStart(stepUp startStepUp: StartStepUp) async throws -> AuthToken {
