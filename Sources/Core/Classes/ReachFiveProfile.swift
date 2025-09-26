@@ -106,7 +106,8 @@ public extension ReachFive {
     func requestPasswordReset(
         email: String? = nil,
         phoneNumber: String? = nil,
-        redirectUrl: String? = nil
+        redirectUrl: String? = nil,
+        origin: String? = nil
     ) async throws {
         let requestPasswordResetRequest = RequestPasswordResetRequest(
             clientId: sdkConfig.clientId,
