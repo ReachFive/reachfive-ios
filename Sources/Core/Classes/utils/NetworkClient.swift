@@ -45,7 +45,7 @@ class NetworkClient {
     func request(_ url: URL, method: HttpMethod = .get, headers: [String: String]? = nil, parameters: [String: Any]?) -> DataRequest {
         let body = parameters.flatMap { try? JSONSerialization.data(withJSONObject: $0) }
         let computedHeaders: [String : String] = headers ?? [:]
-        let withCorrelationHeaders: [String : String] = computedHeaders.merging(["X-Correlation-Id": retrieveCorrelationId()], uniquingKeysWith: { (_, new) in new})
+        let withCorrelationHeaders: [String : String] = computedHeaders.merging(["X-R5-Correlation-Id": retrieveCorrelationId()], uniquingKeysWith: { (_, new) in new})
         return request(url, method: method, headers:  withCorrelationHeaders, body: body)
     }
 }
