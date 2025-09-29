@@ -2,6 +2,8 @@
 
 
 ## Unreleased
+### New Features
+- Support Correlation id
 
 ### Breaking changes
 - Support new option to prevent login with unverified identifier after a signup. Method signup returns a `SignupFlow` that can be an `AchievedLogin(authToken: AuthToken)` or an `AwaitingIdentifierVerification`
