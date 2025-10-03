@@ -4,26 +4,16 @@ class NetworkClient {
     private let session: URLSession
     private let redirectHandler = RedirectHandler()
     private let decoder: JSONDecoder
-    private let storage: Storage
-    static let correlationIdKey = "CORRELATION_ID"
+    private let correlationId: String
 
-    init(decoder: JSONDecoder, storage: Storage) {
+    init(decoder: JSONDecoder, correlationId: String) {
         self.session = URLSession(configuration: .default, delegate: redirectHandler, delegateQueue: nil)
         self.decoder = decoder
-        self.storage = storage
+        self.correlationId = correlationId
     }
 
     deinit {
         session.finishTasksAndInvalidate()
-    }
-    
-    private func retrieveCorrelationId() -> String {
-        guard let correlationId: String = storage.get(key: NetworkClient.correlationIdKey) else {
-            let generated = UUID().uuidString
-            self.storage.save(key: NetworkClient.correlationIdKey, value: generated)
-            return generated
-        }
-        return correlationId
     }
     
     func request(_ url: URL, method: HttpMethod = .get, headers: [String: String]? = nil, body: Data? = nil) -> DataRequest {
@@ -31,7 +21,7 @@ class NetworkClient {
         
         urlRequest.httpMethod = method.rawValue
         let computedHeaders: [String : String] = headers ?? [:]
-        let withCorrelationHeaders: [String : String] = computedHeaders.merging(["X-R5-Correlation-Id": retrieveCorrelationId()], uniquingKeysWith: { (_, new) in new})
+        let withCorrelationHeaders: [String : String] = computedHeaders.merging(["X-R5-Correlation-Id": correlationId], uniquingKeysWith: { (_, new) in new})
 
         urlRequest.allHTTPHeaderFields = withCorrelationHeaders
         urlRequest.httpBody = body
@@ -45,7 +35,7 @@ class NetworkClient {
     func request(_ url: URL, method: HttpMethod = .get, headers: [String: String]? = nil, parameters: [String: Any]?) -> DataRequest {
         let body = parameters.flatMap { try? JSONSerialization.data(withJSONObject: $0) }
         let computedHeaders: [String : String] = headers ?? [:]
-        let withCorrelationHeaders: [String : String] = computedHeaders.merging(["X-R5-Correlation-Id": retrieveCorrelationId()], uniquingKeysWith: { (_, new) in new})
+        let withCorrelationHeaders: [String : String] = computedHeaders.merging(["X-R5-Correlation-Id": correlationId], uniquingKeysWith: { (_, new) in new})
         return request(url, method: method, headers:  withCorrelationHeaders, body: body)
     }
 }
