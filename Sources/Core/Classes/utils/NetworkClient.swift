@@ -6,10 +6,10 @@ class NetworkClient {
     private let decoder: JSONDecoder
     private let correlationId: String
 
-    init(decoder: JSONDecoder, correlationId: String) {
+    init(decoder: JSONDecoder) {
         self.session = URLSession(configuration: .default, delegate: redirectHandler, delegateQueue: nil)
         self.decoder = decoder
-        self.correlationId = correlationId
+        self.correlationId = UUID().uuidString
     }
 
     deinit {
@@ -20,11 +20,12 @@ class NetworkClient {
         var urlRequest = URLRequest(url: url)
         
         urlRequest.httpMethod = method.rawValue
-        let computedHeaders: [String : String] = headers ?? [:]
-        let withCorrelationHeaders: [String : String] = computedHeaders.merging(["X-R5-Correlation-Id": correlationId], uniquingKeysWith: { (_, new) in new})
-
-        urlRequest.allHTTPHeaderFields = withCorrelationHeaders
+        
+        var headersWithCorrelation = headers ?? [:]
+        headersWithCorrelation["X-R5-Correlation-Id"] = correlationId
+        urlRequest.allHTTPHeaderFields = headersWithCorrelation
         urlRequest.httpBody = body
+        
         if body != nil {
             urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
@@ -34,9 +35,7 @@ class NetworkClient {
 
     func request(_ url: URL, method: HttpMethod = .get, headers: [String: String]? = nil, parameters: [String: Any]?) -> DataRequest {
         let body = parameters.flatMap { try? JSONSerialization.data(withJSONObject: $0) }
-        let computedHeaders: [String : String] = headers ?? [:]
-        let withCorrelationHeaders: [String : String] = computedHeaders.merging(["X-R5-Correlation-Id": correlationId], uniquingKeysWith: { (_, new) in new})
-        return request(url, method: method, headers:  withCorrelationHeaders, body: body)
+        return request(url, method: method, headers: headers, body: body)
     }
 }
 

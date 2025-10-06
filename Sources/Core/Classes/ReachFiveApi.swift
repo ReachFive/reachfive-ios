@@ -57,11 +57,11 @@ public class ReachFiveApi {
 
     // MARK: - Initialization
 
-    public init(sdkConfig: SdkConfig, correlationId: String) {
+    public init(sdkConfig: SdkConfig) {
         self.sdkConfig = sdkConfig
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        self.networkClient = NetworkClient(decoder: decoder, correlationId: correlationId)
+        self.networkClient = NetworkClient(decoder: decoder)
     }
 
     // MARK: - URL Construction

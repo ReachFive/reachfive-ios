@@ -38,7 +38,7 @@ public class ReachFive: NSObject {
         self.sdkConfig = sdkConfig
         self.providersCreators = providersCreators
         self.storage = storage ?? UserDefaultsStorage()
-        self.reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig, correlationId: UUID().uuidString)
+        self.reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig)
         self.credentialManager = CredentialManager(reachFiveApi: reachFiveApi, storage: self.storage)
 
         if let sdkInternalConfig {
