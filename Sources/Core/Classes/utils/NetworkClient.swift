@@ -4,21 +4,28 @@ class NetworkClient {
     private let session: URLSession
     private let redirectHandler = RedirectHandler()
     private let decoder: JSONDecoder
+    private let correlationId: String
 
     init(decoder: JSONDecoder) {
         self.session = URLSession(configuration: .default, delegate: redirectHandler, delegateQueue: nil)
         self.decoder = decoder
+        self.correlationId = UUID().uuidString
     }
 
     deinit {
         session.finishTasksAndInvalidate()
     }
-
+    
     func request(_ url: URL, method: HttpMethod = .get, headers: [String: String]? = nil, body: Data? = nil) -> DataRequest {
         var urlRequest = URLRequest(url: url)
+        
         urlRequest.httpMethod = method.rawValue
-        urlRequest.allHTTPHeaderFields = headers
+        
+        var headersWithCorrelation = headers ?? [:]
+        headersWithCorrelation["X-R5-Correlation-Id"] = correlationId
+        urlRequest.allHTTPHeaderFields = headersWithCorrelation
         urlRequest.httpBody = body
+        
         if body != nil {
             urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
