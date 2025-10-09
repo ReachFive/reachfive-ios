@@ -416,7 +416,7 @@ Returned when a signup completes but the user must verify their identifier (emai
 // end::AwaitingIdentifierVerification[]
 
 // tag::AchievedLoginSignup[]
-=== AchievedLogin (Signup)
+=== AchievedLogin
 
 Returned when a signup completes successfully and the user is immediately logged in.  
 Contains the authentication token and user information, identical to the login flow.

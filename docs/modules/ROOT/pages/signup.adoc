@@ -55,7 +55,7 @@ include::partial$params.adoc[tag="scope"]
 
 == Response
 
-* *Type*: SignupFlow.<<AchievedLoginSignup,AchievedLogin>> | <<AwaitingIdentifierVerification>>
+* *Type*: SignupFlow.<<AchievedLogin>> | <<AwaitingIdentifierVerification>>
 * *Error*: <<ReachFiveError>>
 
 If the signup completes successfully, the promise returns either the authentication token (`AchievedLogin`) or indicates that the user must verify their identifier (`AwaitingIdentifierVerification`).  
