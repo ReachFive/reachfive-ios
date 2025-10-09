@@ -39,6 +39,13 @@ It should match the value you describe in your xref:docs:ROOT:mfa-templates.adoc
 +
 We recommend using meaningful values like `login` or `transaction` to help better align with MFA email and SMS templates.
 
+* `trustDevice`: Boolean indicating if the device should be trusted or not.
++
+* `true` = trust the device
+* `false` = do not trust the device
++
+This option only applies during registration when the second factor is already verified and the user doesn't need to enter a verification code to complete enrollment.
+
 [source,swift]
 ----
 AppDelegate.reachfive()
@@ -87,7 +94,6 @@ This includes the following:
 * `challengeId`: The code challenge ID to verify the user.
 * `trustDevice`: _Optional_ boolean to trust the device or not.
 Accepts `true` to mark the device as trusted and `false` to mark the device as not trusted.
-This only applies to xref:docs:ROOT:rba.adoc[].
 
 [source,swift]
 ----
@@ -627,6 +633,16 @@ NOTE: Both the international format and the national conventions of the account'
 |The ID of the trusted device.
 
 // end::trustedDeviceId[]
+
+// tag::trustDevice[]
+|[[trustDevice,trustDevice]]trustDevice `boolean` 
+|Boolean indicating if the device should be trusted or not.
+
+* `true` = trust the device
+* `false` = do not trust the device
+
+NOTE: This option only applies during registration when the second factor is already verified and the user doesn’t need to enter a verification code to complete enrollment.
+// end::trustDevice[]
 
 // tag::application[]
 |[[application,application]] application `UIApplication` 
