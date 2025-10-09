@@ -33,6 +33,11 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
 * `origin`: The domain of the origin.
 It must be a valid URL.
+* `action`: A string describing the action for the MFA flow.
+You can value this with whatever you like.
+It should match the value you describe in your xref:docs:ROOT:mfa-templates.adoc[].
++
+We recommend using meaningful values like `login` or `transaction` to help better align with MFA email and SMS templates.
 
 [source,swift]
 ----
@@ -41,7 +46,9 @@ AppDelegate.reachfive()
         authType: "email",
         scope: scope,
         redirectUri: "https://example.com/callback",
-        authToken: profileAuthToken
+        authToken: profileAuthToken,
+        origin: "ios-app",
+        action: "signup"
     ))
 ----
 --
@@ -691,3 +698,13 @@ Defaults to `nil`.
 NOTE: The `logout` method invalidates any tokens found here.
 
 // end::revoke[]
+
+// tag::action[]
+|[[action, action]]action `String` 
+|A string describing the action for the MFA flow.
+
+You can value this with whatever you like.
+It should match the value you describe in your xref:docs:ROOT:mfa-templates.adoc[].
+
+We recommend using meaningful values like `login` or `transaction` to help better align with MFA email and SMS templates.
+// end::action[]

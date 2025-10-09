@@ -4,12 +4,12 @@
 {sdk-ios-version-badge}
 
 [.expand]
-icon:warning[] Breaking changes for `9.0.0`, please read.
+icon:warning[] Breaking changes for `10.0.0`, please read.
 
 [.expand-content]
 ====
 [discrete]
-include::partial$announcements/900-breaking-changes.adoc[leveloffset=+1]
+include::partial$announcements/1000-breaking-changes.adoc[leveloffset=+1]
 ====
 
 == Requirements
