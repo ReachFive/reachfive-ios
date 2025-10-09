@@ -55,11 +55,15 @@ include::partial$params.adoc[tag="scope"]
 
 == Response
 
-* *Type*: <<AuthToken>>
+* *Type*: SignupFlow.<<AchievedLogin>> | <<AwaitingIdentifierVerification>>
 * *Error*: <<ReachFiveError>>
 
-Return the profile's authentication token. If the parameters are invalid or if a profile already exists with the same email address, the promise will be rejected and will return a `ReachFiveError`.
+If the signup completes successfully, the promise returns either the authentication token (`AchievedLogin`) or indicates that the user must verify their identifier (`AwaitingIdentifierVerification`).  
+Otherwise it is rejected and returns a `ReachFiveError`.
 
-include::partial$models.adoc[tag=authtoken]
+include::partial$models.adoc[tag=AchievedLoginSignup]
+
+include::partial$models.adoc[tag=AwaitingIdentifierVerification]
 
 include::partial$models.adoc[tag=reachfiveerror]
+

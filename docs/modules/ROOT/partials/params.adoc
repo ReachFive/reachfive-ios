@@ -724,3 +724,4 @@ It should match the value you describe in your xref:docs:ROOT:mfa-templates.adoc
 
 We recommend using meaningful values like `login` or `transaction` to help better align with MFA email and SMS templates.
 // end::action[]
+
