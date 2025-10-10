@@ -6,7 +6,8 @@
 AppDelegate.reachfive().{docname}(
     <<CredentialType>>, <1>
     <<code>>,
-    <<authToken,authToken>>
+    <<authToken,authToken>>,
+    <<trustDevice>>
 )
 ----
 <1> This "CredentialType" should be either `.Email` or `.PhoneNumber` as shown in the <<Examples, examples>> below.
@@ -43,7 +44,7 @@ include::example${docname}WithPhoneNumber.swift[]
 [cols="1,3a"]
 |===
 
-include::partial$params.adoc[tags="CredentialType,code,authtoken"]
+include::partial$params.adoc[tags="CredentialType,code,authtoken,trustDevice"]
 
 |===
 

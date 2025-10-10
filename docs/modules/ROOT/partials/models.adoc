@@ -403,3 +403,56 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 |===
 
 // end::OngoingStepUp[]
+
+// tag::AwaitingIdentifierVerification[]
+=== AwaitingIdentifierVerification
+
+Returned when a signup completes but the user must verify their identifier (email or phone) before logging in.
+
+* No `AuthToken` is returned.
+* You should prompt the user to check their email or SMS for verification instructions.
+* After verification, the user can log in normally to receive an `AuthToken`.
+
+// end::AwaitingIdentifierVerification[]
+
+// tag::AchievedLoginSignup[]
+=== AchievedLogin
+
+Returned when a signup completes successfully and the user is immediately logged in.  
+Contains the authentication token and user information.
+
+[cols="1a,2a"]
+|===
+|idToken|The ID token {rfc-7519}[JSON Web Token (JWT)^] that contains the profile's information. This is only available when the `openid` xref:docs:ROOT:scope.adoc[scope] is requested.
+|accessToken|The authorization credential {rfc-7519}[JSON Web Token (JWT)^] used to access the {company} API.
+|refreshToken
+|The refresh token {rfc-7519}[JSON Web Token (JWT)^] used to obtain new access tokens once they expire. This is only available when the `offline_access` xref:docs:ROOT:scope.adoc[scope] is requested.
+
+|tokenType|The type of token. Always equal to `Bearer`.
+|expiresIn|The lifetime in seconds of the access token.
+
+If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
+|user **OpenIDUser**|The user's information contained in the ID token.
+
+!===
+! id `string`! The identifier of the user.
+! name `string`! The full name of the user in displayable form including all name parts, possibly including titles and suffixes, ordered according to the user's locale and preferences.
+! preferredUsername `string`! The shorthand name by which the user wishes to be referred to.
+! givenName `string`! The given name or first name of the user.
+! familyName `string`! The surname or last name of the user.
+! middleName `string`! The middle name of the user.
+! nickname `string`! The casual name of the user that may or may not be the same as the givenName
+! picture `string`! The URL of the user's profile picture.
+! website `string`! The URL of the user's web page or blog.
+! email `string`! The user's preferred e-mail address.
+! emailVerified `boolean`! True if the user's e-mail address has been verified; otherwise false.
+! gender `string`! The user's gender.
+! zoneinfo `string`! The string from zoneinfo time zone database representing the user's time zone.
+! locale `string`! The user's language code in lowercase and country code in uppercase, separated by a dash.
+! phoneNumber `string`! The user's preferred telephone number.
+! phoneNumberVerified `boolean`! `true` if the user's phone number has been verified; otherwise `false`.
+! address `string`! The user's preferred postal address.
+!===
+|===
+
+// end::AchievedLoginSignup[]

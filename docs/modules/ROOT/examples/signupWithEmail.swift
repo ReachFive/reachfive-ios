@@ -1,7 +1,7 @@
 import Reach5
 
 do {
-    let authToken = try await AppDelegate.reachfive().signup(
+    let signupFlow = try await AppDelegate.reachfive().signup(
         profile: ProfileSignupRequest(
             givenName: "John",
             familyName: "Doe",
@@ -13,7 +13,14 @@ do {
         redirectUrl: "https://www.example.com/redirect",
         scope: ["openid", "profile", "email"]
     )
-    // Get the profile's authentication token
+
+    switch signupFlow {
+    case .AchievedLogin(authToken: AuthToken):
+        // Signup completed and user is logged in
+        // Use authToken as needed
+    case .AwaitingIdentifierVerification:
+        // Signup completed but email/phone verification is required
+    }
 } catch {
-    // Return a ReachFive error
+    // Handle ReachFive error
 }

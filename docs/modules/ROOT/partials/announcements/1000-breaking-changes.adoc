@@ -1,0 +1,7 @@
+= Breaking changes for `iOS 10.0.0`
+
+From {page-component-title} version `10.0.0`, xref:signup.adoc[] now returns a `SignupFlow`, and the `authToken` is optional.
+
+* If the xref:docs:ROOT:block-unverified-logins.adoc#block-unverified-logins[Block unverified logins at signup feature] is enabled, the signup may return `SignupFlow.AwaitingIdentifierVerification` instead of `SignupFlow.AchievedLogin`. 
+In this case, no `AuthToken` will be provided, and you must handle pending verification states without errors.
+* Ensure your application logic accounts for both possible outcomes of `SignupFlow` (`AchievedLogin(authToken)` and `AwaitingIdentifierVerification`) to avoid runtime issues.

@@ -5,7 +5,9 @@
 ----
 AppDelegate.reachfive().{docname}(
     <<Credential,registering>>,
-    <<authToken,authToken>>
+    <<authToken,authToken>>,
+    <<action,action>>,
+    <<trustDevice>>
 )
 ----
 
@@ -55,7 +57,7 @@ include::example${docname}WithPhoneNumber.swift[]
 [cols="1,3a"]
 |===
 
-include::partial$params.adoc[tags="authtoken,Credential"]
+include::partial$params.adoc[tags="authtoken,Credential,action,trustDevice"]
 
 |===
 

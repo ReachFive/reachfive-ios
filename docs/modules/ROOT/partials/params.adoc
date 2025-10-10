@@ -33,6 +33,18 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
 * `origin`: The domain of the origin.
 It must be a valid URL.
+* `action`: A string describing the action for the MFA flow.
+You can value this with whatever you like.
+It should match the value you describe in your xref:docs:ROOT:mfa-templates.adoc[].
++
+We recommend using meaningful values like `login` or `transaction` to help better align with MFA email and SMS templates.
+
+* `trustDevice`: Boolean indicating if the device should be trusted or not.
++
+* `true` = trust the device
+* `false` = do not trust the device
++
+This option only applies during registration when the second factor is already verified and the user doesn't need to enter a verification code to complete enrollment.
 
 [source,swift]
 ----
@@ -41,7 +53,9 @@ AppDelegate.reachfive()
         authType: "email",
         scope: scope,
         redirectUri: "https://example.com/callback",
-        authToken: profileAuthToken
+        authToken: profileAuthToken,
+        origin: "ios-app",
+        action: "signup"
     ))
 ----
 --
@@ -80,7 +94,6 @@ This includes the following:
 * `challengeId`: The code challenge ID to verify the user.
 * `trustDevice`: _Optional_ boolean to trust the device or not.
 Accepts `true` to mark the device as trusted and `false` to mark the device as not trusted.
-This only applies to xref:docs:ROOT:rba.adoc[].
 
 [source,swift]
 ----
@@ -621,6 +634,16 @@ NOTE: Both the international format and the national conventions of the account'
 
 // end::trustedDeviceId[]
 
+// tag::trustDevice[]
+|[[trustDevice,trustDevice]]trustDevice `boolean` 
+|Boolean indicating if the device should be trusted or not.
+
+* `true` = trust the device
+* `false` = do not trust the device
+
+NOTE: This option only applies during registration when the second factor is already verified and the user doesn’t need to enter a verification code to complete enrollment.
+// end::trustDevice[]
+
 // tag::application[]
 |[[application,application]] application `UIApplication` 
 | The UIKit Application instance. 
@@ -691,3 +714,14 @@ Defaults to `nil`.
 NOTE: The `logout` method invalidates any tokens found here.
 
 // end::revoke[]
+
+// tag::action[]
+|[[action, action]]action `String` 
+|A string describing the action for the MFA flow.
+
+You can value this with whatever you like.
+It should match the value you describe in your xref:docs:ROOT:mfa-templates.adoc[].
+
+We recommend using meaningful values like `login` or `transaction` to help better align with MFA email and SMS templates.
+// end::action[]
+
