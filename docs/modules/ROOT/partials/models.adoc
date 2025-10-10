@@ -419,7 +419,7 @@ Returned when a signup completes but the user must verify their identifier (emai
 === AchievedLogin
 
 Returned when a signup completes successfully and the user is immediately logged in.  
-Contains the authentication token and user information, identical to the login flow.
+Contains the authentication token and user information.
 
 [cols="1a,2a"]
 |===

@@ -15,7 +15,7 @@ do {
     )
 
     switch signupFlow {
-    case .AchievedLogin(let authToken):
+    case .AchievedLogin(authToken: AuthToken):
         // Signup completed and user is logged in
         // Use authToken as needed
     case .AwaitingIdentifierVerification:
