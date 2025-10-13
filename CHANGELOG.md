@@ -1,12 +1,16 @@
 # Changelog
 
-
 ## Unreleased
-### New Features
-- Support Correlation id
+
+## v10.0.0
 
 ### Breaking changes
 - Support new option to prevent login with unverified identifier after a signup. Method signup returns a `SignupFlow` that can be an `AchievedLogin(authToken: AuthToken)` or an `AwaitingIdentifierVerification`
+
+### New Features
+- support parameter origin to requestPasswordReset
+- allow to trust device during mfa credential registering
+- support action parameter for step up and mfa credential registering
 
 ## v9.1.2
 ### Bug fix
