@@ -113,7 +113,8 @@ public extension ReachFive {
             clientId: sdkConfig.clientId,
             email: email,
             phoneNumber: phoneNumber,
-            redirectUrl: redirectUrl
+            redirectUrl: redirectUrl,
+            origin: origin
         )
         return try await reachFiveApi.requestPasswordReset(
             requestPasswordResetRequest: requestPasswordResetRequest
