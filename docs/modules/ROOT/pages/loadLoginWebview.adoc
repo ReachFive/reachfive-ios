@@ -29,11 +29,11 @@ CAUTION: We recommend using the standard native login or standard webview login 
 include::example${docname}.swift[]
 ----
 
-TIP: You can find this example with its UI integration in the link:https://github.com/ReachFive/reachfive-ios/blob/master/Sandbox/Sandbox/LoginWKWebviewController.swift[{company} sandbox^].
+TIP: You can find this example with its UI integration in the link:https://github.com/ReachFive/reachfive-ios/blob/master/Sandbox/Sandbox/Controllers/Web/LoginWKWebviewController.swift[{company} sandbox^].
 
 == Customisation
 
-To further customise the behaviour and appearance of the `WKWebview`, please see the link:https://github.com/ReachFive/reachfive-ios/blob/master/Sandbox/Sandbox/LoginCustomWebviewController.swift[{company} sandbox^].
+To further customise the behaviour and appearance of the `WKWebview`, please see the link:https://github.com/ReachFive/reachfive-ios/blob/master/Sandbox/Sandbox/Controllers/Web/LoginCustomWebviewController.swift[{company} sandbox^].
 
 == Parameters
 
