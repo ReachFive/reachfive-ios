@@ -162,7 +162,7 @@ public class CredentialManager: NSObject {
         let authorizationRequest = if #available(iOS 16.0, *) {
             try createCredentialAssertionRequest(assertionRequestOptions)
         } else {
-            throw ReachFiveError.TechnicalError(reason: "Should not happen, but XCode 26 introduced this.")
+            throw ReachFiveError.TechnicalError(reason: "Passkey AutoFill-assisted sign-in requires iOS 16 or later.")
         }
 
         // AutoFill-assisted requests only support ASAuthorizationPlatformPublicKeyCredentialAssertionRequest.
