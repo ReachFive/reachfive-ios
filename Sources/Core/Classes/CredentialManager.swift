@@ -159,7 +159,11 @@ public class CredentialManager: NSObject {
         scope = webAuthnLoginRequest.scope
 
         let assertionRequestOptions = try await reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
-        let authorizationRequest = try createCredentialAssertionRequest(assertionRequestOptions)
+        let authorizationRequest = if #available(iOS 16.0, *) {
+            try createCredentialAssertionRequest(assertionRequestOptions)
+        } else {
+            throw ReachFiveError.TechnicalError(reason: "Should not happen, but XCode 26 introduced this.")
+        }
 
         // AutoFill-assisted requests only support ASAuthorizationPlatformPublicKeyCredentialAssertionRequest.
         let authController = ASAuthorizationController(authorizationRequests: [authorizationRequest])
