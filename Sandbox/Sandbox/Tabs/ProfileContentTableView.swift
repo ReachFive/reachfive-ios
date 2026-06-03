@@ -20,6 +20,7 @@ enum SecurityRows: Int, CaseIterable {
     //TODO: case Password // show if there is one, and able to add/edit
     case Passkeys
     case TrustedDevices
+    case SessionDevices
     case Addresses
     case CustomFields
     case Consents
@@ -172,6 +173,14 @@ extension ProfileController: UITableViewDelegate {
                         self.navigationController?.pushViewController(trustedDevicesVC, animated: true)
                     }
                 }
+            case .SessionDevices:
+                if case .loaded(let devices) = self.sessionDevicesState {
+                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                    if let sessionDevicesVC = storyboard.instantiateViewController(withIdentifier: "SessionDevicesViewController") as? SessionDevicesViewController {
+                        sessionDevicesVC.sessionDevices = devices
+                        self.navigationController?.pushViewController(sessionDevicesVC, animated: true)
+                    }
+                }
             default:
                 break
             }
@@ -282,22 +291,38 @@ return UITableViewCell() }
         case .Passkeys:
             cell.textLabel?.text = "Passkeys"
             cell.detailTextLabel?.text = "\(passkeys.count)"
-        case .TrustedDevices:
-            cell.textLabel?.text = "Trusted Devices"
-            cell.accessoryType = .none
-            switch trustedDevicesState {
-            case .loading:
-                cell.detailTextLabel?.text = "Loading..."
-            case .loaded(let devices):
-                cell.detailTextLabel?.text = "\(devices.count)"
-                cell.accessoryType = .disclosureIndicator
-            case .error(let message):
-                cell.detailTextLabel?.text = message
-            case .unavailable:
-                cell.detailTextLabel?.text = "Not available"
-            case .stepUpRequired:
-                cell.detailTextLabel?.text = "Step-up required"
-            }
+            case .TrustedDevices:
+                cell.textLabel?.text = "Trusted Devices"
+                cell.accessoryType = .none
+                switch trustedDevicesState {
+                case .loading:
+                    cell.detailTextLabel?.text = "Loading..."
+                case .loaded(let devices):
+                    cell.detailTextLabel?.text = "\(devices.count)"
+                    cell.accessoryType = .disclosureIndicator
+                case .error(let message):
+                    cell.detailTextLabel?.text = message
+                case .unavailable:
+                    cell.detailTextLabel?.text = "Not available"
+                case .stepUpRequired:
+                    cell.detailTextLabel?.text = "Step-up required"
+                }
+            case .SessionDevices:
+                cell.textLabel?.text = "Session Devices"
+                cell.accessoryType = .none
+                switch sessionDevicesState {
+                case .loading:
+                    cell.detailTextLabel?.text = "Loading..."
+                case .loaded(let devices):
+                    cell.detailTextLabel?.text = "\(devices.count)"
+                    cell.accessoryType = .disclosureIndicator
+                case .error(let message):
+                    cell.detailTextLabel?.text = message
+                case .unavailable:
+                    cell.detailTextLabel?.text = "Not available"
+                case .stepUpRequired:
+                    cell.detailTextLabel?.text = "Step-up required"
+                }
         case .Addresses:
             cell.textLabel?.text = "Addresses"
             cell.detailTextLabel?.text = "\(profile.addresses?.count ?? 0)"

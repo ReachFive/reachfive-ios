@@ -16,6 +16,7 @@ class ProfileController: UIViewController {
     var profile: Profile = Profile()
     var updatedProfile: ProfileUpdate?
     var trustedDevicesState: DataState<[TrustedDevice]> = .loading
+    var sessionDevicesState: DataState<[SessionDevice]> = .loading
     var mfaCredentials: [MfaCredentialItem] = []
     var passkeys: [DeviceCredential] = []
 
@@ -150,6 +151,7 @@ class ProfileController: UIViewController {
                 self.passkeys = passkeys
 
                 await fetchTrustedDevices()
+                await fetchSessionDevices()
                 await fetchMfaCredentials(token: authToken)
 
                 Task { @MainActor in
@@ -205,6 +207,24 @@ class ProfileController: UIViewController {
 
         await MainActor.run {
             self.profileData.reloadRows(at: [IndexPath(row: SecurityRows.TrustedDevices.rawValue, section: Section.Security.rawValue)], with: .automatic)
+        }
+    }
+
+    func fetchSessionDevices() async {
+        guard let token = authToken else { return }
+        do {
+            print("fetch session devices")
+            let response = try await AppDelegate.reachfive().listSessionDevices(authToken: token)
+            self.sessionDevicesState = .loaded(response.sessionDevices)
+        } catch let ReachFiveError.TechnicalError(_, apiError) where apiError?.errorMessageKey == "error.feature.notAvailable" {
+            self.sessionDevicesState = .unavailable
+        } catch {
+            self.sessionDevicesState = .error("Failed to load")
+            print("Error fetching session devices: \(error.localizedDescription)")
+        }
+
+        await MainActor.run {
+            self.profileData.reloadRows(at: [IndexPath(row: SecurityRows.SessionDevices.rawValue, section: Section.Security.rawValue)], with: .automatic)
         }
     }
 

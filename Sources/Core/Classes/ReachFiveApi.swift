@@ -192,6 +192,12 @@ public class ReachFiveApi {
             .responseJson(type: Profile.self)
     }
 
+    // MARK: - Session devices
+    public func listSessionDevices(authToken: AuthToken) async throws -> ListSessionDevices {
+        try await networkClient.request(createUrl(path: "/identity/v1/session-devices"), method: .get, headers: tokenHeader(authToken))
+            .responseJson(type: ListSessionDevices.self)
+    }
+    
     // MARK: - Verification
 
     public func sendEmailVerification(authToken: AuthToken, sendEmailVerificationRequest: SendEmailVerificationRequest) async throws -> SendEmailVerificationResponse {
