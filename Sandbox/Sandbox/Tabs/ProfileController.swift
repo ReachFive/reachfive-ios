@@ -215,11 +215,17 @@ class ProfileController: UIViewController {
         do {
             print("fetch session devices")
             let response = try await AppDelegate.reachfive().listSessionDevices(authToken: token)
-            self.sessionDevicesState = .loaded(response.sessionDevices)
+            await MainActor.run {
+                self.sessionDevicesState = .loaded(response.sessionDevices)
+            }
         } catch let ReachFiveError.TechnicalError(_, apiError) where apiError?.errorMessageKey == "error.feature.notAvailable" {
-            self.sessionDevicesState = .unavailable
+            await MainActor.run {
+                self.sessionDevicesState = .unavailable
+            }
         } catch {
-            self.sessionDevicesState = .error("Failed to load")
+            await MainActor.run {
+                self.sessionDevicesState = .error("Failed to load")
+            }
             print("Error fetching session devices: \(error.localizedDescription)")
         }
 
