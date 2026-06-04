@@ -10,7 +10,8 @@ public class ListSessionDevices: Codable {
 }
 
 public enum SessionDeviceTokenType: String, Codable {
-    case RT = "RT", ST = "ST"
+    case rt = "RT"
+    case st = "ST"
 }
 
 public class SessionDevice: Codable {
