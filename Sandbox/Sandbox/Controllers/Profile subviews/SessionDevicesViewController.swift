@@ -61,6 +61,7 @@ extension SessionDevicesViewController: UITableViewDelegate {
                 button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
             }
         )
+        
         headerView.setEditButtonHidden(sessionDevices.isEmpty)
         
         return headerView
