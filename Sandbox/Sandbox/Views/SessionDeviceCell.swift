@@ -14,9 +14,16 @@ class SessionDeviceCell: UITableViewCell {
     @IBOutlet weak var locationLabel: UILabel!
     @IBOutlet weak var tokenTypeLabel: UILabel!
     @IBOutlet weak var lastConnectionLabel: UILabel!
+    @IBOutlet weak var deleteButton: UIButton!
+
+    var onDelete: (() -> Void)?
 
     override func awakeFromNib() {
         super.awakeFromNib()
+    }
+
+    @IBAction func deleteButtonTapped(_ sender: UIButton) {
+        onDelete?()
     }
 
     func configure(with device: SessionDevice) {

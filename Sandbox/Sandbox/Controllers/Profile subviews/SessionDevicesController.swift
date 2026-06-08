@@ -1,19 +1,17 @@
 import UIKit
 import Reach5
 
-class SessionDevicesViewController: UIViewController {
+class SessionDevicesController: UIViewController {
     var sessionDevices: [SessionDevice] = [] {
         didSet {
             DispatchQueue.main.async {
                 if let header = self.sessionDevicesTableView.headerView(forSection: 0) as? EditableSectionHeaderView {
                     header.setEditButtonHidden(self.sessionDevices.isEmpty)
                 }
-                self.sessionDevicesTableView.reloadData()
             }
         }
     }
-    var authToken: AuthToken?
-
+    
     @IBOutlet weak var sessionDevicesTableView: UITableView!
     
     override func viewDidLoad() {
@@ -32,45 +30,24 @@ class SessionDevicesViewController: UIViewController {
 
 extension SessionDevicesViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return sessionDevices.count
+        return trustedDevices.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: SessionDeviceCell.reuseIdentifier, for: indexPath) as! SessionDeviceCell
         let device = sessionDevices[indexPath.row]
         cell.configure(with: device)
-        cell.onDelete = { [weak self] in
-            self?.deleteDevice(device, at: indexPath)
-        }
         return cell
     }
 }
 
-extension SessionDevicesViewController {
-    private func deleteDevice(_ device: SessionDevice, at indexPath: IndexPath) {
-        guard let authToken else { return }
-        Task {
-            do {
-                try await AppDelegate.reachfive().deleteSessionDevice(id: device.id, authToken: authToken)
-                await MainActor.run {
-                    self.sessionDevices.remove(at: indexPath.row)
-                }
-            } catch {
-                await MainActor.run {
-                    let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default))
-                    self.present(alert, animated: true)
-                }
-            }
-        }
-    }
-}
-
 extension SessionDevicesViewController: UITableViewDelegate {
+    // method to run when table view cell is tapped
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
+    // Use a custom header view for each section.
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: EditableSectionHeaderView.reuseIdentifier) as? EditableSectionHeaderView else {
             return nil
@@ -85,8 +62,9 @@ extension SessionDevicesViewController: UITableViewDelegate {
                 button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
             }
         )
-        headerView.setEditButtonHidden(sessionDevices.isEmpty)
+        headerView.setEditButtonHidden(SessionDevice.isEmpty)
         
         return headerView
     }
 }
+

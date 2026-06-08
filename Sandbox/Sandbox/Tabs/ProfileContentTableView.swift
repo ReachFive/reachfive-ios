@@ -178,6 +178,7 @@ extension ProfileController: UITableViewDelegate {
                     let storyboard = UIStoryboard(name: "Main", bundle: nil)
                     if let sessionDevicesVC = storyboard.instantiateViewController(withIdentifier: "SessionDevicesViewController") as? SessionDevicesViewController {
                         sessionDevicesVC.sessionDevices = devices
+                        sessionDevicesVC.authToken = authToken
                         self.navigationController?.pushViewController(sessionDevicesVC, animated: true)
                     }
                 }

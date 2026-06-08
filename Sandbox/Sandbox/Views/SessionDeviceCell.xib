@@ -10,11 +10,11 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="180" id="KGk-i7-Jjw" customClass="SessionDeviceCell" customModule="Sandbox" customModuleProvider="target">
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="212" id="KGk-i7-Jjw" customClass="SessionDeviceCell" customModule="Sandbox" customModuleProvider="target">
             <rect key="frame" x="0.0" y="0.0" width="414" height="180"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
-                <rect key="frame" x="0.0" y="0.0" width="414" height="180"/>
+                <rect key="frame" x="0.0" y="0.0" width="414" height="212"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Device Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gTV-gL-4bA">
@@ -97,6 +97,19 @@
                         <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <nil key="highlightedColor"/>
                     </label>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="deleteBtn-id">
+                        <rect key="frame" x="20" y="158" width="374" height="36"/>
+                        <color key="backgroundColor" red="0.84705882352941175" green="0.19607843137254902" blue="0.17254901960784313" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                        <inset key="contentEdgeInsets" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        <state key="normal" title="Delete">
+                            <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </state>
+                        <connections>
+                            <action selector="deleteButtonTapped:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="deleteBtn-action-id"/>
+                        </connections>
+                    </button>
                 </subviews>
                 <constraints>
                     <constraint firstItem="sLh-sD-eGB" firstAttribute="top" secondItem="gTV-gL-4bA" secondAttribute="bottom" constant="8" id="1Ue-Gj-eB3"/>
@@ -116,7 +129,11 @@
                     <constraint firstItem="pGe-9g-b8G" firstAttribute="top" secondItem="lastConnLabel" secondAttribute="bottom" constant="8" id="z2V-cE-gqg"/>
                     <constraint firstAttribute="trailingMargin" secondItem="pGe-9g-b8G" secondAttribute="trailing" id="g2e-iV-gqg"/>
                     <constraint firstItem="h3A-fF-gYd" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" id="R0K-aI-g2d"/>
-                    <constraint firstAttribute="bottomMargin" relation="greaterThanOrEqual" secondItem="pGe-9g-b8G" secondAttribute="bottom" constant="4" id="O2D-eC-gVd"/>
+                    <constraint firstItem="deleteBtn-id" firstAttribute="top" secondItem="pGe-9g-b8G" secondAttribute="bottom" constant="14" id="deleteBtn-top"/>
+                    <constraint firstItem="deleteBtn-id" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" id="deleteBtn-lead"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="deleteBtn-id" secondAttribute="trailing" id="deleteBtn-trail"/>
+                    <constraint firstItem="deleteBtn-id" firstAttribute="height" constant="36" id="deleteBtn-height"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="deleteBtn-id" secondAttribute="bottom" constant="8" id="deleteBtn-bottom"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -131,6 +148,7 @@
                 <outlet property="osLabel" destination="fNe-yT-dF5" id="c2g-bA-f5f"/>
                 <outlet property="tokenTypeLabel" destination="tokLabel" id="tokLabelOutlet"/>
                 <outlet property="userAgentLabel" destination="bV9-aV-aG9" id="f2g-bA-f5f"/>
+                <outlet property="deleteButton" destination="deleteBtn-id" id="deleteBtn-outlet-id"/>
             </connections>
             <point key="canvasLocation" x="139" y="20"/>
         </tableViewCell>
