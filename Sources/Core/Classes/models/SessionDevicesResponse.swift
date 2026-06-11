@@ -16,8 +16,8 @@ public enum SessionDeviceTokenType: String, Codable {
 
 public class SessionDevice: Codable {
     public let id: String
-    public let ip: String
     public let tokenType: SessionDeviceTokenType
+    public let ip: String
     public let country: String?
     public let city: String?
     public let operatingSystem: String?

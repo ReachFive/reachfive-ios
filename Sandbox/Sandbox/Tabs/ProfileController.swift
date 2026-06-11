@@ -216,7 +216,7 @@ class ProfileController: UIViewController {
             print("fetch session devices")
             let response = try await AppDelegate.reachfive().listSessionDevices(authToken: token)
             await MainActor.run {
-                self.sessionDevicesState = .loaded(response.sessionDevices)
+                self.sessionDevicesState = .loaded(response)
             }
         } catch let ReachFiveError.TechnicalError(_, apiError) where apiError?.errorMessageKey == "error.feature.notAvailable" {
             await MainActor.run {
