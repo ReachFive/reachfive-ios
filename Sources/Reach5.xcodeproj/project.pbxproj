@@ -102,6 +102,8 @@
 		9943B0852B6953C5007AD120 /* ReachFiveMfa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9943B0842B6953C5007AD120 /* ReachFiveMfa.swift */; };
 		9943B0872B6954F1007AD120 /* MfaCredentialsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9943B0862B6954F1007AD120 /* MfaCredentialsRequest.swift */; };
 		9958690C2C32DDDC005CD5C4 /* TrustedDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9958690B2C32DDDC005CD5C4 /* TrustedDevice.swift */; };
+		999000302FC9D1980081A366 /* SessionDevicesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9990002F2FC9D1950081A366 /* SessionDevicesResponse.swift */; };
+		999000322FC9D39D0081A366 /* ReachFiveSessionDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999000312FC9D38E0081A366 /* ReachFiveSessionDevice.swift */; };
 		99DD57C22E72E19A00EE4D1C /* SignupTokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */; };
 /* End PBXBuildFile section */
 
@@ -204,6 +206,8 @@
 		9943B0842B6953C5007AD120 /* ReachFiveMfa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveMfa.swift; sourceTree = "<group>"; };
 		9943B0862B6954F1007AD120 /* MfaCredentialsRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MfaCredentialsRequest.swift; sourceTree = "<group>"; };
 		9958690B2C32DDDC005CD5C4 /* TrustedDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedDevice.swift; sourceTree = "<group>"; };
+		9990002F2FC9D1950081A366 /* SessionDevicesResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDevicesResponse.swift; sourceTree = "<group>"; };
+		999000312FC9D38E0081A366 /* ReachFiveSessionDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveSessionDevice.swift; sourceTree = "<group>"; };
 		99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupTokenResponse.swift; sourceTree = "<group>"; };
 		DBD028BD86E6BB22BBAD012C /* Pods_Reach5.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Reach5.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11E5406A766337B2CE86F9C /* Pods-Reach5.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Reach5.debug.xcconfig"; path = "Target Support Files/Pods-Reach5/Pods-Reach5.debug.xcconfig"; sourceTree = "<group>"; };
@@ -224,6 +228,7 @@
 		34173218229D801500681CFD /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				999000312FC9D38E0081A366 /* ReachFiveSessionDevice.swift */,
 				2AE040E32C88E33900162014 /* AppleProvider.swift */,
 				2AE53309299462DD00EF97E0 /* CredentialManager.swift */,
 				2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */,
@@ -326,6 +331,7 @@
 		34E18B8D22A6C13100952EBD /* models */ = {
 			isa = PBXGroup;
 			children = (
+				9990002F2FC9D1950081A366 /* SessionDevicesResponse.swift */,
 				99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */,
 				34E18B8B22A6BEC900952EBD /* AccessTokenResponse.swift */,
 				34689A9622CDFB5F002970F9 /* AuthToken.swift */,
@@ -574,6 +580,7 @@
 				347FDB65229C02A800660687 /* SdkConfig.swift in Sources */,
 				34F7D3E422A54AA2003A7BC0 /* ReachFiveApi.swift in Sources */,
 				8496EB2625DEAFCF005098DD /* RegistrationPublicKeyCredential.swift in Sources */,
+				999000322FC9D39D0081A366 /* ReachFiveSessionDevice.swift in Sources */,
 				8496EB2C25DEAFCF005098DD /* WebauthnSignupCredential.swift in Sources */,
 				990AF3422DD2146800D31780 /* VerifyEmailRequest.swift in Sources */,
 				34F7D3E622A54ADE003A7BC0 /* ProvidersConfigsResult.swift in Sources */,
@@ -582,6 +589,7 @@
 				2A0305102C04DBE500A92524 /* ResetOptions.swift in Sources */,
 				8496EB3D25DEB141005098DD /* R5AuthenticatorSelectionCriteria.swift in Sources */,
 				72DDB78E22EF354300048262 /* ClientConfigResponse.swift in Sources */,
+				999000302FC9D1980081A366 /* SessionDevicesResponse.swift in Sources */,
 				3417FF6A22FAD1810009EC84 /* ReachFivePasswordLess.swift in Sources */,
 				34689A9722CDFB5F002970F9 /* AuthToken.swift in Sources */,
 				2AE533062994629400EF97E0 /* StringUtils.swift in Sources */,
