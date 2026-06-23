@@ -292,37 +292,37 @@ return UITableViewCell() }
         case .Passkeys:
             cell.textLabel?.text = "Passkeys"
             cell.detailTextLabel?.text = "\(passkeys.count)"
-            case .TrustedDevices:
-                cell.textLabel?.text = "Trusted Devices"
-                cell.accessoryType = .none
-                switch trustedDevicesState {
-                case .loading:
-                    cell.detailTextLabel?.text = "Loading..."
-                case .loaded(let devices):
-                    cell.detailTextLabel?.text = "\(devices.count)"
-                    cell.accessoryType = .disclosureIndicator
-                case .error(let message):
-                    cell.detailTextLabel?.text = message
-                case .unavailable:
-                    cell.detailTextLabel?.text = "Not available"
-                case .stepUpRequired:
-                    cell.detailTextLabel?.text = "Step-up required"
-                }
-            case .SessionDevices:
-                cell.textLabel?.text = "Session Devices"
-                cell.accessoryType = .none
-                switch sessionDevicesState {
-                case .loading:
-                    cell.detailTextLabel?.text = "Loading..."
-                case .loaded(let devices):
-                    cell.detailTextLabel?.text = "\(devices.count)"
-                    cell.accessoryType = .disclosureIndicator
-                case .error(let message):
-                    cell.detailTextLabel?.text = message
-                case .unavailable:
-                    cell.detailTextLabel?.text = "Not available"
-                case .stepUpRequired:
-                    cell.detailTextLabel?.text = "Step-up required"
+        case .TrustedDevices:
+            cell.textLabel?.text = "Trusted Devices"
+            cell.accessoryType = .none
+            switch trustedDevicesState {
+            case .loading:
+                cell.detailTextLabel?.text = "Loading..."
+            case .loaded(let devices):
+                cell.detailTextLabel?.text = "\(devices.count)"
+                cell.accessoryType = .disclosureIndicator
+            case .error(let message):
+                cell.detailTextLabel?.text = message
+            case .unavailable:
+                cell.detailTextLabel?.text = "Not available"
+            case .stepUpRequired:
+                cell.detailTextLabel?.text = "Step-up required"
+            }
+        case .SessionDevices:
+            cell.textLabel?.text = "Session Devices"
+            cell.accessoryType = .none
+            switch sessionDevicesState {
+            case .loading:
+                cell.detailTextLabel?.text = "Loading..."
+            case .loaded(let devices):
+                cell.detailTextLabel?.text = "\(devices.count)"
+                cell.accessoryType = .disclosureIndicator
+            case .error(let message):
+                cell.detailTextLabel?.text = message
+            case .unavailable:
+                cell.detailTextLabel?.text = "Not available"
+            case .stepUpRequired:
+                cell.detailTextLabel?.text = "Step-up required"
                 }
         case .Addresses:
             cell.textLabel?.text = "Addresses"

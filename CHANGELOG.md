@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v10.0.1
+
+- Fix compilation issue in XCode 26
+
 ## v10.0.0
 
 ### Breaking changes

@@ -34,6 +34,22 @@ extension SessionDevicesViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return sessionDevices.count
     }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            guard let authToken = AppDelegate.storage.getToken() else { return }
+            Task { @MainActor in
+                let element = sessionDevices[indexPath.row]
+                do {
+                    try await AppDelegate.reachfive().deleteSessionDevice(id: element.id, authToken: authToken)
+                    self.sessionDevices.remove(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: .fade)
+                } catch {
+                    self.presentErrorAlert(title: "Remove Session device failed", error)
+                }
+            }
+        }
+    }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: SessionDeviceCell.reuseIdentifier, for: indexPath) as! SessionDeviceCell
@@ -48,7 +64,7 @@ extension SessionDevicesViewController: UITableViewDataSource {
 
 extension SessionDevicesViewController {
     private func deleteDevice(_ device: SessionDevice, at indexPath: IndexPath) {
-        guard let authToken else { return }
+        guard let authToken = AppDelegate.storage.getToken() else { return }
         Task {
             do {
                 try await AppDelegate.reachfive().deleteSessionDevice(id: device.id, authToken: authToken)
@@ -56,11 +72,7 @@ extension SessionDevicesViewController {
                     self.sessionDevices.remove(at: indexPath.row)
                 }
             } catch {
-                await MainActor.run {
-                    let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default))
-                    self.present(alert, animated: true)
-                }
+                self.presentErrorAlert(title: "Error deleting device", error)
             }
         }
     }
