@@ -16,7 +16,7 @@ public typealias EmailVerificationCallback = (_ result: Result<(), ReachFiveErro
 //TODO:
 // Tester One-tap account upgrade : https://developer.apple.com/videos/play/wwdc2020/10666/
 // Tester le MFA avec "Securing Logins with iCloud Keychain Verification Codes" https://developer.apple.com/documentation/authenticationservices/securing_logins_with_icloud_keychain_verification_codes
-// Apparemment les custom scheme sont dépréciés et il faudrait utiliser les "Universal Links" : https://developer.apple.com/ios/universal-links/
+// Voir si je peux améliorer l'init/rétention du CredentialManager
 /// ReachFive identity SDK
 public class ReachFive: NSObject {
     var passwordlessCallback: PasswordlessCallback? = nil
@@ -26,7 +26,7 @@ public class ReachFive: NSObject {
     var state: State = .NotInitialized
     public let sdkConfig: SdkConfig
     let providersCreators: Array<ProviderCreator>
-    let reachFiveApi: ReachFiveApi
+    public let reachFiveApi: ReachFiveApi
     var providers: [Provider] = []
     public internal(set) var scope: [String] = []
     internal var clientConfig: ClientConfigResponse? = nil

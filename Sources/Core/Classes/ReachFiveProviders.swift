@@ -39,20 +39,19 @@ public extension ReachFive {
         return providersConfigsResult.items.filter { $0.clientId != nil }.map({ config in
             if config.provider == AppleProvider.NAME {
                 return ConfiguredAppleProvider(
-                    sdkConfig: sdkConfig,
+                    reachFive: self,
                     providerConfig: config,
-                    clientConfigResponse: clientConfigResponse,
-                    credentialManager: credentialManager
+                    clientConfigResponse: clientConfigResponse
                 )
             }
             if let nativeCreator = providersCreators.first(where: { $0.name == config.provider }) {
                 return nativeCreator.create(
-                    sdkConfig: sdkConfig,
+                    reachFive: self,
                     providerConfig: config,
-                    reachFiveApi: reachFiveApi,
                     clientConfigResponse: clientConfigResponse
                 )
             }
+            Logger.shared.log("No ProviderCreator registered for provider '\(config.provider)' (variant '\(config.variant)'); falling back to DefaultProvider. If you expected a custom provider, check that its name matches and that it is passed to ReachFive(providersCreators:).")
             return DefaultProvider(reachfive: self, providerConfig: config)
         })
     }

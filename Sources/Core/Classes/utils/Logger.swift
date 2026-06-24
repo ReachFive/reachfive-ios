@@ -33,6 +33,11 @@ class Logger {
         guard enabled else { return }
         print("❌ ERROR: \(message(for: error))")
     }
+
+    func log(_ message: String) {
+        guard enabled else { return }
+        print("ℹ️ \(message)")
+    }
 }
 
 extension Data {
