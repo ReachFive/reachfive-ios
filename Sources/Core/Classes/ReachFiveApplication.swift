@@ -17,6 +17,7 @@ public extension ReachFive {
                     let _ = provider.application(application, didFinishLaunchingWithOptions: launchOptions)
                 }
             } catch {
+                //TODO: faire une passe de cohérence sur l'utilisation de #if DEBUG et du Logger
                 #if DEBUG
                 print(Logger.shared.message(for: error))
                 #endif
@@ -33,9 +34,12 @@ public extension ReachFive {
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        // Return whether a provider actually consumed the activity, so the host app — which forwards all
+        // its universal links here — can still route the ones ReachFive does not handle.
+        var handled = false
         for provider in providers {
-            let _ = provider.application(application, continue: userActivity, restorationHandler: restorationHandler)
+            handled = provider.application(application, continue: userActivity, restorationHandler: restorationHandler) || handled
         }
-        return true
+        return handled
     }
 }
