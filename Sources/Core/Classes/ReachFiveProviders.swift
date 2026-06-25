@@ -37,13 +37,6 @@ public extension ReachFive {
 
     private func createProviders(providersConfigsResult: ProvidersConfigsResult, clientConfigResponse: ClientConfigResponse) -> [Provider] {
         return providersConfigsResult.items.filter { $0.clientId != nil }.map({ config in
-            if config.provider == AppleProvider.NAME {
-                return ConfiguredAppleProvider(
-                    reachFive: self,
-                    providerConfig: config,
-                    clientConfigResponse: clientConfigResponse
-                )
-            }
             if let nativeCreator = providersCreators.first(where: { $0.name == config.provider }) {
                 return nativeCreator.create(
                     reachFive: self,
