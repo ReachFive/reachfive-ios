@@ -14,9 +14,6 @@ class SessionDeviceCell: UITableViewCell {
     @IBOutlet weak var locationLabel: UILabel!
     @IBOutlet weak var tokenTypeLabel: UILabel!
     @IBOutlet weak var lastConnectionLabel: UILabel!
-    @IBOutlet weak var deleteButton: UIButton!
-
-    var onDelete: (() -> Void)?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -24,10 +21,10 @@ class SessionDeviceCell: UITableViewCell {
 
     func configure(with device: SessionDevice) {
         deviceNameLabel.text = device.deviceName ?? "Anonymous device"
-        
+
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        
+
         func formatDate(_ dateString: String) -> String {
             if let date = dateFormatter.date(from: dateString) {
                 let displayFormatter = DateFormatter()
@@ -46,10 +43,10 @@ class SessionDeviceCell: UITableViewCell {
         userAgentLabel.text = "UA: \(device.userAgentName ?? "N/A")"
         deviceClassLabel.text = "Class: \(device.deviceClass ?? "N/A")"
         idLabel.text = "ID: \(device.id)"
-        
+
         let location = [device.city, device.country].compactMap { $0 }.joined(separator: ", ")
         locationLabel.text = location.isEmpty ? "Location: N/A" : "Location: \(location)"
-        
+
         tokenTypeLabel.text = "Token: \(device.tokenType.rawValue)"
     }
 }

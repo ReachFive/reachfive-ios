@@ -116,11 +116,7 @@
                     <constraint firstItem="pGe-9g-b8G" firstAttribute="top" secondItem="lastConnLabel" secondAttribute="bottom" constant="8" id="z2V-cE-gqg"/>
                     <constraint firstAttribute="trailingMargin" secondItem="pGe-9g-b8G" secondAttribute="trailing" id="g2e-iV-gqg"/>
                     <constraint firstItem="h3A-fF-gYd" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="topMargin" id="R0K-aI-g2d"/>
-                    <constraint firstItem="deleteBtn-id" firstAttribute="top" secondItem="pGe-9g-b8G" secondAttribute="bottom" constant="14" id="deleteBtn-top"/>
-                    <constraint firstItem="deleteBtn-id" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" id="deleteBtn-lead"/>
-                    <constraint firstAttribute="trailingMargin" secondItem="deleteBtn-id" secondAttribute="trailing" id="deleteBtn-trail"/>
-                    <constraint firstItem="deleteBtn-id" firstAttribute="height" constant="36" id="deleteBtn-height"/>
-                    <constraint firstAttribute="bottomMargin" secondItem="deleteBtn-id" secondAttribute="bottom" constant="8" id="deleteBtn-bottom"/>
+                    <constraint firstAttribute="bottomMargin" relation="greaterThanOrEqual" secondItem="pGe-9g-b8G" secondAttribute="bottom" constant="4" id="O2D-eC-gVd"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -135,7 +131,6 @@
                 <outlet property="osLabel" destination="fNe-yT-dF5" id="c2g-bA-f5f"/>
                 <outlet property="tokenTypeLabel" destination="tokLabel" id="tokLabelOutlet"/>
                 <outlet property="userAgentLabel" destination="bV9-aV-aG9" id="f2g-bA-f5f"/>
-                <outlet property="deleteButton" destination="deleteBtn-id" id="deleteBtn-outlet-id"/>
             </connections>
             <point key="canvasLocation" x="139" y="20"/>
         </tableViewCell>

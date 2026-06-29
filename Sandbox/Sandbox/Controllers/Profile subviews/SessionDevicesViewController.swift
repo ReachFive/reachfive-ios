@@ -12,17 +12,15 @@ class SessionDevicesViewController: UIViewController {
             }
         }
     }
-    var authToken: AuthToken?
-
     @IBOutlet weak var sessionDevicesTableView: UITableView!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Session Devices"
-        
+
         sessionDevicesTableView.dataSource = self
         sessionDevicesTableView.delegate = self
-        
+
         let nib = UINib(nibName: "SessionDeviceCell", bundle: nil)
         sessionDevicesTableView.register(nib, forCellReuseIdentifier: SessionDeviceCell.reuseIdentifier)
         let sessionDevicesNib = UINib(nibName: "EditableSectionHeaderView", bundle: nil)
@@ -34,7 +32,7 @@ extension SessionDevicesViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return sessionDevices.count
     }
-    
+
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             guard let authToken = AppDelegate.storage.getToken() else { return }
@@ -63,12 +61,12 @@ extension SessionDevicesViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
-    
+
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: EditableSectionHeaderView.reuseIdentifier) as? EditableSectionHeaderView else {
             return nil
         }
-        
+
         headerView.configure(
             title: "",
             onEdit: { [weak self] button in
@@ -79,7 +77,7 @@ extension SessionDevicesViewController: UITableViewDelegate {
             }
         )
         headerView.setEditButtonHidden(sessionDevices.isEmpty)
-        
+
         return headerView
     }
 }
