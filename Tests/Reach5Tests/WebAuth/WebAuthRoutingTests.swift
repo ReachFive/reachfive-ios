@@ -7,8 +7,6 @@ final class WebAuthRoutingTests: XCTestCase {
         WebAuthRouting(state: state, expectedCallback: callback.flatMap { URL(string: $0) })
     }
 
-    // MARK: Routage par state (prioritaire)
-
     func testMatchesByState() {
         XCTAssertTrue(routing(state: "abc").matches(URL(string: "https://host.example.com/cb?code=x&state=abc")!))
     }
@@ -17,53 +15,14 @@ final class WebAuthRoutingTests: XCTestCase {
         XCTAssertFalse(routing(state: "abc").matches(URL(string: "https://host.example.com/cb?code=x&state=zzz")!))
     }
 
-    func testStateTakesPrecedenceOverURL() {
-        // Même URL, mais le state diverge → refus (le state fait autorité).
-        XCTAssertFalse(routing(state: "abc", callback: "https://host.example.com/cb")
-            .matches(URL(string: "https://host.example.com/cb?state=other")!))
-    }
-
-    func testStateMatchEvenIfHostDiffers() {
-        // Le state suffit : on ne regarde pas l'URL quand il est présent.
+    func testMatchesRegardlessOfURL() {
+        // Le state fait foi : un host/path différent n'empêche pas le match.
         XCTAssertTrue(routing(state: "abc", callback: "https://host.example.com/cb")
             .matches(URL(string: "https://elsewhere.example.com/whatever?state=abc")!))
     }
 
-    // MARK: Fallback URL (state absent du callback)
-
-    func testFallbackHostCaseInsensitive() {
-        XCTAssertTrue(routing(state: "abc", callback: "https://Host.Example.com/cb")
-            .matches(URL(string: "https://host.EXAMPLE.com/cb")!))
-    }
-
-    func testFallbackEmptyPathIsNotWildcard() {
-        XCTAssertFalse(routing(state: "abc", callback: "https://host.example.com")
-            .matches(URL(string: "https://host.example.com/anything")!))
-    }
-
-    func testFallbackRootPathIsNotWildcard() {
-        XCTAssertFalse(routing(state: "abc", callback: "https://host.example.com/")
-            .matches(URL(string: "https://host.example.com/promo")!))
-    }
-
-    func testFallbackNoOverMatchOnPartialSegment() {
-        // "/cbextra" ne doit pas matcher "/cb" (comparaison par segments, pas hasPrefix).
-        XCTAssertFalse(routing(state: "abc", callback: "https://host.example.com/cb")
-            .matches(URL(string: "https://host.example.com/cbextra")!))
-    }
-
-    func testFallbackPathPrefixBySegments() {
-        XCTAssertTrue(routing(state: "abc", callback: "https://host.example.com/cb")
-            .matches(URL(string: "https://host.example.com/cb/return")!))
-    }
-
-    func testFallbackDifferentHost() {
-        XCTAssertFalse(routing(state: "abc", callback: "https://host.example.com/cb")
-            .matches(URL(string: "https://evil.example.com/cb")!))
-    }
-
-    func testFallbackNoExpectedCallback() {
-        XCTAssertFalse(WebAuthRouting(state: "abc", expectedCallback: nil)
-            .matches(URL(string: "https://host.example.com/cb")!))
+    func testNoStateReturnsFalse() {
+        // Sans `state` dans le callback, aucune session ne matche.
+        XCTAssertFalse(routing(state: "abc").matches(URL(string: "https://host.example.com/cb?code=x")!))
     }
 }

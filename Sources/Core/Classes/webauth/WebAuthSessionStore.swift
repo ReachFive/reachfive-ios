@@ -30,7 +30,9 @@ final class WebAuthSessionStore {
     }
 
     private var entries: [String: Entry] = [:]
-    private let makeSession: () -> WebAuthRunning
+    // `nonisolated(unsafe)` : `let` immuable fixé à l'init et lu uniquement sur le main actor (depuis
+    // `run`). Permet l'init `nonisolated` (ReachFive est non isolé) sans risque de course.
+    nonisolated(unsafe) private let makeSession: () -> WebAuthRunning
 
     nonisolated init(makeSession: @escaping () -> WebAuthRunning = { WebAuthenticationSession() }) {
         self.makeSession = makeSession

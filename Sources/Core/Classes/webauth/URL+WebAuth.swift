@@ -9,9 +9,4 @@ extension URL {
             .first(where: { $0.name == name })?
             .value
     }
-
-    /// Segments de path non vides. `""` et `"/"` donnent `[]` (pas de joker).
-    var pathSegments: [String] {
-        path.split(separator: "/").map(String.init)
-    }
 }

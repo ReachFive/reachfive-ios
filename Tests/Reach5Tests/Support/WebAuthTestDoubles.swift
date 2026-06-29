@@ -15,13 +15,13 @@ final class FakeRunner: WebAuthRunning {
                callbackURLScheme: String,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool) async throws -> URL {
-        try await withCheckedThrowingContinuation { continuation in
-            self.resultContinuation = continuation
-            //TODO: Ne faut-il pas mettre le didStart en dehors de la continuation ?
-            self.didStart = true
-            self.startedContinuation?.resume()
-            self.startedContinuation = nil
-        }
+        // `didStart` et le signal de démarrage sont posés à l'entrée de `start`, pas dans la
+        // continuation : ils représentent « start a été appelé », indépendamment du mécanisme de
+        // continuation. Seule la `resultContinuation` doit être capturée dans la closure.
+        didStart = true
+        startedContinuation?.resume()
+        startedContinuation = nil
+        return try await withCheckedThrowingContinuation { self.resultContinuation = $0 }
     }
 
     /// Suspend jusqu'à ce que `start` ait été appelé (donc la session enregistrée dans le store).
