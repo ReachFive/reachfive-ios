@@ -155,7 +155,7 @@ extension ProfileController: UITableViewDelegate {
         switch section {
         case .Security:
             guard let row = SecurityRows(rawValue: indexPath.row) else { return }
-
+            
             switch row {
             case .Passkeys:
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -233,7 +233,7 @@ return UITableViewCell() }
     }
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-
+        
         guard let section = Section(rawValue: section) else {
             print("section not found")
             return "" }
@@ -281,7 +281,7 @@ return UITableViewCell() }
 
     private func navigableCell(for indexPath: IndexPath) -> UITableViewCell {
         let cell = /*profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ??*/ UITableViewCell(style: .value1, reuseIdentifier: "DisclosureCell")
-
+        
         guard let row = SecurityRows(rawValue: indexPath.row) else {
             return cell
         }
