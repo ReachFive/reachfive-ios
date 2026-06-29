@@ -55,26 +55,7 @@ extension SessionDevicesViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: SessionDeviceCell.reuseIdentifier, for: indexPath) as! SessionDeviceCell
         let device = sessionDevices[indexPath.row]
         cell.configure(with: device)
-        cell.onDelete = { [weak self] in
-            self?.deleteDevice(device, at: indexPath)
-        }
         return cell
-    }
-}
-
-extension SessionDevicesViewController {
-    private func deleteDevice(_ device: SessionDevice, at indexPath: IndexPath) {
-        guard let authToken = AppDelegate.storage.getToken() else { return }
-        Task {
-            do {
-                try await AppDelegate.reachfive().deleteSessionDevice(id: device.id, authToken: authToken)
-                await MainActor.run {
-                    self.sessionDevices.remove(at: indexPath.row)
-                }
-            } catch {
-                self.presentErrorAlert(title: "Error deleting device", error)
-            }
-        }
     }
 }
 

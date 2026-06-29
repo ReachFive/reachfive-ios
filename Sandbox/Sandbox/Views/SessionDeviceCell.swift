@@ -22,10 +22,6 @@ class SessionDeviceCell: UITableViewCell {
         super.awakeFromNib()
     }
 
-    @IBAction func deleteButtonTapped(_ sender: UIButton) {
-        onDelete?()
-    }
-
     func configure(with device: SessionDevice) {
         deviceNameLabel.text = device.deviceName ?? "Anonymous device"
         
