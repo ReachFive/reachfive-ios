@@ -37,29 +37,10 @@ class DefaultProvider: NSObject, Provider {
     let reachfive: ReachFive
     let providerConfig: ProviderConfig
 
-    /// Set when the provider ends its flow by redirecting to a **universal link** (https) rather than
-    /// the custom scheme — e.g. an external app (a bank doing identity verification) reopens the host
-    /// app with the authorization code. That link is delivered by the system via
-    /// `application(_:continue:)` while the `ASWebAuthenticationSession` is still open, so we complete
-    /// the session out-of-band. (The iOS 17.4 `.https` session callback does NOT help here: it only
-    /// intercepts redirects navigated *inside* the session's web view.)
-    ///
-    /// Requirements on the host app for this case:
-    /// - an `applinks:<host>` Associated Domain (+ a matching apple-app-site-association file),
-    /// - forwarding `application(_:continue:)` / `scene(_:continue:)` to `ReachFive.application(_:continue:…)`.
-    private let universalLink: URL?
-
-    /// The `WebAuthenticationSession` for the login currently in flight. A **fresh** instance is created
-    /// per `login()` (its one-shot completion guard must never be reused) and kept here only so an
-    /// incoming universal link can complete it out-of-band — see `application(_:continue:)`. The login
-    /// orchestration itself (PKCE, authorize URL, code exchange) lives in `ReachFive.webviewLogin`.
-    private var webAuthentication: WebAuthenticationSession?
-
     public init(reachfive: ReachFive, providerConfig: ProviderConfig) {
         self.reachfive = reachfive
         self.providerConfig = providerConfig
         self.name = providerConfig.provider
-        self.universalLink = providerConfig.universalLink.flatMap { URL(string: $0) }
     }
 
     public func login(
@@ -72,35 +53,16 @@ class DefaultProvider: NSObject, Provider {
             throw ReachFiveError.TechnicalError(reason: "No presenting viewController")
         }
 
-        // A fresh, single-use session per login: never reuse one whose completion guard is already set.
-        let webAuthentication = WebAuthenticationSession()
-        self.webAuthentication = webAuthentication
-
         return try await reachfive.webviewLogin(
             WebviewLoginRequest(
                 scope: scope,
                 presentationContextProvider: presentationContextProvider,
                 origin: origin,
                 provider: providerConfig.providerWithVariant,
-                // For a universal-link provider, the universal link IS the OAuth redirect_uri (same
-                // value for /authorize and /token); for others this is nil → custom scheme.
-                redirectUri: providerConfig.universalLink
-            ),
-            using: webAuthentication)
+                // Pour un provider à universal link, le universal link EST le redirect_uri OAuth (même
+                // valeur pour /authorize et /token) ; pour les autres, nil → scheme custom.
+                redirectUri: providerConfig.universalLink))
     }
-
-    public func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        guard let universalLink,
-              userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-              let url = userActivity.webpageURL,
-              url.host == universalLink.host,
-              url.path.hasPrefix(universalLink.path) else {
-            return false
-        }
-        Task { @MainActor in webAuthentication?.complete(externalCallbackURL: url) }
-        return true
-    }
-
 
     override var description: String {
         "Provider: \(providerConfig.provider)"

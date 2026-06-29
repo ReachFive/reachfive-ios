@@ -24,6 +24,7 @@ final class WebAuthenticationSession {
     nonisolated init() {}
 
     func start(url: URL,
+               routing: WebAuthRouting,
                callbackURLScheme: String,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
@@ -31,11 +32,30 @@ final class WebAuthenticationSession {
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
 
-            let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { [weak self] callbackURL, error in
+            let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
                 // Ensure all logic runs on the main thread to prevent race conditions.
                 Task { @MainActor in
                     self?.handleSessionCompletion(callbackURL: callbackURL, error: error)
                 }
+            }
+
+            let session: ASWebAuthenticationSession
+            // iOS 17.4+ : quand le redirect_uri est un universal link (https), on intercepte la
+            // redirection in-band directement dans la session via le callback `.https` (nécessite
+            // l'Associated Domain `webcredentials:<host>`). Sinon, scheme custom (legacy, iOS < 17.4).
+            if #available(iOS 17.4, *),
+               let expectedCallback = routing.expectedCallback,
+               expectedCallback.scheme == "https",
+               let host = expectedCallback.host {
+                session = ASWebAuthenticationSession(
+                    url: url,
+                    callback: .https(host: host, path: expectedCallback.path),
+                    completionHandler: completionHandler)
+            } else {
+                session = ASWebAuthenticationSession(
+                    url: url,
+                    callbackURLScheme: callbackURLScheme,
+                    completionHandler: completionHandler)
             }
 
             // Set an appropriate context provider instance that determines the window that acts as a presentation anchor for the session

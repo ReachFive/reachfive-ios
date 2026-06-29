@@ -15,7 +15,10 @@ public class WebviewLoginRequest {
     public let redirectUri: String?
 
     public init(state: String? = nil, nonce: String? = nil, scope: [String]? = nil, presentationContextProvider: ASWebAuthenticationPresentationContextProviding, origin: String? = nil, provider: String? = nil, prefersEphemeralWebBrowserSession: Bool = false, redirectUri: String? = nil) {
-        self.state = state ?? "state"
+        // `state` unique par défaut : sert à la fois de protection CSRF et de clé de routage du
+        // callback (cf. `WebAuthSessionStore`). Un intégrateur peut fournir le sien ; il doit alors
+        // être unique entre deux logins concurrents.
+        self.state = state ?? UUID().uuidString
         self.nonce = nonce ?? "nonce"
         self.scope = scope
         self.presentationContextProvider = presentationContextProvider

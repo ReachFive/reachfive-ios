@@ -33,13 +33,21 @@ public extension ReachFive {
         }
     }
 
+    @MainActor
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        // Return whether a provider actually consumed the activity, so the host app — which forwards all
-        // its universal links here — can still route the ones ReachFive does not handle.
+        // D'abord les providers (un provider custom peut consommer l'activité)…
         var handled = false
         for provider in providers {
             handled = provider.application(application, continue: userActivity, restorationHandler: restorationHandler) || handled
         }
-        return handled
+        if handled { return true }
+
+        // …puis le store web-auth : ne renvoie true QUE si une session en vol attend ce universal link
+        // (sinon false, pour que l'app hôte — qui nous forwarde tous ses liens — route elle-même les
+        // liens que ReachFive ne gère pas).
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb, let url = userActivity.webpageURL else {
+            return false
+        }
+        return webAuthSessionStore.complete(externalCallbackURL: url)
     }
 }

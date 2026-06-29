@@ -15,7 +15,11 @@ public extension ReachFive {
                 "origin": request.origin,
             ]
 
-            let _ = try? await WebAuthenticationSession().start(
+            // Passe par le store pour que toute session web ait un propriétaire unique. Le logout se
+            // complète in-band via le scheme custom (post_logout_redirect_uri) ; le `state` n'est qu'une
+            // clé interne (pas de complétion hors-bande attendue).
+            let _ = try? await webAuthSessionStore.run(
+                routing: WebAuthRouting(state: UUID().uuidString, expectedCallback: URL(string: sdkConfig.redirectUri)),
                 url: reachFiveApi.buildLogoutURL(queryParams: options),
                 callbackURLScheme: sdkConfig.baseScheme,
                 presentationContextProvider: request.presentationContextProvider,
