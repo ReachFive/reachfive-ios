@@ -88,4 +88,27 @@ final class WebAuthSessionStoreTests: XCTestCase {
 
         XCTAssertFalse(store.complete(externalCallbackURL: callback(state: "s")))
     }
+
+    // Chemin d'erreur : si la session se termine en erreur (annulation, échec de présentation…),
+    // `run` propage l'erreur ET l'entrée est retirée (defer), donc un callback ultérieur ne matche plus.
+    func testEntryIsRemovedWhenRunFails() async {
+        let fake = FakeRunner()
+        var queue: [FakeRunner] = [fake]
+        let store = WebAuthSessionStore(makeSession: { queue.removeFirst() })
+
+        async let login = store.run(
+            routing: WebAuthRouting(state: "s", expectedCallback: nil),
+            url: authorizeURL(state: "s"), callbackURLScheme: "scheme",
+            presentationContextProvider: provider, prefersEphemeralWebBrowserSession: false)
+
+        await fake.waitUntilStarted()
+        fake.fail(ReachFiveError.AuthCanceled)
+
+        do {
+            _ = try await login
+            XCTFail("run doit propager l'erreur de la session")
+        } catch { /* attendu */ }
+
+        XCTAssertFalse(store.complete(externalCallbackURL: callback(state: "s")))
+    }
 }

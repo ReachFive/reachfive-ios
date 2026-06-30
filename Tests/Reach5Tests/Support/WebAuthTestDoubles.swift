@@ -34,6 +34,12 @@ final class FakeRunner: WebAuthRunning {
         resultContinuation?.resume(returning: url)
         resultContinuation = nil
     }
+
+    /// Simule une fin en erreur (annulation, échec de présentation…), comme le ferait la vraie session.
+    func fail(_ error: Error) {
+        resultContinuation?.resume(throwing: error)
+        resultContinuation = nil
+    }
 }
 
 /// Fournisseur de contexte factice : jamais sollicité par `FakeRunner` (aucune session présentée).

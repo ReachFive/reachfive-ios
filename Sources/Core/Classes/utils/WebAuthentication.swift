@@ -89,13 +89,7 @@ final class WebAuthenticationSession {
 
     private func handleSessionCompletion(callbackURL: URL?, error: Error?) {
         if let error {
-            let r5Error: ReachFiveError = switch error._code {
-            case 1: .AuthCanceled
-            case 2: .TechnicalError(reason: "Presentation context not provided: \(error.localizedDescription)")
-            case 3: .TechnicalError(reason: "Presentation context invalid: \(error.localizedDescription)")
-            default: .TechnicalError(reason: "Unknown Error \(error.localizedDescription)")
-            }
-            complete(.failure(r5Error))
+            complete(.failure(Self.reachFiveError(for: error)))
         } else if let callbackURL {
             complete(.success(callbackURL))
         } else {
@@ -109,5 +103,15 @@ final class WebAuthenticationSession {
         self.continuation = nil
         self.session = nil
         continuation.resume(with: result)
+    }
+
+    /// Mappe une erreur d'`ASWebAuthenticationSession` vers une `ReachFiveError`.
+    nonisolated static func reachFiveError(for error: Error) -> ReachFiveError {
+        switch error._code {
+        case 1: .AuthCanceled
+        case 2: .TechnicalError(reason: "Presentation context not provided: \(error.localizedDescription)")
+        case 3: .TechnicalError(reason: "Presentation context invalid: \(error.localizedDescription)")
+        default: .TechnicalError(reason: "Unknown Error \(error.localizedDescription)")
+        }
     }
 }
