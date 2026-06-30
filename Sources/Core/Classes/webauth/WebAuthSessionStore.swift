@@ -14,11 +14,11 @@ protocol WebAuthRunning: AnyObject {
 
 extension WebAuthenticationSession: WebAuthRunning {}
 
-/// Gestionnaire centralisé des sessions de login web en vol, porté par ``ReachFive``.
+/// Gestionnaire centralisé des sessions de login web en cours, porté par ``ReachFive``.
 ///
-/// Propriétaire unique de toutes les `WebAuthenticationSession` actives.
-/// Il les indexe par leur `state` (clé de routage)
-/// pour compléter la bonne session quand un universal link arrive hors-bande via `application(_:continue:)`.
+/// Il les indexe par leur `state` (clé de corrélation) afin, quand un universal link arrive hors-bande
+/// via `application(_:continue:)`, de reconnaître s'il s'agit d'un de nos callbacks et, le cas échéant,
+/// de compléter la session correspondante.
 ///
 /// `@MainActor` : tout le domaine `ASWebAuthenticationSession` est déjà
 /// main-thread, donc l'isolation main suffit à éliminer les data races, sans hop async.
@@ -40,7 +40,6 @@ final class WebAuthSessionStore {
 
     /// Démarre un login web et attend son callback. Crée une session fraîche (à usage unique),
     /// l'enregistre sous `routing.state` le temps du flow, et la retire à la fin (succès, erreur, annulation).
-    /// Plusieurs logins concurrents coexistent sans s'écraser.
     func run(routing: WebAuthRouting,
              url: URL,
              callbackURLScheme: String,

@@ -21,7 +21,8 @@ final class WebAuthSessionStoreTests: XCTestCase {
         XCTAssertFalse(store.complete(externalCallbackURL: callback(state: "whatever")))
     }
 
-    // #2 : deux logins concurrents, chaque callback complète SA session (routage par state).
+    // Deux sessions en vol en même temps (cas multi-fenêtres iPad/macCatalyst) : chaque callback
+    // complète SA session grâce au routage par state.
     func testRoutesCallbackToMatchingSessionByState() async throws {
         let f1 = FakeRunner(), f2 = FakeRunner()
         var queue: [FakeRunner] = [f1, f2]
