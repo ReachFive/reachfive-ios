@@ -5,7 +5,7 @@ import XCTest
 final class WebAuthCallbackMatchingTests: XCTestCase {
 
     private func isOurs(_ incoming: String, expected: String) -> Bool {
-        WebAuthSessionHolder.isOurCallback(URL(string: incoming)!, expectedCallback: URL(string: expected)!)
+        WebAuthenticationSession.isOurCallback(URL(string: incoming)!, expectedCallback: URL(string: expected)!)
     }
 
     func testMatchesSameHostPathWithCode() {

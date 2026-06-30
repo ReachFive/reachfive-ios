@@ -15,7 +15,13 @@ public extension ReachFive {
         self.clientConfig = clientConfig
         self.scope = clientConfig.scope.components(separatedBy: " ")
 
-        let variants = Dictionary(uniqueKeysWithValues: self.providersCreators.map { ($0.name, $0.variant) })
+        // Tolère deux créateurs de même nom (ex. un provider natif + un `WebProvider` du même nom) sans
+        // crasher : on garde le premier, comme `createProviders` qui résout par `first(where:)`.
+        let creators = self.providersCreators
+        let variants = Dictionary(creators.map { ($0.name, $0.variant) }, uniquingKeysWith: { first, _ in first })
+        if variants.count != creators.count {
+            Logger.shared.log("Several ProviderCreators share the same name; only the first of each is used (its variant is sent to the backend). Register at most one creator per provider name.")
+        }
         let providersConfigs = try await self.reachFiveApi.providersConfigs(variants: variants)
         let providers = self.createProviders(providersConfigsResult: providersConfigs, clientConfigResponse: clientConfig)
 

@@ -1,28 +1,34 @@
 import AuthenticationServices
 
-/// Owns an `ASWebAuthenticationSession` and the continuation that awaits its result.
+/// Porte le login web en cours : démarre une `ASWebAuthenticationSession`, attend son callback, et —
+/// pour les providers à universal link — laisse un lien reçu hors-bande via `application(_:continue:)`
+/// le compléter (``tryComplete(externalCallbackURL:)``).
 ///
-/// Beyond the usual case (the session completes itself via its callback URL scheme), this can also
-/// be completed **out-of-band** via ``complete(externalCallbackURL:)`` — for providers that end their
-/// flow on a universal link delivered to the app through `application(_:continue:)` while the session
-/// is still open (e.g. an external app reopens the host app). The session is then cancelled.
+/// **Un seul login à la fois.** La feuille modale d'une `ASWebAuthenticationSession` empêche d'en
+/// lancer un second sur iPhone. Le cas multi-fenêtres (iPad/macCatalyst) n'est pas couvert : un second
+/// `start(...)` écrase l'état en cours et le login précédent ne peut alors plus être complété.
 ///
-/// A session is **single-use**: create a new instance for each authentication attempt. The one-shot
-/// `hasResumed` guard is never reset — so a duplicate or late `ASWebAuthenticationSession` callback
-/// (which can fire more than once) can never resume a continuation twice.
-/// Reusing an instance for a second login would leave it permanently completed.
+/// Les callbacks tardifs ou dupliqués sont neutralisés de deux façons : un **jeton par tentative**
+/// (`attempt`) — pour qu'un callback d'une `ASWebAuthenticationSession` périmée ne puisse jamais
+/// reprendre la continuation d'un login plus récent — et un garde **une-seule-fois** (`hasResumed`) —
+/// pour que la résolution gagnante (in-band, hors-bande, ou annulation) reprenne la continuation
+/// exactement une fois.
 ///
-/// Marked `@MainActor` so `session.start()` / `cancel()` always run on the main thread.
+/// `@MainActor` : tout le domaine `ASWebAuthenticationSession` est déjà main-thread.
 @MainActor
 final class WebAuthenticationSession {
     private var session: ASWebAuthenticationSession?
     private var continuation: CheckedContinuation<URL, Error>?
-    // ASWebAuthenticationSession's completion handler can fire more than once in edge cases, and an
-    // external completion can race the cancellation callback: only the first resolution wins.
+    /// Le `redirect_uri` parsé attendu pour cette tentative ; `nil` hors d'un login → `tryComplete`
+    /// ne matche rien.
+    private var expectedCallback: URL?
     private var hasResumed = false
+    /// Identifie la tentative en cours ; un callback capturant un `attempt` périmé est ignoré.
+    private var attempt = 0
 
     nonisolated init() {}
 
+    /// Démarre un login web et attend son callback (succès, erreur ou annulation).
     func start(url: URL,
                expectedCallback: URL?,
                callbackURLScheme: String,
@@ -30,12 +36,16 @@ final class WebAuthenticationSession {
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
 
         return try await withCheckedThrowingContinuation { continuation in
+            attempt += 1
+            let attempt = attempt
             self.continuation = continuation
+            self.expectedCallback = expectedCallback
+            self.hasResumed = false
 
             let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
-                // Ensure all logic runs on the main thread to prevent race conditions.
+                // Tout passe sur le main thread pour éviter les races.
                 Task { @MainActor in
-                    self?.handleSessionCompletion(callbackURL: callbackURL, error: error)
+                    self?.handleSessionCompletion(attempt: attempt, callbackURL: callbackURL, error: error)
                 }
             }
 
@@ -58,51 +68,68 @@ final class WebAuthenticationSession {
                     completionHandler: completionHandler)
             }
 
-            // Set an appropriate context provider instance that determines the window that acts as a presentation anchor for the session
+            // Fenêtre qui sert d'ancre de présentation à la session.
             session.presentationContextProvider = presentationContextProvider
             session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
             self.session = session
 
-            // Start the Authentication Flow
+            // Démarre le flow d'authentification.
             if !session.start() {
                 // Log the error for debugging purposes.
                 #if DEBUG
                 print("WebAuthentication session failed to start.")
                 #endif
-                // If start() returns false, the completion handler might not be called.
-                // We need to resume the continuation with an error.
-                complete(.failure(ReachFiveError.TechnicalError(reason: "ASWebAuthenticationSession failed to start")))
+                // Si start() renvoie false, le completion handler peut ne jamais être appelé : on
+                // reprend la continuation avec une erreur.
+                complete(attempt: attempt, .failure(ReachFiveError.TechnicalError(reason: "ASWebAuthenticationSession failed to start")))
             }
         }
     }
 
-    /// Completes the awaiting `start(...)` with a callback URL obtained outside the session (a universal
-    /// link received via `application(_:continue:)`), and cancels the still-open session.
-    func complete(externalCallbackURL url: URL) {
-        // Capture `session` before `complete(_:)`, which nils it out; otherwise we'd lose the reference
-        // needed to cancel the still-open session. Cancelling after resuming is fine: the cancellation
-        // callback is ignored thanks to the `hasResumed` guard.
+    /// Complète le login en cours si l'URL entrante est bien notre callback, et annule la session
+    /// encore ouverte. Renvoie `true` seulement dans ce cas — sinon `false`, pour que l'app hôte puisse
+    /// router elle-même le lien.
+    func tryComplete(externalCallbackURL url: URL) -> Bool {
+        guard let expectedCallback,
+              Self.isOurCallback(url, expectedCallback: expectedCallback) else {
+            return false
+        }
+        // Capture `session` avant `complete(_:)`, qui le met à nil ; on en a besoin pour annuler la
+        // session encore ouverte. Annuler après reprise est sans effet (le callback d'annulation est
+        // ignoré grâce au garde `hasResumed`).
         let runningSession = session
-        complete(.success(url))
+        complete(attempt: attempt, .success(url))
         runningSession?.cancel()
+        return true
     }
 
-    private func handleSessionCompletion(callbackURL: URL?, error: Error?) {
+    private func handleSessionCompletion(attempt: Int, callbackURL: URL?, error: Error?) {
         if let error {
-            complete(.failure(Self.reachFiveError(for: error)))
+            complete(attempt: attempt, .failure(Self.reachFiveError(for: error)))
         } else if let callbackURL {
-            complete(.success(callbackURL))
+            complete(attempt: attempt, .success(callbackURL))
         } else {
-            complete(.failure(ReachFiveError.TechnicalError(reason: "No callback URL")))
+            complete(attempt: attempt, .failure(ReachFiveError.TechnicalError(reason: "No callback URL")))
         }
     }
 
-    private func complete(_ result: Result<URL, Error>) {
-        guard !hasResumed, let continuation else { return }
+    private func complete(attempt: Int, _ result: Result<URL, Error>) {
+        // Ignore un callback périmé (login plus récent) ou une seconde résolution.
+        guard attempt == self.attempt, !hasResumed, let continuation else { return }
         hasResumed = true
         self.continuation = nil
         self.session = nil
+        self.expectedCallback = nil
         continuation.resume(with: result)
+    }
+
+    /// `true` si l'URL entrante a le même host (insensible à la casse) et le même path que le
+    /// `redirect_uri` envoyé, et porte un paramètre `code`. Le path attendu étant celui qu'on déclare
+    /// dans l'AASA, ce matching exact suffit à distinguer notre callback des autres liens de l'app.
+    nonisolated static func isOurCallback(_ url: URL, expectedCallback expected: URL) -> Bool {
+        url.host?.lowercased() == expected.host?.lowercased()
+            && url.path == expected.path
+            && url.queryValue("code") != nil
     }
 
     /// Mappe une erreur d'`ASWebAuthenticationSession` vers une `ReachFiveError`.

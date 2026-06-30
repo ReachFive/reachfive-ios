@@ -32,8 +32,8 @@ public class ReachFive: NSObject {
     internal var clientConfig: ClientConfigResponse? = nil
     public let storage: Storage
     let credentialManager: CredentialManager
-    /// Porteur de la session de login web en cours (cf. ``WebAuthSessionHolder``).
-    let webAuthSessionHolder = WebAuthSessionHolder()
+    /// Session de login web en cours (cf. ``WebAuthenticationSession``).
+    let webAuthSession = WebAuthenticationSession()
     public let pkceKey = "PASSWORDLESS_PKCE"
 
     public init(sdkConfig: SdkConfig, providersCreators: Array<ProviderCreator> = [], storage: Storage? = nil, sdkInternalConfig: SdkInternalConfig? = nil) {
