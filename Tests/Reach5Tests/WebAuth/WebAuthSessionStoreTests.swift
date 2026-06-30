@@ -50,6 +50,27 @@ final class WebAuthSessionStoreTests: XCTestCase {
         XCTAssertEqual(result2, callback(state: "s2"))
     }
 
+    // Un callback dont le `state` ne correspond à aucune session en vol n'est pas consommé (renvoie
+    // false) et ne complète surtout pas une AUTRE session ; la session visée reste en attente de SON
+    // propre callback.
+    func testCompleteWithNonMatchingStateReturnsFalse() async throws {
+        let fake = FakeRunner()
+        var queue: [FakeRunner] = [fake]
+        let store = WebAuthSessionStore(makeSession: { queue.removeFirst() })
+
+        async let login = store.run(
+            routing: WebAuthRouting(state: "expected", expectedCallback: nil),
+            url: authorizeURL(state: "expected"), callbackURLScheme: "scheme",
+            presentationContextProvider: provider, prefersEphemeralWebBrowserSession: false)
+
+        await fake.waitUntilStarted()
+        // Un state différent ne matche pas → la session reste en vol.
+        XCTAssertFalse(store.complete(externalCallbackURL: callback(state: "different")))
+        // On termine proprement avec le bon state (sinon l'`await` ci-dessous pendrait).
+        XCTAssertTrue(store.complete(externalCallbackURL: callback(state: "expected")))
+        _ = try await login
+    }
+
     // #1 / idempotence : une fois la session terminée, un second callback n'est plus consommé.
     func testCompleteIsFalseAfterSessionFinished() async throws {
         let fake = FakeRunner()
