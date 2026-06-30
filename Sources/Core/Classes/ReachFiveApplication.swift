@@ -42,12 +42,12 @@ public extension ReachFive {
         }
         if handled { return true }
 
-        // …puis le store web-auth : ne renvoie true QUE si une session en vol attend ce universal link
-        // (sinon false, pour que l'app hôte — qui nous forwarde tous ses liens — route elle-même les
-        // liens que ReachFive ne gère pas).
+        // …puis le porteur web-auth : ne renvoie true QUE si la session en cours attend ce universal
+        // link (sinon false, pour que l'app hôte — qui nous forwarde tous ses liens — route elle-même
+        // les liens que ReachFive ne gère pas).
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb, let url = userActivity.webpageURL else {
             return false
         }
-        return webAuthSessionStore.complete(externalCallbackURL: url)
+        return webAuthSessionHolder.complete(externalCallbackURL: url)
     }
 }

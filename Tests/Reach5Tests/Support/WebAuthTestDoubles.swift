@@ -2,8 +2,8 @@ import AuthenticationServices
 @testable import Reach5
 
 /// Faux runner de session web : ne présente aucune `ASWebAuthenticationSession`. Il suspend `start`
-/// sur une continuation que le test résout via `complete(externalCallbackURL:)` ou via le store.
-/// Permet de tester le routage/sélection du `WebAuthSessionStore` sans UI.
+/// sur une continuation que le test résout via `complete(externalCallbackURL:)` ou via le porteur.
+/// Permet de tester la reconnaissance du callback du `WebAuthSessionHolder` sans UI.
 @MainActor
 final class FakeRunner: WebAuthRunning {
     private var resultContinuation: CheckedContinuation<URL, Error>?
@@ -11,7 +11,7 @@ final class FakeRunner: WebAuthRunning {
     private(set) var didStart = false
 
     func start(url: URL,
-               routing: WebAuthRouting,
+               expectedCallback: URL?,
                callbackURLScheme: String,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool) async throws -> URL {
@@ -24,7 +24,7 @@ final class FakeRunner: WebAuthRunning {
         return try await withCheckedThrowingContinuation { self.resultContinuation = $0 }
     }
 
-    /// Suspend jusqu'à ce que `start` ait été appelé (donc la session enregistrée dans le store).
+    /// Suspend jusqu'à ce que `start` ait été appelé (donc la session posée dans la fente).
     func waitUntilStarted() async {
         if didStart { return }
         await withCheckedContinuation { self.startedContinuation = $0 }

@@ -15,10 +15,7 @@ public class WebviewLoginRequest {
     public let redirectUri: String?
 
     public init(state: String? = nil, nonce: String? = nil, scope: [String]? = nil, presentationContextProvider: ASWebAuthenticationPresentationContextProviding, origin: String? = nil, provider: String? = nil, prefersEphemeralWebBrowserSession: Bool = false, redirectUri: String? = nil) {
-        // `state` généré par défaut : clé de corrélation pour reconnaître/router le callback (cf.
-        // `WebAuthSessionStore`) ; ce n'est pas un mécanisme de sécurité (la CSRF est couverte par PKCE).
-        // Un intégrateur peut fournir le sien ; il doit alors être distinct d'un login à l'autre.
-        self.state = state ?? UUID().uuidString
+        self.state = state ?? "state"
         self.nonce = nonce ?? "nonce"
         self.scope = scope
         self.presentationContextProvider = presentationContextProvider

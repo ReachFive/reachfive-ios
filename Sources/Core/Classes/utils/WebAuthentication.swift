@@ -24,7 +24,7 @@ final class WebAuthenticationSession {
     nonisolated init() {}
 
     func start(url: URL,
-               routing: WebAuthRouting,
+               expectedCallback: URL?,
                callbackURLScheme: String,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
@@ -44,7 +44,7 @@ final class WebAuthenticationSession {
             // redirection in-band directement dans la session via le callback `.https` (nécessite
             // l'Associated Domain `webcredentials:<host>`). Sinon, scheme custom (legacy, iOS < 17.4).
             if #available(iOS 17.4, *),
-               let expectedCallback = routing.expectedCallback,
+               let expectedCallback,
                expectedCallback.scheme == "https",
                let host = expectedCallback.host {
                 session = ASWebAuthenticationSession(
