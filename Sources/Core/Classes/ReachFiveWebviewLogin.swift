@@ -26,8 +26,8 @@ public extension ReachFive {
             presentationContextProvider: request.presentationContextProvider,
             prefersEphemeralWebBrowserSession: request.prefersEphemeralWebBrowserSession)
 
-        let params = URLComponents(url: callbackURL, resolvingAgainstBaseURL: true)?.queryItems
-        guard let params, let code = params.first(where: { $0.name == "code" })?.value else {
+        guard let code = callbackURL.queryValue("code") else {
+            let params = URLComponents(url: callbackURL, resolvingAgainstBaseURL: true)?.queryItems
             throw ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))
         }
 

@@ -48,6 +48,6 @@ public extension ReachFive {
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb, let url = userActivity.webpageURL else {
             return false
         }
-        return webAuthSessionHolder.complete(externalCallbackURL: url)
+        return webAuthSessionHolder.tryComplete(externalCallbackURL: url)
     }
 }

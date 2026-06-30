@@ -1,19 +1,5 @@
 import AuthenticationServices
 
-/// Abstraction de la session web sous-jacente. Découple le porteur de `ASWebAuthenticationSession`
-/// (non mockable) et rend la reconnaissance du callback testable. Conformé par `WebAuthenticationSession`.
-@MainActor
-protocol WebAuthRunning: AnyObject {
-    func start(url: URL,
-               expectedCallback: URL?,
-               callbackURLScheme: String,
-               presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
-               prefersEphemeralWebBrowserSession: Bool) async throws -> URL
-    func complete(externalCallbackURL url: URL)
-}
-
-extension WebAuthenticationSession: WebAuthRunning {}
-
 /// Porte la session de login web en cours, le temps de son flow, pour qu'un universal link reçu
 /// hors-bande via `application(_:continue:)` puisse la compléter.
 ///
@@ -26,18 +12,13 @@ extension WebAuthenticationSession: WebAuthRunning {}
 @MainActor
 final class WebAuthSessionHolder {
     private struct Current {
-        let session: WebAuthRunning
+        let session: WebAuthenticationSession
         let expectedCallback: URL?
     }
 
     private var current: Current?
-    // `nonisolated(unsafe)` : `let` immuable fixé à l'init, lu uniquement sur le main actor. Permet
-    // l'init `nonisolated` (ReachFive est non isolé) sans risque de course.
-    nonisolated(unsafe) private let makeSession: () -> WebAuthRunning
 
-    nonisolated init(makeSession: @escaping () -> WebAuthRunning = { WebAuthenticationSession() }) {
-        self.makeSession = makeSession
-    }
+    nonisolated init() {}
 
     /// Démarre un login web et attend son callback. La session est posée dans la fente le temps du flow
     /// et retirée à la fin (succès, erreur, annulation).
@@ -46,7 +27,7 @@ final class WebAuthSessionHolder {
              callbackURLScheme: String,
              presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
              prefersEphemeralWebBrowserSession: Bool) async throws -> URL {
-        let session = makeSession()
+        let session = WebAuthenticationSession()
         current = Current(session: session, expectedCallback: expectedCallback)
         // On ne vide la fente que si elle pointe ENCORE notre session : évite qu'un flow tardif n'efface
         // la fente d'un login démarré entre-temps.
@@ -61,7 +42,7 @@ final class WebAuthSessionHolder {
 
     /// Complète la session en cours si l'URL entrante est bien notre callback. Renvoie `true` seulement
     /// dans ce cas — sinon `false`, pour que l'app hôte puisse router elle-même le lien.
-    func complete(externalCallbackURL url: URL) -> Bool {
+    func tryComplete(externalCallbackURL url: URL) -> Bool {
         guard let current,
               let expected = current.expectedCallback,
               Self.isOurCallback(url, expectedCallback: expected) else {
