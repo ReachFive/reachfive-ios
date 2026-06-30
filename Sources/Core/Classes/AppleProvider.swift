@@ -12,12 +12,13 @@ public class AppleProvider: ProviderCreator {
     }
 
     public func create(
-        sdkConfig: SdkConfig,
+        reachFive: ReachFive,
         providerConfig: ProviderConfig,
-        reachFiveApi: ReachFiveApi,
         clientConfigResponse: ClientConfigResponse
     ) -> Provider {
-        fatalError("Do not use")
+        ConfiguredAppleProvider(reachFive: reachFive,
+                                providerConfig: providerConfig,
+                                clientConfigResponse: clientConfigResponse)
     }
 }
 
@@ -30,15 +31,14 @@ class ConfiguredAppleProvider: NSObject, Provider {
     let credentialManager: CredentialManager
 
     public init(
-        sdkConfig: SdkConfig,
+        reachFive: ReachFive,
         providerConfig: ProviderConfig,
-        clientConfigResponse: ClientConfigResponse,
-        credentialManager: CredentialManager
+        clientConfigResponse: ClientConfigResponse
     ) {
-        self.sdkConfig = sdkConfig
+        self.sdkConfig = reachFive.sdkConfig
         self.providerConfig = providerConfig
         self.clientConfigResponse = clientConfigResponse
-        self.credentialManager = credentialManager
+        self.credentialManager = reachFive.credentialManager
     }
 
     public func login(
@@ -57,21 +57,6 @@ class ConfiguredAppleProvider: NSObject, Provider {
         case .AchievedLogin(let authToken): return authToken
         case .OngoingStepUp:                throw ReachFiveError.TechnicalError(reason: "Should not happen: MFA Step Up in a Sign In with Apple flow")
         }
-    }
-
-    public func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
-        true
-    }
-
-    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        true
-    }
-
-    public func applicationDidBecomeActive(_ application: UIApplication) {
-    }
-
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([any UIUserActivityRestoring]?) -> Void) -> Bool {
-        true
     }
 
     public func logout() {
