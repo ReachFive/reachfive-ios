@@ -1,6 +1,36 @@
 import Foundation
 import AuthenticationServices
 
+/// Registers a **web** provider (one without a native SDK component, served by `DefaultProvider`) so the app
+/// can pick its **variant** — exactly like native creators carry a `variant`. The chosen variant flows through
+/// the existing mechanism: `ReachFive.reinitialize()` sends `providersCreators.map { ($0.name, $0.variant) }`
+/// to `/api/v1/providers`, and the returned per-variant config (incl. `universalLink`) drives `DefaultProvider`.
+///
+/// Example: `WebProvider(name: .bconnect, variant: "natif")`.
+public final class WebProvider: ProviderCreator {
+    /// The variant-aware SLO providers the backend exposes a variant for. `rawValue` is the backend name.
+    public enum Name: String {
+        case apple
+        case facebook
+        case google
+        case line
+        case bconnect
+    }
+
+    private let providerName: Name
+    public var name: String { providerName.rawValue }
+    public let variant: String?
+
+    public init(name: Name, variant: String? = nil) {
+        self.providerName = name
+        self.variant = variant
+    }
+
+    public func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> any Provider {
+        DefaultProvider(reachfive: reachFive, providerConfig: providerConfig)
+    }
+}
+
 class DefaultProvider: NSObject, Provider {
     let name: String
 
@@ -23,28 +53,19 @@ class DefaultProvider: NSObject, Provider {
             throw ReachFiveError.TechnicalError(reason: "No presenting viewController")
         }
 
-        return try await reachfive.webviewLogin(WebviewLoginRequest(scope: scope, presentationContextProvider: presentationContextProvider, origin: origin, provider: providerConfig.provider))
+        return try await reachfive.webviewLogin(
+            WebviewLoginRequest(
+                scope: scope,
+                presentationContextProvider: presentationContextProvider,
+                origin: origin,
+                provider: providerConfig.providerWithVariant,
+                // Pour un provider à universal link, le universal link EST le redirect_uri OAuth (même
+                // valeur pour /authorize et /token) ; pour les autres, nil → scheme custom.
+                redirectUri: providerConfig.universalLink))
     }
 
     override var description: String {
         "Provider: \(providerConfig.provider)"
-    }
-}
-
-extension DefaultProvider {
-    public func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
-        true
-    }
-
-    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        true
-    }
-
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        true
-    }
-
-    public func applicationDidBecomeActive(_ application: UIApplication) {
     }
 
     public func logout() {

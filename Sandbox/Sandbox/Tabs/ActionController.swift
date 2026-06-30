@@ -62,6 +62,14 @@ class ActionController: UITableViewController {
                         try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin"))
                     }
                 }
+
+                // secure webview returning via an https universal link
+                if indexPath.row == 1 {
+                    let httpsRedirectUri = "https://local-sandbox.og4.me/sdk/callback"
+                    await handleAuthToken {
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.https", redirectUri: httpsRedirectUri))
+                    }
+                }
             }
 
             // Section Others

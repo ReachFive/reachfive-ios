@@ -17,6 +17,7 @@ public extension ReachFive {
                     let _ = provider.application(application, didFinishLaunchingWithOptions: launchOptions)
                 }
             } catch {
+                //TODO: faire une passe de cohérence sur l'utilisation de #if DEBUG et du Logger
                 #if DEBUG
                 print(Logger.shared.message(for: error))
                 #endif
@@ -32,10 +33,21 @@ public extension ReachFive {
         }
     }
 
+    @MainActor
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        // D'abord les providers (un provider custom peut consommer l'activité)…
+        var handled = false
         for provider in providers {
-            let _ = provider.application(application, continue: userActivity, restorationHandler: restorationHandler)
+            handled = provider.application(application, continue: userActivity, restorationHandler: restorationHandler) || handled
         }
-        return true
+        if handled { return true }
+
+        // …puis le porteur web-auth : ne renvoie true QUE si la session en cours attend ce universal
+        // link (sinon false, pour que l'app hôte — qui nous forwarde tous ses liens — route elle-même
+        // les liens que ReachFive ne gère pas).
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb, let url = userActivity.webpageURL else {
+            return false
+        }
+        return webAuthSessionHolder.complete(externalCallbackURL: url)
     }
 }

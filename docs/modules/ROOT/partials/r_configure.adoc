@@ -70,6 +70,24 @@ let ReachFive = ReachFive(
 <2> Where the callback mfaUri `scheme` ends with `myOwnMfaScheme`.
 <3> Where the callback accountRecoveryUri `scheme` ends with `myOwnRecoveryScheme`.
 
+=== Associated Domains (universal-link providers)
+
+Some providers (such as B.connect) finish their login on an *https universal link* instead of the custom scheme. To support them, declare the universal-link host in your app's *Associated Domains* entitlement with *two* service types, and host a matching `apple-app-site-association` file on that host:
+
+[cols="4m,6a"]
+|===
+|Entry |Role
+
+|applinks:$\{host\}
+|*Out-of-band* return (all iOS versions). When an external app (e.g. a bank) reopens your app via the universal link, iOS delivers it to `application(_:continue:)`, which you must forward to {company} (see xref:application/applicationContinueUserActivity.adoc[]).
+
+|webcredentials:$\{host\}
+|*In-band* completion on *iOS 17.4+*. Lets `ASWebAuthenticationSession` intercept the redirect to the universal link directly inside its web view, without leaving the app. If this entry (or the association file) is missing, the session fails to start.
+
+|===
+
+`$\{host\}` is the host of the `universalLink` returned by {company} for that provider. Both the entitlement entry and the `apple-app-site-association` file are required for iOS to honour the domain.
+
 === Customise storage
 
 Storage is used by the iOS SDK to store the PKCE code during passwordless and MFA flows.
