@@ -1,7 +1,7 @@
 import AuthenticationServices
 
-/// Porte le login web en cours : démarre une `ASWebAuthenticationSession`, attend son callback, et —
-/// pour les providers à universal link — laisse un lien reçu hors-bande via `application(_:continue:)`
+/// Porte le login web en cours : démarre une `ASWebAuthenticationSession`, attend son callback,
+///  et —pour les providers à universal link — laisse un lien reçu hors-bande via `application(_:continue:)`
 /// le compléter (``tryComplete(externalCallbackURL:)``).
 ///
 /// **Un seul login à la fois.** La feuille modale d'une `ASWebAuthenticationSession` empêche d'en
@@ -19,8 +19,7 @@ import AuthenticationServices
 final class WebAuthenticationSession {
     private var session: ASWebAuthenticationSession?
     private var continuation: CheckedContinuation<URL, Error>?
-    /// Le `redirect_uri` parsé attendu pour cette tentative ; `nil` hors d'un login → `tryComplete`
-    /// ne matche rien.
+    /// Le `redirect_uri` parsé attendu pour cette tentative ; `nil` hors d'un login → `tryComplete` ne matche rien.
     private var expectedCallback: URL?
     private var hasResumed = false
     /// Identifie la tentative en cours ; un callback capturant un `attempt` périmé est ignoré.
@@ -43,7 +42,7 @@ final class WebAuthenticationSession {
             self.hasResumed = false
 
             let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
-                // Tout passe sur le main thread pour éviter les races.
+                // Tout passe sur le main thread pour éviter les situations de compétition.
                 Task { @MainActor in
                     self?.handleSessionCompletion(attempt: attempt, callbackURL: callbackURL, error: error)
                 }
@@ -109,11 +108,11 @@ final class WebAuthenticationSession {
         } else if let callbackURL {
             complete(attempt: attempt, .success(callbackURL))
         } else {
-            complete(attempt: attempt, .failure(ReachFiveError.TechnicalError(reason: "No callback URL")))
+            complete(attempt: attempt, .failure(.TechnicalError(reason: "No callback URL")))
         }
     }
 
-    private func complete(attempt: Int, _ result: Result<URL, Error>) {
+    private func complete(attempt: Int, _ result: Result<URL, ReachFiveError>) {
         // Ignore un callback périmé (login plus récent) ou une seconde résolution.
         guard attempt == self.attempt, !hasResumed, let continuation else { return }
         hasResumed = true

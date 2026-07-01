@@ -15,11 +15,9 @@ public extension ReachFive {
                 "origin": request.origin,
             ]
 
-            // Le logout se complète in-band via le scheme custom (post_logout_redirect_uri) ; pas de
-            // complétion hors-bande (le callback de logout ne porte pas de `code`, cf. isOurCallback).
             let _ = try? await webAuthSession.start(
                 url: reachFiveApi.buildLogoutURL(queryParams: options),
-                expectedCallback: URL(string: sdkConfig.redirectUri),
+                expectedCallback: nil,
                 callbackURLScheme: sdkConfig.baseScheme,
                 presentationContextProvider: request.presentationContextProvider,
                 prefersEphemeralWebBrowserSession: false)
