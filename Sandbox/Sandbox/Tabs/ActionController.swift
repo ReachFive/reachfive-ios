@@ -63,11 +63,19 @@ class ActionController: UITableViewController {
                     }
                 }
 
-                // secure webview returning via an https universal link
+                // secure webview completing IN-BAND via an https universal link (intercepted in the sheet, iOS 17.4+)
                 if indexPath.row == 1 {
-                    let httpsRedirectUri = "https://local-sandbox.og4.me/universal_link_internal"
+                    let inSheetCallback = "https://local-sandbox.og4.me/universal_link_internal"
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.https", redirectUri: httpsRedirectUri))
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.https", callback: .universalLinkInSheet(inSheetCallback)))
+                    }
+                }
+
+                // secure webview handing off to an external app and returning OUT-OF-BAND via an https universal link
+                if indexPath.row == 2 {
+                    let externalAppCallback = "https://local-sandbox.og4.me/_dev/mobile/callback"
+                    await handleAuthToken {
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.externalApp", callback: .externalApp(externalAppCallback)))
                     }
                 }
             }

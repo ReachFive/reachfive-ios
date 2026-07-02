@@ -23,12 +23,25 @@ final class WebviewLoginRequestTests: XCTestCase {
         XCTAssertEqual(WebviewLoginRequest(nonce: "my-nonce", presentationContextProvider: provider).nonce, "my-nonce")
     }
 
-    func testRedirectUriDefaultsNil() {
-        XCTAssertNil(WebviewLoginRequest(presentationContextProvider: provider).redirectUri)
+    func testCallbackDefaultsToSdkScheme() {
+        guard case .sdkScheme = WebviewLoginRequest(presentationContextProvider: provider).callback else {
+            return XCTFail("callback should default to .sdkScheme")
+        }
     }
 
-    func testRedirectUriIsPreserved() {
-        let r = WebviewLoginRequest(presentationContextProvider: provider, redirectUri: "https://h/cb")
-        XCTAssertEqual(r.redirectUri, "https://h/cb")
+    func testExternalAppCallbackIsPreserved() {
+        let r = WebviewLoginRequest(presentationContextProvider: provider, callback: .externalApp("https://h/cb"))
+        guard case .externalApp(let link) = r.callback else {
+            return XCTFail("callback should be .externalApp")
+        }
+        XCTAssertEqual(link, "https://h/cb")
+    }
+
+    func testUniversalLinkInSheetCallbackIsPreserved() {
+        let r = WebviewLoginRequest(presentationContextProvider: provider, callback: .universalLinkInSheet("https://h/cb"))
+        guard case .universalLinkInSheet(let link) = r.callback else {
+            return XCTFail("callback should be .universalLinkInSheet")
+        }
+        XCTAssertEqual(link, "https://h/cb")
     }
 }

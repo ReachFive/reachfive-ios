@@ -59,9 +59,10 @@ class DefaultProvider: NSObject, Provider {
                 presentationContextProvider: presentationContextProvider,
                 origin: origin,
                 provider: providerConfig.providerWithVariant,
-                // Pour un provider à universal link, le universal link EST le redirect_uri OAuth (même
-                // valeur pour /authorize et /token) ; pour les autres, nil → scheme custom.
-                redirectUri: providerConfig.universalLink))
+                // Un provider à universal link (ex. B.connect) termine son flow dans une app externe et
+                // rouvre l'app hôte hors-bande via ce universal link, qui EST le redirect_uri OAuth (même
+                // valeur pour /authorize et /token). Sinon, scheme custom du SDK.
+                callback: providerConfig.universalLink.map { WebviewCallback.externalApp($0) } ?? .sdkScheme))
     }
 
     override var description: String {

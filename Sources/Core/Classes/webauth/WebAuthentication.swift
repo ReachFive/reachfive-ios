@@ -27,10 +27,11 @@ final class WebAuthenticationSession {
 
     nonisolated init() {}
 
-    /// Démarre un login web et attend son callback (succès, erreur ou annulation).
+    /// Démarre un login web et attend son callback (succès, erreur ou annulation). Le ``WebSessionMode``
+    /// décrit comment la session se termine (scheme in-band, universal link in-band, ou app externe
+    /// hors-bande) et pilote donc à la fois la construction de la session et le canal du callback.
     func start(url: URL,
-               expectedCallback: URL?,
-               callbackURLScheme: String,
+               mode: WebSessionMode,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
 
@@ -38,7 +39,8 @@ final class WebAuthenticationSession {
             attempt += 1
             let attempt = attempt
             self.continuation = continuation
-            self.expectedCallback = expectedCallback
+            // Seul le mode hors-bande arme `tryComplete` ; en in-band, la session se complète elle-même.
+            self.expectedCallback = mode.outOfBandCallback
             self.hasResumed = false
 
             let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
@@ -49,21 +51,33 @@ final class WebAuthenticationSession {
             }
 
             let session: ASWebAuthenticationSession
-            // iOS 17.4+ : quand le redirect_uri est un universal link (https), on intercepte la
-            // redirection in-band directement dans la session via le callback `.https` (nécessite
-            // l'Associated Domain `webcredentials:<host>`). Sinon, scheme custom (legacy, iOS < 17.4).
-            if #available(iOS 17.4, *),
-               let expectedCallback,
-               expectedCallback.scheme == "https",
-               let host = expectedCallback.host {
+            switch mode {
+            case let .inSheet(.scheme(scheme)):
+                // Scheme custom intercepté par la session (historique, tout iOS).
                 session = ASWebAuthenticationSession(
                     url: url,
-                    callback: .https(host: host, path: expectedCallback.path),
+                    callbackURLScheme: scheme,
                     completionHandler: completionHandler)
-            } else {
+
+            case let .inSheet(.universalLink(callback)):
+                // iOS 17.4+ : universal link intercepté in-band dans la webview via `callback: .https`
+                // (nécessite l'Associated Domain `webcredentials:<host>`). `@available` est impossible
+                // sur un case d'enum porteur de valeur, on teste donc la disponibilité ici, à l'usage.
+                guard #available(iOS 17.4, *), let host = callback.host else {
+                    complete(attempt: attempt, .failure(.TechnicalError(reason: "In-sheet universal link callback requires iOS 17.4+ and a host: \(callback)")))
+                    return
+                }
                 session = ASWebAuthenticationSession(
                     url: url,
-                    callbackURLScheme: callbackURLScheme,
+                    callback: .https(host: host, path: callback.path),
+                    completionHandler: completionHandler)
+
+            case .externalApp:
+                // Le flow se termine dans une app externe : la session ne recevra jamais le callback
+                // (traité hors-bande par `tryComplete`), on ne lui donne donc aucun scheme à intercepter.
+                session = ASWebAuthenticationSession(
+                    url: url,
+                    callbackURLScheme: nil,
                     completionHandler: completionHandler)
             }
 
