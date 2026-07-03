@@ -141,17 +141,24 @@ final class WebAuthenticationSession {
     /// dans l'AASA, ce matching exact suffit à distinguer notre callback des autres liens de l'app.
     nonisolated static func isOurCallback(_ url: URL, expectedCallback expected: URL) -> Bool {
         url.host?.lowercased() == expected.host?.lowercased()
-            && url.path == expected.path
-            && url.queryValue("code") != nil
+        && url.path == expected.path
+        && url.queryValue("code") != nil
     }
 
     /// Mappe une erreur d'`ASWebAuthenticationSession` vers une `ReachFiveError`.
     nonisolated static func reachFiveError(for error: Error) -> ReachFiveError {
-        switch error._code {
-        case 1: .AuthCanceled
-        case 2: .TechnicalError(reason: "Presentation context not provided: \(error.localizedDescription)")
-        case 3: .TechnicalError(reason: "Presentation context invalid: \(error.localizedDescription)")
-        default: .TechnicalError(reason: "Unknown Error \(error.localizedDescription)")
+        guard let sessionError = error as? ASWebAuthenticationSessionError else {
+            return .TechnicalError(reason: "Unknown Error \(error.localizedDescription)")
+        }
+        switch sessionError.code {
+        case .canceledLogin:
+            return .AuthCanceled
+        case .presentationContextNotProvided:
+            return .TechnicalError(reason: "Presentation context not provided: \(error.localizedDescription)")
+        case .presentationContextInvalid:
+            return .TechnicalError(reason: "Presentation context invalid: \(error.localizedDescription)")
+        @unknown default:
+            return .TechnicalError(reason: "Unknown Error \(error.localizedDescription)")
         }
     }
 }
