@@ -16,11 +16,12 @@ public final class WebProvider: ProviderCreator {
         case line
         case bconnect
     }
-    
+
     public enum WebProviderMode {
         case sdkScheme
-        case universalLink
         case externalApp
+        @available(iOS 17.4, *)
+        case universalLink
     }
 
     private let providerName: Name
@@ -28,14 +29,14 @@ public final class WebProvider: ProviderCreator {
     public let variant: String?
     public let mode: WebProviderMode
 
-    public init(name: Name, variant: String? = nil, mode: WebProviderMode? = nil) {
+    public init(name: Name, variant: String? = nil, mode: WebProviderMode = .sdkScheme) {
         self.providerName = name
         self.variant = variant
-        self.mode = mode ?? .sdkScheme
+        self.mode = mode
     }
 
     public func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> Provider {
-        DefaultProvider(reachfive: reachFive, providerConfig: providerConfig)
+        DefaultProvider(reachfive: reachFive, providerConfig: providerConfig, mode: mode)
     }
 }
 
@@ -44,13 +45,31 @@ class DefaultProvider: NSObject, Provider {
 
     let reachfive: ReachFive
     let providerConfig: ProviderConfig
-//    public let mode: WebProvider.WebProviderMode
+    public let webSessionMode: WebSessionMode?
 
-    public init(reachfive: ReachFive, providerConfig: ProviderConfig) {
+    public init(
+        reachfive: ReachFive,
+        providerConfig: ProviderConfig,
+        mode: WebProvider.WebProviderMode = .sdkScheme
+    ) {
         self.reachfive = reachfive
         self.providerConfig = providerConfig
         self.name = providerConfig.provider
-//        self.mode = mode
+        
+        if mode == .sdkScheme {
+            webSessionMode = .sdkScheme
+        } else {
+            guard let link = providerConfig.universalLink else {
+                Logger.shared.log("No universal link configured for \(mode) mode. This will crash at runtime.")
+                webSessionMode = nil
+                return
+            }
+            if mode == .externalApp {
+                webSessionMode = WebSessionMode.externalApp(link)
+            } else {
+                webSessionMode = WebSessionMode.universalLink(link)
+            }
+        }
     }
 
     public func login(
@@ -63,16 +82,17 @@ class DefaultProvider: NSObject, Provider {
             throw ReachFiveError.TechnicalError(reason: "No presenting viewController")
         }
         
+        guard let webSessionMode else {
+            throw ReachFiveError.TechnicalError(reason: "No universal link configured for provider \(name)")
+        }
+
         return try await reachfive.webviewLogin(
             WebviewLoginRequest(
                 scope: scope,
                 presentationContextProvider: presentationContextProvider,
                 origin: origin,
                 provider: providerConfig.providerWithVariant,
-                // Un provider à universal link (ex. B.connect) termine son flow dans une app externe et
-                // rouvre l'app hôte hors-bande via ce universal link, qui EST le redirect_uri OAuth (même
-                // valeur pour /authorize et /token). Sinon, scheme custom du SDK.
-                webSessionMode: providerConfig.universalLink.map { WebSessionMode.externalApp($0) } ?? .sdkScheme)
+                webSessionMode: webSessionMode)
         )
     }
 
