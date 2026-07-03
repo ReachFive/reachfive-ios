@@ -13,7 +13,7 @@ public extension ReachFive {
 
         let callbackURL = try await webAuthenticationSession(
             url: authURL,
-            callbackURLScheme: reachFiveApi.sdkConfig.baseScheme,
+            callbackURLScheme: reachFiveApi.sdkConfig.customScheme,
             presentationContextProvider: request.presentationContextProvider,
             prefersEphemeralWebBrowserSession: request.prefersEphemeralWebBrowserSession)
         

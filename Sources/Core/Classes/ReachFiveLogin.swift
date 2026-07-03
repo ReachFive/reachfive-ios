@@ -17,7 +17,7 @@ public extension ReachFive {
 
             let _ = try? await webAuthenticationSession(
                 url: reachFiveApi.buildLogoutURL(queryParams: options),
-                callbackURLScheme: sdkConfig.baseScheme,
+                callbackURLScheme: sdkConfig.customScheme,
                 presentationContextProvider: request.presentationContextProvider,
                 prefersEphemeralWebBrowserSession: false)
         }

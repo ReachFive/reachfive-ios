@@ -3,7 +3,12 @@
 ## Unreleased
 
 ### Breaking changes
-- Require URL instead of String for the redirect URLs
+- Changed type of redirect URL fields to URL instead of String 
+- SdkConfig:
+  - As above, changed type of redirect URL fields to URL instead of String
+  - Removed `scheme` field alias for `redirectUri`
+  - Renamed `baseScheme` field to `customScheme`
+  - The initializer now throws an error in case the scheme is not correct (either due to the `customScheme` parameter or indirectly because of the `clientId` parameter being ill-formatted)
 
 ## v10.0.1
 

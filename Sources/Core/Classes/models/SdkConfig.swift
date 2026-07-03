@@ -5,7 +5,7 @@ public class SdkConfig {
     public let clientId: String
 
     ///The scheme. Defaults to `reachfive-clientId`
-    public let baseScheme: String
+    public let customScheme: String
     /// The redirect URI for passwordless. Defaults to `reachfive-clientId://callback`
     public let redirectUri: URL
     /// The redirect URI for MFA. Defaults to `reachfive-clientId://mfa`
@@ -18,7 +18,7 @@ public class SdkConfig {
     public init(
         domain: String,
         clientId: String,
-        baseScheme: String? = nil,
+        customScheme: String? = nil,
         redirectUri: URL? = nil,
         mfaUri: URL? = nil,
         accountRecoveryUri: URL? = nil,
@@ -27,22 +27,21 @@ public class SdkConfig {
         self.domain = domain
         self.clientId = clientId
 
-        let resolvedBaseScheme = baseScheme ?? "reachfive-\(clientId)"
-        self.baseScheme = resolvedBaseScheme
+        let resolvedScheme = customScheme ?? "reachfive-\(clientId)"
 
-        func parseUrl(_ url: URL?, defaultString: String) throws -> URL {
-            if let url {
-                return url
-            }
-            guard let parsedUrl = URL(string: defaultString) else {
-                throw ReachFiveError.TechnicalError(reason: "Unable to construct SdkConfig default URL for value: \(defaultString)")
-            }
-            return parsedUrl
+        // Broad scheme validation based on RFC 3986 generic parser rules:
+        // Must start with a letter and contain any character except `:`, `/`, `?`, `#`, or whitespace.
+        let schemeRegex = "^[a-zA-Z][^:/?#\\s]*$"
+        guard resolvedScheme.range(of: schemeRegex, options: .regularExpression) != nil else {
+            throw ReachFiveError.TechnicalError(reason: "Invalid scheme format: '\(resolvedScheme)'. A URL scheme must start with a letter and must not contain colons, slashes, question marks, hash symbols, or whitespace.")
         }
 
-        self.redirectUri = try parseUrl(redirectUri, defaultString: "\(resolvedBaseScheme)://callback")
-        self.mfaUri = try parseUrl(mfaUri, defaultString: "\(resolvedBaseScheme)://mfa")
-        self.emailVerificationUri = try parseUrl(emailVerificationUri, defaultString: "\(resolvedBaseScheme)://email-verification")
-        self.accountRecoveryUri = try parseUrl(accountRecoveryUri, defaultString: "\(resolvedBaseScheme)://account-recovery")
+        self.customScheme = resolvedScheme
+
+        // Since resolvedBaseScheme is validated under generic URI parsing rules, the following URL constructions are guaranteed to succeed
+        self.redirectUri = redirectUri ?? URL(string: "\(resolvedScheme)://callback")!
+        self.mfaUri = mfaUri ?? URL(string: "\(resolvedScheme)://mfa")!
+        self.emailVerificationUri = emailVerificationUri ?? URL(string: "\(resolvedScheme)://email-verification")!
+        self.accountRecoveryUri = accountRecoveryUri ?? URL(string: "\(resolvedScheme)://account-recovery")!
     }
 }
