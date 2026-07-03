@@ -3,14 +3,14 @@ import Foundation
 public class StartMfaStepUpRequest: Codable, DictionaryEncodable {
     public let responseType: String
     public let clientId: String
-    public let redirectUri: String
+    public let redirectUri: URL
     public let codeChallenge: String
     public let codeChallengeMethod: String
     public let scope: String?
     public let tkn: String?
     public let action: String?
 
-    public init(clientId: String, redirectUri: String, pkce: Pkce, scope: String? = nil, tkn: String? = nil, action: String? = nil) {
+    public init(clientId: String, redirectUri: URL, pkce: Pkce, scope: String? = nil, tkn: String? = nil, action: String? = nil) {
         self.clientId = clientId
         self.responseType = "code"
         self.redirectUri = redirectUri
@@ -34,13 +34,13 @@ public class StartMfaStepUpResponse: Codable, DictionaryEncodable {
 
 public class StartMfaPasswordlessRequest: Codable, DictionaryEncodable {
     public let responseType: String
-    public let redirectUri: String
+    public let redirectUri: URL
     public let clientId: String
     public let stepUp: String
     public let authType: MfaCredentialItemType
     public let origin: String?
 
-    public init(redirectUri: String, clientId: String, stepUp: String, authType: MfaCredentialItemType, origin: String?) {
+    public init(redirectUri: URL, clientId: String, stepUp: String, authType: MfaCredentialItemType, origin: String?) {
         self.redirectUri = redirectUri
         self.responseType = "code"
         self.clientId = clientId

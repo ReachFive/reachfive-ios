@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Breaking changes
+- Require URL instead of String for the redirect URLs
+
 ## v10.0.1
 
 - Fix compilation issue in XCode 26
