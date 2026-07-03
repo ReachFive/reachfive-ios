@@ -65,17 +65,17 @@ class ActionController: UITableViewController {
 
                 // secure webview completing IN-BAND via an https universal link (intercepted in the sheet, iOS 17.4+)
                 if indexPath.row == 1 {
-                    let inSheetCallback = "https://local-sandbox.og4.me/universal_link_internal"
+                    let inSheetCallback = URL(string: "https://local-sandbox.og4.me/universal_link_internal")!
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.https", callback: .universalLinkInSheet(inSheetCallback)))
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.https", webSessionMode: .universalLink(inSheetCallback)))
                     }
                 }
 
                 // secure webview handing off to an external app and returning OUT-OF-BAND via an https universal link
                 if indexPath.row == 2 {
-                    let externalAppCallback = "https://local-sandbox.og4.me/_dev/mobile/callback"
+                    let externalAppCallback = URL(string: "https://local-sandbox.og4.me/_dev/mobile/callback")!
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.externalApp", callback: .externalApp(externalAppCallback)))
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.externalApp", webSessionMode: .externalApp(externalAppCallback)))
                     }
                 }
             }

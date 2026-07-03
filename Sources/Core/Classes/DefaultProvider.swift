@@ -16,17 +16,25 @@ public final class WebProvider: ProviderCreator {
         case line
         case bconnect
     }
+    
+    public enum WebProviderMode {
+        case sdkScheme
+        case universalLink
+        case externalApp
+    }
 
     private let providerName: Name
     public var name: String { providerName.rawValue }
     public let variant: String?
+    public let mode: WebProviderMode
 
-    public init(name: Name, variant: String? = nil) {
+    public init(name: Name, variant: String? = nil, mode: WebProviderMode? = nil) {
         self.providerName = name
         self.variant = variant
+        self.mode = mode ?? .sdkScheme
     }
 
-    public func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> any Provider {
+    public func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> Provider {
         DefaultProvider(reachfive: reachFive, providerConfig: providerConfig)
     }
 }
@@ -36,11 +44,13 @@ class DefaultProvider: NSObject, Provider {
 
     let reachfive: ReachFive
     let providerConfig: ProviderConfig
+//    public let mode: WebProvider.WebProviderMode
 
     public init(reachfive: ReachFive, providerConfig: ProviderConfig) {
         self.reachfive = reachfive
         self.providerConfig = providerConfig
         self.name = providerConfig.provider
+//        self.mode = mode
     }
 
     public func login(
@@ -52,7 +62,7 @@ class DefaultProvider: NSObject, Provider {
         guard let presentationContextProvider = viewController as? ASWebAuthenticationPresentationContextProviding else {
             throw ReachFiveError.TechnicalError(reason: "No presenting viewController")
         }
-
+        
         return try await reachfive.webviewLogin(
             WebviewLoginRequest(
                 scope: scope,
@@ -62,7 +72,8 @@ class DefaultProvider: NSObject, Provider {
                 // Un provider à universal link (ex. B.connect) termine son flow dans une app externe et
                 // rouvre l'app hôte hors-bande via ce universal link, qui EST le redirect_uri OAuth (même
                 // valeur pour /authorize et /token). Sinon, scheme custom du SDK.
-                callback: providerConfig.universalLink.map { WebviewCallback.externalApp($0) } ?? .sdkScheme))
+                webSessionMode: providerConfig.universalLink.map { WebSessionMode.externalApp($0) } ?? .sdkScheme)
+        )
     }
 
     override var description: String {

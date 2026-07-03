@@ -24,8 +24,11 @@ final class WebAuthenticationSession {
     private var hasResumed = false
     /// Identifie la tentative en cours ; un callback capturant un `attempt` périmé est ignoré.
     private var attempt = 0
+    private let baseScheme: String
 
-    nonisolated init() {}
+    nonisolated init(baseScheme: String) {
+        self.baseScheme = baseScheme
+    }
 
     /// Démarre un login web et attend son callback (succès, erreur ou annulation). Le ``WebSessionMode``
     /// décrit comment la session se termine (scheme in-band, universal link in-band, ou app externe
@@ -52,14 +55,14 @@ final class WebAuthenticationSession {
 
             let session: ASWebAuthenticationSession
             switch mode {
-            case let .inSheet(.scheme(scheme)):
+            case .sdkScheme:
                 // Scheme custom intercepté par la session (historique, tout iOS).
                 session = ASWebAuthenticationSession(
                     url: url,
-                    callbackURLScheme: scheme,
+                    callbackURLScheme: baseScheme,
                     completionHandler: completionHandler)
 
-            case let .inSheet(.universalLink(callback)):
+            case let .universalLink(callback):
                 // iOS 17.4+ : universal link intercepté in-band dans la webview via `callback: .https`
                 // (nécessite l'Associated Domain `webcredentials:<host>`). `@available` est impossible
                 // sur un case d'enum porteur de valeur, on teste donc la disponibilité ici, à l'usage.
