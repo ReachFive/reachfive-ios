@@ -5,8 +5,9 @@ import AuthenticationServices
 /// le compléter (``tryComplete(externalCallbackURL:)``).
 ///
 /// **Un seul login à la fois.** La feuille modale d'une `ASWebAuthenticationSession` empêche d'en
-/// lancer un second sur iPhone. Le cas multi-fenêtres (iPad/macCatalyst) n'est pas couvert : un second
-/// `start(...)` écrase l'état en cours et le login précédent ne peut alors plus être complété.
+/// lancer un second sur iPhone, mais un second `start(...)` reste atteignable (logout web pendant un
+/// login, nouveau login après un aller-retour `externalApp` abandonné, iPad multi-fenêtres) : le
+/// dernier arrivé gagne — le login précédent est repris avec `.AuthCanceled` et sa feuille est fermée.
 ///
 /// Les callbacks tardifs ou dupliqués sont neutralisés de deux façons : un **jeton par tentative**
 /// (`attempt`) — pour qu'un callback d'une `ASWebAuthenticationSession` périmée ne puisse jamais
@@ -39,6 +40,7 @@ final class WebAuthenticationSession {
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
 
         return try await withCheckedThrowingContinuation { continuation in
+            cancelPendingAttempt()
             attempt += 1
             let attempt = attempt
             self.continuation = continuation
@@ -117,6 +119,17 @@ final class WebAuthenticationSession {
         complete(attempt: attempt, .success(url))
         runningSession?.cancel()
         return true
+    }
+
+    /// Reprend le login encore en attente avec `.AuthCanceled` et ferme sa feuille — sans effet s'il
+    /// n'y en a pas. Appelé quand un nouveau `start(...)` le remplace (dernier arrivé gagne), pour ne
+    /// jamais laisser une continuation geler sans résolution.
+    private func cancelPendingAttempt() {
+        guard continuation != nil else { return }
+        // Même capture de `session` avant `complete(_:)` que dans `tryComplete`.
+        let staleSession = session
+        complete(attempt: attempt, .failure(.AuthCanceled))
+        staleSession?.cancel()
     }
 
     private func handleSessionCompletion(attempt: Int, callbackURL: URL?, error: Error?) {
