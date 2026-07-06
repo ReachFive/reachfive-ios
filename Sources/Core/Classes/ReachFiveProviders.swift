@@ -44,6 +44,14 @@ public extension ReachFive {
                     clientConfigResponse: clientConfigResponse
                 )
             }
+            // Sign In with Apple is always native: no web flow fallback for Apple
+            if config.provider == AppleProvider.NAME {
+                return ConfiguredAppleProvider(
+                    reachFive: self,
+                    providerConfig: config,
+                    clientConfigResponse: clientConfigResponse
+                )
+            }
             Logger.shared.log("No ProviderCreator registered for provider '\(config.provider)' (variant '\(config.variant)'); falling back to DefaultProvider. If you expected a custom provider, check that its name matches and that it is passed to ReachFive(providersCreators:).")
             return DefaultProvider(reachfive: self, providerConfig: config)
         })
