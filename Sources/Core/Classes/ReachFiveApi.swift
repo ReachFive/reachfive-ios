@@ -138,11 +138,7 @@ public class ReachFiveApi {
 
     public func authorize(params: [String: String?]?) async throws -> String {
         let url = try await networkClient.request(createUrl(path: "/oauth/authorize", params: params)).redirect()
-        let params = URLComponents(string: url.absoluteString)?.queryItems
-        guard let code = params?.first(where: { $0.name == "code" })?.value else {
-            throw ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))
-        }
-        return code
+        return try url.authorizationCode()
     }
 
     public func authWithCode(authCodeRequest: AuthCodeRequest) async throws -> AccessTokenResponse {

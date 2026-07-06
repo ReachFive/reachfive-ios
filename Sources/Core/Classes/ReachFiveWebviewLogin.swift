@@ -22,11 +22,7 @@ public extension ReachFive {
             presentationContextProvider: request.presentationContextProvider,
             prefersEphemeralWebBrowserSession: request.prefersEphemeralWebBrowserSession)
 
-        guard let code = callbackURL.queryValue("code") else {
-            let params = URLComponents(url: callbackURL, resolvingAgainstBaseURL: true)?.queryItems
-            throw ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))
-        }
-
+        let code = try callbackURL.authorizationCode()
         return try await self.authWithCode(code: code, pkce: pkce, redirectUri: mode.redirectUri)
     }
 }

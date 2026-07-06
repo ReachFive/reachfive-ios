@@ -40,13 +40,8 @@ extension LoginWKWebview: WKNavigationDelegate {
             return .allow
         }
 
-        let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
-        if let params, let code = params.first(where: { $0.name == "code" })?.value {
-            continuation.resume {
-                try await reachfive.authWithCode(code: code, pkce: pkce)
-            }
-        } else {
-            continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params)))
+        continuation.resume {
+            try await reachfive.authWithCode(code: url.authorizationCode(), pkce: pkce)
         }
         self.continuation = nil
         return .cancel
