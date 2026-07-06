@@ -6,12 +6,25 @@
 #
 # Setup Cocoapod session/token on CircleCi: https://fuller.li/posts/automated-cocoapods-releases-with-ci/
 version: 2.1
+
+check_sdk_version: &check_sdk_version
+  name: Check SdkVersion.swift is in sync with version.rb
+  command: |
+    EXPECTED=$(ruby -r ./version.rb -e 'puts $VERSION')
+    ACTUAL=$(grep -oE '"[^"]+"' Sources/Core/Classes/SdkVersion.swift | tr -d '"')
+    if [ "$EXPECTED" != "$ACTUAL" ]; then
+      echo "SdkVersion.swift ($ACTUAL) is out of sync with version.rb ($EXPECTED). Run ./set_version.sh and commit the result."
+      exit 1
+    fi
+    echo "SdkVersion.swift is in sync with version.rb ($EXPECTED)"
+
 jobs:
   build:
     macos:
       xcode: "16.4.0"
     steps:
       - checkout
+      - run: *check_sdk_version
       - run:
           name: Install CocoaPods
           command: gem install cocoapods --user-install
@@ -27,6 +40,7 @@ jobs:
       xcode: "16.4.0"
     steps:
       - checkout
+      - run: *check_sdk_version
       - run:
           name: Install CocoaPods
           command: gem install cocoapods --user-install
