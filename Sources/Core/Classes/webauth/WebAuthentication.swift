@@ -11,9 +11,9 @@ import AuthenticationServices
 ///
 /// Les callbacks tardifs ou dupliqués sont neutralisés de deux façons : un **jeton par tentative**
 /// (`attempt`) — pour qu'un callback d'une `ASWebAuthenticationSession` périmée ne puisse jamais
-/// reprendre la continuation d'un login plus récent — et un garde **une-seule-fois** (`hasResumed`) —
-/// pour que la résolution gagnante (in-band, hors-bande, ou annulation) reprenne la continuation
-/// exactement une fois.
+/// reprendre la continuation d'un login plus récent — et la remise à `nil` de `continuation` dans
+/// `complete(_:)` — pour que la résolution gagnante (in-band, hors-bande, ou annulation) reprenne la
+/// continuation exactement une fois.
 ///
 /// `@MainActor` : tout le domaine `ASWebAuthenticationSession` est déjà main-thread.
 @MainActor
@@ -22,7 +22,6 @@ final class WebAuthenticationSession {
     private var continuation: CheckedContinuation<URL, Error>?
     /// Le `redirect_uri` parsé attendu pour cette tentative ; `nil` hors d'un login → `tryComplete` ne matche rien.
     private var expectedCallback: URL?
-    private var hasResumed = false
     /// Identifie la tentative en cours ; un callback capturant un `attempt` périmé est ignoré.
     private var attempt = 0
     private let baseScheme: String
@@ -46,7 +45,6 @@ final class WebAuthenticationSession {
             self.continuation = continuation
             // Seul le mode hors-bande arme `tryComplete` ; en in-band, la session se complète elle-même.
             self.expectedCallback = mode.outOfBandCallback
-            self.hasResumed = false
 
             let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
                 // Tout passe sur le main thread pour éviter les situations de compétition.
@@ -113,8 +111,8 @@ final class WebAuthenticationSession {
             return false
         }
         // Capture `session` avant `complete(_:)`, qui le met à nil ; on en a besoin pour annuler la
-        // session encore ouverte. Annuler après reprise est sans effet (le callback d'annulation est
-        // ignoré grâce au garde `hasResumed`).
+        // session encore ouverte. Annuler après reprise est sans effet (le callback d'annulation
+        // trouve une `continuation` déjà nil et est ignoré).
         let runningSession = session
         complete(attempt: attempt, .success(url))
         runningSession?.cancel()
@@ -143,9 +141,8 @@ final class WebAuthenticationSession {
     }
 
     private func complete(attempt: Int, _ result: Result<URL, ReachFiveError>) {
-        // Ignore un callback périmé (login plus récent) ou une seconde résolution.
-        guard attempt == self.attempt, !hasResumed, let continuation else { return }
-        hasResumed = true
+        // Ignore un callback périmé (login plus récent) ou une seconde résolution (`continuation` déjà nil).
+        guard attempt == self.attempt, let continuation else { return }
         self.continuation = nil
         self.session = nil
         self.expectedCallback = nil
