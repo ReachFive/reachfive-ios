@@ -15,6 +15,13 @@ import AuthenticationServices
 /// `complete(_:)` — pour que la résolution gagnante (in-band, hors-bande, ou annulation) reprenne la
 /// continuation exactement une fois.
 ///
+/// **Limitation (hors-bande)** : l'état d'un login en vol ne vit qu'en mémoire. Si iOS tue l'app
+/// pendant l'aller-retour vers l'app externe, le callback reçu au relancement ne matche rien
+/// (`tryComplete` renvoie `false`, l'app hôte route le lien) et le `code` est perdu : l'utilisateur
+/// doit relancer le login. Une reprise après relancement demanderait de persister le login en vol
+/// (redirect_uri + PKCE, déjà en storage) et un canal pour livrer le résultat à l'app — assumé hors
+/// périmètre tant que l'usage ne le justifie pas.
+///
 /// `@MainActor` : tout le domaine `ASWebAuthenticationSession` est déjà main-thread.
 @MainActor
 final class WebAuthenticationSession {
