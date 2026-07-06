@@ -26,4 +26,18 @@ final class URLWebAuthTests: XCTestCase {
     func testQueryValueFirstOfDuplicates() {
         XCTAssertEqual(URL(string: "https://h/p?state=first&state=second")!.queryValue("state"), "first")
     }
+
+    func testAuthorizationCodePresent() throws {
+        XCTAssertEqual(try URL(string: "https://h/p?code=abc&state=x")!.authorizationCode(), "abc")
+    }
+
+    func testAuthorizationCodeMissingThrowsWithApiError() {
+        XCTAssertThrowsError(try URL(string: "https://h/p?error=access_denied&error_description=denied")!.authorizationCode()) { error in
+            guard case let ReachFiveError.TechnicalError(reason, apiError) = error else {
+                return XCTFail("attendu : TechnicalError, obtenu \(error)")
+            }
+            XCTAssertEqual(reason, "No authorization code")
+            XCTAssertEqual(apiError?.error, "access_denied")
+        }
+    }
 }
