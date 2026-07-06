@@ -23,25 +23,25 @@ final class WebviewLoginRequestTests: XCTestCase {
         XCTAssertEqual(WebviewLoginRequest(nonce: "my-nonce", presentationContextProvider: provider).nonce, "my-nonce")
     }
 
-    func testCallbackDefaultsToSdkScheme() {
-        guard case .sdkScheme = WebviewLoginRequest(presentationContextProvider: provider).callback else {
-            return XCTFail("callback should default to .sdkScheme")
+    func testWebSessionModeDefaultsToSdkScheme() {
+        guard case .sdkScheme = WebviewLoginRequest(presentationContextProvider: provider).webSessionMode else {
+            return XCTFail("webSessionMode should default to .sdkScheme")
         }
     }
 
-    func testExternalAppCallbackIsPreserved() {
-        let r = WebviewLoginRequest(presentationContextProvider: provider, callback: .externalApp("https://h/cb"))
-        guard case .externalApp(let link) = r.callback else {
-            return XCTFail("callback should be .externalApp")
+    func testExternalAppModeIsPreserved() {
+        let r = WebviewLoginRequest(presentationContextProvider: provider, webSessionMode: .externalApp(URL(string: "https://h/cb")!))
+        guard case .externalApp(let link) = r.webSessionMode else {
+            return XCTFail("webSessionMode should be .externalApp")
         }
-        XCTAssertEqual(link, "https://h/cb")
+        XCTAssertEqual(link.absoluteString, "https://h/cb")
     }
 
-    func testUniversalLinkInSheetCallbackIsPreserved() {
-        let r = WebviewLoginRequest(presentationContextProvider: provider, callback: .universalLinkInSheet("https://h/cb"))
-        guard case .universalLinkInSheet(let link) = r.callback else {
-            return XCTFail("callback should be .universalLinkInSheet")
+    func testUniversalLinkModeIsPreserved() {
+        let r = WebviewLoginRequest(presentationContextProvider: provider, webSessionMode: .universalLink(URL(string: "https://h/cb")!))
+        guard case .universalLink(let link) = r.webSessionMode else {
+            return XCTFail("webSessionMode should be .universalLink")
         }
-        XCTAssertEqual(link, "https://h/cb")
+        XCTAssertEqual(link.absoluteString, "https://h/cb")
     }
 }
