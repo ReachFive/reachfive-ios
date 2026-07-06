@@ -3,7 +3,7 @@ import Foundation
 /// Décrit comment une `ASWebAuthenticationSession` se termine — donc **comment on la construit** et
 /// **par quel canal on reçoit le callback**.
 /// Deux canaux, mutuellement exclusifs pour un même login :
-/// - **in-band** (``scheme`` & ``universalLink``) : la redirection finale est interceptée DANS la webview de la session,
+/// - **in-band** (``sdkScheme`` & ``universalLink``) : la redirection finale est interceptée DANS la webview de la session,
 ///   qui déclenche alors son completion handler.
 /// - **hors-bande** (``externalApp``) : le flow se termine dans une app externe qui rouvre l'app hôte
 ///   via un universal link (`application(_:continue:)` → ``WebAuthenticationSession/tryComplete(externalCallbackURL:)``) ;
@@ -26,14 +26,16 @@ public enum WebSessionMode {
     var outOfBandCallback: URL? {
         switch self {
         case .externalApp(let url): url
-        default: nil
+        case .sdkScheme, .universalLink: nil
         }
     }
+
+    /// Le `redirect_uri` OAuth porté par le mode ; `nil` pour ``sdkScheme``, où celui du `SdkConfig`
+    /// s'applique (à `/authorize` comme à l'échange du code).
     var redirectUri: String? {
         switch self {
-        case .externalApp(let url): url.absoluteString
-        case .universalLink(let url): url.absoluteString
-        default: nil
+        case .externalApp(let url), .universalLink(let url): url.absoluteString
+        case .sdkScheme: nil
         }
     }
 }
