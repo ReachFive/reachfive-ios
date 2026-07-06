@@ -88,6 +88,11 @@ Some providers (such as B.connect) finish their login on an *https universal lin
 
 `$\{host\}` is the host of the `universalLink` returned by {company} for that provider. Both the entitlement entry and the `apple-app-site-association` file are required for iOS to honour the domain.
 
+[NOTE]
+====
+If the association file restricts the callback path with a `components` filter, make sure it lets through both the success callback (`?code=...`) *and* the OAuth error callback (`?error=...`, e.g. when the user denies consent), so that the SDK can end the login cleanly with the error instead of leaving the authentication sheet open.
+====
+
 === Customise storage
 
 Storage is used by the iOS SDK to store the PKCE code during passwordless and MFA flows.

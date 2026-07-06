@@ -1,7 +1,7 @@
 import XCTest
 @testable import Reach5
 
-/// Reconnaissance « est-ce notre callback ? » par forme d'URL (host + path + présence d'un `code`).
+/// Reconnaissance « est-ce notre callback ? » par forme d'URL (host + path + présence d'un `code` ou d'un `error`).
 final class WebAuthCallbackMatchingTests: XCTestCase {
 
     private func isOurs(_ incoming: String, expected: String) -> Bool {
@@ -12,7 +12,11 @@ final class WebAuthCallbackMatchingTests: XCTestCase {
         XCTAssertTrue(isOurs("https://host.example.com/cb?code=abc&state=x", expected: "https://host.example.com/cb"))
     }
 
-    func testRejectsMissingCode() {
+    func testMatchesErrorCallback() {
+        XCTAssertTrue(isOurs("https://host.example.com/cb?error=access_denied&state=x", expected: "https://host.example.com/cb"))
+    }
+
+    func testRejectsMissingCodeAndError() {
         XCTAssertFalse(isOurs("https://host.example.com/cb?state=x", expected: "https://host.example.com/cb"))
     }
 

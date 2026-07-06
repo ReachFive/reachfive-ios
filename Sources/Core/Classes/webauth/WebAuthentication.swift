@@ -170,12 +170,14 @@ final class WebAuthenticationSession {
     }
 
     /// `true` si l'URL entrante a le même host (insensible à la casse) et le même path que le
-    /// `redirect_uri` envoyé, et porte un paramètre `code`. Le path attendu étant celui qu'on déclare
-    /// dans l'AASA, ce matching exact suffit à distinguer notre callback des autres liens de l'app.
+    /// `redirect_uri` envoyé, et porte un paramètre `code` (succès) ou `error` (refus OAuth, ex.
+    /// `access_denied` — le login se termine alors proprement avec l'`ApiError` du callback au lieu
+    /// de rester bloqué sur la feuille). Le path attendu étant celui qu'on déclare dans l'AASA, ce
+    /// matching exact suffit à distinguer notre callback des autres liens de l'app.
     nonisolated static func isOurCallback(_ url: URL, expectedCallback expected: URL) -> Bool {
         url.host?.lowercased() == expected.host?.lowercased()
         && url.path == expected.path
-        && url.queryValue("code") != nil
+        && (url.queryValue("code") != nil || url.queryValue("error") != nil)
     }
 
     /// Mappe une erreur d'`ASWebAuthenticationSession` vers une `ReachFiveError`.
