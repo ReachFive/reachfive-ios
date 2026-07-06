@@ -1,7 +1,7 @@
 import AuthenticationServices
 
 /// Porte le login web en cours : démarre une `ASWebAuthenticationSession`, attend son callback,
-///  et —pour les providers à universal link — laisse un lien reçu hors-bande via `application(_:continue:)`
+/// et — pour les providers à universal link — laisse un lien reçu hors-bande via `application(_:continue:)`
 /// le compléter (``tryComplete(externalCallbackURL:)``).
 ///
 /// **Un seul login à la fois.** La feuille modale d'une `ASWebAuthenticationSession` empêche d'en
@@ -51,7 +51,9 @@ final class WebAuthenticationSession {
         // déjà tiré, à vide, avant que la continuation soit posée).
         try Task.checkCancellation()
 
-        cancelPendingAttempt()
+        // Dernier arrivé gagne : reprend l'éventuel login encore en attente avec `.AuthCanceled` et
+        // ferme sa feuille, pour ne jamais laisser une continuation geler sans résolution.
+        complete(attempt: attempt, .failure(.AuthCanceled))
         attempt += 1
         let attempt = attempt
 
@@ -104,27 +106,22 @@ final class WebAuthenticationSession {
                 session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
                 self.session = session
 
-                // Démarre le flow d'authentification.
                 if !session.start() {
-                    // Log the error for debugging purposes.
-                    #if DEBUG
-                    print("WebAuthentication session failed to start.")
-                    #endif
                     // Si start() renvoie false, le completion handler peut ne jamais être appelé : on
                     // reprend la continuation avec une erreur.
-                    self.complete(attempt: attempt, .failure(ReachFiveError.TechnicalError(reason: "ASWebAuthenticationSession failed to start")))
+                    self.complete(attempt: attempt, .failure(.TechnicalError(reason: "ASWebAuthenticationSession failed to start")))
                 }
             }
         } onCancel: {
             // L'annulation peut arriver sur n'importe quel thread → hop sur le main actor. Sans effet
-            // si la tentative est déjà résolue ou remplacée par un login plus récent.
+            // si la tentative est déjà résolue ou remplacée par un login plus récent (gardes de `complete`).
             Task { @MainActor in
-                self.cancel(attempt: attempt)
+                self.complete(attempt: attempt, .failure(.AuthCanceled))
             }
         }
     }
 
-    /// Complète le login en cours si l'URL entrante est bien notre callback, et annule la session
+    /// Complète le login en cours si l'URL entrante est bien notre callback, et ferme la feuille
     /// encore ouverte. Renvoie `true` seulement dans ce cas — sinon `false`, pour que l'app hôte puisse
     /// router elle-même le lien.
     func tryComplete(externalCallbackURL url: URL) -> Bool {
@@ -132,29 +129,8 @@ final class WebAuthenticationSession {
               Self.isOurCallback(url, expectedCallback: expectedCallback) else {
             return false
         }
-        // Capture `session` avant `complete(_:)`, qui le met à nil ; on en a besoin pour annuler la
-        // session encore ouverte. Annuler après reprise est sans effet (le callback d'annulation
-        // trouve une `continuation` déjà nil et est ignoré).
-        let runningSession = session
         complete(attempt: attempt, .success(url))
-        runningSession?.cancel()
         return true
-    }
-
-    /// Reprend la tentative `attempt` avec `.AuthCanceled` et ferme sa feuille — sans effet si elle
-    /// est déjà résolue ou déjà remplacée par un login plus récent.
-    private func cancel(attempt: Int) {
-        guard attempt == self.attempt, continuation != nil else { return }
-        // Même capture de `session` avant `complete(_:)` que dans `tryComplete`.
-        let staleSession = session
-        complete(attempt: attempt, .failure(.AuthCanceled))
-        staleSession?.cancel()
-    }
-
-    /// Annule le login encore en attente, quel qu'il soit. Appelé quand un nouveau `start(...)` le
-    /// remplace (dernier arrivé gagne), pour ne jamais laisser une continuation geler sans résolution.
-    private func cancelPendingAttempt() {
-        cancel(attempt: attempt)
     }
 
     private func handleSessionCompletion(attempt: Int, callbackURL: URL?, error: Error?) {
@@ -167,13 +143,20 @@ final class WebAuthenticationSession {
         }
     }
 
+    /// L'unique point de résolution : reprend la continuation avec `result`, nettoie l'état, et ferme
+    /// la feuille si elle est encore présentée (résolution hors-bande, annulation, remplacement).
     private func complete(attempt: Int, _ result: Result<URL, ReachFiveError>) {
         // Ignore un callback périmé (login plus récent) ou une seconde résolution (`continuation` déjà nil).
         guard attempt == self.attempt, let continuation else { return }
+        // Capture la session avant de la nil-er pour fermer sa feuille après la reprise. Le callback
+        // d'annulation tardif qui en résulte est ignoré (continuation désormais nil) ; sur une session
+        // déjà terminée ou jamais présentée, `cancel()` est sans effet.
+        let openSession = session
         self.continuation = nil
         self.session = nil
         self.expectedCallback = nil
         continuation.resume(with: result)
+        openSession?.cancel()
     }
 
     /// `true` si l'URL entrante a le même host (insensible à la casse) et le même path que le
