@@ -42,7 +42,10 @@ public final class WebProvider: ProviderCreator {
 class DefaultProvider: NSObject, Provider {
     let name: String
 
-    let reachfive: ReachFive
+    // `weak` : ReachFive retient ses providers, une référence forte ici créerait un cycle
+    // ReachFive ↔ DefaultProvider et le graphe SDK ne serait jamais désalloué (même pattern que
+    // LoginWKWebview).
+    private weak var reachfive: ReachFive?
     let providerConfig: ProviderConfig
     public let webSessionMode: WebSessionMode?
 
@@ -83,6 +86,10 @@ class DefaultProvider: NSObject, Provider {
 
         guard let webSessionMode else {
             throw ReachFiveError.TechnicalError(reason: "No universal link configured for provider \(name)")
+        }
+
+        guard let reachfive else {
+            throw ReachFiveError.TechnicalError(reason: "ReachFive instance was deallocated")
         }
 
         return try await reachfive.webviewLogin(
