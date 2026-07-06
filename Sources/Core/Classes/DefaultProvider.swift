@@ -10,7 +10,6 @@ import AuthenticationServices
 public final class WebProvider: ProviderCreator {
     /// The variant-aware SLO providers the backend exposes a variant for. `rawValue` is the backend name.
     public enum Name: String {
-        case apple
         case facebook
         case google
         case line
@@ -55,12 +54,12 @@ class DefaultProvider: NSObject, Provider {
         self.reachfive = reachfive
         self.providerConfig = providerConfig
         self.name = providerConfig.provider
-        
+
         if mode == .sdkScheme {
             webSessionMode = .sdkScheme
         } else {
             guard let link = providerConfig.universalLink else {
-                Logger.shared.log("No universal link configured for \(mode) mode. This will crash at runtime.")
+                Logger.shared.log("No universal link configured for provider '\(providerConfig.provider)' in \(mode) mode; login() will fail with a TechnicalError.")
                 webSessionMode = nil
                 return
             }
@@ -81,7 +80,7 @@ class DefaultProvider: NSObject, Provider {
         guard let presentationContextProvider = viewController as? ASWebAuthenticationPresentationContextProviding else {
             throw ReachFiveError.TechnicalError(reason: "No presenting viewController")
         }
-        
+
         guard let webSessionMode else {
             throw ReachFiveError.TechnicalError(reason: "No universal link configured for provider \(name)")
         }
