@@ -33,71 +33,86 @@ final class WebAuthenticationSession {
     /// Démarre un login web et attend son callback (succès, erreur ou annulation). Le ``WebSessionMode``
     /// décrit comment la session se termine (scheme in-band, universal link in-band, ou app externe
     /// hors-bande) et pilote donc à la fois la construction de la session et le canal du callback.
+    /// Si le `Task` appelant est annulé (vue démontée, timeout…), la feuille est fermée et l'appel se
+    /// termine par `.AuthCanceled`.
     func start(url: URL,
                mode: WebSessionMode,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
 
-        return try await withCheckedThrowingContinuation { continuation in
-            cancelPendingAttempt()
-            attempt += 1
-            let attempt = attempt
-            self.continuation = continuation
-            // Seul le mode hors-bande arme `tryComplete` ; en in-band, la session se complète elle-même.
-            self.expectedCallback = mode.outOfBandCallback
+        // Un Task déjà annulé ne doit pas présenter de feuille (son `onCancel` ci-dessous aurait
+        // déjà tiré, à vide, avant que la continuation soit posée).
+        try Task.checkCancellation()
 
-            let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
-                // Tout passe sur le main thread pour éviter les situations de compétition.
-                Task { @MainActor in
-                    self?.handleSessionCompletion(attempt: attempt, callbackURL: callbackURL, error: error)
+        cancelPendingAttempt()
+        attempt += 1
+        let attempt = attempt
+
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                self.continuation = continuation
+                // Seul le mode hors-bande arme `tryComplete` ; en in-band, la session se complète elle-même.
+                self.expectedCallback = mode.outOfBandCallback
+
+                let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
+                    // Tout passe sur le main thread pour éviter les situations de compétition.
+                    Task { @MainActor in
+                        self?.handleSessionCompletion(attempt: attempt, callbackURL: callbackURL, error: error)
+                    }
+                }
+
+                let session: ASWebAuthenticationSession
+                switch mode {
+                case .sdkScheme:
+                    // Scheme custom intercepté par la session (historique, tout iOS).
+                    session = ASWebAuthenticationSession(
+                        url: url,
+                        callbackURLScheme: self.baseScheme,
+                        completionHandler: completionHandler)
+
+                case let .universalLink(callback):
+                    // iOS 17.4+ : universal link intercepté in-band dans la webview via `callback: .https`
+                    // (nécessite l'Associated Domain `webcredentials:<host>`). `@available` est impossible
+                    // sur un case d'enum porteur de valeur, on teste donc la disponibilité ici, à l'usage.
+                    guard #available(iOS 17.4, *), let host = callback.host else {
+                        self.complete(attempt: attempt, .failure(.TechnicalError(reason: "In-sheet universal link callback requires iOS 17.4+ and a host: \(callback)")))
+                        return
+                    }
+                    session = ASWebAuthenticationSession(
+                        url: url,
+                        callback: .https(host: host, path: callback.path),
+                        completionHandler: completionHandler)
+
+                case .externalApp:
+                    // Le flow se termine dans une app externe : la session ne recevra jamais le callback
+                    // (traité hors-bande par `tryComplete`), on ne lui donne donc aucun scheme à intercepter.
+                    session = ASWebAuthenticationSession(
+                        url: url,
+                        callbackURLScheme: nil,
+                        completionHandler: completionHandler)
+                }
+
+                // Fenêtre qui sert d'ancre de présentation à la session.
+                session.presentationContextProvider = presentationContextProvider
+                session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
+                self.session = session
+
+                // Démarre le flow d'authentification.
+                if !session.start() {
+                    // Log the error for debugging purposes.
+                    #if DEBUG
+                    print("WebAuthentication session failed to start.")
+                    #endif
+                    // Si start() renvoie false, le completion handler peut ne jamais être appelé : on
+                    // reprend la continuation avec une erreur.
+                    self.complete(attempt: attempt, .failure(ReachFiveError.TechnicalError(reason: "ASWebAuthenticationSession failed to start")))
                 }
             }
-
-            let session: ASWebAuthenticationSession
-            switch mode {
-            case .sdkScheme:
-                // Scheme custom intercepté par la session (historique, tout iOS).
-                session = ASWebAuthenticationSession(
-                    url: url,
-                    callbackURLScheme: baseScheme,
-                    completionHandler: completionHandler)
-
-            case let .universalLink(callback):
-                // iOS 17.4+ : universal link intercepté in-band dans la webview via `callback: .https`
-                // (nécessite l'Associated Domain `webcredentials:<host>`). `@available` est impossible
-                // sur un case d'enum porteur de valeur, on teste donc la disponibilité ici, à l'usage.
-                guard #available(iOS 17.4, *), let host = callback.host else {
-                    complete(attempt: attempt, .failure(.TechnicalError(reason: "In-sheet universal link callback requires iOS 17.4+ and a host: \(callback)")))
-                    return
-                }
-                session = ASWebAuthenticationSession(
-                    url: url,
-                    callback: .https(host: host, path: callback.path),
-                    completionHandler: completionHandler)
-
-            case .externalApp:
-                // Le flow se termine dans une app externe : la session ne recevra jamais le callback
-                // (traité hors-bande par `tryComplete`), on ne lui donne donc aucun scheme à intercepter.
-                session = ASWebAuthenticationSession(
-                    url: url,
-                    callbackURLScheme: nil,
-                    completionHandler: completionHandler)
-            }
-
-            // Fenêtre qui sert d'ancre de présentation à la session.
-            session.presentationContextProvider = presentationContextProvider
-            session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
-            self.session = session
-
-            // Démarre le flow d'authentification.
-            if !session.start() {
-                // Log the error for debugging purposes.
-                #if DEBUG
-                print("WebAuthentication session failed to start.")
-                #endif
-                // Si start() renvoie false, le completion handler peut ne jamais être appelé : on
-                // reprend la continuation avec une erreur.
-                complete(attempt: attempt, .failure(ReachFiveError.TechnicalError(reason: "ASWebAuthenticationSession failed to start")))
+        } onCancel: {
+            // L'annulation peut arriver sur n'importe quel thread → hop sur le main actor. Sans effet
+            // si la tentative est déjà résolue ou remplacée par un login plus récent.
+            Task { @MainActor in
+                self.cancel(attempt: attempt)
             }
         }
     }
@@ -119,15 +134,20 @@ final class WebAuthenticationSession {
         return true
     }
 
-    /// Reprend le login encore en attente avec `.AuthCanceled` et ferme sa feuille — sans effet s'il
-    /// n'y en a pas. Appelé quand un nouveau `start(...)` le remplace (dernier arrivé gagne), pour ne
-    /// jamais laisser une continuation geler sans résolution.
-    private func cancelPendingAttempt() {
-        guard continuation != nil else { return }
+    /// Reprend la tentative `attempt` avec `.AuthCanceled` et ferme sa feuille — sans effet si elle
+    /// est déjà résolue ou déjà remplacée par un login plus récent.
+    private func cancel(attempt: Int) {
+        guard attempt == self.attempt, continuation != nil else { return }
         // Même capture de `session` avant `complete(_:)` que dans `tryComplete`.
         let staleSession = session
         complete(attempt: attempt, .failure(.AuthCanceled))
         staleSession?.cancel()
+    }
+
+    /// Annule le login encore en attente, quel qu'il soit. Appelé quand un nouveau `start(...)` le
+    /// remplace (dernier arrivé gagne), pour ne jamais laisser une continuation geler sans résolution.
+    private func cancelPendingAttempt() {
+        cancel(attempt: attempt)
     }
 
     private func handleSessionCompletion(attempt: Int, callbackURL: URL?, error: Error?) {
