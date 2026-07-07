@@ -22,4 +22,26 @@ final class WebviewLoginRequestTests: XCTestCase {
     func testProvidedNonceIsPreserved() {
         XCTAssertEqual(WebviewLoginRequest(nonce: "my-nonce", presentationContextProvider: provider).nonce, "my-nonce")
     }
+
+    func testWebSessionModeDefaultsToSdkScheme() {
+        guard case .sdkScheme = WebviewLoginRequest(presentationContextProvider: provider).webSessionMode else {
+            return XCTFail("webSessionMode should default to .sdkScheme")
+        }
+    }
+
+    func testExternalAppModeIsPreserved() {
+        let r = WebviewLoginRequest(presentationContextProvider: provider, webSessionMode: .externalApp(URL(string: "https://h/cb")!))
+        guard case .externalApp(let link) = r.webSessionMode else {
+            return XCTFail("webSessionMode should be .externalApp")
+        }
+        XCTAssertEqual(link.absoluteString, "https://h/cb")
+    }
+
+    func testUniversalLinkModeIsPreserved() {
+        let r = WebviewLoginRequest(presentationContextProvider: provider, webSessionMode: .universalLink(URL(string: "https://h/cb")!))
+        guard case .universalLink(let link) = r.webSessionMode else {
+            return XCTFail("webSessionMode should be .universalLink")
+        }
+        XCTAssertEqual(link.absoluteString, "https://h/cb")
+    }
 }

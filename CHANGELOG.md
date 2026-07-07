@@ -3,15 +3,21 @@
 ## Unreleased
 
 ### Breaking changes
-- Changed type of redirect URL fields to URL instead of String 
+- Changed type of redirect URL fields to URL instead of String
 - SdkConfig:
   - As above, changed type of redirect URL fields to URL instead of String
   - Removed `scheme` field alias for `redirectUri`
   - Renamed `baseScheme` field to `customScheme`
   - The initializer now stops the program with a `preconditionFailure` when the scheme is not a valid URL scheme (either because of the `customScheme` parameter, or indirectly because the default scheme is derived from an ill-formatted `clientId`, e.g. one containing `_`). In that case, pass an explicit valid `customScheme` and declare it in your Info.plist and your ReachFive console.
 
+- `application(_:continue:restorationHandler:)` now returns `false` when neither ReachFive's web-auth session nor any registered provider consumed the activity, instead of always returning `true`. If your app also routes universal links itself, only do so when this call returns `false`.
+
 - ProviderCreator : the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can
   reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
+
+### New features
+- Support for universal-link providers: register a `WebProvider` (e.g. `WebProvider(name: .bconnect, mode: .externalApp)`) to pick how the login session is delivered back to the app. See xref:providerCreator.adoc[] and xref:guides/custom-provider.adoc[].
+- `webviewLogin` accepts a new `webSessionMode` parameter (`.sdkScheme`, `.universalLink`, `.externalApp`) to control the return channel of the underlying `ASWebAuthenticationSession`.
 
 ## v10.0.1
 
