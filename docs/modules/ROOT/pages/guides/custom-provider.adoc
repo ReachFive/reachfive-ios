@@ -1,0 +1,120 @@
+= Implement a custom provider
+
+Our built-in provider creators (`GoogleProvider`, `FacebookProvider`, `AppleProvider`, `WeChat`, `WebProvider` — see xref:providerCreator.adoc[]) cover the common cases. This guide is for the rest: a social/SSO provider with its own native SDK, or a login flow that none of the built-ins model.
+
+TIP: If your provider has no native SDK component and only needs to choose *how* its `ASWebAuthenticationSession` returns to the app (custom scheme, universal link, out-of-band), you don't need a custom provider at all — configure a xref:providerCreator.adoc[`WebProvider`] instead.
+
+== The two protocols
+
+A provider is made of two pieces, both in `Sources/Core/Classes/Provider.swift`:
+
+* `ProviderCreator`: a lightweight factory you list in `ReachFive(providersCreators:)`. It only carries a `name` and an optional `variant`, and builds the actual `Provider` once ReachFive has fetched that provider's configuration from the backend.
+* `Provider`: the object doing the actual work — `login`, `logout`, and the app-lifecycle hooks it needs to intercept its own callback.
+
+[source,swift]
+----
+public protocol ProviderCreator {
+    var name: String { get }
+    var variant: String? { get }
+
+    func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> Provider
+}
+
+public protocol Provider {
+    var name: String { get }
+    func login(scope: [String]?, origin: String, viewController: UIViewController?) async throws -> AuthToken
+    func logout() async throws
+
+    // Default (no-op) implementations provided — override only what your provider needs:
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
+    func applicationDidBecomeActive(_ application: UIApplication)
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool
+}
+----
+
+`name` must match the provider's name as configured on your {cc} — this is how ReachFive matches your `ProviderCreator` against the provider configurations it fetches from the backend. A configured provider with no matching creator (and that isn't Apple) still logs in, falling back to a generic web-based `DefaultProvider`.
+
+[CAUTION]
+====
+Do not store the `reachFive` instance strongly in your `Provider`. ReachFive retains its providers, so a strong back-reference creates a retain cycle (`ReachFive` ↔ `Provider`) and the whole SDK graph never gets deallocated. Hold it `weak`, or copy the values you need (`sdkConfig`, `reachFiveApi`, `scope`, …) at creation time instead.
+====
+
+== Register it
+
+[source,swift]
+----
+let reachfive = ReachFive(
+    sdkConfig: SdkConfig(domain: DOMAIN, clientId: CLIENT_ID),
+    providersCreators: [MyProvider(variant: "ios")]
+)
+----
+
+== Example: wrapping a native SDK
+
+This is the shape used by our own `AppleProvider` (link:https://github.com/ReachFive/reachfive-ios/blob/master/Sources/Core/Classes/AppleProvider.swift[source^]): the creator is a thin factory, and the actual `Provider` calls into the third-party native SDK, then exchanges its result for a {company} `AuthToken` — here through `reachFive.authWithCode`, which is the same helper used internally by native login.
+
+[source,swift]
+----
+public class MyProvider: ProviderCreator {
+    public var name: String = "my-provider"
+    public var variant: String?
+
+    public init(variant: String? = nil) {
+        self.variant = variant
+    }
+
+    public func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> Provider {
+        ConfiguredMyProvider(reachFive: reachFive, providerConfig: providerConfig)
+    }
+}
+
+class ConfiguredMyProvider: NSObject, Provider {
+    let name: String
+    private weak var reachFive: ReachFive? // weak: see the retain-cycle note above
+
+    init(reachFive: ReachFive, providerConfig: ProviderConfig) {
+        self.name = providerConfig.provider
+        self.reachFive = reachFive
+    }
+
+    func login(scope: [String]?, origin: String, viewController: UIViewController?) async throws -> AuthToken {
+        // 1. Drive your native SDK's own login UI/flow here, e.g.:
+        let code = try await MyNativeSDK.shared.login(presenting: viewController)
+
+        // 2. Exchange its authorization code for a ReachFive AuthToken.
+        guard let reachFive else { throw ReachFiveError.TechnicalError(reason: "ReachFive instance was deallocated") }
+        return try await reachFive.authWithCode(code: code, pkce: nil)
+    }
+
+    func logout() {
+        MyNativeSDK.shared.logout()
+    }
+}
+----
+
+== Example: a fully custom web flow
+
+If your provider has no native SDK but needs behaviour `WebProvider` doesn't offer, drive `ASWebAuthenticationSession` yourself (or reuse `reachFive.webviewLogin(_:)`, see xref:webviewLogin.adoc[]) inside `login`, then return the resulting `AuthToken` the same way.
+
+== App-lifecycle hooks
+
+Only implement the hooks your provider actually needs to intercept its own callback; every other hook has a default no-op implementation.
+
+[cols="3m,7a"]
+|===
+|Hook |When to implement it
+
+|application(_:open:options:)
+|Your provider's callback arrives through a custom URL scheme (`myapp://...`) rather than the completion handler of `ASWebAuthenticationSession`.
+
+|application(_:didFinishLaunchingWithOptions:)
+|Your provider's native SDK needs an explicit startup call (e.g. registering itself before the app finishes launching).
+
+|applicationDidBecomeActive(_:)
+|Your provider needs to react to the app returning to the foreground (e.g. resuming a paused native SDK session).
+
+|application(_:continue:restorationHandler:)
+|Your provider's callback arrives as a *universal link* (`NSUserActivityTypeBrowsingWeb`) — e.g. an out-of-band flow like `WebProvider` `.externalApp` mode. Return `true` only if you actually consumed the activity; ReachFive relies on that return value (see xref:application/applicationContinueUserActivity.adoc[]).
+
+|===

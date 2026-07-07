@@ -19,7 +19,7 @@ GoogleProvider(variant: "native") <1>
 This provider takes two optional parameters:
 
 * variant `string`: the provider variant to use.
-* prefersLoginTracking `FBSDKLoginKit.LoginTracking`: Indicates preference to the Facebook SDK for the limited or classic login. 
+* prefersLoginTracking `FBSDKLoginKit.LoginTracking`: Indicates preference to the Facebook SDK for the limited or classic login.
 Facebook SDK is ultimately responsible for the decision.
 
 [source,swift]
@@ -59,3 +59,26 @@ WeChat() <1>
 <1> WeChat takes no parameters.
 
 // end::WeChat[]
+
+// tag::WebProvider[]
+|[[WebProvider,WebProvider]]WebProvider
+|The object for configuring a **web-only** provider — one with no native SDK component, authenticated entirely through an `ASWebAuthenticationSession`.
+
+Takes a `name` (one of `.facebook`, `.google`, `.line`, `.bconnect`), an optional `variant`, and a `mode` controlling how the session's redirection reaches the app:
+
+* `.sdkScheme` (default): custom scheme, works on all supported iOS versions.
+* `.externalApp`: *out-of-band* — the flow ends in an external app (e.g. a banking app) that reopens yours via a universal link, forwarded to {company} through xref:application/applicationContinueUserActivity.adoc[]. Requires the `applinks:` Associated Domain.
+* `.universalLink` (iOS 17.4+): *in-band* — the universal-link redirect is intercepted directly inside the authentication sheet. Requires the `webcredentials:` Associated Domain.
+
+See the "Associated Domains" section of xref:index.adoc[] for the entitlement setup.
+
+[source,swift]
+----
+WebProvider(name: .bconnect, variant: "natif", mode: .externalApp)
+----
+
+NOTE: A provider configured on your client with no matching entry in `providersCreators` still logs in, falling back to `.sdkScheme` automatically. Add an explicit `WebProvider` only when you need `.externalApp`/`.universalLink`, or a specific `variant`.
+
+TIP: To implement your own provider (native SDK, custom flow) instead, see xref:guides/custom-provider.adoc[].
+
+// end::WebProvider[]

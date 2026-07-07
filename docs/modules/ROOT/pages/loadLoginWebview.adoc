@@ -22,6 +22,8 @@ include::docs:ROOT:partial$general/snippets/r_orchestrated-flows-min-version.ado
 
 CAUTION: We recommend using the standard native login or standard webview login for iOS. Proceed with caution while using this particular method for user authentication.
 
+CAUTION: *Universal-link* providers are not supported by this method: their out-of-band callback is delivered through `application(_:continue:)` and completes the session held by `ReachFive` itself, not this embedded webview. Use xref:webviewLogin.adoc[] (with a `WebProvider`, see xref:providerCreator.adoc[]) for them instead.
+
 == Examples
 
 [source, swift]

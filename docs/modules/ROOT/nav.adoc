@@ -9,6 +9,7 @@
 ** xref:guides/passkeys.adoc[]
 ** xref:guides/migrate-futures.adoc[]
 ** xref:guides/migrate-reach5future.adoc[]
+** xref:guides/custom-provider.adoc[]
 
 .Configuration icon:cogs[]
 ** `application`()

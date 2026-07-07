@@ -27,6 +27,8 @@ Otherwise, the default variant is chosen.
 |===
 |Name |Description
 
-include::partial$config/params.adoc[tags="GoogleProvider,FacebookProvider,AppleProvider,WeChat"]
+include::partial$config/params.adoc[tags="GoogleProvider,FacebookProvider,AppleProvider,WeChat,WebProvider"]
 
 |===
+
+TIP: None of these fit your case? See xref:guides/custom-provider.adoc[] to implement your own.

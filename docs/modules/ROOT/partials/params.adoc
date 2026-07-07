@@ -404,6 +404,18 @@ TIP: For more, see link:https://developer.apple.com/documentation/authentication
 
 // end::prefersEphemeralWebBrowserSession[]
 
+// tag::webSessionMode[]
+|[[webSessionMode,webSessionMode]] webSessionMode `WebSessionMode`
+|Controls the return channel of the `ASWebAuthenticationSession` and its `redirect_uri`. Defaults to `.sdkScheme`.
+
+.Values
+* `.sdkScheme`: custom scheme, intercepted inside the session. Works on all supported iOS versions.
+* `.universalLink(URL)`: universal link intercepted inside the session (iOS 17.4+). Requires the `webcredentials:` Associated Domain.
+* `.externalApp(URL)`: *out-of-band* — an external app reopens the host app via the universal link, forwarded to {company} through xref:application/applicationContinueUserActivity.adoc[]. Requires the `applinks:` Associated Domain.
+
+TIP: See the "Associated Domains" section of xref:index.adoc[] for entitlement setup, and the xref:providerCreator.adoc[WebProvider] entry for a ready-made provider using this mechanism.
+// end::webSessionMode[]
+
 // tag::state[]
 |[[state,state]] state `string`
 |The OAuth2 state value.
