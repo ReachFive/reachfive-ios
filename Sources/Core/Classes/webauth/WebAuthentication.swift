@@ -1,13 +1,16 @@
 import AuthenticationServices
 
 /// Porte le login web en cours : démarre une `ASWebAuthenticationSession`, attend son callback,
-/// et — pour les providers à universal link — laisse un lien reçu hors-bande via `application(_:continue:)`
+/// et — pour les providers à lien universel — laisse un lien reçu hors-bande via `application(_:continue:)`
 /// le compléter (``tryComplete(externalCallbackURL:)``).
 ///
-/// **Un seul login à la fois.** La feuille modale d'une `ASWebAuthenticationSession` empêche d'en
-/// lancer un second sur iPhone, mais un second `start(...)` reste atteignable (logout web pendant un
-/// login, nouveau login après un aller-retour `externalApp` abandonné, iPad multi-fenêtres) : le
-/// dernier arrivé gagne — le login précédent est repris avec `.AuthCanceled` et sa feuille est fermée.
+/// **Un seul login à la fois.** Sur iPhone, la feuille modale d'une `ASWebAuthenticationSession` rend
+/// un second `start(...)` inatteignable par l'interaction utilisateur : tant qu'elle est présentée rien
+/// d'autre n'est déclenchable, et sa disparition passe par une résolution (callback, Annuler) qui reprend
+/// la continuation. Restent les appels **programmatiques** (logout/login déclenché par une logique d'app
+/// sans interaction, double invocation), le multi-fenêtres (iPad/macCatalyst), et un completion handler
+/// que le système ne rappellerait jamais : dans tous ces cas, le dernier arrivé gagne — le login
+/// précédent est repris avec `.AuthCanceled` et sa feuille est fermée, aucune continuation ne gèle.
 ///
 /// Les callbacks tardifs ou dupliqués sont neutralisés de deux façons : un **jeton par tentative**
 /// (`attempt`) — pour qu'un callback d'une `ASWebAuthenticationSession` périmée ne puisse jamais
@@ -27,7 +30,7 @@ import AuthenticationServices
 final class WebAuthenticationSession {
     private var session: ASWebAuthenticationSession?
     private var continuation: CheckedContinuation<URL, Error>?
-    /// Le `redirect_uri` parsé attendu pour cette tentative ; `nil` hors d'un login → `tryComplete` ne matche rien.
+    /// La `redirect_uri` attendue pour cette tentative ; `nil` hors d'un login → `tryComplete` ne matche rien.
     private var expectedCallback: URL?
     /// Identifie la tentative en cours ; un callback capturant un `attempt` périmé est ignoré.
     private var attempt = 0
@@ -38,7 +41,7 @@ final class WebAuthenticationSession {
     }
 
     /// Démarre un login web et attend son callback (succès, erreur ou annulation). Le ``WebSessionMode``
-    /// décrit comment la session se termine (scheme in-band, universal link in-band, ou app externe
+    /// décrit comment la session se termine (scheme in-band, lien universel in-band, ou app externe
     /// hors-bande) et pilote donc à la fois la construction de la session et le canal du callback.
     /// Si le `Task` appelant est annulé (vue démontée, timeout…), la feuille est fermée et l'appel se
     /// termine par `.AuthCanceled`.
@@ -80,7 +83,7 @@ final class WebAuthenticationSession {
                         completionHandler: completionHandler)
 
                 case let .universalLink(callback):
-                    // iOS 17.4+ : universal link intercepté in-band dans la webview via `callback: .https`
+                    // iOS 17.4+ : lien universel intercepté in-band dans la webview via `callback: .https`
                     // (nécessite l'Associated Domain `webcredentials:<host>`). `@available` est impossible
                     // sur un case d'enum porteur de valeur, on teste donc la disponibilité ici, à l'usage.
                     guard #available(iOS 17.4, *), let host = callback.host else {
