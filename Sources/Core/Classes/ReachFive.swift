@@ -32,6 +32,8 @@ public class ReachFive: NSObject {
     internal var clientConfig: ClientConfigResponse? = nil
     public let storage: Storage
     let credentialManager: CredentialManager
+    // Session de login web en cours (cf. ``WebAuthenticationSession``).
+    let webAuthSession: WebAuthenticationSession
     public let pkceKey = "PASSWORDLESS_PKCE"
 
     public init(sdkConfig: SdkConfig, providersCreators: Array<ProviderCreator> = [], storage: Storage? = nil, sdkInternalConfig: SdkInternalConfig? = nil) {
@@ -40,6 +42,7 @@ public class ReachFive: NSObject {
         self.storage = storage ?? UserDefaultsStorage()
         self.reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig)
         self.credentialManager = CredentialManager(reachFiveApi: reachFiveApi, storage: self.storage)
+        self.webAuthSession = WebAuthenticationSession(baseScheme: sdkConfig.customScheme)
 
         if let sdkInternalConfig {
             Logger.shared.enabled = sdkInternalConfig.loggingEnabled
