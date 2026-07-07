@@ -32,9 +32,9 @@ public enum WebSessionMode {
 
     /// The OAuth `redirect_uri` carried by the mode; `nil` for ``sdkScheme``, where the `SdkConfig`'s
     /// applies instead (both to `/authorize` and to the code exchange).
-    var redirectUri: String? {
+    var redirectUri: URL? {
         switch self {
-        case .externalApp(let url), .universalLink(let url): url.absoluteString
+        case .externalApp(let url), .universalLink(let url): url
         case .sdkScheme: nil
         }
     }
