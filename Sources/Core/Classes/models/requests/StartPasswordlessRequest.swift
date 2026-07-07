@@ -11,7 +11,7 @@ public class StartPasswordlessRequest: Codable, DictionaryEncodable {
     public let phoneNumber: String?
     public let responseType: String
     public let authType: String
-    public let redirectUri: String
+    public let redirectUri: URL
     public let state: String?
     public let codeChallenge: String
     public let codeChallengeMethod: String
@@ -22,7 +22,7 @@ public class StartPasswordlessRequest: Codable, DictionaryEncodable {
         email: String? = nil,
         phoneNumber: String? = nil,
         authType: PasswordLessAuthType,
-        redirectUri: String,
+        redirectUri: URL,
         codeChallenge: String,
         codeChallengeMethod: String,
         origin: String? = nil
@@ -47,7 +47,7 @@ public class StartPasswordlessRequest: Codable, DictionaryEncodable {
         phoneNumber: String?,
         responseType: String,
         authType: PasswordLessAuthType,
-        redirectUri: String,
+        redirectUri: URL,
         state: String? = nil,
         codeChallenge: String,
         codeChallengeMethod: String,

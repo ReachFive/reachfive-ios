@@ -4,28 +4,28 @@ public extension ReachFive {
 
     func logout(webSessionLogout request: WebSessionLogoutRequest? = nil, revoke token: AuthToken? = nil) async throws {
         // Don't stop for errors along the way
-        
+
         for provider in providers {
             try? await provider.logout()
         }
 
         if let request {
             let options = [
-                "post_logout_redirect_uri": sdkConfig.redirectUri,
+                "post_logout_redirect_uri": sdkConfig.redirectUri.absoluteString,
                 "origin": request.origin,
             ]
 
             let _ = try? await webAuthenticationSession(
                 url: reachFiveApi.buildLogoutURL(queryParams: options),
-                callbackURLScheme: sdkConfig.baseScheme,
+                callbackURLScheme: sdkConfig.customScheme,
                 presentationContextProvider: request.presentationContextProvider,
                 prefersEphemeralWebBrowserSession: false)
         }
-        
+
         if let token {
             try? await revokeToken(authToken: token)
         }
-        
+
         try await self.reachFiveApi.logout()
     }
 
@@ -42,7 +42,7 @@ public extension ReachFive {
         let options = [
             "provider": provider,
             "client_id": sdkConfig.clientId,
-            "redirect_uri": sdkConfig.redirectUri,
+            "redirect_uri": sdkConfig.redirectUri.absoluteString,
             "response_type": "code",
             "scope": scope,
             "code_challenge": pkce.codeChallenge,
@@ -59,7 +59,7 @@ public extension ReachFive {
         let authCodeRequest = AuthCodeRequest(
             clientId: sdkConfig.clientId,
             code: code,
-            redirectUri: sdkConfig.scheme,
+            redirectUri: sdkConfig.redirectUri,
             pkce: pkce)
         let token = try await reachFiveApi.authWithCode(authCodeRequest: authCodeRequest)
         return try AuthToken.fromOpenIdTokenResponse(token)

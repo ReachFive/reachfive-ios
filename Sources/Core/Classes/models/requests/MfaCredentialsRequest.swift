@@ -1,11 +1,11 @@
 import Foundation
 
 public class MfaStartEmailRegistrationRequest: Codable, DictionaryEncodable {
-    public let redirectUrl: String?
+    public let redirectUrl: URL?
     public let action: String?
     public let trustDevice: Bool
-    
-    public init(redirectUrl: String? = nil, action: String? = nil, trustDevice: Bool = false) {
+
+    public init(redirectUrl: URL? = nil, action: String? = nil, trustDevice: Bool = false) {
         self.redirectUrl = redirectUrl
         self.action = action
         self.trustDevice = trustDevice
@@ -16,7 +16,7 @@ public class MfaStartPhoneRegistrationRequest: Codable, DictionaryEncodable {
     public let phoneNumber: String
     public let action: String?
     public let trustDevice: Bool
-    
+
     public init(phoneNumber: String, action: String? = nil, trustDevice: Bool = false) {
         self.phoneNumber = phoneNumber
         self.action = action
@@ -27,7 +27,7 @@ public class MfaStartPhoneRegistrationRequest: Codable, DictionaryEncodable {
 public class MfaVerifyEmailRegistrationPostRequest: Codable, DictionaryEncodable {
     public let verificationCode: String
     public let trustDevice: Bool
-    
+
     public init(_ verificationCode: String, trustDevice: Bool = false) {
         self.verificationCode = verificationCode
         self.trustDevice = trustDevice
@@ -47,7 +47,7 @@ public class MfaVerifyEmailRegistrationGetRequest: Codable, DictionaryEncodable 
 public class MfaVerifyPhoneRegistrationRequest: Codable, DictionaryEncodable {
     public let verificationCode: String
     public let trustDevice: Bool
-    
+
     public init(_ verificationCode: String, trustDevice: Bool = false) {
         self.verificationCode = verificationCode
         self.trustDevice = trustDevice

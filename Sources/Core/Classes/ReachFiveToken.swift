@@ -5,7 +5,7 @@ public extension ReachFive {
         let refreshRequest = RefreshRequest(
             clientId: sdkConfig.clientId,
             refreshToken: authToken.refreshToken,
-            redirectUri: sdkConfig.scheme
+            redirectUri: sdkConfig.redirectUri
         )
         let token = try await reachFiveApi.refreshAccessToken(refreshRequest)
         return try AuthToken.fromOpenIdTokenResponse(token)
@@ -21,7 +21,7 @@ public extension ReachFive {
             clientId: sdkConfig.clientId
         )
         try await reachFiveApi.revokeToken(revokeTokenRequest: revokeAccessToken)
-        
+
         if let refreshToken = authToken.refreshToken {
             let revokeRefreshToken = RevokeTokenRequest(
                 token: refreshToken,

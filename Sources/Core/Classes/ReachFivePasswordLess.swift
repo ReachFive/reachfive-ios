@@ -1,8 +1,8 @@
 import Foundation
 
 public enum PasswordLessRequest {
-    case Email(email: String, redirectUri: String?, origin: String? = nil)
-    case PhoneNumber(phoneNumber: String, redirectUri: String?, origin: String? = nil)
+    case Email(email: String, redirectUri: URL?, origin: String? = nil)
+    case PhoneNumber(phoneNumber: String, redirectUri: URL?, origin: String? = nil)
 }
 
 public extension ReachFive {
@@ -20,7 +20,7 @@ public extension ReachFive {
                 clientId: sdkConfig.clientId,
                 email: email,
                 authType: .MagicLink,
-                redirectUri: redirectUri ?? sdkConfig.scheme,
+                redirectUri: redirectUri ?? sdkConfig.redirectUri,
                 codeChallenge: pkce.codeChallenge,
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin
@@ -30,7 +30,7 @@ public extension ReachFive {
                 clientId: sdkConfig.clientId,
                 phoneNumber: phoneNumber,
                 authType: .SMS,
-                redirectUri: redirectUri ?? sdkConfig.scheme,
+                redirectUri: redirectUri ?? sdkConfig.redirectUri,
                 codeChallenge: pkce.codeChallenge,
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin

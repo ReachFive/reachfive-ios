@@ -14,6 +14,11 @@ let package = Package(
             name: "Reach5",
             path: "Sources/Core",
             resources: [.copy("PrivacyInfo.xcprivacy")]
+        ),
+        .testTarget(
+            name: "Reach5Tests",
+            dependencies: ["Reach5"],
+            path: "Tests/Reach5Tests"
         )
     ]
 )
