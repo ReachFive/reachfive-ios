@@ -22,7 +22,7 @@ extension LoginCustomWebviewController: WKNavigationDelegate {
         let app: UIApplication = UIApplication.shared
         // not sure why the callback has a scheme in lowercase
         let reachfive = AppDelegate.reachfive()
-        guard let url = navigationAction.request.url, url.scheme == reachfive.sdkConfig.baseScheme.lowercased(), app.canOpenURL(url) else {
+        guard let url = navigationAction.request.url, url.scheme == reachfive.sdkConfig.customScheme.lowercased(), app.canOpenURL(url) else {
             return .allow
         }
 

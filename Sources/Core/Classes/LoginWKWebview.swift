@@ -35,7 +35,7 @@ extension LoginWKWebview: WKNavigationDelegate {
               let pkce,
               let continuation,
               let url = navigationAction.request.url,
-              url.scheme == reachfive.sdkConfig.baseScheme.lowercased()
+              url.scheme == reachfive.sdkConfig.customScheme.lowercased()
         else {
             return .allow
         }

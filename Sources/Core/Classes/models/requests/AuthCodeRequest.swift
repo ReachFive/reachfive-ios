@@ -4,13 +4,13 @@ public class AuthCodeRequest: Codable, DictionaryEncodable {
     public let clientId: String
     public let code: String
     public let grantType: String
-    public let redirectUri: String
+    public let redirectUri: URL
     public let codeVerifier: String?
 
     public convenience init(
         clientId: String,
         code: String,
-        redirectUri: String,
+        redirectUri: URL,
         pkce: Pkce? = nil
     ) {
         self.init(
@@ -26,7 +26,7 @@ public class AuthCodeRequest: Codable, DictionaryEncodable {
         clientId: String,
         code: String,
         grantType: String,
-        redirectUri: String,
+        redirectUri: URL,
         codeVerifier: String?
     ) {
         self.clientId = clientId

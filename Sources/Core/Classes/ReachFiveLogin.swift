@@ -11,7 +11,7 @@ public extension ReachFive {
 
         if let request {
             let options = [
-                "post_logout_redirect_uri": sdkConfig.redirectUri,
+                "post_logout_redirect_uri": sdkConfig.redirectUri.absoluteString,
                 "origin": request.origin,
             ]
 
@@ -42,7 +42,7 @@ public extension ReachFive {
         let options = [
             "provider": provider,
             "client_id": sdkConfig.clientId,
-            "redirect_uri": redirectUri ?? sdkConfig.redirectUri,
+            "redirect_uri": redirectUri ?? sdkConfig.redirectUri.absoluteString,
             "response_type": "code",
             "scope": scope,
             "code_challenge": pkce.codeChallenge,
@@ -59,7 +59,7 @@ public extension ReachFive {
         let authCodeRequest = AuthCodeRequest(
             clientId: sdkConfig.clientId,
             code: code,
-            redirectUri: redirectUri ?? sdkConfig.scheme,
+            redirectUri: redirectUri ?? sdkConfig.redirectUri,
             pkce: pkce)
         let token = try await reachFiveApi.authWithCode(authCodeRequest: authCodeRequest)
         return try AuthToken.fromOpenIdTokenResponse(token)

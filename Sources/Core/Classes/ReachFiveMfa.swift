@@ -6,7 +6,7 @@ public enum CredentialType {
 }
 
 public enum Credential {
-    case Email(redirectUrl: String? = nil)
+    case Email(redirectUrl: URL? = nil)
     case PhoneNumber(_ phoneNumber: String)
 
     public var credentialType: CredentialType {
@@ -18,8 +18,8 @@ public enum Credential {
 }
 
 public enum StartStepUp {
-    case AuthTokenFlow(authType: MfaCredentialItemType, authToken: AuthToken, redirectUri: String? = nil, scope: [String]? = nil, origin: String? = nil, action: String? = nil)
-    case LoginFlow(authType: MfaCredentialItemType, stepUpToken: String, redirectUri: String? = nil, origin: String? = nil)
+    case AuthTokenFlow(authType: MfaCredentialItemType, authToken: AuthToken, redirectUri: URL? = nil, scope: [String]? = nil, origin: String? = nil, action: String? = nil)
+    case LoginFlow(authType: MfaCredentialItemType, stepUpToken: String, redirectUri: URL? = nil, origin: String? = nil)
     public var authType: MfaCredentialItemType {
         switch self {
         case let .AuthTokenFlow(authType, _, _, _, _, _): return authType
@@ -59,7 +59,7 @@ public class ContinueRegistration {
     private let reachfive: ReachFive
     private let authToken: AuthToken
     private let trustDevice: Bool
-    
+
     fileprivate init(credentialType: CredentialType, reachfive: ReachFive, authToken: AuthToken, trustDevice: Bool = false) {
         self.credentialType = credentialType
         self.authToken = authToken
@@ -116,7 +116,8 @@ public extension ReachFive {
         switch request {
 
         case let .LoginFlow(authType, stepUpToken, redirectUri, origin):
-            let response = try await reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin))
+            let req = StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: stepUpToken, authType: authType, origin: origin)
+            let response = try await reachFiveApi.startPasswordless(mfa: req)
             return ContinueStepUp(challengeId: response.challengeId, reachFive: self)
 
         case let .AuthTokenFlow(authType, authToken, redirectUri, overwrittenScope, origin, action):
@@ -124,7 +125,8 @@ public extension ReachFive {
             storage.save(key: pkceKey, value: pkce)
             let stepUp = StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: redirectUri ?? sdkConfig.redirectUri, pkce: pkce, scope: (overwrittenScope ?? scope).joined(separator: " "), action: action)
             let result = try await reachFiveApi.startMfaStepUp(stepUp, authToken: authToken)
-            let response = try await self.reachFiveApi.startPasswordless(mfa: StartMfaPasswordlessRequest(redirectUri: redirectUri ?? self.sdkConfig.redirectUri, clientId: self.sdkConfig.clientId, stepUp: result.token, authType: authType, origin: origin))
+            let req = StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: result.token, authType: authType, origin: origin)
+            let response = try await self.reachFiveApi.startPasswordless(mfa: req)
             return ContinueStepUp(challengeId: response.challengeId, reachFive: self)
         }
     }

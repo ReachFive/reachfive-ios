@@ -26,7 +26,7 @@ public extension ReachFive {
         try await reachFiveApi.getProfile(authToken: authToken)
     }
 
-    func sendEmailVerification(authToken: AuthToken, redirectUrl: String? = nil) async throws -> EmailVerificationResponse {
+    func sendEmailVerification(authToken: AuthToken, redirectUrl: URL? = nil) async throws -> EmailVerificationResponse {
         let sendEmailVerificationRequest = SendEmailVerificationRequest(redirectUrl: redirectUrl ?? sdkConfig.emailVerificationUri)
 
         let resp = try await reachFiveApi.sendEmailVerification(authToken: authToken, sendEmailVerificationRequest: sendEmailVerificationRequest)
@@ -58,7 +58,7 @@ public extension ReachFive {
     func updateEmail(
         authToken: AuthToken,
         email: String,
-        redirectUrl: String? = nil
+        redirectUrl: URL? = nil
     ) async throws -> Profile {
         let updateEmailRequest = UpdateEmailRequest(email: email, redirectUrl: redirectUrl)
         return try await reachFiveApi.updateEmail(
@@ -106,7 +106,7 @@ public extension ReachFive {
     func requestPasswordReset(
         email: String? = nil,
         phoneNumber: String? = nil,
-        redirectUrl: String? = nil,
+        redirectUrl: URL? = nil,
         origin: String? = nil
     ) async throws {
         let requestPasswordResetRequest = RequestPasswordResetRequest(
@@ -124,7 +124,7 @@ public extension ReachFive {
     func requestAccountRecovery(
         email: String? = nil,
         phoneNumber: String? = nil,
-        redirectUrl: String? = nil,
+        redirectUrl: URL? = nil,
         origin: String? = nil
     ) async throws {
         let requestAccountRecoveryRequest = RequestAccountRecoveryRequest(

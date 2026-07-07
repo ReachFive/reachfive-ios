@@ -16,7 +16,9 @@ public class AppleProvider: ProviderCreator {
         providerConfig: ProviderConfig,
         clientConfigResponse: ClientConfigResponse
     ) -> Provider {
-        fatalError("Do not use")
+        ConfiguredAppleProvider(reachFive: reachFive,
+                                providerConfig: providerConfig,
+                                clientConfigResponse: clientConfigResponse)
     }
 }
 

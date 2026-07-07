@@ -60,10 +60,10 @@ public class ReachFive: NSObject {
     public func interceptUrl(_ url: URL) -> () {
         let receivedUrl = URLComponents(url: url, resolvingAgainstBaseURL: true)
 
-        let recovery = URLComponents(string: sdkConfig.accountRecoveryUri)
-        let mfa = URLComponents(string: sdkConfig.mfaUri)
-        let passwordless = URLComponents(string: sdkConfig.redirectUri)
-        let emailVerification = URLComponents(string: sdkConfig.emailVerificationUri)
+        let recovery = URLComponents(url: sdkConfig.accountRecoveryUri, resolvingAgainstBaseURL: true)
+        let mfa = URLComponents(url: sdkConfig.mfaUri, resolvingAgainstBaseURL: true)
+        let passwordless = URLComponents(url: sdkConfig.redirectUri, resolvingAgainstBaseURL: true)
+        let emailVerification = URLComponents(url: sdkConfig.emailVerificationUri, resolvingAgainstBaseURL: true)
 
         switch (receivedUrl?.host, receivedUrl?.path) {
 

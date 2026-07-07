@@ -1956,6 +1956,48 @@
             </objects>
             <point key="canvasLocation" x="-1790" y="1598"/>
         </scene>
+        <!-- Session Devices -->
+        <scene sceneID="SessionDevicesSceneID">
+            <objects>
+                <viewController storyboardIdentifier="SessionDevicesViewController" id="SessionDevicesViewControllerID" userLabel="Session Devices" customClass="SessionDevicesViewController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="SessionDevicesViewID">
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="sessionDevicesTableViewID">
+                                <rect key="frame" x="0.0" y="124" width="402" height="633"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="SessionDeviceCell" id="sessionDeviceCellID" customClass="SessionDeviceCell" customModule="Sandbox" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="50" width="402" height="51.666667938232422"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="sessionDeviceCellID" id="sessionDeviceCellContentViewID">
+                                            <rect key="frame" x="0.0" y="0.0" width="402" height="51.666667938232422"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="SessionDevicesSafeAreaID"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="sessionDevicesTableViewID" firstAttribute="top" secondItem="SessionDevicesSafeAreaID" secondAttribute="top" id="SessionDevicesTableViewTopConstraint"/>
+                            <constraint firstItem="SessionDevicesSafeAreaID" firstAttribute="bottom" secondItem="sessionDevicesTableViewID" secondAttribute="bottom" id="SessionDevicesTableViewBottomConstraint"/>
+                            <constraint firstItem="sessionDevicesTableViewID" firstAttribute="leading" secondItem="SessionDevicesSafeAreaID" secondAttribute="leading" id="SessionDevicesTableViewLeadingConstraint"/>
+                            <constraint firstItem="sessionDevicesTableViewID" firstAttribute="trailing" secondItem="SessionDevicesSafeAreaID" secondAttribute="trailing" id="SessionDevicesTableViewTrailingConstraint"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Session Devices" id="SessionDevicesNavigationItemID"/>
+                    <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="sessionDevicesTableView" destination="sessionDevicesTableViewID" id="sessionDevicesTableViewOutletID"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="SessionDevicesPlaceholderID" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1100" y="1598"/>
+        </scene>
     </scenes>
     <resources>
         <image name="Reach5" width="821.427978515625" height="321.42800903320312"/>

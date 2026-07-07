@@ -188,6 +188,17 @@ public class ReachFiveApi {
             .responseJson(type: Profile.self)
     }
 
+    // MARK: - Session devices
+    public func listSessionDevices(authToken: AuthToken) async throws -> ListSessionDevices {
+        try await networkClient.request(createUrl(path: "/identity/v1/session-devices"), method: .get, headers: tokenHeader(authToken))
+            .responseJson(type: ListSessionDevices.self)
+    }
+    
+    public func deleteSessionDevice(id: String, authToken: AuthToken) async throws -> Void {
+        try await networkClient.request(createUrl(path: "/identity/v1/session-devices/\(id)"), method: .delete, headers: tokenHeader(authToken))
+            .responseJson()
+    }
+    
     // MARK: - Verification
 
     public func sendEmailVerification(authToken: AuthToken, sendEmailVerificationRequest: SendEmailVerificationRequest) async throws -> SendEmailVerificationResponse {

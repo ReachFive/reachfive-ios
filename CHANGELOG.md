@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Breaking changes
+- Changed type of redirect URL fields to URL instead of String 
+- SdkConfig:
+  - As above, changed type of redirect URL fields to URL instead of String
+  - Removed `scheme` field alias for `redirectUri`
+  - Renamed `baseScheme` field to `customScheme`
+  - The initializer now stops the program with a `preconditionFailure` when the scheme is not a valid URL scheme (either because of the `customScheme` parameter, or indirectly because the default scheme is derived from an ill-formatted `clientId`, e.g. one containing `_`). In that case, pass an explicit valid `customScheme` and declare it in your Info.plist and your ReachFive console.
+
+- ProviderCreator : the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can
+  reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
+
 ## v10.0.1
 
 - Fix compilation issue in XCode 26

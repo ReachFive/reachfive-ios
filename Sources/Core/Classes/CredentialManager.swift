@@ -382,7 +382,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                         "client_id": reachFiveApi.sdkConfig.clientId,
                         "id_token": idToken,
                         "response_type": "code",
-                        "redirect_uri": reachFiveApi.sdkConfig.scheme,
+                        "redirect_uri": reachFiveApi.sdkConfig.redirectUri.absoluteString,
                         "scope": scope,
                         "code_challenge": pkce.codeChallenge,
                         "code_challenge_method": pkce.codeChallengeMethod,
@@ -517,7 +517,7 @@ extension CredentialManager {
         let authCodeRequest = AuthCodeRequest(
             clientId: reachFiveApi.sdkConfig.clientId,
             code: code,
-            redirectUri: reachFiveApi.sdkConfig.scheme,
+            redirectUri: reachFiveApi.sdkConfig.redirectUri,
             pkce: pkce
         )
         let token = try await reachFiveApi.authWithCode(authCodeRequest: authCodeRequest)
