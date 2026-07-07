@@ -18,7 +18,9 @@ public class OpenIdUser: Codable {
     public let phoneNumber: String?
     public let phoneNumberVerified: Bool?
     public let address: ProfileAddress?
-    
+    /// B.connect-specific claim
+    public let cico: String?
+
     public init(
         id: String?,
         name: String?,
@@ -36,7 +38,8 @@ public class OpenIdUser: Codable {
         locale: String?,
         phoneNumber: String?,
         phoneNumberVerified: Bool?,
-        address: ProfileAddress?
+        address: ProfileAddress?,
+        cico: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -55,6 +58,7 @@ public class OpenIdUser: Codable {
         self.phoneNumber = phoneNumber
         self.phoneNumberVerified = phoneNumberVerified
         self.address = address
+        self.cico = cico
     }
 }
 
@@ -77,6 +81,7 @@ extension OpenIdUser {
         var phoneNumber: String?
         var phoneNumberVerified: Bool?
         var address: ProfileAddress?
+        var cico: String?
     }
 }
 
@@ -99,7 +104,8 @@ extension OpenIdUser.CodingData {
             locale: locale,
             phoneNumber: phoneNumber,
             phoneNumberVerified: phoneNumberVerified,
-            address: address
+            address: address,
+            cico: cico
         )
     }
 }
