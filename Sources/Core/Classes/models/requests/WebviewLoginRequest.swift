@@ -9,9 +9,9 @@ public class WebviewLoginRequest {
     public let origin: String?
     public let provider: String?
     public let prefersEphemeralWebBrowserSession: Bool
-    /// Le `redirect_uri` de ce login et son canal de retour. Le `redirect_uri` résolu doit faire partie
-    /// des callback URLs autorisées du client, et est réutilisé à l'identique pour l'échange du code.
-    /// Défaut : ``WebSessionMode/sdkScheme``.
+    /// The `redirect_uri` of this login and its return channel. The resolved `redirect_uri` must be one
+    /// of the client's authorized callback URLs, and is reused identically for the code exchange.
+    /// Default: ``WebSessionMode/sdkScheme``.
     public let webSessionMode: WebSessionMode
 
     public init(

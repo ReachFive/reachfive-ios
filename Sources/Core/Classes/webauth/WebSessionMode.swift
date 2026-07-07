@@ -1,28 +1,28 @@
 import Foundation
 
-/// Décrit comment une `ASWebAuthenticationSession` se termine — donc **comment on la construit** et
-/// **par quel canal on reçoit le callback**.
-/// Deux canaux, mutuellement exclusifs pour un même login :
-/// - **in-band** (``sdkScheme`` & ``universalLink``) : la redirection finale est interceptée DANS la webview de la session,
-///   qui déclenche alors son completion handler.
-/// - **hors-bande** (``externalApp``) : le flow se termine dans une app externe qui rouvre l'app hôte
-///   via un universal link (`application(_:continue:)` → ``WebAuthenticationSession/tryComplete(externalCallbackURL:)``) ;
-///   la session ne voit jamais ce callback, on l'ouvre en simple hôte web puis on l'annule.
+/// Describes how an `ASWebAuthenticationSession` ends — hence **how it's built** and
+/// **which channel receives the callback**.
+/// Two channels, mutually exclusive for a given login:
+/// - **in-band** (``sdkScheme`` & ``universalLink``): the final redirection is intercepted INSIDE the session's webview,
+///   which then triggers its completion handler.
+/// - **out-of-band** (``externalApp``): the flow ends in an external app that reopens the host app
+///   via a universal link (`application(_:continue:)` → ``WebAuthenticationSession/tryComplete(externalCallbackURL:)``);
+///   the session never sees this callback, so it's opened as a plain web host and then cancelled.
 public enum WebSessionMode {
-    /// Scheme custom intercepté par la session (historique, tout iOS). Ex. `reachfive-<clientId>`.
+    /// Custom scheme intercepted by the session (works on all iOS versions). E.g. `reachfive-<clientId>`.
     case sdkScheme
-    
-    /// Universal link intercepté DANS la webview (iOS 17.4+ via `callback: .https`). Requiert
-    /// l'Associated Domain `webcredentials:<host>`. À réserver aux flows qui se terminent
-    /// entièrement dans la feuille (aucun saut vers une app externe).
+
+    /// Universal link intercepted INSIDE the webview (iOS 17.4+ via `callback: .https`). Requires
+    /// the `webcredentials:<host>` Associated Domain. Reserve for flows that end
+    /// entirely within the sheet (no jump to an external app).
     case universalLink(URL)
-    
-    /// Complétion HORS-BANDE : universal link renvoyé par une app externe (ex. B.connect). Requiert
-    /// l'Associated Domain `applinks:<host>` côté app hôte. La valeur portée est le `redirect_uri`
-    /// attendu, reconnu par `tryComplete`.
+
+    /// OUT-OF-BAND completion: universal link returned by an external app. Requires
+    /// the `applinks:<host>` Associated Domain on the host app side. The carried value is the expected
+    /// `redirect_uri`, recognized by `tryComplete`.
     case externalApp(URL)
-    
-    /// Le universal link attendu HORS-BANDE (via `tryComplete`), `nil` en mode in-band.
+
+    /// The universal link expected OUT-OF-BAND (via `tryComplete`), `nil` in in-band mode.
     var outOfBandCallback: URL? {
         switch self {
         case .externalApp(let url): url
@@ -30,8 +30,8 @@ public enum WebSessionMode {
         }
     }
 
-    /// Le `redirect_uri` OAuth porté par le mode ; `nil` pour ``sdkScheme``, où celui du `SdkConfig`
-    /// s'applique (à `/authorize` comme à l'échange du code).
+    /// The OAuth `redirect_uri` carried by the mode; `nil` for ``sdkScheme``, where the `SdkConfig`'s
+    /// applies instead (both to `/authorize` and to the code exchange).
     var redirectUri: String? {
         switch self {
         case .externalApp(let url), .universalLink(let url): url.absoluteString

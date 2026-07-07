@@ -32,7 +32,7 @@ public class ReachFive: NSObject {
     internal var clientConfig: ClientConfigResponse? = nil
     public let storage: Storage
     let credentialManager: CredentialManager
-    /// Session de login web en cours (cf. ``WebAuthenticationSession``).
+    // Session de login web en cours (cf. ``WebAuthenticationSession``).
     let webAuthSession: WebAuthenticationSession
     public let pkceKey = "PASSWORDLESS_PKCE"
 

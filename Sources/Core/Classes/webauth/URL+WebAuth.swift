@@ -1,7 +1,7 @@
 import Foundation
 
 extension URL {
-    /// Valeur du paramètre de query `name`, ou `nil` s'il est absent.
+    /// Value of the `name` query parameter, or `nil` if absent.
     func queryValue(_ name: String) -> String? {
         URLComponents(url: self, resolvingAgainstBaseURL: true)?
             .queryItems?
@@ -9,8 +9,8 @@ extension URL {
             .value
     }
 
-    /// Le `code` d'autorisation de ce callback OAuth, ou une `TechnicalError` portant l'`ApiError`
-    /// décrit par les paramètres du callback (`error`, `error_description`…).
+    /// The authorization `code` of this OAuth callback, or a `TechnicalError` carrying the `ApiError`
+    /// described by the callback's parameters (`error`, `error_description`…).
     func authorizationCode() throws -> String {
         let params = URLComponents(url: self, resolvingAgainstBaseURL: true)?.queryItems
         guard let code = params?.first(where: { $0.name == "code" })?.value else {

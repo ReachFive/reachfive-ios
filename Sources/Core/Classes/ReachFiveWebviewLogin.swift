@@ -3,10 +3,10 @@ import AuthenticationServices
 
 public extension ReachFive {
 
-    /// Orchestre tout le login web : PKCE, URL d'autorize, session web (via le porteur centralisé),
-    /// puis échange du code. La session est portée par `ReachFive` pour qu'un retour par universal link
-    /// (reçu via `application(_:continue:)`) puisse la compléter hors-bande, même pour un appel direct
-    /// de cette API publique.
+    /// Orchestrates the whole web login: PKCE, authorize URL, web session (via the centralized carrier),
+    /// then code exchange. The session is carried by `ReachFive` so that a return via universal link
+    /// (received through `application(_:continue:)`) can complete it out-of-band, even for a direct call
+    /// to this public API.
     func webviewLogin(_ request: WebviewLoginRequest) async throws -> AuthToken {
 
         let pkce = Pkce.generate()
