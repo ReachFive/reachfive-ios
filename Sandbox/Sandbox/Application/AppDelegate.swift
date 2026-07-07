@@ -41,12 +41,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     /// A complete example of a redirect URI utilizing a private-use URI scheme is:
     ///
     ///     com.example.app:/oauth2redirect/example-provider
-    static let sdkLocal = try! SdkConfig(
+    static let sdkLocal = SdkConfig(
         domain: "local-sandbox.og4.me",
         clientId: "9DKRdQyDLpaJqQQQAR9K"
     )
 
-    static let sdkRemote = try! SdkConfig(
+    static let sdkRemote = SdkConfig(
         domain: "integ-qa-fonctionnelle.reach5.net",
         clientId: "9DKRdQyDLpaJqQQQAR9K"
     )

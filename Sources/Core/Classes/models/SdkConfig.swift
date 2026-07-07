@@ -23,25 +23,31 @@ public class SdkConfig {
         mfaUri: URL? = nil,
         accountRecoveryUri: URL? = nil,
         emailVerificationUri: URL? = nil
-    ) throws {
+    ) {
         self.domain = domain
         self.clientId = clientId
 
-        let resolvedScheme = customScheme ?? "reachfive-\(clientId)"
+        let scheme = customScheme ?? "reachfive-\(clientId)"
+        self.customScheme = scheme
 
-        // Broad scheme validation based on RFC 3986 generic parser rules:
-        // Must start with a letter and contain any character except `:`, `/`, `?`, `#`, or whitespace.
-        let schemeRegex = "^[a-zA-Z][^:/?#\\s]*$"
-        guard resolvedScheme.range(of: schemeRegex, options: .regularExpression) != nil else {
-            throw ReachFiveError.TechnicalError(reason: "Invalid scheme format: '\(resolvedScheme)'. A URL scheme must start with a letter and must not contain colons, slashes, question marks, hash symbols, or whitespace.")
+        // Built unconditionally so that an invalid scheme is caught at init even when every URI is provided explicitly
+        let defaultRedirectUri = Self.defaultUri(scheme: scheme, path: "callback")
+        self.redirectUri = redirectUri ?? defaultRedirectUri
+        self.mfaUri = mfaUri ?? Self.defaultUri(scheme: scheme, path: "mfa")
+        self.emailVerificationUri = emailVerificationUri ?? Self.defaultUri(scheme: scheme, path: "email-verification")
+        self.accountRecoveryUri = accountRecoveryUri ?? Self.defaultUri(scheme: scheme, path: "account-recovery")
+    }
+
+    /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing,
+    /// the same rules the rest of the system will enforce on every redirect.
+    private static func defaultUri(scheme: String, path: String) -> URL {
+        guard let url = URL(string: "\(scheme)://\(path)") else {
+            preconditionFailure("""
+                '\(scheme)' is not a valid URL scheme: it must start with a letter and contain only letters, digits, '+', '-' or '.'. \
+                If no customScheme is passed, the scheme is derived from the clientId as 'reachfive-<clientId>'. \
+                Pass an explicit valid customScheme, and declare it in your app's Info.plist (CFBundleURLSchemes) and in your ReachFive console.
+                """)
         }
-
-        self.customScheme = resolvedScheme
-
-        // Since resolvedBaseScheme is validated under generic URI parsing rules, the following URL constructions are guaranteed to succeed
-        self.redirectUri = redirectUri ?? URL(string: "\(resolvedScheme)://callback")!
-        self.mfaUri = mfaUri ?? URL(string: "\(resolvedScheme)://mfa")!
-        self.emailVerificationUri = emailVerificationUri ?? URL(string: "\(resolvedScheme)://email-verification")!
-        self.accountRecoveryUri = accountRecoveryUri ?? URL(string: "\(resolvedScheme)://account-recovery")!
+        return url
     }
 }
