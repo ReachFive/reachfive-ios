@@ -37,22 +37,22 @@ public extension ReachFive {
 
     private func createProviders(providersConfigsResult: ProvidersConfigsResult, clientConfigResponse: ClientConfigResponse) -> [Provider] {
         return providersConfigsResult.items.filter { $0.clientId != nil }.map({ config in
-            if config.provider == AppleProvider.NAME {
-                return ConfiguredAppleProvider(
-                    sdkConfig: sdkConfig,
-                    providerConfig: config,
-                    clientConfigResponse: clientConfigResponse,
-                    credentialManager: credentialManager
-                )
-            }
             if let nativeCreator = providersCreators.first(where: { $0.name == config.provider }) {
                 return nativeCreator.create(
-                    sdkConfig: sdkConfig,
+                    reachFive: self,
                     providerConfig: config,
-                    reachFiveApi: reachFiveApi,
                     clientConfigResponse: clientConfigResponse
                 )
             }
+            // Sign In with Apple is always native: no web flow fallback for Apple
+            if config.provider == AppleProvider.NAME {
+                return ConfiguredAppleProvider(
+                    reachFive: self,
+                    providerConfig: config,
+                    clientConfigResponse: clientConfigResponse
+                )
+            }
+            Logger.shared.log("No ProviderCreator registered for provider '\(config.provider)' (variant '\(config.variant)'); falling back to DefaultProvider. If you expected a custom provider, check that its name matches and that it is passed to ReachFive(providersCreators:).")
             return DefaultProvider(reachfive: self, providerConfig: config)
         })
     }

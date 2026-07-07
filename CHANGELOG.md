@@ -10,6 +10,9 @@
   - Renamed `baseScheme` field to `customScheme`
   - The initializer now throws an error in case the scheme is not correct (either due to the `customScheme` parameter or indirectly because of the `clientId` parameter being ill-formatted)
 
+- ProviderCreator : the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can
+  reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
+
 ## v10.0.1
 
 - Fix compilation issue in XCode 26

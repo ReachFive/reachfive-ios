@@ -1,8 +1,8 @@
 import AuthenticationServices
 import Foundation
 import Reach5
-//TODO: import Reach5Google
-// import Reach5Facebook
+import Reach5Google
+import Reach5Facebook
 import UIKit
 
 #if targetEnvironment(macCatalyst)
@@ -51,7 +51,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         clientId: "9DKRdQyDLpaJqQQQAR9K"
     )
 
-    static let providers: [ProviderCreator] = [/*GoogleProvider(variant: "one_tap"), FacebookProvider(),*/ AppleProvider(variant: "natif")]
+    static let providers: [ProviderCreator] = [GoogleProvider(variant: "one_tap"), FacebookProvider(), AppleProvider(variant: "natif")]
     #if targetEnvironment(macCatalyst)
     static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: true))
     static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: true))
