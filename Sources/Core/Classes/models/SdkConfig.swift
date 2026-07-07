@@ -40,8 +40,21 @@ public class SdkConfig {
 
     /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing,
     /// the same rules the rest of the system will enforce on every redirect.
+    /// Checking the parsed scheme is required because a malformed input can still parse,
+    /// just not as intended: with "my:app", "my" becomes the scheme and "app://callback" the path;
+    /// with "my/app" the whole string parses as a scheme-less relative reference.
+    internal static func makeUri(scheme: String, path: String) -> URL? {
+        guard !scheme.isEmpty, // "://callback" parses, with an empty scheme
+              let url = URL(string: "\(scheme)://\(path)"),
+              url.scheme?.lowercased() == scheme.lowercased()
+        else {
+            return nil
+        }
+        return url
+    }
+
     private static func defaultUri(scheme: String, path: String) -> URL {
-        guard let url = URL(string: "\(scheme)://\(path)") else {
+        guard let url = makeUri(scheme: scheme, path: path) else {
             preconditionFailure("""
                 '\(scheme)' is not a valid URL scheme: it must start with a letter and contain only letters, digits, '+', '-' or '.'. \
                 If no customScheme is passed, the scheme is derived from the clientId as 'reachfive-<clientId>'. \
