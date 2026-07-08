@@ -40,10 +40,6 @@ final class CredentialManagerErrorMappingTests: XCTestCase {
 @MainActor
 final class CredentialManagerRegistrationRequestTests: XCTestCase {
 
-    private func makeManager() -> CredentialManager {
-        CredentialManager(reachFiveApi: ReachFiveApi(sdkConfig: SdkConfig(domain: "example.reach5.net", clientId: "9DKRdQyDLpaJqQQQAR9K")))
-    }
-
     private func makeOptions(challenge: String, userID: String) -> RegistrationOptions {
         RegistrationOptions(
             friendlyName: "iPhone de Test",
@@ -64,9 +60,7 @@ final class CredentialManagerRegistrationRequestTests: XCTestCase {
 
     @available(iOS 16.0, *)
     func testNominalCaseBuildsRequestWithRelyingParty() throws {
-        let manager = makeManager()
-
-        let request = try manager.makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "BAUG"), friendlyName: "iPhone de Test")
+        let request = try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "BAUG"), friendlyName: "iPhone de Test")
 
         let registrationRequest = try XCTUnwrap(request as? ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest)
         XCTAssertEqual(registrationRequest.relyingPartyIdentifier, "example.reach5.net")
@@ -75,9 +69,7 @@ final class CredentialManagerRegistrationRequestTests: XCTestCase {
 
     @available(iOS 16.0, *)
     func testUnreadableChallengeThrowsTechnicalError() {
-        let manager = makeManager()
-
-        XCTAssertThrowsError(try manager.makeCredentialRegistrationRequest(from: makeOptions(challenge: "%%%", userID: "BAUG"), friendlyName: "iPhone de Test")) { error in
+        XCTAssertThrowsError(try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "%%%", userID: "BAUG"), friendlyName: "iPhone de Test")) { error in
             guard case let ReachFiveError.TechnicalError(reason, _) = error else {
                 return XCTFail("expected .TechnicalError, got \(error)")
             }
@@ -87,9 +79,7 @@ final class CredentialManagerRegistrationRequestTests: XCTestCase {
 
     @available(iOS 16.0, *)
     func testUnreadableUserIDThrowsTechnicalError() {
-        let manager = makeManager()
-
-        XCTAssertThrowsError(try manager.makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "%%%"), friendlyName: "iPhone de Test")) { error in
+        XCTAssertThrowsError(try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "%%%"), friendlyName: "iPhone de Test")) { error in
             guard case let ReachFiveError.TechnicalError(reason, _) = error else {
                 return XCTFail("expected .TechnicalError, got \(error)")
             }
