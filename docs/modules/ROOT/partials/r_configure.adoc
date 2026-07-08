@@ -88,9 +88,32 @@ Some providers (such as B.connect) finish their login on an *https universal lin
 
 `$\{host\}` is the host of the `universalLink` returned by {company} for that provider. Both the entitlement entry and the `apple-app-site-association` file are required for iOS to honour the domain.
 
+The file must be served at `\https://$\{host\}/.well-known/apple-app-site-association` with a `200` response and a JSON `Content-Type`; a redirect or a non-JSON content type causes verification to fail.
+
+.apple-app-site-association example
+[source,json]
+----
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["ABCDE12345.com.example.app"], <1>
+        "components": [
+          {"/": "/_dev/mobile/callback"} <2>
+        ]
+      }
+    ]
+  },
+  "webcredentials": {"apps": ["ABCDE12345.com.example.app"]} <3>
+}
+----
+<1> `<Application Identifier Prefix>.<Bundle Identifier>`.
+<2> Restrict to the callback path of the `universalLink` returned by {company} for this provider. Omit the whole `components` array to match every path on the host.
+<3> Only needed if you also declare `webcredentials:$\{host\}` (`.universalLink` in-band mode), or use xref:guides/passkeys.adoc[passkeys] on the same host.
+
 [NOTE]
 ====
-If the association file restricts the callback path with a `components` filter, make sure it lets through both the success callback (`?code=...`) *and* the OAuth error callback (`?error=...`, e.g. when the user denies consent), so that the SDK can end the login cleanly with the error instead of leaving the authentication sheet open.
+If you restrict `components` to a path, make sure it lets through both the success callback (`?code=...`) *and* the OAuth error callback (`?error=...`, e.g. when the user denies consent), so that the SDK can end the login cleanly with the error instead of leaving the authentication sheet open.
 ====
 
 === Customise storage
