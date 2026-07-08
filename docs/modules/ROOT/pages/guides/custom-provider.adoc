@@ -13,24 +13,7 @@ A provider is made of two pieces, both in `Sources/Core/Classes/Provider.swift`:
 
 [source,swift]
 ----
-public protocol ProviderCreator {
-    var name: String { get }
-    var variant: String? { get }
-
-    func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> Provider
-}
-
-public protocol Provider {
-    var name: String { get }
-    func login(scope: [String]?, origin: String, viewController: UIViewController?) async throws -> AuthToken
-    func logout() async throws
-
-    // Default (no-op) implementations provided — override only what your provider needs:
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
-    func applicationDidBecomeActive(_ application: UIApplication)
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool
-}
+include::example$customProviderProtocols.swift[]
 ----
 
 `name` must match the provider's name as configured on your {cc} — this is how ReachFive matches your `ProviderCreator` against the provider configurations it fetches from the backend. A configured provider with no matching creator (and that isn't Apple) still logs in, falling back to a generic web-based `DefaultProvider`.
@@ -44,10 +27,7 @@ Do not store the `reachFive` instance strongly in your `Provider`. ReachFive ret
 
 [source,swift]
 ----
-let reachfive = ReachFive(
-    sdkConfig: SdkConfig(domain: DOMAIN, clientId: CLIENT_ID),
-    providersCreators: [MyProvider(variant: "ios")]
-)
+include::example$registerCustomProvider.swift[]
 ----
 
 == Example: wrapping a native SDK
@@ -56,41 +36,7 @@ This is the shape used by our own `AppleProvider` (link:https://github.com/Reach
 
 [source,swift]
 ----
-public class MyProvider: ProviderCreator {
-    public var name: String = "my-provider"
-    public var variant: String?
-
-    public init(variant: String? = nil) {
-        self.variant = variant
-    }
-
-    public func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> Provider {
-        ConfiguredMyProvider(reachFive: reachFive, providerConfig: providerConfig)
-    }
-}
-
-class ConfiguredMyProvider: NSObject, Provider {
-    let name: String
-    private weak var reachFive: ReachFive? // weak: see the retain-cycle note above
-
-    init(reachFive: ReachFive, providerConfig: ProviderConfig) {
-        self.name = providerConfig.provider
-        self.reachFive = reachFive
-    }
-
-    func login(scope: [String]?, origin: String, viewController: UIViewController?) async throws -> AuthToken {
-        // 1. Drive your native SDK's own login UI/flow here, e.g.:
-        let code = try await MyNativeSDK.shared.login(presenting: viewController)
-
-        // 2. Exchange its authorization code for a ReachFive AuthToken.
-        guard let reachFive else { throw ReachFiveError.TechnicalError(reason: "ReachFive instance was deallocated") }
-        return try await reachFive.authWithCode(code: code, pkce: nil)
-    }
-
-    func logout() {
-        MyNativeSDK.shared.logout()
-    }
-}
+include::example$customProviderWrappingNativeSDK.swift[]
 ----
 
 == Example: a fully custom web flow
