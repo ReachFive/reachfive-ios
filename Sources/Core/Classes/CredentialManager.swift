@@ -1,6 +1,9 @@
 import Foundation
 import AuthenticationServices
 
+// Tous les callbacks d'ASAuthorizationController arrivent sur le main thread ; l'isolation @MainActor
+// protège l'état mutable partagé entre les points d'entrée async et le delegate.
+@MainActor
 public class CredentialManager: NSObject {
     let reachFiveApi: ReachFiveApi
     let storage: Storage
@@ -39,7 +42,8 @@ public class CredentialManager: NSObject {
 
     // MARK: -
 
-    public init(reachFiveApi: ReachFiveApi, storage: Storage) {
+    // nonisolated : appelé depuis l'init synchrone de ReachFive, hors du main actor
+    nonisolated init(reachFiveApi: ReachFiveApi, storage: Storage) {
         self.reachFiveApi = reachFiveApi
         self.storage = storage
     }
@@ -311,16 +315,33 @@ public class CredentialManager: NSObject {
 
 // MARK: - ASAuthorizationControllerPresentationContextProviding
 extension CredentialManager: ASAuthorizationControllerPresentationContextProviding {
-    public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        authenticationAnchor!
+    nonisolated public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        // AuthenticationServices délivre ce callback sur le main thread
+        MainActor.assumeIsolated {
+            authenticationAnchor!
+        }
     }
 }
 
 // MARK: - ASAuthorizationControllerDelegate
 extension CredentialManager: ASAuthorizationControllerDelegate {
 
-    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        Task {
+    nonisolated public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        // AuthenticationServices délivre ce callback sur le main thread
+        MainActor.assumeIsolated {
+            handleAuthorization(authorization, for: controller)
+        }
+    }
+
+    nonisolated public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        // AuthenticationServices délivre ce callback sur le main thread
+        MainActor.assumeIsolated {
+            handleError(error, for: controller)
+        }
+    }
+
+    private func handleAuthorization(_ authorization: ASAuthorization, for controller: ASAuthorizationController) {
+        Task { @MainActor in
             defer {
                 continuationWithAuthToken = nil
                 continuationRegistration = nil
@@ -463,7 +484,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
         }
     }
 
-    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+    private func handleError(_ error: Error, for controller: ASAuthorizationController) {
         defer {
             continuationWithAuthToken = nil
             continuationRegistration = nil
