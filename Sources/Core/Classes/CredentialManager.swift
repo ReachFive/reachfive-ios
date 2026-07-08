@@ -5,7 +5,9 @@ import AuthenticationServices
 // protège l'état mutable partagé entre les points d'entrée async et le delegate.
 @MainActor
 public class CredentialManager: NSObject {
-    let reachFiveApi: ReachFiveApi
+    // nonisolated(unsafe) : affecté une seule fois depuis l'init nonisolated (appelé par ReachFive.init,
+    // synchrone et hors main actor), jamais modifié ensuite. Lecture sans risque depuis le main actor.
+    nonisolated(unsafe) let reachFiveApi: ReachFiveApi
 
     // MARK: - Contexte de requête
 
@@ -515,31 +517,30 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             return
         }
 
-        let reachFiveError: ReachFiveError
+        context.fail(with: Self.adapt(error))
+    }
 
+    // Fonction pure, extraite pour être testable unitairement
+    nonisolated static func adapt(_ error: Error) -> ReachFiveError {
         if let authorizationError = error as? ASAuthorizationError {
             if authorizationError.code == .canceled {
                 // Either the system doesn't find any credentials and the request ends silently, or the user cancels the request.
                 // This is a good time to show a traditional login form, or ask the user to create an account.
-                reachFiveError = .AuthCanceled
-            } else {
-                // Another ASAuthorization error.
-                reachFiveError = .TechnicalError(reason: "ASAuthorizationError \(authorizationError.code.rawValue): \(error)")
+                return .AuthCanceled
             }
-        } else {
-            reachFiveError = .TechnicalError(reason: "\(error.localizedDescription)")
+            // Another ASAuthorization error.
+            return .TechnicalError(reason: "ASAuthorizationError \(authorizationError.code.rawValue): \(error)")
         }
-
-        context.fail(with: reachFiveError)
+        return .TechnicalError(reason: "\(error.localizedDescription)")
     }
 }
 
 // MARK: - utilities
 extension CredentialManager {
     /// Construit une requête d'enregistrement de passkey à partir des options renvoyées par le serveur.
-    /// Pendant symétrique de ``createCredentialAssertionRequest(_:)``.
+    /// Pendant symétrique de ``createCredentialAssertionRequest(_:)``. Internal pour être testable.
     @available(iOS 16.0, *)
-    private func makeCredentialRegistrationRequest(from options: RegistrationOptions, friendlyName: String) throws -> ASAuthorizationRequest {
+    func makeCredentialRegistrationRequest(from options: RegistrationOptions, friendlyName: String) throws -> ASAuthorizationRequest {
         guard let challenge = options.options.publicKey.challenge.decodeBase64Url() else {
             throw ReachFiveError.TechnicalError(reason: "unreadable challenge: \(options.options.publicKey.challenge)")
         }
