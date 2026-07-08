@@ -37,6 +37,8 @@ public extension ReachFive {
         return try await self.authWithCode(code: code, pkce: pkce)
     }
 
+    // Construction voisine mais distincte de l'appel authorize de Sign In With Apple (CredentialManager) :
+    // jambe OAuth différente (state et URL de navigation ici, id_token/nonce/noms Apple là-bas) ; factoriser n'apporterait rien.
     func buildAuthorizeURL(pkce: Pkce, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil, provider: String? = nil) -> URL {
         let scope = (scope ?? self.scope).joined(separator: " ")
         let options = [

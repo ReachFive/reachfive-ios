@@ -25,20 +25,20 @@ public class AppleProvider: ProviderCreator {
 class ConfiguredAppleProvider: NSObject, Provider {
     let name: String = AppleProvider.NAME
 
-    let sdkConfig: SdkConfig
     let providerConfig: ProviderConfig
     let clientConfigResponse: ClientConfigResponse
-    let credentialManager: CredentialManager
+    // Référence faible : ReachFive retient ses providers, une référence forte créerait un cycle
+    // (même pattern que DefaultProvider).
+    private weak var reachfive: ReachFive?
 
     public init(
         reachFive: ReachFive,
         providerConfig: ProviderConfig,
         clientConfigResponse: ClientConfigResponse
     ) {
-        self.sdkConfig = reachFive.sdkConfig
+        self.reachfive = reachFive
         self.providerConfig = providerConfig
         self.clientConfigResponse = clientConfigResponse
-        self.credentialManager = reachFive.credentialManager
     }
 
     public func login(
@@ -46,12 +46,13 @@ class ConfiguredAppleProvider: NSObject, Provider {
         origin: String,
         viewController: UIViewController?
     ) async throws -> AuthToken {
+        guard let reachfive else { throw ReachFiveError.TechnicalError(reason: "ReachFive instance was deallocated") }
         guard let window = await viewController?.view.window else { throw ReachFiveError.TechnicalError(reason: "The view was not in the app's view hierarchy!") }
 
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
-        let request = NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin)
+        let request = NativeLoginRequest(anchor: window, originWebAuthn: "https://\(reachfive.sdkConfig.domain)", scopes: scope, origin: origin)
 
-        let flow = try await credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self)
+        let flow = try await reachfive.credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self, reachFive: reachfive)
 
         switch flow {
         case .AchievedLogin(let authToken): return authToken

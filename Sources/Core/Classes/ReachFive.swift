@@ -39,7 +39,7 @@ public class ReachFive: NSObject {
         self.providersCreators = providersCreators
         self.storage = storage ?? UserDefaultsStorage()
         self.reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig)
-        self.credentialManager = CredentialManager(reachFiveApi: reachFiveApi, storage: self.storage)
+        self.credentialManager = CredentialManager(reachFiveApi: reachFiveApi)
 
         if let sdkInternalConfig {
             Logger.shared.enabled = sdkInternalConfig.loggingEnabled
