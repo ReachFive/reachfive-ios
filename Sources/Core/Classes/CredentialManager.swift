@@ -115,7 +115,7 @@ public class CredentialManager: NSObject {
     // MARK: - Reset
     @available(iOS 16.0, *)
     func resetPasskeys(withRequest request: ResetPasskeyRequest) async throws {
-        // Here it is very important to cancel a running auti-fill request, otherwise it will fail like other modal requests
+        // Here it is very important to cancel a running auto-fill request, otherwise it will fail like other modal requests
         // so can't separate this method from the rest of the class
         authController?.cancel()
         authenticationAnchor = request.anchor
@@ -159,6 +159,8 @@ public class CredentialManager: NSObject {
         scope = webAuthnLoginRequest.scope
 
         let assertionRequestOptions = try await reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
+        // Cette garde semble redondante (la méthode est déjà @available(iOS 16.0, *)) mais elle est nécessaire
+        // pour compiler sous Xcode 26 (peut-être un bug Xcode). Ne pas la supprimer. Cf. commit 6a65a83.
         let authorizationRequest = if #available(iOS 16.0, *) {
             try createCredentialAssertionRequest(assertionRequestOptions)
         } else {
@@ -228,7 +230,7 @@ public class CredentialManager: NSObject {
         let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFiveApi.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
 
         try await signInWith(webAuthnLoginRequest, withMode: mode, authorizing: requestTypes, appleProvider: appleProvider) { authenticationOptions in
-            guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 15 context
+            guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 16 context
                 throw ReachFiveError.TechnicalError(reason: "Must be iOS 16 or higher")
             }
             return try self.createCredentialAssertionRequest(authenticationOptions)
@@ -277,8 +279,9 @@ public class CredentialManager: NSObject {
                     let authOptions = try await self.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
                     let passkeyRequest = try makeAuthorization(authOptions)
                     requests.append(passkeyRequest)
-                } catch _ where requestTypes.count > 1 {
+                } catch let error where requestTypes.count > 1 {
                     // if there are other types of requests, do not block auth if only passkey fails. Just eat the error
+                    Logger.shared.log("Passkey request error ignored in multi-type authorization: \(error)")
                 }
             }
         }
@@ -475,7 +478,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 reachFiveError = .AuthCanceled
             } else {
                 // Another ASAuthorization error.
-                reachFiveError = .TechnicalError(reason: "\(error)")
+                reachFiveError = .TechnicalError(reason: "ASAuthorizationError \(authorizationError.code.rawValue): \(error)")
             }
         } else {
             reachFiveError = .TechnicalError(reason: "\(error.localizedDescription)")
