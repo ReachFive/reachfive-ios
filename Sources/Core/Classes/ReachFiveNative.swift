@@ -17,16 +17,15 @@ public extension ReachFive {
     @available(iOS 16.0, *)
     func signup(withRequest request: PasskeySignupRequest) async throws -> AuthToken {
         let domain = sdkConfig.domain
-        let scopes = request.scopes ?? scope
         let signupOptions = SignupOptions(
             origin: request.originWebAuthn ?? "https://\(domain)",
             friendlyName: request.friendlyName,
             profile: request.passkeyProfile,
             clientId: sdkConfig.clientId,
-            scope: scopes
+            scope: request.scopes ?? scope
         )
 
-        return try await credentialManager.signUp(withRequest: signupOptions, scopes: scopes, anchor: request.anchor, originR5: request.origin, reachFive: self)
+        return try await credentialManager.signUp(withRequest: signupOptions, anchor: request.anchor, originR5: request.origin, reachFive: self)
     }
 
     /// Starts an auto-fill assisted passkey login request.

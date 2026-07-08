@@ -5,10 +5,6 @@ import AuthenticationServices
 // protège l'état mutable partagé entre les points d'entrée async et le delegate.
 @MainActor
 public class CredentialManager: NSObject {
-    // nonisolated(unsafe) : affecté une seule fois depuis l'init nonisolated (appelé par ReachFive.init,
-    // synchrone et hors main actor), jamais modifié ensuite. Lecture sans risque depuis le main actor.
-    nonisolated(unsafe) let reachFiveApi: ReachFiveApi
-
     // MARK: - Contexte de requête
 
     // Les requêtes peuvent s'entrelacer (une requête modale peut démarrer pendant une requête auto-fill).
@@ -62,12 +58,8 @@ public class CredentialManager: NSObject {
         case ResetPasskey(resetOptions: ResetOptions)
     }
 
-    // MARK: -
-
     // nonisolated : appelé depuis l'init synchrone de ReachFive, hors du main actor
-    nonisolated init(reachFiveApi: ReachFiveApi) {
-        self.reachFiveApi = reachFiveApi
-    }
+    nonisolated override init() {}
 
     // MARK: - Cycle de vie des requêtes
 
@@ -120,11 +112,15 @@ public class CredentialManager: NSObject {
 
     // MARK: - Signup
     @available(iOS 16.0, *)
-    func signUp(withRequest request: SignupOptions, scopes: [String], anchor: ASPresentationAnchor, originR5: String? = nil, reachFive: ReachFive) async throws -> AuthToken {
+    func signUp(withRequest request: SignupOptions, anchor: ASPresentationAnchor, originR5: String? = nil, reachFive: ReachFive) async throws -> AuthToken {
         cancelInFlightRequests()
 
-        let options = try await reachFiveApi.createWebAuthnSignupOptions(webAuthnSignupOptions: request)
+        let options = try await reachFive.reachFiveApi.createWebAuthnSignupOptions(webAuthnSignupOptions: request)
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
+
+        // request.scope est déjà le join espace de la liste de scopes (cf. SignupOptions) ; on la retrouve
+        // sans dupliquer la valeur en paramètre, un token de scope OAuth ne pouvant pas contenir d'espace.
+        let scopes = request.scope.components(separatedBy: " ")
 
         return try await awaitAuthToken(requests: [registrationRequest], reachFive: reachFive, anchor: anchor, scopes: scopes, originR5: originR5, passkeyCreationType: .Signup(signupOptions: options)) {
             $0.performRequests()
@@ -138,7 +134,7 @@ public class CredentialManager: NSObject {
         // so can't separate this method from the rest of the class
         cancelInFlightRequests()
 
-        let options = try await reachFiveApi.createWebAuthnRegistrationOptions(authToken: authToken, registrationRequest: RegistrationRequest(origin: request.originWebAuthn!, friendlyName: request.friendlyName))
+        let options = try await reachFive.reachFiveApi.createWebAuthnRegistrationOptions(authToken: authToken, registrationRequest: RegistrationRequest(origin: request.originWebAuthn!, friendlyName: request.friendlyName))
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
         try await awaitRegistration(requests: [registrationRequest], reachFive: reachFive, anchor: request.anchor, originR5: request.origin, passkeyCreationType: .AddPasskey(authToken: authToken)) {
@@ -153,8 +149,8 @@ public class CredentialManager: NSObject {
         // so can't separate this method from the rest of the class
         cancelInFlightRequests()
 
-        let resetOptions = ResetOptions(email: request.email, phoneNumber: request.phoneNumber, verificationCode: request.verificationCode, friendlyName: request.friendlyName, origin: request.originWebAuthn!, clientId: reachFiveApi.sdkConfig.clientId)
-        let options = try await reachFiveApi.createWebAuthnResetOptions(resetOptions: resetOptions)
+        let resetOptions = ResetOptions(email: request.email, phoneNumber: request.phoneNumber, verificationCode: request.verificationCode, friendlyName: request.friendlyName, origin: request.originWebAuthn!, clientId: reachFive.sdkConfig.clientId)
+        let options = try await reachFive.reachFiveApi.createWebAuthnResetOptions(resetOptions: resetOptions)
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
         try await awaitRegistration(requests: [registrationRequest], reachFive: reachFive, anchor: request.anchor, originR5: request.origin, passkeyCreationType: .ResetPasskey(resetOptions: resetOptions)) {
@@ -168,9 +164,9 @@ public class CredentialManager: NSObject {
     func beginAutoFillAssistedPasskeySignIn(request: NativeLoginRequest, reachFive: ReachFive) async throws -> AuthToken {
         cancelInFlightRequests()
 
-        let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFiveApi.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
+        let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
 
-        let assertionRequestOptions = try await reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
+        let assertionRequestOptions = try await reachFive.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
         // Cette garde semble redondante (la méthode est déjà @available(iOS 16.0, *)) mais elle est nécessaire
         // pour compiler sous Xcode 26 (peut-être un bug Xcode). Ne pas la supprimer. Cf. commit 6a65a83.
         let authorizationRequest = if #available(iOS 16.0, *) {
@@ -189,7 +185,7 @@ public class CredentialManager: NSObject {
     func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode, reachFive: ReachFive) async throws -> AuthToken {
         cancelInFlightRequests()
 
-        let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFiveApi.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
+        let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
         switch username {
 
         case .Unspecified(username: let username):
@@ -206,7 +202,7 @@ public class CredentialManager: NSObject {
 
         let authzs = requestTypes.compactMap { adaptAuthz($0) }
 
-        let built = try await buildAuthorizationRequests(webAuthnLoginRequest, authorizing: authzs) { assertionRequestOptions in
+        let built = try await buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: authzs) { assertionRequestOptions in
             guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 16 context
                 throw ReachFiveError.TechnicalError(reason: "Must be iOS 16 or higher")
             }
@@ -229,9 +225,9 @@ public class CredentialManager: NSObject {
     func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, reachFive: ReachFive) async throws -> LoginFlow {
         cancelInFlightRequests()
 
-        let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFiveApi.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
+        let webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
 
-        let built = try await buildAuthorizationRequests(webAuthnLoginRequest, authorizing: requestTypes, appleProvider: appleProvider) { authenticationOptions in
+        let built = try await buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: requestTypes, appleProvider: appleProvider) { authenticationOptions in
             guard #available(iOS 16.0, *) else { // can't happen, because this is called from a >= iOS 16 context
                 throw ReachFiveError.TechnicalError(reason: "Must be iOS 16 or higher")
             }
@@ -251,7 +247,7 @@ public class CredentialManager: NSObject {
     }
 
     /// Construit les `ASAuthorizationRequest` pour les types demandés, sans toucher à l'état de la classe.
-    private func buildAuthorizationRequests(_ webAuthnLoginRequest: WebAuthnLoginRequest, authorizing requestTypes: [ModalAuthorization], appleProvider: ConfiguredAppleProvider? = nil, makeAuthorization: (AuthenticationOptions) throws -> ASAuthorizationRequest) async throws -> BuiltRequests {
+    private func buildAuthorizationRequests(_ webAuthnLoginRequest: WebAuthnLoginRequest, reachFive: ReachFive, authorizing requestTypes: [ModalAuthorization], appleProvider: ConfiguredAppleProvider? = nil, makeAuthorization: (AuthenticationOptions) throws -> ASAuthorizationRequest) async throws -> BuiltRequests {
         var requests: [ASAuthorizationRequest] = []
         var nonce: Pkce?
         var usedAppleProvider: ConfiguredAppleProvider?
@@ -286,7 +282,7 @@ public class CredentialManager: NSObject {
             case .Passkey:
                 do {
                     // Allow the user to use a saved passkey, if they have one.
-                    let authOptions = try await self.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
+                    let authOptions = try await reachFive.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: webAuthnLoginRequest)
                     let passkeyRequest = try makeAuthorization(authOptions)
                     requests.append(passkeyRequest)
                 } catch let error where requestTypes.count > 1 {
@@ -367,6 +363,9 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
     }
 
     private func complete(_ authorization: ASAuthorization, context: RequestContext) async throws {
+        let reachFiveApi = context.reachFive.reachFiveApi
+        let sdkConfig = context.reachFive.sdkConfig
+
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
             // a password was selected to sign in
             guard case let .loginFlow(continuation) = context.pending else {
@@ -386,16 +385,15 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 phoneNumber = passwordCredential.user
             }
 
-            // Contrairement à ReachFive.loginWithPassword, origin n'est pas envoyé dans le LoginRequest
-            // (divergence historique conservée telle quelle)
             let resp = try await reachFiveApi.loginWithPassword(loginRequest: LoginRequest(
                 email: email,
                 phoneNumber: phoneNumber,
                 customIdentifier: nil, // No custom identifier for login because no custom identifier can be used for signup
                 password: passwordCredential.password,
                 grantType: "password",
-                clientId: reachFiveApi.sdkConfig.clientId,
-                scope: scope
+                clientId: sdkConfig.clientId,
+                scope: scope,
+                origin: context.originR5
             ))
 
             let loginFlow = try await context.reachFive.loginFlow(afterPasswordGrant: resp, scopes: context.scopes, origin: context.originR5)
@@ -421,10 +419,10 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             // id_token/nonce/noms Apple ici, state et URL de navigation là-bas) ; factoriser n'apporterait rien.
             let code = try await reachFiveApi.authorize(params: [
                 "provider": appleProvider.providerConfig.providerWithVariant,
-                "client_id": reachFiveApi.sdkConfig.clientId,
+                "client_id": sdkConfig.clientId,
                 "id_token": idToken,
                 "response_type": "code",
-                "redirect_uri": reachFiveApi.sdkConfig.redirectUri.absoluteString,
+                "redirect_uri": sdkConfig.redirectUri.absoluteString,
                 "scope": scope,
                 "code_challenge": pkce.codeChallenge,
                 "code_challenge_method": pkce.codeChallengeMethod,
