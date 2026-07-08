@@ -2,11 +2,9 @@ import Foundation
 import AuthenticationServices
 
 /// Registers a **web** provider (one without a native SDK component, served by `DefaultProvider`) so the app
-/// can pick its **variant** — exactly like native creators carry a `variant`. The chosen variant flows through
-/// the existing mechanism: `ReachFive.reinitialize()` sends `providersCreators.map { ($0.name, $0.variant) }`
-/// to `/api/v1/providers`, and the returned per-variant config (incl. `universalLink`) drives `DefaultProvider`.
+/// can pick its **variant** and its **completion mode**
 ///
-/// Example: `WebProvider(name: .bconnect, variant: "natif")`.
+/// Example: `WebProvider(name: .bconnect, variant: "natif", mode: .externalApp)`.
 public final class WebProvider: ProviderCreator {
     /// The variant-aware SLO providers the backend exposes a variant for. `rawValue` is the backend name.
     public enum Name: String {
