@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06FA9FFD97F751D36D924E4B /* SdkVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */; };
 		2A0305102C04DBE500A92524 /* ResetOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A03050F2C04DBE500A92524 /* ResetOptions.swift */; };
 		2A0305122C04F07900A92524 /* ResetPasskeyRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0305112C04F07900A92524 /* ResetPasskeyRequest.swift */; };
 		2A0305142C063DEA00A92524 /* ResetPublicKeyCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0305132C063DEA00A92524 /* ResetPublicKeyCredential.swift */; };
@@ -105,11 +106,9 @@
 		999000302FC9D1980081A366 /* SessionDevicesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9990002F2FC9D1950081A366 /* SessionDevicesResponse.swift */; };
 		999000322FC9D39D0081A366 /* ReachFiveSessionDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999000312FC9D38E0081A366 /* ReachFiveSessionDevice.swift */; };
 		99DD57C22E72E19A00EE4D1C /* SignupTokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */; };
-		06FA9FFD97F751D36D924E4B /* SdkVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdkVersion.swift; sourceTree = "<group>"; };
 		2A03050F2C04DBE500A92524 /* ResetOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetOptions.swift; sourceTree = "<group>"; };
 		2A0305112C04F07900A92524 /* ResetPasskeyRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasskeyRequest.swift; sourceTree = "<group>"; };
 		2A0305132C063DEA00A92524 /* ResetPublicKeyCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPublicKeyCredential.swift; sourceTree = "<group>"; };
@@ -183,6 +182,7 @@
 		34F7D3E322A54AA2003A7BC0 /* ReachFiveApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveApi.swift; sourceTree = "<group>"; };
 		34F7D3E522A54ADE003A7BC0 /* ProvidersConfigsResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersConfigsResult.swift; sourceTree = "<group>"; };
 		4820021147382B7F35081385 /* Pods-Reach5.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Reach5.release.xcconfig"; path = "Target Support Files/Pods-Reach5/Pods-Reach5.release.xcconfig"; sourceTree = "<group>"; };
+		6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdkVersion.swift; sourceTree = "<group>"; };
 		72DDB78D22EF354300048262 /* ClientConfigResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientConfigResponse.swift; sourceTree = "<group>"; };
 		8433EA3925F1229F00329358 /* DeviceCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCredential.swift; sourceTree = "<group>"; };
 		8496EB1B25DEAFCF005098DD /* R5AuthenticatorAssertionResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = R5AuthenticatorAssertionResponse.swift; sourceTree = "<group>"; };
@@ -450,6 +450,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 347FDB4A229BE84500660687 /* Build configuration list for PBXNativeTarget "Reach5" */;
 			buildPhases = (
+				A64E74D75E964B173E363A57 /* SwiftLint */,
 				3E48ED07786CEAA846211855 /* [CP] Check Pods Manifest.lock */,
 				347FDB3D229BE84500660687 /* Headers */,
 				347FDB3E229BE84500660687 /* Sources */,
@@ -529,6 +530,24 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		A64E74D75E964B173E363A57 /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint > /dev/null; then\n  swiftlint --config \"${SRCROOT}/../.swiftlint.yml\"\nelse\n  echo \"warning: SwiftLint non installe. Installer via \\`brew install swiftlint\\`\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
