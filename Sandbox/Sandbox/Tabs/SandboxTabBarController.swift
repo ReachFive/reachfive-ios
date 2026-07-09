@@ -59,15 +59,15 @@ class SandboxTabBarController: UITabBarController {
             mode = .tabBar
         }
 
-        clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { _ in
+        clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { [weak self] _ in
             Task { @MainActor in
-                self.didLogout()
+                self?.didLogout()
             }
         }
 
-        setTokenObserver = NotificationCenter.default.addObserver(forName: .DidSetAuthToken, object: nil, queue: nil) { _ in
+        setTokenObserver = NotificationCenter.default.addObserver(forName: .DidSetAuthToken, object: nil, queue: nil) { [weak self] _ in
             Task { @MainActor in
-                self.didLogin()
+                self?.didLogin()
             }
         }
 
@@ -78,6 +78,15 @@ class SandboxTabBarController: UITabBarController {
         if AppDelegate.storage.getToken() != nil {
             sandboxTabBar?.items?[2].image = SandboxTabBarController.tokenPresent
             sandboxTabBar?.items?[2].selectedImage = SandboxTabBarController.tokenPresent
+        }
+    }
+
+    deinit {
+        if let clearTokenObserver {
+            NotificationCenter.default.removeObserver(clearTokenObserver)
+        }
+        if let setTokenObserver {
+            NotificationCenter.default.removeObserver(setTokenObserver)
         }
     }
 

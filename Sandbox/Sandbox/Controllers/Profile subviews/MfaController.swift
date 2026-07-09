@@ -46,8 +46,9 @@ class MfaController: UIViewController {
         trustedDevicesTableView.register(trustedDeviceCellNib, forCellReuseIdentifier: TrustedDeviceCell.reuseIdentifier)
 
 
-        tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
+        tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { [weak self] note in
             Task { @MainActor in
+                guard let self else { return }
                 if let result = note.userInfo?["result"] as? Result<AuthToken, ReachFiveError> {
                     self.dismiss(animated: true)
                     switch result {
@@ -64,6 +65,12 @@ class MfaController: UIViewController {
         Task {
             try await fetchMfaCredentials()
             try await fetchTrustedDevices()
+        }
+    }
+
+    deinit {
+        if let tokenNotification {
+            NotificationCenter.default.removeObserver(tokenNotification)
         }
     }
 
