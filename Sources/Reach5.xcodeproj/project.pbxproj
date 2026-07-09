@@ -105,9 +105,11 @@
 		999000302FC9D1980081A366 /* SessionDevicesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9990002F2FC9D1950081A366 /* SessionDevicesResponse.swift */; };
 		999000322FC9D39D0081A366 /* ReachFiveSessionDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999000312FC9D38E0081A366 /* ReachFiveSessionDevice.swift */; };
 		99DD57C22E72E19A00EE4D1C /* SignupTokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */; };
+		06FA9FFD97F751D36D924E4B /* SdkVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdkVersion.swift; sourceTree = "<group>"; };
 		2A03050F2C04DBE500A92524 /* ResetOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetOptions.swift; sourceTree = "<group>"; };
 		2A0305112C04F07900A92524 /* ResetPasskeyRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasskeyRequest.swift; sourceTree = "<group>"; };
 		2A0305132C063DEA00A92524 /* ResetPublicKeyCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPublicKeyCredential.swift; sourceTree = "<group>"; };
@@ -229,6 +231,7 @@
 			isa = PBXGroup;
 			children = (
 				999000312FC9D38E0081A366 /* ReachFiveSessionDevice.swift */,
+				6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */,
 				2AE040E32C88E33900162014 /* AppleProvider.swift */,
 				2AE53309299462DD00EF97E0 /* CredentialManager.swift */,
 				2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */,
@@ -581,6 +584,7 @@
 				34F7D3E422A54AA2003A7BC0 /* ReachFiveApi.swift in Sources */,
 				8496EB2625DEAFCF005098DD /* RegistrationPublicKeyCredential.swift in Sources */,
 				999000322FC9D39D0081A366 /* ReachFiveSessionDevice.swift in Sources */,
+				06FA9FFD97F751D36D924E4B /* SdkVersion.swift in Sources */,
 				8496EB2C25DEAFCF005098DD /* WebauthnSignupCredential.swift in Sources */,
 				990AF3422DD2146800D31780 /* VerifyEmailRequest.swift in Sources */,
 				34F7D3E622A54ADE003A7BC0 /* ProvidersConfigsResult.swift in Sources */,

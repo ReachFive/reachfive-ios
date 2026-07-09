@@ -34,8 +34,6 @@
 		2AD29AB52E2E9F9F00B26535 /* EditableSectionHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */; };
 		2AD29AB82E2ED7F100B26535 /* TrustedDeviceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */; };
 		2AD29AB92E2ED7F100B26535 /* TrustedDeviceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */; };
-		A00000022E2ED7F100B26535 /* SessionDeviceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000012E2ED7F100B26535 /* SessionDeviceCell.swift */; };
-		A00000042E2ED7F100B26535 /* SessionDeviceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = A00000032E2ED7F100B26535 /* SessionDeviceCell.xib */; };
 		2AD29AE72E32AFA000B26535 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */; };
 		2AE326BD2E3931D1007D6763 /* DemoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE326BC2E3931D1007D6763 /* DemoController.swift */; };
 		2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFF7DE8296F1EB900514B47 /* ActionController.swift */; };
@@ -51,6 +49,8 @@
 		349E16EC230BEBBF002EA06B /* UpdatePasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */; };
 		9987CBB32FCDD182006DF706 /* SessionDevicesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9987CBB22FCDD17B006DF706 /* SessionDevicesViewController.swift */; };
 		99E4472F2B863AB300EC7559 /* ProfileContentTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */; };
+		A00000022E2ED7F100B26535 /* SessionDeviceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000012E2ED7F100B26535 /* SessionDeviceCell.swift */; };
+		A00000042E2ED7F100B26535 /* SessionDeviceCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = A00000032E2ED7F100B26535 /* SessionDeviceCell.xib */; };
 		EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91A17236291622417196AE /* SignupPasskeyController.swift */; };
 		EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */; };
 		EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */; };
@@ -85,8 +85,6 @@
 		2AD29AB42E2E9F9F00B26535 /* EditableSectionHeaderView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditableSectionHeaderView.xib; sourceTree = "<group>"; };
 		2AD29AB62E2ED7F100B26535 /* TrustedDeviceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedDeviceCell.swift; sourceTree = "<group>"; };
 		2AD29AB72E2ED7F100B26535 /* TrustedDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TrustedDeviceCell.xib; sourceTree = "<group>"; };
-		A00000012E2ED7F100B26535 /* SessionDeviceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDeviceCell.swift; sourceTree = "<group>"; };
-		A00000032E2ED7F100B26535 /* SessionDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SessionDeviceCell.xib; sourceTree = "<group>"; };
 		2AD29AE62E32AFA000B26535 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		2AE326BC2E3931D1007D6763 /* DemoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoController.swift; sourceTree = "<group>"; };
 		2AFF7DE8296F1EB900514B47 /* ActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionController.swift; sourceTree = "<group>"; };
@@ -105,6 +103,8 @@
 		349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePasswordController.swift; sourceTree = "<group>"; };
 		9987CBB22FCDD17B006DF706 /* SessionDevicesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDevicesViewController.swift; sourceTree = "<group>"; };
 		99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContentTableView.swift; sourceTree = "<group>"; };
+		A00000012E2ED7F100B26535 /* SessionDeviceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDeviceCell.swift; sourceTree = "<group>"; };
+		A00000032E2ED7F100B26535 /* SessionDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SessionDeviceCell.xib; sourceTree = "<group>"; };
 		C9C16455A16CA84067D7FF45 /* Pods-Sandbox.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sandbox.debug.xcconfig"; path = "Target Support Files/Pods-Sandbox/Pods-Sandbox.debug.xcconfig"; sourceTree = "<group>"; };
 		EA91A17236291622417196AE /* SignupPasskeyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignupPasskeyController.swift; sourceTree = "<group>"; };
 		EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecureStorage.swift; sourceTree = "<group>"; };
@@ -317,7 +317,6 @@
 			buildConfigurationList = 3417320C229D6B6400681CFD /* Build configuration list for PBXNativeTarget "Sandbox" */;
 			buildPhases = (
 				C62175C50B8B62E891F5598C /* [CP] Check Pods Manifest.lock */,
-				2AE326D42E3CC04D007D6763 /* Run Script */,
 				341731F6229D6B6400681CFD /* Sources */,
 				341731F7229D6B6400681CFD /* Frameworks */,
 				341731F8229D6B6400681CFD /* Resources */,
@@ -391,26 +390,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2AE326D42E3CC04D007D6763 /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/../version.rb",
-			);
-			name = "Run Script";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(SRCROOT)/../Sources/Core/Info.plist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "cd ..\n\"./set_version.sh\"\n";
-		};
 		A514CE717C81A5C4759D5906 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -419,9 +398,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Sandbox/Pods-Sandbox-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
