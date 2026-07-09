@@ -27,3 +27,7 @@
 --strip-unused-args closure-only
 --extension-acl on-declarations
 --void-type void
+
+# Ne pas forcer les if/loop à une seule instruction sur plusieurs lignes,
+# le style compact `if cond { instr }` reste autorisé.
+--disable wrapIfStatementBodies,wrapLoopBodies
