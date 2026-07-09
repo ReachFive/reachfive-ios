@@ -47,6 +47,18 @@ class SandboxTabBarController: UITabBarController {
         print("SandboxTabBarController.viewDidLoad")
         super.viewDidLoad()
 
+        // Fond opaque : un fond transparent rendait la barre invisible, notamment sur Mac Catalyst
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        tabBar.standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+            tabBar.scrollEdgeAppearance = appearance
+        }
+        if #available(iOS 18.0, *) {
+            // Garde la barre d'onglets classique en bas (sur Catalyst/iPad, iOS 18 la déplace sinon en sidebar)
+            mode = .tabBar
+        }
+
         clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { _ in
             Task { @MainActor in
                 self.didLogout()
