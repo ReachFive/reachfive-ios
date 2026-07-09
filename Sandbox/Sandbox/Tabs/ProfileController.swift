@@ -59,8 +59,9 @@ class ProfileController: UIViewController {
         print("ProfileController.viewDidLoad")
         super.viewDidLoad()
         emailMfaVerifyNotification = NotificationCenter.default.addObserver(forName: .DidReceiveMfaVerifyEmail, object: nil, queue: nil) {
-            (note) in
+            [weak self] (note) in
             Task { @MainActor in
+                guard let self else { return }
                 if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
                     self.dismiss(animated: true)
                     switch result {
@@ -74,8 +75,9 @@ class ProfileController: UIViewController {
             }
         }
         emailVerificationNotification = NotificationCenter.default.addObserver(forName: .DidReceiveEmailVerificationCallback, object: nil, queue: nil) {
-            (note) in
+            [weak self] (note) in
             Task { @MainActor in
+                guard let self else { return }
                 if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
                     self.dismiss(animated: true)
                     switch result {
@@ -89,13 +91,12 @@ class ProfileController: UIViewController {
             }
         }
 
-        //TODO: mieux gérer les notifications pour ne pas en avoir plusieurs qui se déclenche pour le même évènement
-        clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { _ in
-            self.didLogout()
+        clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { [weak self] _ in
+            self?.didLogout()
         }
 
-        setTokenObserver = NotificationCenter.default.addObserver(forName: .DidSetAuthToken, object: nil, queue: nil) { _ in
-            self.didLogin()
+        setTokenObserver = NotificationCenter.default.addObserver(forName: .DidSetAuthToken, object: nil, queue: nil) { [weak self] _ in
+            self?.didLogin()
         }
 
         authToken = AppDelegate.storage.getToken()
@@ -114,6 +115,13 @@ class ProfileController: UIViewController {
         //TODO: supprimer le logout qui n'a jamais marché
         //        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(toggleEditMode))
 
+    }
+
+    deinit {
+        let center = NotificationCenter.default
+        [emailMfaVerifyNotification, emailVerificationNotification, clearTokenObserver, setTokenObserver]
+            .compactMap { $0 }
+            .forEach { center.removeObserver($0) }
     }
 
     //TODO:
