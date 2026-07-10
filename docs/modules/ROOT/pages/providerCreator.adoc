@@ -5,7 +5,7 @@ These specific providers use native calls or external libraries to authenticate 
 
 All providers except xref:docs:ROOT:apple.adoc[Apple] that you configure in the {cc} for which you don't use a specific provider creator will authenticate through an `ASWebAuthenticationSession`.
 
-You should define and configure these providers when you xref:index.adoc#configuration-5[configure the iOS SDK].
+You should define and configure these providers when you xref:index.adoc#configure-the-ios-sdk[configure the iOS SDK].
 
 == Examples
 
@@ -30,5 +30,23 @@ Otherwise, the default variant is chosen.
 include::partial$config/params.adoc[tags="GoogleProvider,FacebookProvider,AppleProvider,WeChat,WebProvider"]
 
 |===
+
+== Universal-link web providers
+
+Some web providers finish login on an *https* universal link and may hand off to an external app before returning to yours (e.g. B.connect with `.externalApp`).
+Use this checklist to ensure you have everything set up correctly; you do *not* need xref:guides/custom-provider.adoc[a custom provider] unless none of the built-in options fit.
+
+[%interactive]
+* [ ] Configure the provider and variant on your {cc}.
+* [ ] Whitelist the provider's `universalLink` URL in *Allowed Callback URLs* (see xref:docs:ROOT:clients.adoc[]).
+* [ ] Register a <<WebProvider,`WebProvider`>> with the matching `mode` in `ReachFive(providersCreators:)`.
+* [ ] Initialize the SDK so provider configurations are fetched and `getProvider` can resolve your provider (see xref:application/applicationDidFinishLaunchingWithOptions.adoc[]).
+* [ ] Set up Associated Domains and xref:index.adoc#associated-domains-universal-link-providers[`apple-app-site-association`] for the mode you chose.
+* [ ] Forward `application(_:continue:restorationHandler:)` to {company} and honour the returned `Bool` (see xref:application/applicationContinueUserActivity.adoc[]).
+* [ ] Call xref:getProvider.adoc[`getProvider(name:).login(...)`] from a `UIViewController` that implements `ASWebAuthenticationPresentationContextProviding` when required.
+
+Do *not* use xref:loadLoginWebview.adoc[`loadLoginWebview`] for these providers; their callback is delivered through xref:application/applicationContinueUserActivity.adoc[`application(_:continue:)`], not an embedded webview.
+
+If iOS terminates your app while the user is in the external app, the in-flight login is lost and must be restarted (see xref:application/applicationContinueUserActivity.adoc[]).
 
 TIP: None of these fit your case? See xref:guides/custom-provider.adoc[] to implement your own.

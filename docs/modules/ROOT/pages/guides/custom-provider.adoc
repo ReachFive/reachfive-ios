@@ -1,29 +1,37 @@
 = Implement a custom provider
 
-Our built-in provider creators (`GoogleProvider`, `FacebookProvider`, `AppleProvider`, `WeChat`, `WebProvider` — see xref:providerCreator.adoc[]) cover the common cases. This guide is for the rest: a social/SSO provider with its own native SDK, or a login flow that none of the built-ins model.
+Our built-in xref:providerCreator.adoc[provider creators] cover the most common use cases for provider creation:
 
-TIP: If your provider has no native SDK component and only needs to choose *how* its `ASWebAuthenticationSession` returns to the app (custom scheme, universal link, out-of-band), you don't need a custom provider at all — configure a xref:providerCreator.adoc[`WebProvider`] instead.
+* `GoogleProvider`
+* `FacebookProvider`
+* `AppleProvider`
+* `WeChat`
+* `WebProvider`
+
+This custom provider guide instructs you how to implement a provider that none of the built-ins model such as a social/SSO provider with its own native SDK, or a login flow that none of the built-ins model.
+
+If your provider has no native SDK component and only needs to choose *how* its `ASWebAuthenticationSession` returns to the app (custom scheme, universal link, out-of-band), you don't need a custom provider, instead configure a xref:providerCreator.adoc[`WebProvider`].
 
 == The two protocols
 
-A provider is made of two pieces, both in `Sources/Core/Classes/Provider.swift`:
+A provider is made of two pieces, both found in `Sources/Core/Classes/Provider.swift`:
 
-* `ProviderCreator`: a lightweight factory you list in `ReachFive(providersCreators:)`. It only carries a `name` and an optional `variant`, and builds the actual `Provider` once ReachFive has fetched that provider's configuration from the backend.
-* `Provider`: the object doing the actual work — `login`, `logout`, and the app-lifecycle hooks it needs to intercept its own callback.
-
+* `ProviderCreator`: a lightweight factory you list in `ReachFive(providersCreators:)`. 
+It carries a `name` and an optional `variant` and builds the actual `Provider` once {company} has fetched that provider's configuration from the backend.
+Its `create` method also receives the shared `ReachFive` instance.
+See <<Example: wrapping a native SDK>> for how to hold that reference safely in the `Provider` you return.
+* `Provider`: the object doing the actual work: `login`, `logout`, and the app-lifecycle hooks it needs to intercept its own callback.
++
 [source,swift]
 ----
 include::example$customProviderProtocols.swift[]
 ----
 
-`name` must match the provider's name as configured on your {cc} — this is how ReachFive matches your `ProviderCreator` against the provider configurations it fetches from the backend. A configured provider with no matching creator (and that isn't Apple) still logs in, falling back to a generic web-based `DefaultProvider`.
+IMPORTANT: `name` must match the provider's name as configured on your {cc}.
+This is how {company} matches your `ProviderCreator` against the provider configurations it fetches from the backend.
+A configured provider with no matching creator (and that isn't Apple) still logs in, falling back to a generic web-based `DefaultProvider`.
 
-[CAUTION]
-====
-Do not store the `reachFive` instance strongly in your `Provider`. ReachFive retains its providers, so a strong back-reference creates a retain cycle (`ReachFive` ↔ `Provider`) and the whole SDK graph never gets deallocated. Hold it `weak`, or copy the values you need (`sdkConfig`, `reachFiveApi`, `scope`, …) at creation time instead.
-====
-
-== Register it
+== Register the custom provider
 
 [source,swift]
 ----
@@ -32,7 +40,23 @@ include::example$registerCustomProvider.swift[]
 
 == Example: wrapping a native SDK
 
-This is the shape used by our own `AppleProvider` (link:https://github.com/ReachFive/reachfive-ios/blob/master/Sources/Core/Classes/AppleProvider.swift[source^]): the creator is a thin factory, and the actual `Provider` calls into the third-party native SDK, then exchanges its result for a {company} `AuthToken` — here through `reachFive.authWithCode`, which is the same helper used internally by native login.
+This is the shape used by our own (link:https://github.com/ReachFive/reachfive-ios/blob/master/Sources/Core/Classes/AppleProvider.swift[`AppleProvider.swift`^]): 
+
+* The creator is a thin factory.
+* The actual `Provider` calls into the third-party native SDK, then exchanges its result for a {company} `AuthToken` through `reachFive.authWithCode`, which is the same helper used internally by native login.
+
+Your `create` method receives the shared `ReachFive` instance, which the SDK also stores in `ReachFive.providers`.
+When you build your `Provider`, decide how to access it from `login`:
+
+[CAUTION]
+====
+When `create(reachFive:)` runs, the SDK has already decided to keep your `Provider` in `ReachFive.providers`.
+If your provider also keeps a *strong* reference back to that same `ReachFive` instance, neither object can ever be released—a *retain cycle* (`ReachFive` ↔ `Provider`) that pins the whole SDK object graph in memory.
+
+Use `weak var reachFive` in your provider, or copy only the properties you need at init time (e.g. `sdkConfig`, `reachFiveApi`, `scope`).
+
+For background on why this happens and how `weak` breaks the cycle, see link:https://developer.apple.com/documentation/swift/automatic-reference-counting#Strong-Reference-Cycles-Between-Class-Instances[Apple: strong reference cycles between class instances^] and link:https://developer.apple.com/documentation/swift/weak[`weak` references^].
+====
 
 [source,swift]
 ----
@@ -51,16 +75,25 @@ Only implement the hooks your provider actually needs to intercept its own callb
 |===
 |Hook |When to implement it
 
-|application(_:open:options:)
+|xref:application/applicationOpenUrl.adoc[application(_:open:options:)]
 |Your provider's callback arrives through a custom URL scheme (`myapp://...`) rather than the completion handler of `ASWebAuthenticationSession`.
 
-|application(_:didFinishLaunchingWithOptions:)
-|Your provider's native SDK needs an explicit startup call (e.g. registering itself before the app finishes launching).
+|xref:application/applicationDidFinishLaunchingWithOptions.adoc[application(_:didFinishLaunchingWithOptions:)]
+|Your provider's native SDK needs an explicit startup call.
 
-|applicationDidBecomeActive(_:)
-|Your provider needs to react to the app returning to the foreground (e.g. resuming a paused native SDK session).
+An example of this is registering itself before the app finishes launching.
 
-|application(_:continue:restorationHandler:)
-|Your provider's callback arrives as a *universal link* (`NSUserActivityTypeBrowsingWeb`) — e.g. an out-of-band flow like `WebProvider` `.externalApp` mode. Return `true` only if you actually consumed the activity; ReachFive relies on that return value (see xref:application/applicationContinueUserActivity.adoc[]).
+|xref:application/applicationDidBecomeActive.adoc[applicationDidBecomeActive(_:)]
+|Your provider needs to react to the app returning to the foreground.
+
+An example of this is resuming a paused native SDK session.
+
+|xref:application/applicationContinueUserActivity.adoc[application(_:continue:restorationHandler:)]
+|Your provider's callback arrives as a *universal link* (`NSUserActivityTypeBrowsingWeb`).
+
+An example of this is an out-of-band flow like `WebProvider` `.externalApp` mode. 
+
+Return `true` only if you actually consumed the activity.
+{company} relies on that return value (see xref:application/applicationContinueUserActivity.adoc[] for details).
 
 |===
