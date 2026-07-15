@@ -4,7 +4,10 @@ import AuthenticationServices
 class DefaultProvider: NSObject, Provider {
     let name: String
 
-    let reachfive: ReachFive
+    // `weak` : ReachFive retient ses providers, une référence forte ici créerait un cycle
+    // ReachFive ↔ DefaultProvider et le graphe SDK ne serait jamais désalloué (même pattern que
+    // LoginWKWebview).
+    private weak var reachfive: ReachFive?
     let providerConfig: ProviderConfig
 
     public init(reachfive: ReachFive, providerConfig: ProviderConfig) {
@@ -21,6 +24,10 @@ class DefaultProvider: NSObject, Provider {
 
         guard let presentationContextProvider = viewController as? ASWebAuthenticationPresentationContextProviding else {
             throw ReachFiveError.TechnicalError(reason: "No presenting viewController")
+        }
+
+        guard let reachfive else {
+            throw ReachFiveError.TechnicalError(reason: "ReachFive instance was deallocated")
         }
 
         return try await reachfive.webviewLogin(WebviewLoginRequest(scope: scope, presentationContextProvider: presentationContextProvider, origin: origin, provider: providerConfig.provider))
