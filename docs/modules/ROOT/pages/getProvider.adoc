@@ -36,15 +36,6 @@ func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentati
 }
 ----
 
-[NOTE]
-====
-This requirement does not apply to `.logout`.
-
-Universal-link providers such as B.connect use `WebProvider` with `.externalApp` mode.
-See xref:providerCreator.adoc[provider creators] for configuration.
-====
-
-
 == Examples
 
 [tabs]
