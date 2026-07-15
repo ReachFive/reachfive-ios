@@ -18,10 +18,19 @@ public final class WebProvider: ProviderCreator {
         case Line = "line"
     }
 
-    //TODO: doc à reprendre depuis WebSessionMode
+    /// Selects how the `ASWebAuthenticationSession` should complete for this provider; resolved into the
+    /// corresponding ``WebSessionMode`` (with its URL) by `DefaultProvider.init`.
     public enum WebProviderMode {
+        /// Custom scheme intercepted by the session (works on all iOS versions). E.g. `reachfive-<clientId>`.
         case sdkScheme
+
+        /// out-of-band completion: the flow ends in an external app that reopens the host app via a
+        /// universal link. Requires the `applinks:<host>` Associated Domain on the host app side.
         case externalApp
+
+        /// Universal link intercepted _inside_ the webview (iOS 17.4+ via `callback: .https`). Requires
+        /// the `webcredentials:<host>` Associated Domain. Reserve for flows that end
+        /// entirely within the sheet (no jump to an external app).
         @available(iOS 17.4, *)
         case universalLink
     }
