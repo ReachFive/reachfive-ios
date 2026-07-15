@@ -1,0 +1,22 @@
+#!/bin/sh
+# Formate automatiquement les fichiers Swift stagés avec SwiftFormat avant chaque commit.
+# Activation : git config core.hooksPath .githooks
+
+if ! command -v swiftformat >/dev/null 2>&1; then
+    echo "warning: swiftformat non installé (brew install swiftformat), formatage ignoré"
+    exit 0
+fi
+
+staged_swift_files=$(git diff --cached --name-only --diff-filter=ACM -- '*.swift')
+
+if [ -z "$staged_swift_files" ]; then
+    exit 0
+fi
+
+echo "$staged_swift_files" | while IFS= read -r file; do
+    [ -f "$file" ] && swiftformat "$file" >/dev/null 2>&1
+done
+
+echo "$staged_swift_files" | while IFS= read -r file; do
+    [ -f "$file" ] && git add "$file"
+done

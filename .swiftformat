@@ -1,0 +1,33 @@
+--swiftversion 5.10
+--exclude Sources/Pods,Sandbox/Pods,.build,.swiftpm,DerivedData,docs
+
+--indent 4
+--indent-case false
+--trim-whitespace always
+--linebreaks lf
+
+--allman false
+--else-position same-line
+--guard-else same-line
+
+--semicolons never
+--decimal-grouping 3,6
+--hex-grouping 4,8
+--octal-grouping 4,8
+--binary-grouping 4,8
+
+--self remove
+--import-grouping testable-last
+
+--wrap-arguments before-first
+--wrap-parameters before-first
+--wrap-collections before-first
+--closing-paren balanced
+
+--strip-unused-args closure-only
+--extension-acl on-declarations
+--void-type void
+
+# Ne pas forcer les if/loop à une seule instruction sur plusieurs lignes,
+# le style compact `if cond { instr }` reste autorisé.
+--disable wrapIfStatementBodies,wrapLoopBodies

@@ -76,6 +76,26 @@ swcutil developer-mode -e true
 
 # Development
 
+## Linting & formatting
+
+The project uses [SwiftLint](https://github.com/realm/SwiftLint) (linter) and [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) (formatter), configured via `.swiftlint.yml` and `.swiftformat` at the repo root.
+
+```sh
+brew install swiftlint swiftformat
+```
+
+- **SwiftLint** runs automatically as a build phase in both `Reach5.xcodeproj` and `Sandbox.xcodeproj`; violations show up as warnings/errors directly in Xcode.
+- **SwiftFormat** runs on staged files via a git hook before each commit. Enable it once per clone with:
+  ```sh
+  git config core.hooksPath .githooks
+  ```
+
+You can also run either tool manually on the whole repo:
+```sh
+swiftlint lint
+swiftformat .
+```
+
 ## Viewing the modules as libraries in XCode
 
 Open the project folder to view it as a package project, not the .xcodeproj or .xcworkspace which makes them seen as a Pod project
