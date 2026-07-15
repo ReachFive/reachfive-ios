@@ -55,7 +55,7 @@ If your provider also keeps a *strong* reference back to that same `ReachFive` i
 
 Use `weak var reachFive` in your provider, or copy only the properties you need at init time (e.g. `sdkConfig`, `reachFiveApi`, `scope`).
 
-For background on why this happens and how `weak` breaks the cycle, see link:https://developer.apple.com/documentation/swift/automatic-reference-counting#Strong-Reference-Cycles-Between-Class-Instances[Apple: strong reference cycles between class instances^] and link:https://developer.apple.com/documentation/swift/weak[`weak` references^].
+For background on why this happens and how `weak` breaks the cycle, see link:https://docs.swift.org/swift-book/documentation/the-swift-programming-language/automaticreferencecounting/#Strong-Reference-Cycles-Between-Class-Instances[Apple: strong reference cycles between class instances^] and link:https://docs.swift.org/swift-book/documentation/the-swift-programming-language/automaticreferencecounting/#Weak-References[`weak` references^].
 ====
 
 [source,swift]
