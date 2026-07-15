@@ -6,14 +6,19 @@ import AuthenticationServices
 ///
 /// Example: `WebProvider(name: .bconnect, variant: "natif", mode: .externalApp)`.
 public final class WebProvider: ProviderCreator {
-    /// The variant-aware SLO providers the backend exposes a variant for. `rawValue` is the backend name.
+    /// The SLO providers supported by the backend. `rawValue` is the backend name.
     public enum Name: String {
-        case facebook
-        case google
-        case line
-        case bconnect
+        case Facebook = "facebook"
+        case Google = "google"
+        case PayPal = "paypal"
+        case Twitter = "twitter"
+        case FranceConnect = "franceconnect"
+        case Oney = "oney"
+        case Bconnect = "bconnect"
+        case Line = "line"
     }
 
+    //TODO: doc à reprendre depuis WebSessionMode
     public enum WebProviderMode {
         case sdkScheme
         case externalApp

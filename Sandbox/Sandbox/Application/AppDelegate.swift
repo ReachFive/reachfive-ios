@@ -55,7 +55,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         GoogleProvider(variant: "one_tap"),
         FacebookProvider(),
         AppleProvider(variant: "natif"),
-        WebProvider(name: .bconnect, variant: "natif", mode: .externalApp)
+        WebProvider(name: .Bconnect, variant: "natif", mode: .externalApp)
     ]
     #if targetEnvironment(macCatalyst)
     static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: true))

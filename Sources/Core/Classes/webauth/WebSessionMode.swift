@@ -3,7 +3,7 @@ import Foundation
 /// Describes how an `ASWebAuthenticationSession` ends — hence **how it's built** and
 /// **which channel receives the callback**.
 /// Two channels, mutually exclusive for a given login:
-/// - **in-band** (``sdkScheme`` & ``universalLink``): the final redirection is intercepted INSIDE the session's webview,
+/// - **in-band** (``sdkScheme`` & ``universalLink``): the final redirection is intercepted _inside_ the session's webview,
 ///   which then triggers its completion handler.
 /// - **out-of-band** (``externalApp``): the flow ends in an external app that reopens the host app
 ///   via a universal link (`application(_:continue:)` → ``WebAuthenticationSession/tryComplete(externalCallbackURL:)``);
@@ -12,17 +12,17 @@ public enum WebSessionMode {
     /// Custom scheme intercepted by the session (works on all iOS versions). E.g. `reachfive-<clientId>`.
     case sdkScheme
 
-    /// Universal link intercepted INSIDE the webview (iOS 17.4+ via `callback: .https`). Requires
+    /// Universal link intercepted _inside_ the webview (iOS 17.4+ via `callback: .https`). Requires
     /// the `webcredentials:<host>` Associated Domain. Reserve for flows that end
     /// entirely within the sheet (no jump to an external app).
     case universalLink(URL)
 
-    /// OUT-OF-BAND completion: universal link returned by an external app. Requires
+    /// out-of-band completion: universal link returned by an external app. Requires
     /// the `applinks:<host>` Associated Domain on the host app side. The carried value is the expected
     /// `redirect_uri`, recognized by `tryComplete`.
     case externalApp(URL)
 
-    /// The universal link expected OUT-OF-BAND (via `tryComplete`), `nil` in in-band mode.
+    /// The universal link expected out-of-band (via `tryComplete`), `nil` in in-band mode.
     var outOfBandCallback: URL? {
         switch self {
         case .externalApp(let url): url
