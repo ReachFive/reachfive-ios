@@ -51,7 +51,7 @@ When you build your `Provider`, decide how to access it from `login`:
 [CAUTION]
 ====
 When `create(reachFive:)` runs, the SDK has already decided to keep your `Provider` in `ReachFive.providers`.
-If your provider also keeps a *strong* reference back to that same `ReachFive` instance, neither object can ever be released—a *retain cycle* (`ReachFive` ↔ `Provider`) that pins the whole SDK object graph in memory.
+If your provider also keeps a *strong* reference back to that same `ReachFive` instance, neither object can ever be released — a *retain cycle* (`ReachFive` ↔ `Provider`) that pins the whole SDK object graph in memory.
 
 Use `weak var reachFive` in your provider, or copy only the properties you need at init time (e.g. `sdkConfig`, `reachFiveApi`, `scope`).
 
