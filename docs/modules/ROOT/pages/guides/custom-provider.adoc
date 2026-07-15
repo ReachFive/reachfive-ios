@@ -29,7 +29,7 @@ include::example$customProviderProtocols.swift[]
 
 IMPORTANT: `name` must match the provider's name as configured on your {cc}.
 This is how {company} matches your `ProviderCreator` against the provider configurations it fetches from the backend.
-A configured provider with no matching creator (and that isn't Apple) still logs in, falling back to a generic web-based `DefaultProvider`.
+A configured provider with no matching creator still logs in, falling back to either native Sign in with Apple or a generic web-based provider.
 
 == Register the custom provider
 
