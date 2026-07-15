@@ -8,14 +8,14 @@ import AuthenticationServices
 public final class WebProvider: ProviderCreator {
     /// The SLO providers supported by the backend. `rawValue` is the backend name.
     public enum Name: String {
-        case Facebook = "facebook"
-        case Google = "google"
-        case PayPal = "paypal"
-        case Twitter = "twitter"
-        case FranceConnect = "franceconnect"
-        case Oney = "oney"
-        case Bconnect = "bconnect"
-        case Line = "line"
+        case facebook
+        case google
+        case payPal = "paypal"
+        case twitter
+        case franceConnect = "franceconnect"
+        case oney
+        case bconnect
+        case line
     }
 
     /// Selects how the `ASWebAuthenticationSession` should complete for this provider; resolved into the
