@@ -77,12 +77,10 @@ class DefaultProvider: NSObject, Provider {
     public func login(
         scope: [String]?,
         origin: String,
-        viewController: UIViewController?
+        presenting: Presentation
     ) async throws -> AuthToken {
 
-        guard let presentationContextProvider = viewController as? ASWebAuthenticationPresentationContextProviding else {
-            throw ReachFiveError.TechnicalError(reason: "No presenting viewController")
-        }
+        let presentationContextProvider = try await presenting.webAuthContextProvider()
 
         guard let webSessionMode else {
             throw ReachFiveError.TechnicalError(reason: "No universal link configured for provider \(name)")

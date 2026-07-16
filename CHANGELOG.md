@@ -15,6 +15,17 @@
 - ProviderCreator : the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can
   reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
 
+- `Provider.login` takes a `Presentation` instead of a `UIViewController?`:
+
+  ```swift
+  // Before
+  try await provider.login(scope: scope, origin: origin, viewController: self)
+  // After
+  try await provider.login(scope: scope, origin: origin, presenting: Presentation(from: self))
+  ```
+
+  The view controller no longer needs to conform to `ASWebAuthenticationPresentationContextProviding` for web providers: the SDK derives the presentation context itself (a conforming view controller keeps precedence if you have one). It must simply be attached to a window at call time — call `login` from `viewDidAppear` or a user interaction, not from `viewDidLoad`. Conformance is still required when calling `webviewLogin` or `logout(webSessionLogout:)` directly, whose requests are unchanged.
+
 ### New features
 - Support for universal-link providers: register a `WebProvider` (e.g. `WebProvider(name: .bconnect, mode: .externalApp)`) to pick how the login session is delivered back to the app. See xref:providerCreator.adoc[] and xref:guides/custom-provider.adoc[].
 - `webviewLogin` accepts a new `webSessionMode` parameter (`.sdkScheme`, `.universalLink`, `.externalApp`) to control the return channel of the underlying `ASWebAuthenticationSession`.

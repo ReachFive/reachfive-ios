@@ -50,7 +50,7 @@ Login may hand off to an external app (e.g. a banking app) that reopens yours vi
 * [ ] Initialize the SDK so provider configurations are fetched and `getProvider` can resolve your provider (see xref:application/applicationDidFinishLaunchingWithOptions.adoc[`applicationDidFinishLaunchingWithOptions(_:)`]).
 * [ ] Add `applinks:$\{host\}` to Associated Domains and the matching `applinks` section in `apple-app-site-association` (see xref:index.adoc#associated-domains-universal-link-providers[`apple-app-site-association`]).
 * [ ] Forward `application(_:continue:restorationHandler:)` to {company} and honour the returned `Bool` (see xref:application/applicationContinueUserActivity.adoc[`application(_:continue:restorationHandler:)`]).
-* [ ] Call xref:getProvider.adoc[`getProvider(name:).login(...)`] from a `UIViewController` that implements `ASWebAuthenticationPresentationContextProviding`.
+* [ ] Call xref:getProvider.adoc[`getProvider(name:).login(...)`] with a `Presentation` built from a `UIViewController` attached to a window; see xref:getProvider.adoc[] for details.
 
 Do *not* use xref:loadLoginWebview.adoc[`loadLoginWebview`]: the callback is delivered through xref:application/applicationContinueUserActivity.adoc[`application(_:continue:)`], not an embedded webview.
 
@@ -67,7 +67,7 @@ This is the same flow as the default custom-scheme login, but the OAuth `redirec
 * [ ] Register a <<WebProvider,`WebProvider`>> with `mode: .universalLink` in `ReachFive(providersCreators:)` (iOS 17.4+).
 * [ ] Initialize the SDK so provider configurations are fetched and `getProvider` can resolve your provider (see xref:application/applicationDidFinishLaunchingWithOptions.adoc[`applicationDidFinishLaunchingWithOptions(_:)`]).
 * [ ] Add `webcredentials:$\{host\}` to Associated Domains and the matching `webcredentials` section in `apple-app-site-association` (see xref:index.adoc#associated-domains-universal-link-providers[`apple-app-site-association`]).
-* [ ] Call xref:getProvider.adoc[`getProvider(name:).login(...)`] from a `UIViewController` that implements `ASWebAuthenticationPresentationContextProviding`.
+* [ ] Call xref:getProvider.adoc[`getProvider(name:).login(...)`] with a `Presentation` built from a `UIViewController` attached to a window; see xref:getProvider.adoc[] for details.
 
 No `application(_:continue:)` wiring is required for login completion; the `ASWebAuthenticationSession` completes inside the sheet.
 

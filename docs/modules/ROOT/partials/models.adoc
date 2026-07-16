@@ -156,7 +156,7 @@ The provider which name matches the name passed in argument.
 
 - `scope` `[String]`: the list of the profile’s scopes. Make sure they are allowed by the client. Default scopes are the allowed scopes set up in the client’s configuration.
 - `origin` `String`: the origin of the call
-- `viewController` `UIViewController`: the class that manages the views of your iOS app.
+- `presenting` `Presentation`: where the provider presents its UI. Build it from the initiating view controller: `Presentation(from: self)`. The view controller must be attached to a window at call time.
 
 It authenticates the profile with the provider otherwise it returns a `ReachFiveError`.
 | logout `function` | No argument is expected. Kill the SSO session of the profile otherwise returns a `ReachFiveError`.
