@@ -149,6 +149,8 @@ The provider which name matches the name passed in argument.
 - `franceconnect`
 - `apple`
 - `oney`
+- `bconnect`
+- `line`
 
 | login `function` | Expect the following arguments:
 
