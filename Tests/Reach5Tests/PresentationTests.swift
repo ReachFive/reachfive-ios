@@ -97,4 +97,21 @@ final class PresentationTests: XCTestCase {
         XCTAssertNil(weakVC, "l'adaptateur ne doit pas retenir le view controller")
         _ = provider
     }
+
+    func testWebAuthContextProviderAdapterFallsBackSilentlyWhenViewControllerIsDeallocated() throws {
+        // Documente le comportement actuel : si le view controller est désalloué entre la
+        // création de l'adaptateur et l'appel du callback par ASWebAuthenticationSession,
+        // aucune erreur n'est levée (le callback n'est pas throwing) — l'adaptateur retombe
+        // silencieusement sur une anchor de repli fraîchement créée plutôt que de signaler l'échec.
+        var vc: UIViewController? = UIViewController()
+        let provider = try Presentation(from: vc!).webAuthContextProvider()
+        weak var weakVC = vc
+        vc = nil
+        XCTAssertNil(weakVC, "précondition : le view controller doit être réellement désalloué")
+
+        let firstAnchor = provider.presentationAnchor(for: makeSession())
+        let secondAnchor = provider.presentationAnchor(for: makeSession())
+        XCTAssertNotIdentical(firstAnchor, secondAnchor,
+                              "l'anchor de repli doit être reconstruite à chaque appel, pas mise en cache")
+    }
 }
