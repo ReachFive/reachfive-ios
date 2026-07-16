@@ -7,7 +7,7 @@ public protocol ProviderCreator {
 
 public protocol Provider {
     var name: String { get }
-    func login(scope: [String]?, origin: String, viewController: UIViewController?) async throws -> AuthToken
+    func login(scope: [String]?, origin: String, presenting: Presentation) async throws -> AuthToken
     func logout() async throws
 
     // Default (no-op) implementations provided — override only what your provider needs:
