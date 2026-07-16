@@ -37,7 +37,7 @@ public extension ReachFive {
         return try await self.authWithCode(code: code, pkce: pkce)
     }
 
-    func buildAuthorizeURL(pkce: Pkce, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil, provider: String? = nil, redirectUri: URL? = nil) -> URL {
+    func buildAuthorizeURL(pkce: Pkce, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil, provider: String? = nil, redirectUri: URL? = nil, loginUrlFragment: [String: String]? = nil) -> URL {
         let scope = (scope ?? self.scope).joined(separator: " ")
         let options = [
             "provider": provider,
@@ -52,7 +52,22 @@ public extension ReachFive {
             "origin": origin,
         ]
 
-        return reachFiveApi.buildAuthorizeURL(queryParams: options)
+        let url = reachFiveApi.buildAuthorizeURL(queryParams: options)
+
+        // `loginUrlFragment` is intentionally carried in the URL fragment, not a query param. In a
+        // token-orchestration setup, /oauth/authorize 302-redirects to the client's Login URL. A query
+        // param added here is dropped at that redirect (the backend doesn't forward it), whereas the
+        // fragment is never sent to the server but is re-applied by the browser onto the redirect target
+        // (whose Location carries no fragment). The Login URL thus receives it as `#key=value&...` and can
+        // read it via window.location.hash to theme the page per calling channel.
+        guard let loginUrlFragment, !loginUrlFragment.isEmpty,
+              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return url
+        }
+        components.fragment = loginUrlFragment
+            .map { "\($0.key)=\($0.value)" }
+            .joined(separator: "&")
+        return components.url ?? url
     }
 
     func authWithCode(code: String, pkce: Pkce, redirectUri: URL? = nil) async throws -> AuthToken {
