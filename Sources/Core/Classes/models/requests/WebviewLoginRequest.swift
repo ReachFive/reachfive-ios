@@ -33,4 +33,32 @@ public class WebviewLoginRequest {
         self.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
         self.webSessionMode = webSessionMode
     }
+
+    /// Same as ``init(state:nonce:scope:presentationContextProvider:origin:provider:prefersEphemeralWebBrowserSession:webSessionMode:)``,
+    /// but derives the presentation context from a ``Presentation``, so the view controller
+    /// does not need to conform to `ASWebAuthenticationPresentationContextProviding`.
+    ///
+    /// - Throws: `ReachFiveError.TechnicalError` if the view controller has been deallocated.
+    @MainActor
+    public convenience init(
+        state: String? = nil,
+        nonce: String? = nil,
+        scope: [String]? = nil,
+        presenting: Presentation,
+        origin: String? = nil,
+        provider: String? = nil,
+        prefersEphemeralWebBrowserSession: Bool = false,
+        webSessionMode: WebSessionMode = .sdkScheme
+    ) throws {
+        self.init(
+            state: state,
+            nonce: nonce,
+            scope: scope,
+            presentationContextProvider: try presenting.webAuthContextProvider(),
+            origin: origin,
+            provider: provider,
+            prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
+            webSessionMode: webSessionMode
+        )
+    }
 }

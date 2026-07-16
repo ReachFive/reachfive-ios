@@ -114,4 +114,18 @@ final class PresentationTests: XCTestCase {
         XCTAssertNotIdentical(firstAnchor, secondAnchor,
                               "l'anchor de repli doit être reconstruite à chaque appel, pas mise en cache")
     }
+
+    // MARK: - Inits de commodité des requêtes
+
+    func testWebviewLoginRequestConvenienceInitDerivesTheContextProvider() throws {
+        let vc = ConformingViewController()
+        let request = try WebviewLoginRequest(presenting: Presentation(from: vc))
+        XCTAssertIdentical(request.presentationContextProvider, vc)
+    }
+
+    func testWebSessionLogoutRequestConvenienceInitDerivesTheContextProvider() throws {
+        let vc = ConformingViewController()
+        let request = try WebSessionLogoutRequest(presenting: Presentation(from: vc))
+        XCTAssertIdentical(request.presentationContextProvider, vc)
+    }
 }

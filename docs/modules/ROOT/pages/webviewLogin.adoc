@@ -39,9 +39,9 @@ image::sdk-ios:ROOT:secure-login-dialog.png[width=500px,role=zoom]
 
 == Usage
 
-Because of the <<presentationContextProvider,`presentationContextProvider`>> property, you must ensure that your link:https://developer.apple.com/documentation/uikit/uiviewcontroller[UIViewController^] implements the `ASWebAuthenticationPresentationContextProviding` protocol.
+Build the request with `presenting: Presentation(from: self)` from the initiating link:https://developer.apple.com/documentation/uikit/uiviewcontroller[UIViewController^]: the SDK derives the presentation context itself, as it does for xref:getProvider.adoc[`provider.login`].
 
-To do this, add the following to your UIViewController:
+Alternatively, pass your own <<presentationContextProvider,`presentationContextProvider`>> — any object implementing `ASWebAuthenticationPresentationContextProviding`, for instance the view controller itself:
 
 [source,swift]
 ----
