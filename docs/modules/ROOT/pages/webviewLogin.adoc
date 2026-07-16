@@ -12,12 +12,14 @@ AppDelegate.reachfive().{docname}(WebviewLoginRequest(
     <<origin>>,
     <<prefersEphemeralWebBrowserSession>>, <2>
     <<webSessionMode>>, <3>
+    <<loginUrlFragment>>, <4>
 ))
 ----
 <1> Scope isn't explicitly required.
 If not provided here, it defaults to the scopes set up in the client configuration which is picked up when you initialize the iOS SDK.
 <2> Available starting with version 7.1.3
 <3> Optional, defaults to `.sdkScheme`. Use `.externalApp`/`.universalLink` for providers that finish their login on a universal link — see xref:providerCreator.adoc[WebProvider].
+<4> Optional. Requires xref:docs:ROOT:orchestration-token.adoc[request orchestration tokens] to be enabled for the client.
 
 == Description
 
@@ -70,6 +72,7 @@ include::partial$params.adoc[tag="scope"]
 include::partial$params.adoc[tag="origin"]
 include::partial$params.adoc[tag="prefersEphemeralWebBrowserSession"]
 include::partial$params.adoc[tag="webSessionMode"]
+include::partial$params.adoc[tag="loginUrlFragment"]
 
 |===
 
