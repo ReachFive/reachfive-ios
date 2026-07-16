@@ -19,9 +19,15 @@ Refer at the iOS SDK Installation to initialize the providers at the client's in
 
 == Usage
 
-When using the <<Examples,`viewController`>> property for `.login`, you must ensure that your link:https://developer.apple.com/documentation/uikit/uiviewcontroller[UIViewController^] implements the `ASWebAuthenticationPresentationContextProviding` protocol.
+When calling `.login`, pass a link:https://developer.apple.com/documentation/uikit/uiviewcontroller[UIViewController^] as the <<Examples,`viewController`>> argument.
+Whether it must implement link:https://developer.apple.com/documentation/authenticationservices/aswebauthenticationpresentationcontextproviding[`ASWebAuthenticationPresentationContextProviding`^] depends on how the provider authenticates:
 
-To do this, add the following to your `UIViewController`:
+* *Required* for web-based providers: xref:providerCreator.adoc[`WebProvider`], and any provider with no matching native creator (falls back to `DefaultProvider`).
+These open an `ASWebAuthenticationSession` and need a presentation anchor.
+* *Not required* for native SDK providers (`GoogleProvider`, `FacebookProvider`, `WeChat`).
+`AppleProvider` needs the view controller in the app's view hierarchy instead.
+
+Add the following to your `UIViewController` when the protocol is required:
 
 [source,swift]
 ----
@@ -29,13 +35,6 @@ func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentati
     view.window!
 }
 ----
-
-[NOTE]
-====
-This is not applicable for `.logout`.
-
-This only applies to providers that were not explicitly set in the provider list at configuration time.
-====
 
 == Examples
 
