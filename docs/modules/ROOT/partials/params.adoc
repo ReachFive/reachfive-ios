@@ -416,6 +416,15 @@ TIP: For more, see link:https://developer.apple.com/documentation/authentication
 TIP: See the "Associated Domains" section of xref:index.adoc[] for entitlement setup, and the xref:providerCreator.adoc[WebProvider] entry for a ready-made provider using this mechanism.
 // end::webSessionMode[]
 
+// tag::loginUrlFragment[]
+|[[loginUrlFragment,loginUrlFragment]] loginUrlFragment `[String: String]?`
+|Key/value pairs propagated in the *fragment* of the `/oauth/authorize` URL (`#key=value&key2=value2`).
+
+Intended for the token-orchestration flow: `/oauth/authorize` redirects to the client's Login URL, and a fragment (unlike a query param) survives that redirect — the browser re-applies it onto the redirect target. The Login URL can then read it via `window.location.hash` to customize itself (logo, colors) per calling channel.
+
+NOTE: Requires the client to have a Login URL configured and xref:docs:ROOT:orchestration-token.adoc[request orchestration tokens] enabled; otherwise this parameter has no effect.
+// end::loginUrlFragment[]
+
 // tag::state[]
 |[[state,state]] state `string`
 |The OAuth2 state value.
