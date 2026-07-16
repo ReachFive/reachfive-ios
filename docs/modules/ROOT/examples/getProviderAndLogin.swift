@@ -9,7 +9,7 @@ do {
         let authToken = try await provider.login(
             scope: scope,
             origin: "home",
-            viewController: self
+            presenting: Presentation(from: self)
         )
         // Get the profile's authentication token
     }

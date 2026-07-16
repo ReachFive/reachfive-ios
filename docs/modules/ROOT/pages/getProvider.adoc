@@ -19,22 +19,20 @@ Refer at the iOS SDK Installation to initialize the providers at the client's in
 
 == Usage
 
-When calling `.login`, pass a link:https://developer.apple.com/documentation/uikit/uiviewcontroller[UIViewController^] as the <<Examples,`viewController`>> argument.
-Whether it must implement link:https://developer.apple.com/documentation/authenticationservices/aswebauthenticationpresentationcontextproviding[`ASWebAuthenticationPresentationContextProviding`^] depends on how the provider authenticates:
-
-* *Required* for web-based providers: xref:providerCreator.adoc[`WebProvider`], and any provider with no matching native creator (falls back to `DefaultProvider`).
-These open an `ASWebAuthenticationSession` and need a presentation anchor.
-* *Not required* for native SDK providers (`GoogleProvider`, `FacebookProvider`, `WeChat`).
-`AppleProvider` needs the view controller in the app's view hierarchy instead.
-
-Add the following to your `UIViewController` when the protocol is required:
+For `.login`, pass the initiating link:https://developer.apple.com/documentation/uikit/uiviewcontroller[UIViewController^] wrapped in a `Presentation`:
 
 [source,swift]
 ----
-func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-    view.window!
-}
+try await provider.login(scope: scope, origin: origin, presenting: Presentation(from: self))
 ----
+
+Each provider derives what it needs from it, depending on how it authenticates:
+
+* Web-based providers (xref:providerCreator.adoc[`WebProvider`], and any provider with no matching native creator, falling back to `DefaultProvider`) open an `ASWebAuthenticationSession` and need a presentation context. The SDK derives one from the view controller; if it already implements link:https://developer.apple.com/documentation/authenticationservices/aswebauthenticationpresentationcontextproviding[`ASWebAuthenticationPresentationContextProviding`^], its own `presentationAnchor(for:)` keeps precedence.
+* `AppleProvider` needs the view controller to be attached to a window at call time.
+* Native SDK providers (`GoogleProvider`, `FacebookProvider`, `WeChat`) need only the view controller itself, or nothing at all.
+
+In every case, call `.login` from `viewDidAppear` or a user interaction, not from `viewDidLoad`, so the view controller is attached to a window.
 
 == Examples
 

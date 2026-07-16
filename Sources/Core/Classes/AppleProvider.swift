@@ -44,9 +44,9 @@ class ConfiguredAppleProvider: NSObject, Provider {
     public func login(
         scope: [String]?,
         origin: String,
-        viewController: UIViewController?
+        presenting: Presentation
     ) async throws -> AuthToken {
-        guard let window = await viewController?.view.window else { throw ReachFiveError.TechnicalError(reason: "The view was not in the app's view hierarchy!") }
+        let window = try await presenting.anchor()
 
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
         let request = NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin)
