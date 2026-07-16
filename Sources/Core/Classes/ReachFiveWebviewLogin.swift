@@ -16,7 +16,7 @@ public extension ReachFive {
         let mode = request.webSessionMode
         // La `redirect_uri` du mode (nil pour un custom scheme, où le SdkConfig s'applique) est utilisée
         // à l'identique pour `/authorize` et l'échange du code — exigence OAuth : les deux doivent coïncider.
-        let authURL = buildAuthorizeURL(pkce: pkce, state: request.state, nonce: request.nonce, scope: scope, origin: request.origin, provider: request.provider, redirectUri: mode.redirectUri)
+        let authURL = buildAuthorizeURL(pkce: pkce, state: request.state, nonce: request.nonce, scope: scope, origin: request.origin, provider: request.provider, redirectUri: mode.redirectUri, loginUrlFragment: request.loginUrlFragment)
 
         let callbackURL = try await webAuthSession.start(
             url: authURL,
