@@ -18,7 +18,7 @@ Call this method in response to the equivalent UIKit method link:https://develop
 ====
 The method returns a `Bool` that tells you whether {company} actually consumed the activity. It returns `true` only when a {company} login was waiting for that universal link; otherwise it returns `false` so your app can route the link itself. Do not assume {company} handles every universal link you forward — honour the returned value.
 
-Universal-link delivery requires an `applinks:<host>` Associated Domain (see xref:configure.adoc[Configure the SDK]).
+Universal-link delivery requires an `applinks:<host>` Associated Domain (see xref:index.adoc#configure-the-ios-sdk[Configure the SDK]).
 
 The in-flight login only lives in memory. If iOS terminates your app while the user is in the external app, the login is lost: when the universal link relaunches your app, this method returns `false` and the user must start the login again.
 ====

@@ -79,6 +79,8 @@ WebProvider(name: .bconnect, variant: "natif", mode: .externalApp)
 
 NOTE: A provider configured on your client with no matching entry in `providersCreators` still logs in, falling back to `.sdkScheme` automatically. Add an explicit `WebProvider` only when you need `.externalApp`/`.universalLink`, or a specific `variant`.
 
+TIP: Integrating a universal-link provider? See xref:providerCreator.adoc#universal-link-web-providers[the universal-link checklist].
+
 TIP: To implement your own provider (native SDK, custom flow) instead, see xref:guides/custom-provider.adoc[].
 
 // end::WebProvider[]

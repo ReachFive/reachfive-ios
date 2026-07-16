@@ -284,6 +284,8 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 - `franceconnect`
 - `apple`
 - `oney`
+- `bconnect`
+- `line`
 
 // end::name[]
 
