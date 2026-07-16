@@ -44,4 +44,13 @@ final class WebviewLoginRequestTests: XCTestCase {
         }
         XCTAssertEqual(link.absoluteString, "https://h/cb")
     }
+
+    func testDefaultLoginUrlFragmentIsNil() {
+        XCTAssertNil(WebviewLoginRequest(presentationContextProvider: provider).loginUrlFragment)
+    }
+
+    func testProvidedLoginUrlFragmentIsPreserved() {
+        let r = WebviewLoginRequest(presentationContextProvider: provider, loginUrlFragment: ["site": "gourmet"])
+        XCTAssertEqual(r.loginUrlFragment, ["site": "gourmet"])
+    }
 }

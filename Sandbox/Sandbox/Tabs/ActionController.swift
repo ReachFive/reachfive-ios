@@ -59,7 +59,7 @@ class ActionController: UITableViewController {
                         }
                     }
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin", loginUrlFragment: ["LoginURLParameter": "1234"]))
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin", loginUrlFragment: ["LoginURLParameter": "1234", "site": "Gourmet & L'Étudiant #1 / 100% déjanté?", "empty": "", "math": "a=b+c", "treats": "🥐☕️🎉"]))
                     }
                 }
 

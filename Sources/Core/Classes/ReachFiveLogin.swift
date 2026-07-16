@@ -64,9 +64,11 @@ public extension ReachFive {
               var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return url
         }
-        components.fragment = loginUrlFragment
-            .map { "\($0.key)=\($0.value)" }
-            .joined(separator: "&")
+        // Reuse URLComponents' query-encoding (rather than hand-rolling "key=value" pairs) so keys/values
+        // containing `&`, `=`, spaces, etc. are correctly percent-encoded within the fragment.
+        var fragmentComponents = URLComponents()
+        fragmentComponents.queryItems = loginUrlFragment.map { URLQueryItem(name: $0.key, value: $0.value) }
+        components.percentEncodedFragment = fragmentComponents.percentEncodedQuery
         return components.url ?? url
     }
 
