@@ -3,7 +3,7 @@ do {
         state: "zf3ifjfmdkj",
         nonce: "n-0S6_PzA3Ze",
         scope: ["openid", "profile", "email"],
-        presentationContextProvider: self
+        presenting: Presentation(from: self)
     ))
     // Get the profile's authentication token
 } catch {
