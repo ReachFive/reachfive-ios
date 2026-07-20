@@ -16,9 +16,8 @@
   reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
 
 ### New features
-- Support for universal-link and external-app providers: register a `WebProvider` (e.g. `WebProvider(name: .bconnect, mode: .externalAppUniversalLink)`) to pick how the login session is delivered back to the app. See the [ProviderCreator](https://developer.reachfive.com/sdk-ios/providerCreator.html) and [custom provider guide](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) documentation.
-- `WebProvider` also supports choosing a variant: `WebProvider(name: .bconnect, variant: "natif")`
-- `webviewLogin` accepts a new `webSessionMode` parameter to control the return channel of the underlying `ASWebAuthenticationSession`. It is a combination of two orthogonal axes — the callback shape (custom scheme vs HTTPS universal link) and the channel (in-band, intercepted in the sheet, vs out-of-band, handed off to an external app) — exposed as four factories: `.sdkScheme`, `.externalAppScheme`, `.externalAppUniversalLink(_:)`, and `.inSheetUniversalLink(_:)` (iOS 17.4+). `WebProviderMode` offers the same four choices.
+- New `WebProvider` to register a web provider (e.g. B.connect) with a `variant` and a completion `mode`. See the [ProviderCreator](https://developer.reachfive.com/sdk-ios/providerCreator.html) and [custom provider guide](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) documentation.
+- `webviewLogin` accepts a `webSessionMode` parameter picking how the `ASWebAuthenticationSession` returns: `.sdkScheme`, `.externalAppScheme`, `.externalAppUniversalLink(_:)` or `.inSheetUniversalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
 
 ## v10.0.1
 
