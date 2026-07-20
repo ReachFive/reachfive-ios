@@ -6,3 +6,6 @@
 xcuserdata/
 .gemini
 .claude
+
+# Fichiers d’exemples de doc générés par docs/verification/generate.py
+docs/verification/Sources/E_*.swift
