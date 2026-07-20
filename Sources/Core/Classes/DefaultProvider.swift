@@ -4,7 +4,7 @@ import AuthenticationServices
 /// Registers a **web** provider (one without a native SDK component, served by `DefaultProvider`) so the app
 /// can pick its **variant** and its **completion mode**
 ///
-/// Example: `WebProvider(name: .bconnect, variant: "natif", mode: .externalApp)`.
+/// Example: `WebProvider(name: .bconnect, variant: "natif", mode: .externalAppUniversalLink)`.
 public final class WebProvider: ProviderCreator {
     /// The SLO providers supported by the backend. `rawValue` is the backend name.
     public enum Name: String {
@@ -18,21 +18,36 @@ public final class WebProvider: ProviderCreator {
         case line
     }
 
-    /// Selects how the `ASWebAuthenticationSession` should complete for this provider; resolved into the
-    /// corresponding ``WebSessionMode`` (with its URL) by `DefaultProvider.init`.
-    public enum WebProviderMode {
-        /// Custom scheme intercepted by the session (works on all iOS versions). E.g. `reachfive-<clientId>`.
-        case sdkScheme
+    /// Selects how the `ASWebAuthenticationSession` should complete for this provider, on the same two
+    /// orthogonal axes as ``WebSessionMode`` — the callback shape (custom scheme vs universal link) and the
+    /// channel (in-band vs out-of-band) — but without any URL: for a universal-link callback the SDK reads
+    /// the provider's `universalLink` from its backend config. `DefaultProvider.init` resolves this into the
+    /// corresponding ``WebSessionMode``. Exposed as named factories (private init); the in-sheet universal
+    /// link is annotated `@available(iOS 17.4, *)`.
+    public struct WebProviderMode {
+        enum Callback { case customScheme, universalLink }
+        let callback: Callback
+        let channel: WebSessionMode.Channel
 
-        /// out-of-band completion: the flow ends in an external app that reopens the host app via a
-        /// universal link. Requires the `applinks:<host>` Associated Domain on the host app side.
-        case externalApp
+        private init(callback: Callback, channel: WebSessionMode.Channel) {
+            self.callback = callback
+            self.channel = channel
+        }
 
-        /// Universal link intercepted _inside_ the webview (iOS 17.4+ via `callback: .https`). Requires
-        /// the `webcredentials:<host>` Associated Domain. Reserve for flows that end
-        /// entirely within the sheet (no jump to an external app).
+        /// Custom scheme intercepted _inside_ the sheet — the default, on every iOS version.
+        public static let sdkScheme = WebProviderMode(callback: .customScheme, channel: .inBand)
+
+        /// out-of-band: an external app reopens the host app via the custom scheme (`application(_:open:)`).
+        public static let externalAppScheme = WebProviderMode(callback: .customScheme, channel: .outOfBand)
+
+        /// out-of-band: an external app reopens the host app via a universal link (`application(_:continue:)`).
+        /// Requires the `applinks:<host>` Associated Domain on the host app side.
+        public static let externalAppUniversalLink = WebProviderMode(callback: .universalLink, channel: .outOfBand)
+
+        /// Universal link intercepted _inside_ the webview (iOS 17.4+ via `callback: .https`). Requires the
+        /// `webcredentials:<host>` Associated Domain. Reserve for flows that stay within the sheet.
         @available(iOS 17.4, *)
-        case universalLink
+        public static let inSheetUniversalLink = WebProviderMode(callback: .universalLink, channel: .inBand)
     }
 
     private let providerName: Name
@@ -70,18 +85,27 @@ class DefaultProvider: NSObject, Provider {
         self.providerConfig = providerConfig
         self.name = providerConfig.provider
 
-        if mode == .sdkScheme {
-            webSessionMode = .sdkScheme
-        } else {
+        switch mode.callback {
+        case .customScheme:
+            // Le custom scheme n'a pas besoin de l'`universalLink` du backend : la redirect_uri est celle
+            // du SdkConfig, in-band comme hors-bande.
+            webSessionMode = mode.channel == .inBand ? .sdkScheme : .externalAppScheme
+
+        case .universalLink:
             guard let link = providerConfig.universalLink else {
-                Logger.shared.log("No universal link configured for provider '\(providerConfig.provider)' in \(mode) mode; login() will fail with a TechnicalError.")
+                Logger.shared.log("No universal link configured for provider '\(providerConfig.provider)' in universal-link mode; login() will fail with a TechnicalError.")
                 webSessionMode = nil
                 return
             }
-            if mode == .externalApp {
-                webSessionMode = WebSessionMode.externalApp(link)
+            if mode.channel == .inBand {
+                guard #available(iOS 17.4, *) else {
+                    Logger.shared.log("In-sheet universal link requires iOS 17.4+; login() for provider '\(providerConfig.provider)' will fail with a TechnicalError.")
+                    webSessionMode = nil
+                    return
+                }
+                webSessionMode = .inSheetUniversalLink(link)
             } else {
-                webSessionMode = WebSessionMode.universalLink(link)
+                webSessionMode = .externalAppUniversalLink(link)
             }
         }
     }

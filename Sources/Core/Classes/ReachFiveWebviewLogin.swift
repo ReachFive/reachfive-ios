@@ -14,15 +14,20 @@ public extension ReachFive {
 
         let scope = (request.scope ?? scope)
         let mode = request.webSessionMode
-        let authURL = buildAuthorizeURL(pkce: pkce, state: request.state, nonce: request.nonce, scope: scope, origin: request.origin, provider: request.provider, redirectUri: mode.redirectUri)
+        // `redirect_uri` résolue une fois : celle du mode (lien universel), ou à défaut celle du SdkConfig
+        // (custom scheme). Réutilisée à l'identique pour `/authorize`, l'armement hors-bande et l'échange
+        // du code (exigence OAuth : les trois doivent coïncider).
+        let redirectUri = mode.redirectUri ?? sdkConfig.redirectUri
+        let authURL = buildAuthorizeURL(pkce: pkce, state: request.state, nonce: request.nonce, scope: scope, origin: request.origin, provider: request.provider, redirectUri: redirectUri)
 
         let callbackURL = try await webAuthSession.start(
             url: authURL,
             mode: mode,
+            redirectUri: redirectUri,
             presentationContextProvider: request.presentationContextProvider,
             prefersEphemeralWebBrowserSession: request.prefersEphemeralWebBrowserSession)
 
         let code = try callbackURL.authorizationCode()
-        return try await self.authWithCode(code: code, pkce: pkce, redirectUri: mode.redirectUri)
+        return try await self.authWithCode(code: code, pkce: pkce, redirectUri: redirectUri)
     }
 }

@@ -1,7 +1,7 @@
 import XCTest
 @testable import Reach5
 
-/// Reconnaissance « est-ce notre callback ? » par forme d'URL (host + path + présence d'un `code` ou d'un `error`).
+/// Reconnaissance « est-ce notre callback ? » par forme d'URL (scheme + host + path + présence d'un `code` ou d'un `error`).
 final class WebAuthCallbackMatchingTests: XCTestCase {
 
     private func isOurs(_ incoming: String, expected: String) -> Bool {
@@ -39,5 +39,22 @@ final class WebAuthCallbackMatchingTests: XCTestCase {
 
     func testMatchesWithCodeAmongManyParams() {
         XCTAssertTrue(isOurs("https://host.example.com/cb?a=1&code=abc&b=2", expected: "https://host.example.com/cb"))
+    }
+
+    // MARK: Custom scheme (out-of-band via application(_:open:))
+
+    func testMatchesCustomSchemeCallback() {
+        XCTAssertTrue(isOurs("reachfive-clientId://callback?code=abc", expected: "reachfive-clientId://callback"))
+    }
+
+    func testSchemeIsCaseInsensitive() {
+        XCTAssertTrue(isOurs("REACHFIVE-clientId://callback?code=abc", expected: "reachfive-clientId://callback"))
+    }
+
+    func testRejectsDifferentScheme() {
+        // Même host et path, mais un scheme https ne doit pas matcher un callback attendu en custom scheme
+        // (et inversement) : c'est ce qui sépare les deux canaux hors-bande.
+        XCTAssertFalse(isOurs("https://callback/?code=abc", expected: "reachfive-clientId://callback"))
+        XCTAssertFalse(isOurs("reachfive-clientId://callback?code=abc", expected: "https://callback/"))
     }
 }
