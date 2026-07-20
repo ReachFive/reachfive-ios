@@ -18,12 +18,8 @@ public final class WebProvider: ProviderCreator {
         case line
     }
 
-    /// Selects how the `ASWebAuthenticationSession` should complete for this provider, on the same two
-    /// orthogonal axes as ``WebSessionMode`` — the callback shape (custom scheme vs universal link) and the
-    /// channel (in-band vs out-of-band) — but without any URL: for a universal-link callback the SDK reads
-    /// the provider's `universalLink` from its backend config. `DefaultProvider.init` resolves this into the
-    /// corresponding ``WebSessionMode``. Exposed as named factories (private init); the in-sheet universal
-    /// link is annotated `@available(iOS 17.4, *)`.
+    /// How this provider's login session completes. Same choices as ``WebSessionMode``, resolved into it by
+    /// `DefaultProvider.init` (a universal-link mode uses the provider's `universalLink` from its backend config).
     public struct WebProviderMode {
         enum Callback { case customScheme, universalLink }
         let callback: Callback
@@ -34,18 +30,16 @@ public final class WebProvider: ProviderCreator {
             self.channel = channel
         }
 
-        /// Custom scheme intercepted _inside_ the sheet — the default, on every iOS version.
+        /// Custom scheme intercepted in the sheet — the default, on every iOS version.
         public static let sdkScheme = WebProviderMode(callback: .customScheme, channel: .inBand)
 
-        /// out-of-band: an external app reopens the host app via the custom scheme (`application(_:open:)`).
+        /// An external app reopens the host app via the custom scheme.
         public static let externalAppScheme = WebProviderMode(callback: .customScheme, channel: .outOfBand)
 
-        /// out-of-band: an external app reopens the host app via a universal link (`application(_:continue:)`).
-        /// Requires the `applinks:<host>` Associated Domain on the host app side.
+        /// An external app reopens the host app via a universal link.
         public static let externalAppUniversalLink = WebProviderMode(callback: .universalLink, channel: .outOfBand)
 
-        /// Universal link intercepted _inside_ the webview (iOS 17.4+ via `callback: .https`). Requires the
-        /// `webcredentials:<host>` Associated Domain. Reserve for flows that stay within the sheet.
+        /// Universal link intercepted in the sheet (via `callback: .https`).
         @available(iOS 17.4, *)
         public static let inSheetUniversalLink = WebProviderMode(callback: .universalLink, channel: .inBand)
     }

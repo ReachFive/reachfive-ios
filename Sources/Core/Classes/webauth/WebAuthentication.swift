@@ -35,21 +35,21 @@ final class WebAuthenticationSession {
     /// Identifie la tentative en cours ; un callback capturant un `attempt` périmé est ignoré.
     private var attempt = 0
     private let baseScheme: String
+    /// La `redirect_uri` du `SdkConfig`, utilisée par défaut quand le mode n'en porte pas (custom scheme).
+    private let sdkRedirectUri: URL
 
-    nonisolated init(baseScheme: String) {
+    nonisolated init(baseScheme: String, sdkRedirectUri: URL) {
         self.baseScheme = baseScheme
+        self.sdkRedirectUri = sdkRedirectUri
     }
 
     /// Démarre un login web et attend son callback (succès, erreur ou annulation). Le ``WebSessionMode``
     /// décrit comment la session se termine — croisement de deux axes (custom scheme vs lien universel,
     /// in-band vs hors-bande) — et pilote donc à la fois la construction de la session et le canal du
-    /// callback. `redirectUri` est la `redirect_uri` déjà résolue (celle du mode, ou à défaut celle du
-    /// `SdkConfig`) : en hors-bande elle sert à reconnaître le lien entrant (``tryComplete(externalCallbackURL:)``).
-    /// Si le `Task` appelant est annulé (vue démontée, timeout…), la feuille est fermée et l'appel se
-    /// termine par `.AuthCanceled`.
+    /// callback. Si le `Task` appelant est annulé (vue démontée, timeout…), la feuille est fermée et
+    /// l'appel se termine par `.AuthCanceled`.
     func start(url: URL,
                mode: WebSessionMode,
-               redirectUri: URL,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
 
@@ -67,7 +67,8 @@ final class WebAuthenticationSession {
             try await withCheckedThrowingContinuation { continuation in
                 self.continuation = continuation
                 // Seul le mode hors-bande arme `tryComplete` ; en in-band, la session se complète elle-même.
-                self.expectedCallback = mode.channel == .outOfBand ? redirectUri : nil
+                // La `redirect_uri` attendue est celle du mode (lien universel) ou, à défaut, celle du SdkConfig.
+                self.expectedCallback = mode.channel == .outOfBand ? (mode.redirectUri ?? sdkRedirectUri) : nil
 
                 let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
                     // Tout passe sur le main thread pour éviter les situations de compétition.
