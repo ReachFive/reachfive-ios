@@ -72,7 +72,9 @@ def write_report(failures, baseline, checked):
                 lines.append(f"- L{ln}: {msg}")
             lines.append("")
 
-    REPORT.write_text("\n".join(lines) + "\n")
+    text = "\n".join(lines) + "\n"
+    REPORT.write_text(text)
+    return text
 
 
 def main():
@@ -96,12 +98,14 @@ def main():
         return 0
 
     baseline = read_baseline()
-    write_report(failures, baseline, checked)
+    text = write_report(failures, baseline, checked)
     new = sorted(set(failures) - baseline)
-    print(f"Report written to {REPORT.relative_to(HERE.parent.parent)}")
-    print(f"  checked={checked} failing={len(failures)} new={len(new)}")
+
+    # Print the full report to stdout so it is visible directly in the CI log
+    # (not only in the stored report.md artifact).
+    print(text)
     if new:
-        print("❌ New failures: " + ", ".join(new))
+        print("❌ New failures (not in baseline): " + ", ".join(new))
         return 1
     print("✅ No new failures (all failures are known/baselined).")
     return 0
