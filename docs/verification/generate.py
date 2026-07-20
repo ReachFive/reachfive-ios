@@ -22,6 +22,10 @@ OUT = HERE / "Sources"
 SKIP = {
     "logout",           # `presentationContextProvider: // …` placeholder in argument position
     "providerCreator",  # top-level fragment; references provider pods (Google/Facebook/WeChat)
+    # `beginAutoFillAssistedPasskeyLogin` is @available(macCatalyst, unavailable),
+    # so it cannot be type-checked on the Catalyst target. It would be covered by
+    # an iOS Simulator run.
+    "beginAutoFillAssistedPasskeyLogin",
 }
 
 DECL_RE = re.compile(r'^\s*(public\s+|final\s+|open\s+)*(class|struct|enum|protocol|extension)\b')
@@ -85,6 +89,11 @@ def transform(path: Path) -> str:
     # modules the snippets assume (Fixtures.swift can't provide them).
     header = f"// Generated from examples/{path.name}\nimport Foundation\nimport UIKit\nimport Reach5\n\n"
 
+    # Several examples call iOS 16+ passkey APIs without an availability guard
+    # (the docs assume the reader wraps them in `if #available`). Raise the
+    # wrapper's availability instead of flagging that as an error.
+    avail = "@available(iOS 16.0, macCatalyst 16.0, *)\n"
+
     if is_decl:
         # A snippet that defines its own AppDelegate calls AppDelegate.reachfive()
         # on that nested type; inject a stub so the SDK calls type-check.
@@ -93,13 +102,13 @@ def transform(path: Path) -> str:
             body,
         )
         inner = "\n".join("    " + l if l else l for l in body.splitlines())
-        return f"{header}enum {ns} {{\n{inner}\n}}\n"
+        return f"{header}{avail}enum {ns} {{\n{inner}\n}}\n"
     else:
         # Wrap in a UIViewController subclass (not an enum) so that snippets
         # using `self` as a presentation context type-check. See DocExampleContext.
         inner = "\n".join("        " + l if l else l for l in body.splitlines())
         return (
-            f"{header}class {ns}: DocExampleContext {{\n    func run() async throws {{\n{inner}\n    }}\n}}\n"
+            f"{header}{avail}class {ns}: DocExampleContext {{\n    func run() async throws {{\n{inner}\n    }}\n}}\n"
         )
 
 

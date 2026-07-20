@@ -29,6 +29,24 @@ enum AppDelegate {
 /// App-side navigation helper referenced by some snippets.
 func goToProfile(_ authToken: AuthToken) {}
 
+// MARK: - Ambient values the snippets assume from prose or a previous snippet.
+// Providing them with their real API-expected type lets the *API call* be
+// type-checked without the "cannot find 'x' in scope" noise.
+let profileAuthToken: AuthToken = __placeholder()
+let freshProfileAuthToken: AuthToken = __placeholder()
+let authToken: AuthToken = __placeholder()
+let window: ASPresentationAnchor = __placeholder()
+let profile: ProfilePasskeySignupRequest = __placeholder()
+let verificationCode: String = __placeholder()
+let verificationCodeInput: String = __placeholder()
+let friendlyName: String = __placeholder()
+let email: String = __placeholder()
+let emailInput: String = __placeholder()
+let username: String = __placeholder()
+let phoneNumberInput: String = __placeholder()
+let deviceId: String = __placeholder()
+let id: String = __placeholder()
+
 /// Base class for the imperative snippets. Many of them use `self` as a
 /// presentation context (`viewController: self`, `presentationContextProvider:
 /// self`), so the wrapper must be a UIViewController that conforms to the
