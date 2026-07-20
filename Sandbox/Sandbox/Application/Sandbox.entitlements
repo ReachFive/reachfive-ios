@@ -9,7 +9,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>webcredentials:local-sandbox.og4.me?mode=developer</string>
-		<string>applinks:local-sandbox.og4.me</string>
+		<string>applinks:local-sandbox.og4.me?mode=developer</string>
 		<string>webcredentials:integ-qa-fonctionnelle.reach5.net</string>
 		<string>applinks:integ-qa-fonctionnelle.reach5.net</string>
 	</array>

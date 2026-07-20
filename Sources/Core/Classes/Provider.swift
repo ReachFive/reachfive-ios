@@ -8,6 +8,9 @@ public protocol ProviderCreator {
     /// Factory called by the SDK. Receives the ``ReachFive`` instance, so the creator can reuse
     /// `reachFive.sdkConfig`, `reachFive.reachFiveApi` or high-level helpers such as `buildAuthorizeURL`,
     /// `authWithCode` or `webviewLogin`.
+    ///
+    /// Do not store `reachFive` strongly in the returned ``Provider``: ReachFive retains its providers,
+    /// so a strong back-reference creates a retain cycle. Hold it weakly, or copy the values you need.
     func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> Provider
 }
 

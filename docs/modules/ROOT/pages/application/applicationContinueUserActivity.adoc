@@ -9,11 +9,19 @@ AppDelegate.reachfive().application(<<application, application>>, continue: <<ap
 == Description
 
 Allows {company} to handle user activity continuation such as handoffs, and more importantly, universal links.
-Currently, this method is only used by xref:index.adoc#wechat-connect[WeChat].
 
-Call this to enable the SDK to process activities passed to the app, such as restoring state from another device.
+This method is required by xref:index.adoc#wechat-connect[WeChat] and by any *universal-link provider* (such as B.connect): when an external app reopens your app via a universal link to finish a login, the SDK completes the in-flight web authentication session out-of-band through this hook.
 
-Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/[`application(_:continue:restorationHandler:)`^].
+Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/[`application(_:continue:restorationHandler:)`^]. If your app uses scenes, forward link:https://developer.apple.com/documentation/uikit/uiscenedelegate/[`scene(_:continue:)`^] here as well.
+
+[IMPORTANT]
+====
+The method returns a `Bool` that tells you whether {company} actually consumed the activity. It returns `true` only when a {company} login was waiting for that universal link; otherwise it returns `false` so your app can route the link itself. Do not assume {company} handles every universal link you forward — honour the returned value.
+
+Universal-link delivery requires an `applinks:<host>` Associated Domain (see xref:configure.adoc[Configure the SDK]).
+
+The in-flight login only lives in memory. If iOS terminates your app while the user is in the external app, the login is lost: when the universal link relaunches your app, this method returns `false` and the user must start the login again.
+====
 
 == Examples
 
