@@ -3,6 +3,7 @@
 # renamed API…). To be fixed in a dedicated task. One example stem per line.
 addPasswordlessCallback
 listWebAuthnDevices
+logout
 mfaDeleteCredentialPhoneNumber
 mfaStartWithEmail
 mfaStartWithPhoneNumber

@@ -20,7 +20,6 @@ OUT = HERE / "Sources"
 # type-checked against the Reach5 module alone. Each needs a doc-side cleanup
 # before it can be verified (see docs/verification/README.md).
 SKIP = {
-    "logout",           # `presentationContextProvider: // …` placeholder in argument position
     "providerCreator",  # top-level fragment; references provider pods (Google/Facebook/WeChat)
     # `beginAutoFillAssistedPasskeyLogin` is @available(macCatalyst, unavailable),
     # so it cannot be type-checked on the Catalyst target. It would be covered by
@@ -29,7 +28,14 @@ SKIP = {
 }
 
 DECL_RE = re.compile(r'^\s*(public\s+|final\s+|open\s+)*(class|struct|enum|protocol|extension)\b')
-PLACEHOLDER_RE = re.compile(r'=\s*//.*$', re.M)    # `let x: T = // paste…`
+# Placeholders come in three shapes. Each is replaced by a value whose type the
+# compiler can infer from context, so the *API call* still gets type-checked:
+#   let x: T = // paste…          ->  let x: T = __placeholder()   (typed let)
+#   foo(label: // provide…)       ->  foo(label: __placeholder())  (argument position)
+#   let x = // obtain…            ->  (line dropped; x resolves to an ambient global)
+UNTYPED_PLACEHOLDER_RE = re.compile(r'^[ \t]*let\s+\w+\s*=\s*//.*$', re.M)
+ARG_PLACEHOLDER_RE = re.compile(r'^([ \t]*[A-Za-z_]\w*:[ \t]*)//.*$', re.M)
+PLACEHOLDER_RE = re.compile(r'=\s*//.*$', re.M)
 APPDELEGATE_CLASS_RE = re.compile(r'(class\s+AppDelegate\b[^{]*\{)')
 
 
@@ -78,7 +84,10 @@ def transform(path: Path) -> str:
     lines = [l for l in raw.splitlines() if not l.strip().startswith("import ")]
     body = "\n".join(lines).replace("@UIApplicationMain", "")
 
-    # Replace `= // comment` placeholders with a typed stub value.
+    # Resolve placeholders (order matters: drop untyped lets first, then fill the
+    # argument-position and typed-let ones).
+    body = UNTYPED_PLACEHOLDER_RE.sub("", body)
+    body = ARG_PLACEHOLDER_RE.sub(r"\1__placeholder()", body)
     body = PLACEHOLDER_RE.sub("= __placeholder()", body)
     body = fix_empty_cases(body)
 

@@ -29,6 +29,8 @@ contain `= // paste here` placeholders, so they can't be compiled directly.
 
 ```bash
 docs/verification/check.sh                    # check; writes report.md
+```
+```bash
 docs/verification/check.sh --update-baseline  # record current failures as baseline
 ```
 
@@ -51,10 +53,12 @@ once the snippets are corrected.
 
 ## Known limitations
 
-- **3 snippets are excluded** (`SKIP` in `generate.py`): `logout` (placeholder in
-  argument position), `providerCreator` (top-level fragment referencing the
-  Google/Facebook/WeChat provider pods, absent from the `Reach5` module), and
-  `beginAutoFillAssistedPasskeyLogin` (`@available(macCatalyst, unavailable)`).
+- **2 snippets are excluded** (`SKIP` in `generate.py`): `providerCreator`
+  (top-level fragment referencing the Google/Facebook/WeChat provider pods,
+  absent from the `Reach5` module) and `beginAutoFillAssistedPasskeyLogin`
+  (`@available(macCatalyst, unavailable)`). Placeholders in argument position or
+  in untyped `let`s are handled by the generator, so snippets like `logout` are
+  checked.
 - **Mac Catalyst coverage gap**: APIs marked unavailable on Catalyst can't be
   checked here. Adding an iOS Simulator destination would close the gap at the
   cost of a simulator runtime.
