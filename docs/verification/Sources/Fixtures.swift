@@ -46,6 +46,30 @@ let username: String = __placeholder()
 let phoneNumberInput: String = __placeholder()
 let deviceId: String = __placeholder()
 let id: String = __placeholder()
+let DOMAIN: String = __placeholder()
+let CLIENT_ID: String = __placeholder()
+
+// MARK: - Scaffolding referenced by the custom-provider examples.
+// These stand for types the reader supplies (a native SDK to wrap) or defines
+// in a companion snippet, so the *SDK-facing* calls around them can be checked.
+
+/// Stands for the reader's own native SDK, wrapped by a custom provider.
+class MyNativeSDK {
+    static let shared = MyNativeSDK()
+    func login(presenting: UIViewController) async throws -> String { __placeholder() }
+    func logout() {}
+}
+
+/// The custom ProviderCreator defined in customProviderWrappingNativeSDK and
+/// reused in registerCustomProvider (which lives on another doc page).
+class MyProvider: ProviderCreator {
+    var name: String = "my-provider"
+    var variant: String?
+    init(variant: String? = nil) { self.variant = variant }
+    func create(reachFive: ReachFive, providerConfig: ProviderConfig, clientConfigResponse: ClientConfigResponse) -> Provider {
+        __placeholder()
+    }
+}
 
 /// Base class for the imperative snippets. Many of them use `self` as a
 /// presentation context (`viewController: self`, `presentationContextProvider:
