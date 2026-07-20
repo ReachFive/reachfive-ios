@@ -96,6 +96,14 @@ default_workflows_tags: &default_workflows_tags
     tags:
       only: /.*/
 
+# Runs on every branch (i.e. every PR) as well as on tags.
+all_branches_and_tags: &all_branches_and_tags
+  filters:
+    tags:
+      only: /.*/
+    branches:
+      only: /.*/
+
 workflows:
   version: 2
   build-and-deploy:
@@ -103,7 +111,7 @@ workflows:
       - build:
           <<: *default_workflows_tags
       - check-doc-examples:
-          <<: *default_workflows_tags
+          <<: *all_branches_and_tags
       - build-for-release:
           <<: *default_workflows_filters
       - publish:
