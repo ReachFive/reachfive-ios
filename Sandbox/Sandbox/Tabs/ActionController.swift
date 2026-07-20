@@ -65,9 +65,10 @@ class ActionController: UITableViewController {
 
                 // secure webview completing IN-BAND via an https universal link (intercepted in the sheet, iOS 17.4+)
                 if indexPath.row == 1 {
+                    guard #available(iOS 17.4, *) else { return }
                     let inSheetCallback = URL(string: "https://local-sandbox.og4.me/universal_link_internal")!
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.https", webSessionMode: .universalLink(inSheetCallback)))
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.https", webSessionMode: .inSheetUniversalLink(inSheetCallback)))
                     }
                 }
 
@@ -75,7 +76,14 @@ class ActionController: UITableViewController {
                 if indexPath.row == 2 {
                     let externalAppCallback = URL(string: "https://local-sandbox.og4.me/_dev/mobile/callback")!
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.externalApp", webSessionMode: .externalApp(externalAppCallback)))
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.externalApp", webSessionMode: .externalAppUniversalLink(externalAppCallback)))
+                    }
+                }
+
+                // secure webview handing off to an external app and returning OUT-OF-BAND via the custom scheme
+                if indexPath.row == 3 {
+                    await handleAuthToken {
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin.externalAppScheme", webSessionMode: .externalAppScheme))
                     }
                 }
             }

@@ -2,7 +2,16 @@ import Foundation
 import UIKit
 
 public extension ReachFive {
+    @MainActor
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
+        // Canal hors-bande « custom scheme » : une app externe rouvre l'app hôte par le scheme du SDK.
+        // On teste la session web-auth d'abord — son matching est exact (scheme + host + path + code/error
+        // de la redirect_uri attendue, et n'est armé que pendant un login hors-bande en cours) — sinon
+        // `interceptUrl` avalerait le lien comme un callback passwordless.
+        if webAuthSession.tryComplete(externalCallbackURL: url) {
+            return true
+        }
+
         interceptUrl(url)
         for provider in providers {
             let _ = provider.application(app, open: url, options: options)

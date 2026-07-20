@@ -1,8 +1,8 @@
 import AuthenticationServices
 
 /// Porte le login web en cours : démarre une `ASWebAuthenticationSession`, attend son callback,
-/// et — pour les providers à lien universel — laisse un lien reçu hors-bande via `application(_:continue:)`
-/// le compléter (``tryComplete(externalCallbackURL:)``).
+/// et — pour les logins hors-bande — laisse un lien reçu via `application(_:open:)` (custom scheme)
+/// ou `application(_:continue:)` (lien universel) le compléter (``tryComplete(externalCallbackURL:)``).
 ///
 /// **Un seul login à la fois.** Sur iPhone, la feuille modale d'une `ASWebAuthenticationSession` rend
 /// un second `start(...)` inatteignable par l'interaction utilisateur : tant qu'elle est présentée rien
@@ -41,12 +41,15 @@ final class WebAuthenticationSession {
     }
 
     /// Démarre un login web et attend son callback (succès, erreur ou annulation). Le ``WebSessionMode``
-    /// décrit comment la session se termine (scheme in-band, lien universel in-band, ou app externe
-    /// hors-bande) et pilote donc à la fois la construction de la session et le canal du callback.
+    /// décrit comment la session se termine — croisement de deux axes (custom scheme vs lien universel,
+    /// in-band vs hors-bande) — et pilote donc à la fois la construction de la session et le canal du
+    /// callback. `redirectUri` est la `redirect_uri` déjà résolue (celle du mode, ou à défaut celle du
+    /// `SdkConfig`) : en hors-bande elle sert à reconnaître le lien entrant (``tryComplete(externalCallbackURL:)``).
     /// Si le `Task` appelant est annulé (vue démontée, timeout…), la feuille est fermée et l'appel se
     /// termine par `.AuthCanceled`.
     func start(url: URL,
                mode: WebSessionMode,
+               redirectUri: URL,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
 
@@ -64,7 +67,7 @@ final class WebAuthenticationSession {
             try await withCheckedThrowingContinuation { continuation in
                 self.continuation = continuation
                 // Seul le mode hors-bande arme `tryComplete` ; en in-band, la session se complète elle-même.
-                self.expectedCallback = mode.outOfBandCallback
+                self.expectedCallback = mode.channel == .outOfBand ? redirectUri : nil
 
                 let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
                     // Tout passe sur le main thread pour éviter les situations de compétition.
@@ -74,18 +77,19 @@ final class WebAuthenticationSession {
                 }
 
                 let session: ASWebAuthenticationSession
-                switch mode {
-                case .sdkScheme:
+                switch (mode.channel, mode.callback) {
+                case (.inBand, .customScheme):
                     // Scheme custom intercepté par la session (historique, tout iOS).
                     session = ASWebAuthenticationSession(
                         url: url,
                         callbackURLScheme: self.baseScheme,
                         completionHandler: completionHandler)
 
-                case let .universalLink(callback):
+                case let (.inBand, .universalLink(callback)):
                     // iOS 17.4+ : lien universel intercepté in-band dans la webview via `callback: .https`
-                    // (nécessite l'Associated Domain `webcredentials:<host>`). `@available` est impossible
-                    // sur un case d'enum porteur de valeur, on teste donc la disponibilité ici, à l'usage.
+                    // (nécessite l'Associated Domain `webcredentials:<host>`). La disponibilité est déjà
+                    // garantie en amont par la fabrique `@available` de ``WebSessionMode``, on garde ici
+                    // un filet runtime (et l'extraction du host, faillible).
                     guard #available(iOS 17.4, *), let host = callback.host else {
                         self.complete(attempt: attempt, .failure(.TechnicalError(reason: "In-sheet universal link callback requires iOS 17.4+ and a host: \(callback)")))
                         return
@@ -95,9 +99,10 @@ final class WebAuthenticationSession {
                         callback: .https(host: host, path: callback.path),
                         completionHandler: completionHandler)
 
-                case .externalApp:
+                case (.outOfBand, _):
                     // Le flow se termine dans une app externe : la session ne recevra jamais le callback
-                    // (traité hors-bande par `tryComplete`), on ne lui donne donc aucun scheme à intercepter.
+                    // (traité hors-bande par `tryComplete`, quel que soit le type de lien), on ne lui donne
+                    // donc aucun scheme à intercepter.
                     session = ASWebAuthenticationSession(
                         url: url,
                         callbackURLScheme: nil,
@@ -162,13 +167,18 @@ final class WebAuthenticationSession {
         openSession?.cancel()
     }
 
-    /// `true` si l'URL entrante a le même host (insensible à la casse) et le même path que le
-    /// `redirect_uri` envoyé, et porte un paramètre `code` (succès) ou `error` (refus OAuth, ex.
-    /// `access_denied` — le login se termine alors proprement avec l'`ApiError` du callback au lieu
-    /// de rester bloqué sur la feuille). Le path attendu étant celui qu'on déclare dans l'AASA, ce
-    /// matching exact suffit à distinguer notre callback des autres liens de l'app.
+    /// `true` si l'URL entrante a le même scheme et le même host (insensibles à la casse) et le même
+    /// path que le `redirect_uri` envoyé, et porte un paramètre `code` (succès) ou `error` (refus OAuth,
+    /// ex. `access_denied` — le login se termine alors proprement avec l'`ApiError` du callback au lieu
+    /// de rester bloqué sur la feuille). Comparer le scheme est ce qui permet aux deux canaux hors-bande
+    /// (custom scheme via `application(_:open:)`, lien universel via `application(_:continue:)`) de
+    /// partager ce même matcher sans faux positif : un login attendu en scheme ne matche que des URL de
+    /// ce scheme, un login attendu en https que des liens universels. Le path attendu étant celui qu'on
+    /// déclare (AASA pour l'https, redirect_uri pour le scheme), ce matching exact suffit à distinguer
+    /// notre callback des autres liens de l'app.
     nonisolated static func isOurCallback(_ url: URL, expectedCallback expected: URL) -> Bool {
-        url.host?.lowercased() == expected.host?.lowercased()
+        url.scheme?.lowercased() == expected.scheme?.lowercased()
+        && url.host?.lowercased() == expected.host?.lowercased()
         && url.path == expected.path
         && (url.queryValue("code") != nil || url.queryValue("error") != nil)
     }
