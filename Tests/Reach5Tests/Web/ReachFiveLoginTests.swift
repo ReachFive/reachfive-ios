@@ -8,9 +8,7 @@ final class ReachFiveLoginTests: XCTestCase {
     private let reachFive = ReachFive(sdkConfig: SdkConfig(domain: "example.reach5.net", clientId: "abc"))
 
     private func buildURL(loginUrlFragment: [String: String]? = nil) -> URL {
-        let u = reachFive.buildAuthorizeURL(pkce: Pkce.generate(), loginUrlFragment: loginUrlFragment)
-        print(u.absoluteString)
-        return u
+        reachFive.buildAuthorizeURL(pkce: Pkce.generate(), loginUrlFragment: loginUrlFragment)
     }
 
     /// Décode le fragment (déjà percent-encodé) comme une query string, pour comparer les paires
