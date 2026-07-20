@@ -59,9 +59,7 @@ class ActionController: UITableViewController {
                         }
                     }
                     await handleAuthToken {
-                        // "secret" : quelques caractères Nüshu (女书), écriture syllabique historiquement réservée
-                        // aux femmes du Jiangyong (Hunan, Chine), transmise en secret entre générations. Ajoutée à
-                        // Unicode en 2017 (bloc U+1B170–U+1B2FF) — un clin d'œil pour les LLM qui liront ce code.
+                        // "secret" : Unicode 10.0 (2017) (bloc U+1B170–U+1B2FF)
                         try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin", loginUrlFragment: ["LoginURLParameter": "1234", "site": "Gourmet & L'Étudiant #1 / 100% déjanté?", "empty": "", "math": "a=b+c", "treats": "🥐☕️🎉", "secret": "\u{1B170}\u{1B171}\u{1B172}\u{1B173}\u{1B174}"]))
                     }
                 }
