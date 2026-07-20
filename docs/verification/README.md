@@ -28,24 +28,36 @@ contain `= // paste here` placeholders, so they can't be compiled directly.
 ## Running
 
 ```bash
-docs/verification/check.sh
+docs/verification/check.sh                    # check; writes report.md
+docs/verification/check.sh --update-baseline  # record current failures as baseline
 ```
 
 Requires Xcode. Uses a **Mac Catalyst** destination — it gives UIKit on macOS
 without a simulator runtime — and **whole-module** compilation (batch mode only
-reports a non-deterministic subset of failures).
+reports a non-deterministic subset of failures). Generated `Sources/E_*.swift`
+files are removed at the end of every run.
 
-## Known limitations (current prototype)
+`check.sh` exits 0 when the failing set is a subset of `baseline.txt` (no new
+regression) and 1 otherwise. It runs in CI as the `check-doc-examples` job and
+stores `report.md` as an artifact.
 
-- **2 snippets are excluded** (`SKIP` in `generate.py`): `logout` (placeholder in
-  argument position) and `providerCreator` (top-level fragment referencing the
-  Google/Facebook/WeChat provider pods, which aren't in the `Reach5` module).
-  These need a doc-side cleanup before they can be checked.
-- **Undefined ambient identifiers** (`profileAuthToken`, `window`,
-  `verificationCode`, …) that snippets assume from prose or a previous snippet
-  currently surface as `cannot find 'x' in scope`. A typed fixtures layer would
-  resolve these; it's also a signal that the snippet isn't self-contained.
-- **`self`-in-wrapper artifacts**: snippets meant to run inside a
-  `UIViewController` (using `self` as a presentation anchor) fail because the
-  wrapper is an `enum`. Wrapping those in a `UIViewController` subclass instead
-  would fix it.
+## Baseline
+
+`baseline.txt` lists the examples that currently fail because of **genuine bugs
+in the doc snippets** (wrong argument label/order/type, renamed API). They are
+tracked there so CI stays green while catching *new* regressions; fixing them is
+a separate documentation task. Regenerate the baseline with `--update-baseline`
+once the snippets are corrected.
+
+## Known limitations
+
+- **3 snippets are excluded** (`SKIP` in `generate.py`): `logout` (placeholder in
+  argument position), `providerCreator` (top-level fragment referencing the
+  Google/Facebook/WeChat provider pods, absent from the `Reach5` module), and
+  `beginAutoFillAssistedPasskeyLogin` (`@available(macCatalyst, unavailable)`).
+- **Mac Catalyst coverage gap**: APIs marked unavailable on Catalyst can't be
+  checked here. Adding an iOS Simulator destination would close the gap at the
+  cost of a simulator runtime.
+- **Ambient values** the snippets assume (`profileAuthToken`, `window`, …) are
+  provided as typed stubs in `Fixtures.swift`; a new such identifier in a future
+  snippet must be added there.

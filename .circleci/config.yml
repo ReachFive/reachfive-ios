@@ -60,6 +60,17 @@ jobs:
           name: Install CocoaPods
           command: gem install cocoapods --user-install
       - run: pod trunk push Reach5.podspec
+  check-doc-examples:
+    macos:
+      xcode: "16.4.0"
+    steps:
+      - checkout
+      - run:
+          name: Type-check the documentation code examples against the API
+          command: bash docs/verification/check.sh
+      - store_artifacts:
+          path: docs/verification/report.md
+          destination: doc-examples-report.md
   build-sandbox:
     macos:
       xcode: "16.4.0"
@@ -90,6 +101,8 @@ workflows:
   build-and-deploy:
     jobs:
       - build:
+          <<: *default_workflows_tags
+      - check-doc-examples:
           <<: *default_workflows_tags
       - build-for-release:
           <<: *default_workflows_filters
