@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import AuthenticationServices
 import Reach5
 
 // MARK: - Doc-example compilation harness
@@ -27,3 +28,13 @@ enum AppDelegate {
 
 /// App-side navigation helper referenced by some snippets.
 func goToProfile(_ authToken: AuthToken) {}
+
+/// Base class for the imperative snippets. Many of them use `self` as a
+/// presentation context (`viewController: self`, `presentationContextProvider:
+/// self`), so the wrapper must be a UIViewController that conforms to the
+/// authentication presentation protocol.
+class DocExampleContext: UIViewController, ASWebAuthenticationPresentationContextProviding {
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        __placeholder()
+    }
+}

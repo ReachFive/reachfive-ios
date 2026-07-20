@@ -95,9 +95,11 @@ def transform(path: Path) -> str:
         inner = "\n".join("    " + l if l else l for l in body.splitlines())
         return f"{header}enum {ns} {{\n{inner}\n}}\n"
     else:
+        # Wrap in a UIViewController subclass (not an enum) so that snippets
+        # using `self` as a presentation context type-check. See DocExampleContext.
         inner = "\n".join("        " + l if l else l for l in body.splitlines())
         return (
-            f"{header}enum {ns} {{\n    static func run() async throws {{\n{inner}\n    }}\n}}\n"
+            f"{header}class {ns}: DocExampleContext {{\n    func run() async throws {{\n{inner}\n    }}\n}}\n"
         )
 
 
