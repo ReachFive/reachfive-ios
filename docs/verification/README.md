@@ -81,7 +81,10 @@ fixtures were typed). After any change, re-run `check.sh` until only real bugs
 remain, then commit.
 
 The `doc-examples-harness` skill (`.claude/skills/`) walks through this triage
-step by step.
+step by step. Its triggering description can be re-optimized with the
+skill-creator against `skill-trigger-evals.json` (20 labelled should-trigger /
+should-not-trigger queries) — run it from a `claude` session that is logged in
+(`claude -p` needs auth).
 
 ## Known limitations
 
