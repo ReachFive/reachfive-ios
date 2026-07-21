@@ -8,6 +8,8 @@ xcuserdata/
 # Ignore everything under .claude except the shared, versioned skills.
 .claude/*
 !.claude/skills/
+# …but never the skill-creator eval workspaces created next to a skill.
+.claude/skills/*-workspace/
 
 # Fichiers d’exemples de doc générés par docs/verification/generate.py
 docs/verification/Sources/E_*.swift
