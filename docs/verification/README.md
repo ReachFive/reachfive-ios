@@ -80,8 +80,12 @@ real signature in `Sources/Core/` first (this is exactly how the current
 fixtures were typed). After any change, re-run `check.sh` until only real bugs
 remain, then commit.
 
-The `doc-examples-harness` skill (`.claude/skills/`) walks through this triage
-step by step.
+If you're using Claude Code, invoke the **`doc-examples-harness` skill**
+(`.claude/skills/`) to automate this triage: point it at a failing
+`check-doc-examples` run and it classifies each new failure (real doc bug vs.
+harness gap), applies the right fix — a `Fixtures.swift` stub, a `generate.py`
+tweak, or a baseline update — and re-runs the check until only genuine doc bugs
+remain.
 
 ## Known limitations
 
