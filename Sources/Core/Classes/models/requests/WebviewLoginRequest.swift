@@ -13,6 +13,12 @@ public class WebviewLoginRequest {
     /// of the client's authorized callback URLs, and is reused identically for the code exchange.
     /// Default: ``WebSessionMode/sdkScheme``.
     public let webSessionMode: WebSessionMode
+    /// Key/value pairs propagated in the **fragment** of the `/oauth/authorize` URL (`#key=value&key2=value2`).
+    /// Intended for the token-orchestration flow: `/oauth/authorize` 302-redirects to the client's Login URL,
+    /// and a fragment (unlike a query param) survives that redirect — the browser re-applies it onto the
+    /// redirect target. The Login URL can then read it via `window.location.hash` to customize the page per
+    /// calling channel (logo/colors). Ignored when the client has no token orchestration configured.
+    public let loginUrlFragment: [String: String]?
 
     public init(
         state: String? = nil,
@@ -22,7 +28,8 @@ public class WebviewLoginRequest {
         origin: String? = nil,
         provider: String? = nil,
         prefersEphemeralWebBrowserSession: Bool = false,
-        webSessionMode: WebSessionMode = .sdkScheme
+        webSessionMode: WebSessionMode = .sdkScheme,
+        loginUrlFragment: [String: String]? = nil
     ) {
         self.state = state ?? "state"
         self.nonce = nonce ?? "nonce"
@@ -32,5 +39,6 @@ public class WebviewLoginRequest {
         self.provider = provider
         self.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
         self.webSessionMode = webSessionMode
+        self.loginUrlFragment = loginUrlFragment
     }
 }

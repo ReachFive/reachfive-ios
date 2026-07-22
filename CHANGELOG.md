@@ -18,6 +18,7 @@
 ### New features
 - Support for universal-link providers: register a `WebProvider` (e.g. `WebProvider(name: .bconnect, mode: .externalApp)`) to pick how the login session is delivered back to the app. See xref:providerCreator.adoc[] and xref:guides/custom-provider.adoc[].
 - `webviewLogin` accepts a new `webSessionMode` parameter (`.sdkScheme`, `.universalLink`, `.externalApp`) to control the return channel of the underlying `ASWebAuthenticationSession`.
+- `webviewLogin` accepts a new `loginUrlFragment` parameter to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
 
 ## v10.0.1
 
