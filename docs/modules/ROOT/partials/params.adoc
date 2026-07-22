@@ -418,11 +418,14 @@ TIP: See the "Associated Domains" section of xref:index.adoc[] for entitlement s
 
 // tag::loginUrlFragment[]
 |[[loginUrlFragment,loginUrlFragment]] loginUrlFragment `[String: String]?`
-|Key/value pairs propagated in the *fragment* of the `/oauth/authorize` URL (`#key=value&key2=value2`).
+|Key/value pairs propagated in the *fragment* of the link:{site-url}/openapi/identity.html#operation/authorizeUser[`/oauth/authorize` URL] (e.g., `#key=value&key2=value2`).
 
-Intended for the token-orchestration flow: `/oauth/authorize` redirects to the client's Login URL, and a fragment (unlike a query param) survives that redirect — the browser re-applies it onto the redirect target. The Login URL can then read it via `window.location.hash` to customize itself (logo, colors) per calling channel.
+Intended for the token-orchestration flow: link:{site-url}/openapi/identity.html#operation/authorizeUser[`/oauth/authorize`] redirects to the client's Login URL.
+A fragment, unlike a query parameter, survives that redirect; the browser reapplies it onto the redirect target. 
+The Login URL can then read it via `window.location.hash` to customize itself (logo, colors) per calling channel.
 
-NOTE: Requires the client to have a Login URL configured and xref:docs:ROOT:orchestration-token.adoc[request orchestration tokens] enabled; otherwise this parameter has no effect.
+IMPORTANT: Requires the client to have a Login URL configured and xref:docs:ROOT:orchestration-token.adoc[request orchestration tokens] enabled; otherwise this parameter has no effect.
+
 // end::loginUrlFragment[]
 
 // tag::state[]
