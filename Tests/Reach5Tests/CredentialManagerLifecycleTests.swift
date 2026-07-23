@@ -18,11 +18,10 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         var controller: ASAuthorizationController?
         let task = Task { @MainActor in
             try await manager.perform(
-                CredentialManager.RequestContext.Pending.authToken,
+                { .passkeyLogin(scopes: nil, $0) },
                 requests: [ASAuthorizationPasswordProvider().createRequest()],
                 reachFive: makeReachFive(),
                 anchor: anchor,
-                scopes: nil,
                 originR5: nil
             ) { controller = $0 }
         }

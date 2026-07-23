@@ -12,57 +12,55 @@ public class CredentialManager: NSObject {
     // du delegate retrouve le contexte de SA requête, et une requête ne peut pas écraser l'état d'une autre.
     // Internal (et non private) pour que les tests puissent piloter perform(_:requests:...).
     struct RequestContext {
-        enum Pending {
-            // signup, auto-fill, login non-discoverable
-            case authToken(CheckedContinuation<AuthToken, Error>)
-            // login modal (password/SIWA/passkey), qui peut déboucher sur un step-up MFA
-            case loginFlow(CheckedContinuation<LoginFlow, Error>)
-            // enregistrement d'une nouvelle clé (add/reset)
-            case registration(CheckedContinuation<Void, Error>)
-        }
-
-        // Données propres à un flux : une création de passkey (signup/add/reset) et un Sign In With Apple
-        // ne coexistent jamais dans une même requête.
-        enum Extra {
-            case passkeyCreation(PasskeyCreationType)
-            case signInWithApple(nonce: Pkce, provider: ConfiguredAppleProvider)
-            case none
-        }
-
         // retenu : maintient la requête système en vie jusqu'à sa complétion
         let controller: ASAuthorizationController
         // retenu fort pendant la durée de la requête : pas de cycle permanent, et le SDK
         // reste vivant jusqu'à la complétion (pas de back-pointer weak à dénuller)
         let reachFive: ReachFive
-        let pending: Pending
         // anchor pour le presentationContextProvider
         let anchor: ASPresentationAnchor
-        // le scope de la requête
-        let scopes: [String]?
-        // le scope tel qu'envoyé au serveur
-        var scope: String? { scopes?.joined(separator: " ") }
         // origin optionnel pour les événements utilisateur
         let originR5: String?
-        // données propres au flux (création de passkey ou Sign In With Apple)
-        let extra: Extra
+        // l'opération demandée : continuation typée + données propres au flux
+        let operation: Operation
+    }
+
+    /// L'opération portée par une requête. Chaque cas fixe d'un bloc le type de credential attendu, le
+    /// traitement à appliquer et le type de valeur rendu par sa continuation : la nature de la requête
+    /// est donc connue de façon univoque, sans avoir à recouper à la main un `Pending` et un `Extra` dans
+    /// chaque branche de complétion. La continuation est le dernier associé, non étiqueté.
+    enum Operation {
+        /// Création de passkey à l'inscription → jeton d'authentification.
+        case signup(options: RegistrationOptions, scopes: [String], CheckedContinuation<AuthToken, Error>)
+        /// Enregistrement d'une passkey pour un compte déjà connecté (add) → rien.
+        case addPasskey(authToken: AuthToken, CheckedContinuation<Void, Error>)
+        /// Réinitialisation des passkeys → rien.
+        case resetPasskey(options: ResetOptions, CheckedContinuation<Void, Error>)
+        /// Connexion par assertion de passkey (auto-fill ou non-discoverable) → jeton d'authentification.
+        case passkeyLogin(scopes: [String]?, CheckedContinuation<AuthToken, Error>)
+        /// Connexion modale (mot de passe, Sign In With Apple ou passkey), pouvant déboucher sur un
+        /// step-up MFA → LoginFlow. Seul flux à pouvoir recevoir plusieurs types de credential.
+        case modalLogin(scopes: [String]?, siwa: SignInWithApple?, CheckedContinuation<LoginFlow, Error>)
 
         func fail(with error: Error) {
-            switch pending {
-            case let .authToken(continuation): continuation.resume(throwing: error)
-            case let .loginFlow(continuation): continuation.resume(throwing: error)
-            case let .registration(continuation): continuation.resume(throwing: error)
+            switch self {
+            case let .signup(_, _, continuation): continuation.resume(throwing: error)
+            case let .addPasskey(_, continuation): continuation.resume(throwing: error)
+            case let .resetPasskey(_, continuation): continuation.resume(throwing: error)
+            case let .passkeyLogin(_, continuation): continuation.resume(throwing: error)
+            case let .modalLogin(_, _, continuation): continuation.resume(throwing: error)
             }
         }
     }
 
+    // Données d'un Sign In With Apple, à conserver entre la construction de la requête et sa complétion.
+    struct SignInWithApple {
+        let nonce: Pkce
+        let provider: ConfiguredAppleProvider
+    }
+
     // les requêtes en cours, indexées par leur controller
     private var contexts: [ObjectIdentifier: RequestContext] = [:]
-
-    enum PasskeyCreationType {
-        case Signup(signupOptions: RegistrationOptions)
-        case AddPasskey(authToken: AuthToken)
-        case ResetPasskey(resetOptions: ResetOptions)
-    }
 
     // nonisolated : appelé depuis l'init synchrone de ReachFive, hors du main actor
     nonisolated override init() {}
@@ -82,24 +80,22 @@ public class CredentialManager: NSObject {
     /// Crée le controller, enregistre le contexte de la requête PUIS lance la requête système via `perform` :
     /// comme tout se passe sur le main actor, la continuation est en place avant que le delegate puisse tirer.
     ///
-    /// Le case de `Pending` à construire est passé comme fonction (`RequestContext.Pending.authToken`, etc.),
+    /// L'`Operation` à construire est passée comme closure recevant la continuation (`{ .signup(…, $0) }`),
     /// ce qui fixe le type de retour `T` de la requête. Internal pour être testable : un test pilote la méthode
     /// avec un `perform` inerte puis simule les callbacks du delegate.
     func perform<T>(
-        _ makePending: (CheckedContinuation<T, Error>) -> RequestContext.Pending,
+        _ makeOperation: (CheckedContinuation<T, Error>) -> Operation,
         requests: [ASAuthorizationRequest],
         reachFive: ReachFive,
         anchor: ASPresentationAnchor,
-        scopes: [String]?,
         originR5: String?,
-        extra: RequestContext.Extra = .none,
         using perform: (ASAuthorizationController) -> Void
     ) async throws -> T {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<T, Error>) in
             let controller = ASAuthorizationController(authorizationRequests: requests)
             controller.delegate = self
             controller.presentationContextProvider = self
-            contexts[ObjectIdentifier(controller)] = RequestContext(controller: controller, reachFive: reachFive, pending: makePending(continuation), anchor: anchor, scopes: scopes, originR5: originR5, extra: extra)
+            contexts[ObjectIdentifier(controller)] = RequestContext(controller: controller, reachFive: reachFive, anchor: anchor, originR5: originR5, operation: makeOperation(continuation))
             perform(controller)
         }
     }
@@ -116,7 +112,7 @@ public class CredentialManager: NSObject {
         // sans dupliquer la valeur en paramètre, un token de scope OAuth ne pouvant pas contenir d'espace.
         let scopes = request.scope.components(separatedBy: " ")
 
-        return try await perform(RequestContext.Pending.authToken, requests: [registrationRequest], reachFive: reachFive, anchor: anchor, scopes: scopes, originR5: originR5, extra: .passkeyCreation(.Signup(signupOptions: options))) {
+        return try await perform({ .signup(options: options, scopes: scopes, $0) }, requests: [registrationRequest], reachFive: reachFive, anchor: anchor, originR5: originR5) {
             $0.performRequests()
         }
     }
@@ -131,7 +127,7 @@ public class CredentialManager: NSObject {
         let options = try await reachFive.reachFiveApi.createWebAuthnRegistrationOptions(authToken: authToken, registrationRequest: RegistrationRequest(origin: request.originWebAuthn!, friendlyName: request.friendlyName))
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
-        try await perform(RequestContext.Pending.registration, requests: [registrationRequest], reachFive: reachFive, anchor: request.anchor, scopes: nil, originR5: request.origin, extra: .passkeyCreation(.AddPasskey(authToken: authToken))) {
+        try await perform({ .addPasskey(authToken: authToken, $0) }, requests: [registrationRequest], reachFive: reachFive, anchor: request.anchor, originR5: request.origin) {
             $0.performRequests()
         }
     }
@@ -147,7 +143,7 @@ public class CredentialManager: NSObject {
         let options = try await reachFive.reachFiveApi.createWebAuthnResetOptions(resetOptions: resetOptions)
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
-        try await perform(RequestContext.Pending.registration, requests: [registrationRequest], reachFive: reachFive, anchor: request.anchor, scopes: nil, originR5: request.origin, extra: .passkeyCreation(.ResetPasskey(resetOptions: resetOptions))) {
+        try await perform({ .resetPasskey(options: resetOptions, $0) }, requests: [registrationRequest], reachFive: reachFive, anchor: request.anchor, originR5: request.origin) {
             $0.performRequests()
         }
     }
@@ -170,7 +166,7 @@ public class CredentialManager: NSObject {
         }
 
         // AutoFill-assisted requests only support ASAuthorizationPlatformPublicKeyCredentialAssertionRequest.
-        return try await perform(RequestContext.Pending.authToken, requests: [authorizationRequest], reachFive: reachFive, anchor: request.anchor, scopes: request.scopes, originR5: request.origin) {
+        return try await perform({ .passkeyLogin(scopes: request.scopes, $0) }, requests: [authorizationRequest], reachFive: reachFive, anchor: request.anchor, originR5: request.origin) {
             $0.performAutoFillAssistedRequests()
         }
     }
@@ -211,7 +207,7 @@ public class CredentialManager: NSObject {
             return assertionRequest
         }
 
-        return try await perform(RequestContext.Pending.authToken, requests: built.requests, reachFive: reachFive, anchor: request.anchor, scopes: request.scopes, originR5: request.origin, extra: built.extra) {
+        return try await perform({ .passkeyLogin(scopes: request.scopes, $0) }, requests: built.requests, reachFive: reachFive, anchor: request.anchor, originR5: request.origin) {
             performRequests(on: $0, mode: mode)
         }
     }
@@ -228,7 +224,7 @@ public class CredentialManager: NSObject {
             return try self.createCredentialAssertionRequest(authenticationOptions)
         }
 
-        return try await perform(RequestContext.Pending.loginFlow, requests: built.requests, reachFive: reachFive, anchor: request.anchor, scopes: request.scopes, originR5: request.origin, extra: built.extra) {
+        return try await perform({ .modalLogin(scopes: request.scopes, siwa: built.siwa, $0) }, requests: built.requests, reachFive: reachFive, anchor: request.anchor, originR5: request.origin) {
             performRequests(on: $0, mode: mode)
         }
     }
@@ -236,8 +232,8 @@ public class CredentialManager: NSObject {
     // Internal pour être testable
     struct BuiltRequests {
         let requests: [ASAuthorizationRequest]
-        // .signInWithApple si une requête Sign In With Apple fait partie du lot, sinon .none
-        let extra: RequestContext.Extra
+        // renseigné si une requête Sign In With Apple fait partie du lot
+        let siwa: SignInWithApple?
     }
 
     /// Construit les `ASAuthorizationRequest` pour les types demandés, sans toucher à l'état de la classe.
@@ -245,7 +241,7 @@ public class CredentialManager: NSObject {
     /// construire les requêtes sans réseau.
     func buildAuthorizationRequests(_ webAuthnLoginRequest: WebAuthnLoginRequest, reachFive: ReachFive,authorizing requestTypes: [ModalAuthorization], appleProvider: ConfiguredAppleProvider? = nil, fetchAuthenticationOptions: (ReachFive, WebAuthnLoginRequest) async throws -> AuthenticationOptions = { try await $0.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: $1) }, makeAuthorization: (AuthenticationOptions) throws -> ASAuthorizationRequest) async throws -> BuiltRequests {
         var requests: [ASAuthorizationRequest] = []
-        var extra: RequestContext.Extra = .none
+        var siwa: SignInWithApple? = nil
 
         for type in requestTypes {
             switch type {
@@ -270,7 +266,7 @@ public class CredentialManager: NSObject {
                 let siwaNonce = Pkce.generate()
                 appleIDRequest.nonce = siwaNonce.codeChallenge
                 if let appleProvider {
-                    extra = .signInWithApple(nonce: siwaNonce, provider: appleProvider)
+                    siwa = SignInWithApple(nonce: siwaNonce, provider: appleProvider)
                 }
 
                 requests.append(appleIDRequest)
@@ -288,7 +284,7 @@ public class CredentialManager: NSObject {
             }
         }
 
-        return BuiltRequests(requests: requests, extra: extra)
+        return BuiltRequests(requests: requests, siwa: siwa)
     }
 
     private func performRequests(on controller: ASAuthorizationController, mode: Mode) {
@@ -353,24 +349,59 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             do {
                 try await complete(authorization, context: context)
             } catch {
-                context.fail(with: error)
+                context.operation.fail(with: error)
             }
         }
     }
 
+    /// Un seul `switch` sur l'opération : chaque branche sait quel credential elle attend et le récupère
+    /// via un helper d'extraction. Plus aucun recoupement pending/extra/credential à faire à la main.
     private func complete(_ authorization: ASAuthorization, context: RequestContext) async throws {
-        let reachFiveApi = context.reachFive.reachFiveApi
-        let sdkConfig = context.reachFive.sdkConfig
+        let reachFive = context.reachFive
+        let reachFiveApi = reachFive.reachFiveApi
+
+        switch context.operation {
+        case let .signup(options, scopes, continuation):
+            let credential = try registrationCredential(from: authorization)
+            let webauthnSignupCredential = WebauthnSignupCredential(webauthnId: options.options.publicKey.user.id, publicKeyCredential: credential)
+            let authenticationToken = try await reachFiveApi.signupWithWebAuthn(webauthnSignupCredential: webauthnSignupCredential, originR5: context.originR5)
+            let authToken = try await reachFive.loginCallback(tkn: authenticationToken.tkn, scopes: scopes, origin: context.originR5)
+            continuation.resume(returning: authToken)
+
+        case let .addPasskey(authToken, continuation):
+            let credential = try registrationCredential(from: authorization)
+            try await reachFiveApi.registerWithWebAuthn(authToken: authToken, publicKeyCredential: credential, originR5: context.originR5)
+            continuation.resume(returning: ())
+
+        case let .resetPasskey(options, continuation):
+            let credential = try registrationCredential(from: authorization)
+            let resetPublicKeyCredential = ResetPublicKeyCredential(resetOptions: options, publicKeyCredential: credential)
+            try await reachFiveApi.resetWebAuthn(resetPublicKeyCredential: resetPublicKeyCredential, originR5: context.originR5)
+            continuation.resume(returning: ())
+
+        case let .passkeyLogin(scopes, continuation):
+            let authToken = try await authenticateWithPasskey(authorization, scopes: scopes, reachFive: reachFive, originR5: context.originR5)
+            continuation.resume(returning: authToken)
+
+        case let .modalLogin(scopes, siwa, continuation):
+            let loginFlow = try await completeModalLogin(authorization, scopes: scopes, siwa: siwa, context: context)
+            continuation.resume(returning: loginFlow)
+        }
+    }
+
+    /// Complète une connexion modale, seul flux à pouvoir recevoir plusieurs types de credential
+    /// (mot de passe, Sign In With Apple ou passkey).
+    private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String]?, siwa: SignInWithApple?, context: RequestContext) async throws -> LoginFlow {
+        let reachFive = context.reachFive
+        let reachFiveApi = reachFive.reachFiveApi
+        let sdkConfig = reachFive.sdkConfig
+
+        guard let scopes else {
+            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope")
+        }
 
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
             // a password was selected to sign in
-            guard case let .loginFlow(continuation) = context.pending else {
-                throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: unexpected password credential for this request")
-            }
-            guard let scope = context.scope else {
-                throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope")
-            }
-
             let email: String?
             let phoneNumber: String?
             if passwordCredential.user.contains("@") {
@@ -388,24 +419,18 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 password: passwordCredential.password,
                 grantType: "password",
                 clientId: sdkConfig.clientId,
-                scope: scope,
+                scope: scopes.joined(separator: " "),
                 origin: context.originR5
             ))
 
-            let loginFlow = try await context.reachFive.loginFlow(afterPasswordGrant: resp, scopes: context.scopes, origin: context.originR5)
-            continuation.resume(returning: loginFlow)
+            return try await reachFive.loginFlow(afterPasswordGrant: resp, scopes: scopes, origin: context.originR5)
         } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-            guard case let .loginFlow(continuation) = context.pending else {
-                throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: unexpected Sign In With Apple credential for this request")
+            guard let siwa else {
+                throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no nonce, no apple provider")
             }
-            guard case let .signInWithApple(nonce, appleProvider) = context.extra, let scope = context.scope else {
-                throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope, no nonce, no apple provider")
-            }
-
             guard let identityToken = appleIDCredential.identityToken else {
                 throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no id token returned")
             }
-
             guard let idToken = String(data: identityToken, encoding: .utf8) else {
                 throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: unreadable id token \(identityToken)")
             }
@@ -414,94 +439,25 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             // Construction voisine mais distincte de ReachFive.buildAuthorizeURL (jambe OAuth différente :
             // id_token/nonce/noms Apple ici, state et URL de navigation là-bas) ; factoriser n'apporterait rien.
             let code = try await reachFiveApi.authorize(params: [
-                "provider": appleProvider.providerConfig.providerWithVariant,
+                "provider": siwa.provider.providerConfig.providerWithVariant,
                 "client_id": sdkConfig.clientId,
                 "id_token": idToken,
                 "response_type": "code",
                 "redirect_uri": sdkConfig.redirectUri.absoluteString,
-                "scope": scope,
+                "scope": scopes.joined(separator: " "),
                 "code_challenge": pkce.codeChallenge,
                 "code_challenge_method": pkce.codeChallengeMethod,
-                "nonce": nonce.codeVerifier,
+                "nonce": siwa.nonce.codeVerifier,
                 "origin": context.originR5,
                 "given_name": appleIDCredential.fullName?.givenName,
                 "family_name": appleIDCredential.fullName?.familyName
             ])
-            let token = try await context.reachFive.authWithCode(code: code, pkce: pkce)
-            continuation.resume(returning: .AchievedLogin(authToken: token))
-        } else if #available(iOS 16.0, *), let credentialRegistration = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration {
-            // A new passkey was registered
-            guard let attestationObject = credentialRegistration.rawAttestationObject else {
-                throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no attestationObject")
-            }
-
-            let clientDataJSON = credentialRegistration.rawClientDataJSON
-            let r5AuthenticatorAttestationResponse = R5AuthenticatorAttestationResponse(attestationObject: attestationObject.toBase64Url(), clientDataJSON: clientDataJSON.toBase64Url())
-
-            let id = credentialRegistration.credentialID.toBase64Url()
-            let registrationPublicKeyCredential = RegistrationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: r5AuthenticatorAttestationResponse)
-
-            guard case let .passkeyCreation(passkeyCreationType) = context.extra else {
-                throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no passkey creation data")
-            }
-
-            switch passkeyCreationType {
-            case let .AddPasskey(authToken):
-                guard case let .registration(continuation) = context.pending else {
-                    throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: unexpected passkey registration for this request")
-                }
-                try await reachFiveApi.registerWithWebAuthn(authToken: authToken, publicKeyCredential: registrationPublicKeyCredential, originR5: context.originR5)
-                continuation.resume(returning: ())
-
-            case let .Signup(signupOptions):
-                guard case let .authToken(continuation) = context.pending else {
-                    throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: unexpected passkey registration for this request")
-                }
-                guard let scopes = context.scopes else {
-                    throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope")
-                }
-
-                let webauthnSignupCredential = WebauthnSignupCredential(webauthnId: signupOptions.options.publicKey.user.id, publicKeyCredential: registrationPublicKeyCredential)
-                let authenticationToken = try await reachFiveApi.signupWithWebAuthn(webauthnSignupCredential: webauthnSignupCredential, originR5: context.originR5)
-                let authToken = try await context.reachFive.loginCallback(tkn: authenticationToken.tkn, scopes: scopes, origin: context.originR5)
-                continuation.resume(returning: authToken)
-
-            case let .ResetPasskey(resetOptions):
-                guard case let .registration(continuation) = context.pending else {
-                    throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: unexpected passkey registration for this request")
-                }
-                let resetPublicKeyCredential = ResetPublicKeyCredential(resetOptions: resetOptions, publicKeyCredential: registrationPublicKeyCredential)
-                try await reachFiveApi.resetWebAuthn(resetPublicKeyCredential: resetPublicKeyCredential, originR5: context.originR5)
-                continuation.resume(returning: ())
-            }
-        } else if #available(iOS 16.0, *), let credentialAssertion = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialAssertion {
-            // A passkey was selected to sign in
-
-            guard let scopes = context.scopes else {
-                throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope")
-            }
-
-            let signature = credentialAssertion.signature.toBase64Url()
-            let clientDataJSON = credentialAssertion.rawClientDataJSON.toBase64Url()
-            let userID = credentialAssertion.userID.toBase64Url()
-
-            let id = credentialAssertion.credentialID.toBase64Url()
-            let authenticatorData = credentialAssertion.rawAuthenticatorData.toBase64Url()
-            let response = R5AuthenticatorAssertionResponse(authenticatorData: authenticatorData, clientDataJSON: clientDataJSON, signature: signature, userHandle: userID)
-
-            let authenticationToken = try await reachFiveApi.authenticateWithWebAuthn(authenticationPublicKeyCredential: AuthenticationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: response))
-            let authToken = try await context.reachFive.loginCallback(tkn: authenticationToken.tkn, scopes: scopes, origin: context.originR5)
-
-            switch context.pending {
-            case let .authToken(continuation):
-                continuation.resume(returning: authToken)
-            case let .loginFlow(continuation):
-                continuation.resume(returning: .AchievedLogin(authToken: authToken))
-            case .registration:
-                throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: unexpected passkey assertion for this request")
-            }
+            let token = try await reachFive.authWithCode(code: code, pkce: pkce)
+            return .AchievedLogin(authToken: token)
         } else {
-            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: Received unknown authorization type.")
+            // a passkey was selected to sign in
+            let authToken = try await authenticateWithPasskey(authorization, scopes: scopes, reachFive: reachFive, originR5: context.originR5)
+            return .AchievedLogin(authToken: authToken)
         }
     }
 
@@ -511,7 +467,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             return
         }
 
-        context.fail(with: Self.adapt(error))
+        context.operation.fail(with: Self.adapt(error))
     }
 
     // Fonction pure, extraite pour être testable unitairement
@@ -526,6 +482,46 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             return .TechnicalError(reason: "ASAuthorizationError \(authorizationError.code.rawValue): \(error)")
         }
         return .TechnicalError(reason: "\(error.localizedDescription)")
+    }
+}
+
+// MARK: - extraction des credentials reçus
+extension CredentialManager {
+    /// Extrait le credential d'enregistrement de passkey d'une autorisation (signup / add / reset)
+    /// et le convertit dans notre format. Lève une erreur technique si l'autorisation n'en contient pas.
+    private func registrationCredential(from authorization: ASAuthorization) throws -> RegistrationPublicKeyCredential {
+        guard #available(iOS 16.0, *), let credentialRegistration = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration else {
+            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: expected a passkey registration")
+        }
+        guard let attestationObject = credentialRegistration.rawAttestationObject else {
+            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no attestationObject")
+        }
+
+        let response = R5AuthenticatorAttestationResponse(attestationObject: attestationObject.toBase64Url(), clientDataJSON: credentialRegistration.rawClientDataJSON.toBase64Url())
+        let id = credentialRegistration.credentialID.toBase64Url()
+        return RegistrationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: response)
+    }
+
+    /// Extrait l'assertion de passkey d'une autorisation, la valide auprès du serveur et rend le jeton.
+    /// Partagé par la connexion par passkey (auto-fill / non-discoverable) et la branche passkey de la
+    /// connexion modale. Lève une erreur technique si l'autorisation n'est pas une assertion de passkey.
+    private func authenticateWithPasskey(_ authorization: ASAuthorization, scopes: [String]?, reachFive: ReachFive, originR5: String?) async throws -> AuthToken {
+        guard #available(iOS 16.0, *), let credentialAssertion = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialAssertion else {
+            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: expected a passkey assertion")
+        }
+        guard let scopes else {
+            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope")
+        }
+
+        let signature = credentialAssertion.signature.toBase64Url()
+        let clientDataJSON = credentialAssertion.rawClientDataJSON.toBase64Url()
+        let userID = credentialAssertion.userID.toBase64Url()
+        let id = credentialAssertion.credentialID.toBase64Url()
+        let authenticatorData = credentialAssertion.rawAuthenticatorData.toBase64Url()
+        let response = R5AuthenticatorAssertionResponse(authenticatorData: authenticatorData, clientDataJSON: clientDataJSON, signature: signature, userHandle: userID)
+
+        let authenticationToken = try await reachFive.reachFiveApi.authenticateWithWebAuthn(authenticationPublicKeyCredential: AuthenticationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: response))
+        return try await reachFive.loginCallback(tkn: authenticationToken.tkn, scopes: scopes, origin: originR5)
     }
 }
 
