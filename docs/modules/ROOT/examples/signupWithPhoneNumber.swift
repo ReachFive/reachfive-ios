@@ -3,18 +3,18 @@ import Reach5
 do {
     let signupFlow = try await AppDelegate.reachfive().signup(
         profile: ProfileSignupRequest(
-            givenName: "John",
-            familyName: "Doe",
-            gender: "male",
+            password: "hjk90wxc",
             phoneNumber: "+353875551234",
             customIdentifier: "coolCat55",
-            password: "hjk90wxc"
+            givenName: "John",
+            familyName: "Doe",
+            gender: "male"
         ),
         scope: ["openid", "profile", "phone"]
     )
 
     switch signupFlow {
-    case .AchievedLogin(authToken: AuthToken):
+    case .AchievedLogin(authToken: let authToken):
         // Signup completed and user is logged in
         // Use authToken as needed
     case .AwaitingIdentifierVerification:

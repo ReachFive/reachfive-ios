@@ -5,7 +5,7 @@ let scope = ["openid", "email", "profile", "phone", "full_write", "offline_acces
 do {
     let response = try await AppDelegate.reachfive().mfaStart(
         stepUp: .AuthTokenFlow(
-            authType: "email",
+            authType: .email,
             authToken: profileAuthToken,
             scope: scope
         )
