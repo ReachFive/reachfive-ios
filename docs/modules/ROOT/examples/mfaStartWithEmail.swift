@@ -2,7 +2,7 @@ import Reach5
 
 do {
     let response = try await AppDelegate.reachfive().mfaStart(
-        registering: .Email(redirectUri: "reachfive-${clientId}://callback"),
+        registering: .Email(redirectUrl: URL(string: "reachfive-${clientId}://callback")!),
         authToken: profileAuthToken
     )
     // Do something

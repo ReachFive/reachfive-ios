@@ -3,7 +3,7 @@ import Reach5
 let authToken: AuthToken = // The authentication token obtained from login or signup.
 
 do {
-    let refreshedAuthToken = try await AppDelegate.reachfive().refreshAccessToken(authToken)
+    let refreshedAuthToken = try await AppDelegate.reachfive().refreshAccessToken(authToken: authToken)
     // Do something
 } catch {
     // Return a ReachFive error

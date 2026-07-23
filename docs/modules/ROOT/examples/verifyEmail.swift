@@ -5,8 +5,8 @@ let profileAuthToken: AuthToken = // Here paste the authorization token of the p
 do {
     try await AppDelegate.reachfive().verifyEmail(
         authToken: profileAuthToken,
-        email: "johnatthan.doe@gmail.com",
-        code: "123456"
+        code: "123456",
+        email: "johnatthan.doe@gmail.com"
     )
     // Successfully verified email
 } catch {

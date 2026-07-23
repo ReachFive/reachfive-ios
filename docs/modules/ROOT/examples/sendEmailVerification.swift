@@ -5,7 +5,7 @@ let profileAuthToken: AuthToken = // Here paste the authorization token of the p
 do {
     let emailVerificationResponse = try await AppDelegate.reachfive().sendEmailVerification(
         authToken: profileAuthToken,
-        redirectUrl: "https://example-email-verification.com" // optional
+        redirectUrl: URL(string: "https://example-email-verification.com")! // optional
     )
     switch emailVerificationResponse {
     case .Success:
