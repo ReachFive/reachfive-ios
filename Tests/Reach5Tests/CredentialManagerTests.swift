@@ -77,9 +77,7 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
 
         XCTAssertEqual(built.requests.count, 1)
         XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
-        guard case .none = built.extra else {
-            return XCTFail("expected .none, got \(built.extra)")
-        }
+        XCTAssertNil(built.siwa)
     }
 
     func testSignInWithAppleCarriesProviderScopesAndNonce() async throws {
@@ -91,12 +89,10 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
         let appleRequest = try XCTUnwrap(built.requests.first as? ASAuthorizationAppleIDRequest)
         XCTAssertEqual(appleRequest.requestedScopes, [.email, .fullName])
 
-        guard case let .signInWithApple(nonce, provider) = built.extra else {
-            return XCTFail("expected .signInWithApple, got \(built.extra)")
-        }
+        let siwa = try XCTUnwrap(built.siwa)
         // le nonce envoyé à Apple est le code challenge ; le verifier correspondant partira au serveur
-        XCTAssertEqual(appleRequest.nonce, nonce.codeChallenge)
-        XCTAssertTrue(provider === appleProvider)
+        XCTAssertEqual(appleRequest.nonce, siwa.nonce.codeChallenge)
+        XCTAssertTrue(siwa.provider === appleProvider)
     }
 
     @available(iOS 16.0, *)
