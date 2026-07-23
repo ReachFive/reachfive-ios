@@ -77,15 +77,34 @@ def write_report(failures, baseline, checked):
     return text
 
 
+def _int_arg(prefix, default):
+    for a in sys.argv:
+        if a.startswith(prefix):
+            try:
+                return int(a.split("=", 1)[1])
+            except ValueError:
+                return default
+    return default
+
+
 def main():
     update = "--update-baseline" in sys.argv
     log_text = sys.stdin.read()
-    try:
-        checked = int([a for a in sys.argv if a.startswith("--checked=")][0].split("=")[1])
-    except IndexError:
-        checked = 0
+    checked = _int_arg("--checked=", 0)
+    build_status = _int_arg("--build-status=", 0)
 
     failures = parse(log_text)
+
+    # A build that failed while producing *no* parseable per-example compiler
+    # error means the failure is invisible to this report — an error in
+    # Fixtures.swift, an unresolved scheme, a toolchain/linker error, or an
+    # aborted build. Never treat that as a clean pass (nor baseline it away).
+    if build_status != 0 and not failures:
+        msg = ("❌ Build failed but no per-example compiler errors were parsed — "
+               "this is a harness/build error, not a clean run. See the build log.")
+        print(msg)
+        REPORT.write_text("# Documentation examples — API check report\n\n" + msg + "\n")
+        return 1
 
     if update:
         BASELINE.write_text(

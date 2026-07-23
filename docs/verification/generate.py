@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate compilable Swift files from the doc example fragments.
 
-Each fragment in docs/modules/ROOT/examples/*.swift is wrapped into its own
+Each fragment in docs/modules/ROOT/examples/**/*.swift is wrapped into its own
 namespace so that (a) top-level statements become legal and (b) snippets that
 define the same type (e.g. AppDelegate) don't collide in a single module.
 
@@ -28,15 +28,28 @@ SKIP = {
 }
 
 DECL_RE = re.compile(r'^\s*(public\s+|final\s+|open\s+)*(class|struct|enum|protocol|extension)\b')
+# A line that is *only* an attribute (`@main`, `@available(iOS 16, *)`), and the
+# leading attribute(s) of an inline decl (`@MainActor class Foo`). Used so that
+# an attribute-led declaration is still classified as a declaration.
+ATTR_ONLY_RE = re.compile(r'@\w+(\([^)]*\))?$')
+ATTR_PREFIX_RE = re.compile(r'^(?:@\w+(?:\([^)]*\))?\s+)+')
 # Placeholders come in three shapes. Each is replaced by a value whose type the
 # compiler can infer from context, so the *API call* still gets type-checked:
 #   let x: T = // paste…          ->  let x: T = __placeholder()   (typed let)
 #   foo(label: // provide…)       ->  foo(label: __placeholder())  (argument position)
 #   let x = // obtain…            ->  (line dropped; x resolves to an ambient global)
-UNTYPED_PLACEHOLDER_RE = re.compile(r'^[ \t]*let\s+\w+\s*=\s*//.*$', re.M)
-ARG_PLACEHOLDER_RE = re.compile(r'^([ \t]*[A-Za-z_]\w*:[ \t]*)//.*$', re.M)
-PLACEHOLDER_RE = re.compile(r'=\s*//.*$', re.M)
+UNTYPED_PLACEHOLDER_RE = re.compile(r'^[ \t]*let\s+\w+\s*=\s*//.*$')
+# `label: // …` in argument position — but never a switch `default:` label, whose
+# colon looks the same yet must keep its `break` (see fix_empty_cases).
+ARG_PLACEHOLDER_RE = re.compile(r'^([ \t]*(?!default\b)[A-Za-z_]\w*:[ \t]*)//.*$')
+PLACEHOLDER_RE = re.compile(r'=\s*//.*$')
 APPDELEGATE_CLASS_RE = re.compile(r'(class\s+AppDelegate\b[^{]*\{)')
+CASE_START_RE = re.compile(r'^\s*(case|default)\b')
+
+
+def rel_stem(path: Path) -> str:
+    """Path relative to EXAMPLES, without extension, e.g. 'application/applicationOpenUrl'."""
+    return str(path.relative_to(EXAMPLES).with_suffix(""))
 
 
 def sanitize(stem: str) -> str:
@@ -46,36 +59,86 @@ def sanitize(stem: str) -> str:
 def first_significant_line(lines):
     for l in lines:
         s = l.strip()
-        if s and not s.startswith("//"):
-            return s
+        if not s or s.startswith("//"):
+            continue
+        if ATTR_ONLY_RE.match(s):  # a line bearing only an attribute
+            continue
+        return s
     return ""
 
 
-CASE_RE = re.compile(r'^\s*(case\b.*|default\s*):\s*$')
+def resolve_placeholders(body: str) -> str:
+    """Replace the `= // paste…` / `label: // provide…` placeholder shapes with a
+    typed stub, working line by line so a `= //` inside a string literal is left
+    untouched (it is not a placeholder)."""
+    out = []
+    for line in body.splitlines():
+        # `let x = // obtain…` → drop; x resolves to an ambient global in Fixtures.
+        if UNTYPED_PLACEHOLDER_RE.match(line):
+            continue
+        # `foo(label: // provide…)` → argument-position placeholder.
+        m = ARG_PLACEHOLDER_RE.match(line)
+        if m:
+            out.append(m.group(1) + "__placeholder()")
+            continue
+        # `let x: T = // paste…` (or any assignment) → typed placeholder, unless the
+        # `= //` lives inside a string literal (a quote precedes it on the line).
+        m = PLACEHOLDER_RE.search(line)
+        if m and '"' not in line[:m.start()]:
+            line = line[:m.start()] + "= __placeholder()"
+        out.append(line)
+    return "\n".join(out)
+
+
+def _case_label_span(lines, i):
+    """If lines[i] begins a `case`/`default` label, return (end_index, has_inline_body)
+    where end_index carries the terminating ':' (a label may span several lines,
+    each ending in ','). Return None if lines[i] does not start a label."""
+    if not CASE_START_RE.match(lines[i]):
+        return None
+    j = i
+    while j < len(lines):
+        code = lines[j].split("//", 1)[0].rstrip()
+        pos = code.rfind(":")
+        if pos != -1:
+            return j, bool(code[pos + 1:].strip())
+        if not code.endswith(","):
+            # No ':' and no comma-continuation → not a simple label we can reason
+            # about; treat as already having a body (inject nothing).
+            return j, True
+        j += 1
+    return len(lines) - 1, True
 
 
 def fix_empty_cases(body: str) -> str:
     """A `switch` case whose body is only a comment is illegal Swift.
     These appear in illustrative snippets (`// Handle error`). Inject a `break`
-    so the *API call* driving the switch can still be type-checked."""
+    so the *API call* driving the switch can still be type-checked. Handles
+    single-line, inline-comment, inline-body and multi-line case labels."""
     lines = body.splitlines()
     out = []
-    for i, line in enumerate(lines):
-        out.append(line)
-        if CASE_RE.match(line):
-            indent = line[: len(line) - len(line.lstrip())]
-            # Look at following lines until the next case/label or block end.
+    i = 0
+    n = len(lines)
+    while i < n:
+        span = _case_label_span(lines, i)
+        if span is None:
+            out.append(lines[i])
+            i += 1
+            continue
+        end, has_inline_body = span
+        indent = lines[i][: len(lines[i]) - len(lines[i].lstrip())]
+        out.extend(lines[i:end + 1])
+        if not has_inline_body:
             body_is_empty = True
-            for nxt in lines[i + 1:]:
+            for nxt in lines[end + 1:]:
                 s = nxt.strip()
                 if s == "" or s.startswith("//"):
                     continue
-                if CASE_RE.match(nxt) or s.startswith("}"):
-                    break
-                body_is_empty = False
+                body_is_empty = CASE_START_RE.match(nxt) is not None or s.startswith("}")
                 break
             if body_is_empty:
                 out.append(indent + "    break")
+        i = end + 1
     return "\n".join(out)
 
 
@@ -84,19 +147,17 @@ def transform(path: Path) -> str:
     lines = [l for l in raw.splitlines() if not l.strip().startswith("import ")]
     body = "\n".join(lines).replace("@UIApplicationMain", "")
 
-    # Resolve placeholders (order matters: drop untyped lets first, then fill the
-    # argument-position and typed-let ones).
-    body = UNTYPED_PLACEHOLDER_RE.sub("", body)
-    body = ARG_PLACEHOLDER_RE.sub(r"\1__placeholder()", body)
-    body = PLACEHOLDER_RE.sub("= __placeholder()", body)
+    body = resolve_placeholders(body)
     body = fix_empty_cases(body)
 
-    ns = sanitize(path.stem)
-    is_decl = bool(DECL_RE.match(first_significant_line(body.splitlines())))
+    ns = sanitize(rel_stem(path))
+    sig = ATTR_PREFIX_RE.sub("", first_significant_line(body.splitlines()))
+    is_decl = bool(DECL_RE.match(sig))
 
     # Imports are per-file in Swift, so every generated file re-imports the
     # modules the snippets assume (Fixtures.swift can't provide them).
-    header = f"// Generated from examples/{path.name}\nimport Foundation\nimport UIKit\nimport Reach5\n\n"
+    rel = path.relative_to(EXAMPLES)
+    header = f"// Generated from examples/{rel}\nimport Foundation\nimport UIKit\nimport Reach5\n\n"
 
     # Several examples call iOS 16+ passkey APIs without an availability guard
     # (the docs assume the reader wraps them in `if #available`). Raise the
@@ -105,11 +166,13 @@ def transform(path: Path) -> str:
 
     if is_decl:
         # A snippet that defines its own AppDelegate calls AppDelegate.reachfive()
-        # on that nested type; inject a stub so the SDK calls type-check.
-        body = APPDELEGATE_CLASS_RE.sub(
-            r"\1\n        static func reachfive() -> ReachFive { __placeholder() }",
-            body,
-        )
+        # on that nested type; inject a stub so the SDK calls type-check — unless
+        # the snippet already defines reachfive() itself (avoid a redeclaration).
+        if "func reachfive" not in body:
+            body = APPDELEGATE_CLASS_RE.sub(
+                r"\1\n        static func reachfive() -> ReachFive { __placeholder() }",
+                body,
+            )
         inner = "\n".join("    " + l if l else l for l in body.splitlines())
         return f"{header}{avail}enum {ns} {{\n{inner}\n}}\n"
     else:
@@ -128,11 +191,20 @@ def main():
         f.unlink()
 
     count = skipped = 0
-    for path in sorted(EXAMPLES.glob("*.swift")):
+    written = {}
+    # rglob so examples in subdirectories (e.g. application/) are also checked.
+    for path in sorted(EXAMPLES.rglob("*.swift")):
         if path.stem in SKIP:
             skipped += 1
             continue
-        (OUT / f"{sanitize(path.stem)}.swift").write_text(transform(path))
+        name = sanitize(rel_stem(path))
+        if name in written:
+            raise SystemExit(
+                f"error: examples '{written[name]}' and '{path.relative_to(EXAMPLES)}' "
+                f"both map to {name}.swift — rename one so they don't collide."
+            )
+        written[name] = path.relative_to(EXAMPLES)
+        (OUT / f"{name}.swift").write_text(transform(path))
         count += 1
     print(f"Generated {count} files into {OUT} ({skipped} skipped: {', '.join(sorted(SKIP))})")
 

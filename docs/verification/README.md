@@ -55,37 +55,19 @@ once the snippets are corrected.
 ## Maintenance
 
 Whenever a doc example is added or changed, run `docs/verification/check.sh` and
-read the report. **Every new failure falls into exactly one of two kinds**, and
-the whole maintenance effort is telling them apart:
+read the report. Every new failure is either a **real doc bug** (fix the snippet,
+or add its stem to `baseline.txt` if the fix is deferred) or a **harness gap**
+(fix the harness — a `Fixtures.swift` stub, a `generate.py` tweak — never the
+baseline).
 
-- **Real doc bug** — the snippet genuinely misuses the API (wrong label, order,
-  type, renamed/removed method). *Fix the `.adoc`/example snippet*, or, if it is
-  deferred to a later task, add its stem to `baseline.txt` (or run
-  `--update-baseline`) so CI stays green meanwhile.
-- **Harness gap** — the snippet is fine but the harness lacks context. *Fix the
-  harness*, never the baseline. Pick the remedy by the compiler message:
-
-  | Compiler error | Cause | Fix |
-  |---|---|---|
-  | `cannot find 'x' in scope` | ambient value assumed from prose / a previous snippet (`profileAuthToken`, `window`, …) | add `let x: <API type> = __placeholder()` to `Fixtures.swift`, using the type the API expects (grep the SDK signature) |
-  | `cannot find 'MyX' in scope`, unknown placeholder constant | reader-supplied scaffolding (a native SDK, `DOMAIN`, …) or a type defined on another doc page | add a stub to the *Scaffolding* section of `Fixtures.swift` |
-  | `... .Type` does not conform / is not a `UIViewController` | snippet uses `self` as a presentation context | it must be wrapped as a `DocExampleContext` subclass (imperative snippets already are) |
-  | `only available in iOS N` | snippet calls a newer API without a guard | raise the wrapper's `@available` in `generate.py` |
-  | `unavailable in Mac Catalyst` | API can't exist on the Catalyst target | add the stem to `SKIP`; note it needs an iOS Simulator run |
-  | placeholder in an unusual position not resolved | generator didn't recognise the placeholder shape | extend the placeholder rules in `generate.py` |
-
-**Key rule:** a fixture stub must carry the type the API actually expects — a
-wrong type turns a harness gap into a false positive. When in doubt, grep the
-real signature in `Sources/Core/` first (this is exactly how the current
-fixtures were typed). After any change, re-run `check.sh` until only real bugs
-remain, then commit.
-
-If you're using Claude Code, invoke the **`doc-examples-harness` skill**
-(`.claude/skills/`) to automate this triage: point it at a failing
-`check-doc-examples` run and it classifies each new failure (real doc bug vs.
-harness gap), applies the right fix — a `Fixtures.swift` stub, a `generate.py`
-tweak, or a baseline update — and re-runs the check until only genuine doc bugs
-remain.
+The full triage procedure — how to tell the two apart from the compiler message,
+which remedy each message calls for, and the rule that every fixture must carry
+the exact type the API expects — lives in the **`doc-examples-harness` skill**
+([`.claude/skills/doc-examples-harness/SKILL.md`](../../.claude/skills/doc-examples-harness/SKILL.md)),
+the single source of truth for maintaining this harness. If you use Claude Code,
+invoke that skill and point it at a failing `check-doc-examples` run: it
+classifies each new failure (real doc bug vs. harness gap), applies the right fix,
+and re-runs the check until only genuine doc bugs remain.
 
 ## Known limitations
 
