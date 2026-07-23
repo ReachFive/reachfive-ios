@@ -380,25 +380,23 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             continuation.resume(returning: ())
 
         case let .passkeyLogin(scopes, continuation):
+            guard let scopes else { throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope") }
             let authToken = try await authenticateWithPasskey(authorization, scopes: scopes, reachFive: reachFive, originR5: context.originR5)
             continuation.resume(returning: authToken)
 
         case let .modalLogin(scopes, siwa, continuation):
-            let loginFlow = try await completeModalLogin(authorization, scopes: scopes, siwa: siwa, context: context)
+            guard let scopes else { throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope") }
+            let loginFlow = try await completeModalLogin(authorization, scopes: scopes, siwa: siwa, reachFive: reachFive, originR5: context.originR5)
             continuation.resume(returning: loginFlow)
         }
     }
 
     /// Complète une connexion modale, seul flux à pouvoir recevoir plusieurs types de credential
     /// (mot de passe, Sign In With Apple ou passkey).
-    private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String]?, siwa: SignInWithApple?, context: RequestContext) async throws -> LoginFlow {
-        let reachFive = context.reachFive
+    private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
         let reachFiveApi = reachFive.reachFiveApi
         let sdkConfig = reachFive.sdkConfig
-
-        guard let scopes else {
-            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope")
-        }
+        let scope = scopes.joined(separator: " ")
 
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
             // a password was selected to sign in
@@ -419,18 +417,18 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 password: passwordCredential.password,
                 grantType: "password",
                 clientId: sdkConfig.clientId,
-                scope: scopes.joined(separator: " "),
-                origin: context.originR5
+                scope: scope,
+                origin: originR5
             ))
 
             let loginFlow: LoginFlow
             if resp.mfaRequired == true {
                 let pkce = Pkce.generate()
                 reachFive.storage.save(key: "PASSWORDLESS_PKCE", value: pkce)
-                let stepUpResp = try await reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: sdkConfig.redirectUri, pkce: pkce, scope: scopes.joined(separator: " "), tkn: resp.tkn))
+                let stepUpResp = try await reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: sdkConfig.redirectUri, pkce: pkce, scope: scope, tkn: resp.tkn))
                 loginFlow = .OngoingStepUp(token: stepUpResp.token, availableMfaCredentialItemTypes: stepUpResp.amr)
             } else {
-                let token = try await reachFive.loginCallback(tkn: resp.tkn, scopes: scopes, origin: context.originR5)
+                let token = try await reachFive.loginCallback(tkn: resp.tkn, scopes: scopes, origin: originR5)
                 loginFlow = .AchievedLogin(authToken: token)
             }
             return loginFlow
@@ -452,11 +450,11 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
                 "id_token": idToken,
                 "response_type": "code",
                 "redirect_uri": sdkConfig.redirectUri.absoluteString,
-                "scope": scopes.joined(separator: " "),
+                "scope": scope,
                 "code_challenge": pkce.codeChallenge,
                 "code_challenge_method": pkce.codeChallengeMethod,
                 "nonce": siwa.nonce.codeVerifier,
-                "origin": context.originR5,
+                "origin": originR5,
                 "given_name": appleIDCredential.fullName?.givenName,
                 "family_name": appleIDCredential.fullName?.familyName
             ])
@@ -464,7 +462,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
             return .AchievedLogin(authToken: token)
         } else {
             // a passkey was selected to sign in
-            let authToken = try await authenticateWithPasskey(authorization, scopes: scopes, reachFive: reachFive, originR5: context.originR5)
+            let authToken = try await authenticateWithPasskey(authorization, scopes: scopes, reachFive: reachFive, originR5: originR5)
             return .AchievedLogin(authToken: authToken)
         }
     }
@@ -513,12 +511,9 @@ extension CredentialManager {
     /// Extrait l'assertion de passkey d'une autorisation, la valide auprès du serveur et rend le jeton.
     /// Partagé par la connexion par passkey (auto-fill / non-discoverable) et la branche passkey de la
     /// connexion modale. Lève une erreur technique si l'autorisation n'est pas une assertion de passkey.
-    private func authenticateWithPasskey(_ authorization: ASAuthorization, scopes: [String]?, reachFive: ReachFive, originR5: String?) async throws -> AuthToken {
+    private func authenticateWithPasskey(_ authorization: ASAuthorization, scopes: [String], reachFive: ReachFive, originR5: String?) async throws -> AuthToken {
         guard #available(iOS 16.0, *), let credentialAssertion = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialAssertion else {
             throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: expected a passkey assertion")
-        }
-        guard let scopes else {
-            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no scope")
         }
 
         let signature = credentialAssertion.signature.toBase64Url()
