@@ -11,9 +11,8 @@ public extension ReachFive {
         let scope = (request.scope ?? scope)
         let authURL = buildAuthorizeURL(pkce: pkce, state: request.state, nonce: request.nonce, scope: scope, origin: request.origin, provider: request.provider)
 
-        let callbackURL = try await webAuthenticationSession(
+        let callbackURL = try await webAuthSession.start(
             url: authURL,
-            callbackURLScheme: reachFiveApi.sdkConfig.customScheme,
             presentationContextProvider: request.presentationContextProvider,
             prefersEphemeralWebBrowserSession: request.prefersEphemeralWebBrowserSession)
 
