@@ -42,7 +42,8 @@ files are removed at the end of every run.
 `check.sh` exits 0 when the failing set is a subset of `baseline.txt` (no new
 regression) and 1 otherwise. It runs in CI as the `check-doc-examples` job, which
 prints the full report to the build log and also stores `report.md` as an
-artifact.
+artifact — open the job on CircleCI and check its **Artifacts** tab
+(`doc-examples-report.md`) to read it directly, no need to dig through the log.
 
 ## Baseline
 
