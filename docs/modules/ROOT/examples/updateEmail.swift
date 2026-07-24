@@ -6,7 +6,7 @@ do {
     let updatedProfile = try await AppDelegate.reachfive().updateEmail(
         authToken: profileAuthToken,
         email: "johnatthan.doe@gmail.com",
-        redirectUrl: "https://example-email-update.com"
+        redirectUrl: URL(string: "https://example-email-update.com")!
     )
     // Get the updated profile
 } catch {

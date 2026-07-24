@@ -1,7 +1,7 @@
 do {
     try await AppDelegate.reachfive().requestAccountRecovery(
         email: "john.doe@gmail.com",
-        redirectUrl: "reachfive-clientId://account-recovery"
+        redirectUrl: URL(string: "reachfive-clientId://account-recovery")!
     )
     // Do something
 } catch {

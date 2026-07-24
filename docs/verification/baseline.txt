@@ -1,23 +1,3 @@
 # Documentation examples that currently fail the API check because of
 # genuine bugs in the doc snippets (wrong argument label/order/type,
 # renamed API…). To be fixed in a dedicated task. One example stem per line.
-addPasswordlessCallback
-listWebAuthnDevices
-logout
-mfaDeleteCredentialPhoneNumber
-mfaStartWithEmail
-mfaStartWithPhoneNumber
-mfaStartWithStepUp
-mfaStartWithStepUpLoginFlow
-refreshAccessToken
-requestAccountRecoveryWithEmail
-requestAccountRecoveryWithPhoneNumber
-requestPasswordResetWithEmail
-sendEmailVerification
-signupWithEmail
-signupWithPhoneNumber
-startPasswordlessWithEmail
-startPasswordlessWithPhoneNumber
-updateEmail
-updatePasswordWithAccessToken
-verifyEmail
