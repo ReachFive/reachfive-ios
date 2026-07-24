@@ -30,6 +30,9 @@ Available from version `6.3.0`.
 
 Available from version `7.0.0`.
 
+|reachfive-$\{clientId\}://email-verification
+|This callback URL is used to return to the app after email verification.
+
 |===
 
 == Configuration
@@ -60,15 +63,17 @@ let ReachFive = ReachFive(
     sdkConfig: SdkConfig(
         domain: DOMAIN,
         clientId: CLIENT_ID,
-        scheme: "reachfive-${clientId}://myOwnScheme", <1>
-        mfaUri: "reachfive-${clientId}://myOwnMfaScheme", <2>
-        accountRecoveryUri: "reachfive-${clientId}://myOwnRecoveryScheme" <3>
+        customScheme: "myOwnScheme", <1>
+        mfaUri: URL(string: "myOwnScheme://myOwnMfaPath")!, <2>
+        accountRecoveryUri: URL(string: "myOwnScheme://myOwnRecoveryPath")!, <3>
+        emailVerificationUri: URL(string: "myOwnScheme://myOwnEmailVerificationPath")! <4>
     )
 )
 ----
-<1> Where the callback `scheme` ends with `myOwnScheme`.
-<2> Where the callback mfaUri `scheme` ends with `myOwnMfaScheme`.
-<3> Where the callback accountRecoveryUri `scheme` ends with `myOwnRecoveryScheme`.
+<1> The custom URL scheme. Pass the scheme only (no `://`); it replaces the default `reachfive-${clientId}`. Every callback URI that you don't override explicitly is then derived from it (`myOwnScheme://callback`, `myOwnScheme://mfa`, and so on).
+<2> Overrides the full MFA callback URI.
+<3> Overrides the full account recovery callback URI.
+<4> Overrides the full email verification callback URI.
 
 === Customise storage
 
@@ -85,7 +90,7 @@ let ReachFive = ReachFive(
         domain: DOMAIN,
         clientId: CLIENT_ID
     ),
-    storage: UserDefaultsStorage()
+    storage: UserDefaultsStorage() <1>
 )
 ----
 <1> This value can be any object that implements our `Storage` protocol.
