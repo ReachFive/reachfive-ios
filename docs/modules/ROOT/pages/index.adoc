@@ -28,7 +28,7 @@ icon:book[] For more on configuring a client, see xref:docs:ROOT:clients.adoc#co
 
 == Installation
 
-{company} SDKs are available with Swift Package Manager and link:https://cocoapods.org/pods/Reach5[Cocoapods^] as independent modules.
+{company} SDKs are available with Swift Package Manager (and, for some modules, Cocoapods) as independent modules.
 
 TIP: You can also find releases directly on the {company} repo at link:https://github.com/ReachFive/reachfive-ios/releases/[ReachFive iOS SDK^].
 
@@ -47,30 +47,6 @@ The core SDK contains all the main tools, interfaces, and methods related to sta
 
 ==== Installation
 
-[tabs]
-====
-Cocoapods::
-+
---
-
-. Add this line to your `Podfile` file, replacing `x` with the latest version:
-+
-[source,subs="normal,callouts"]
-----
-pod 'Reach5', '~> {sdk-ios-latest-version}' <1>
-----
-<1> `{sdk-ios-latest-version}` is the latest version of SDK.
-
-. Then run:
-+
-[source, javascript]
-----
-pod install
-----
---
-Swift Package Manager::
-+
---
 Add the package dependency with XCode using this package URL:
 
 [source]
@@ -86,9 +62,6 @@ dependencies: [
     .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "{page-component-version}"))
 ]
 ----
-
---
-====
 
 ==== Configuration
 
