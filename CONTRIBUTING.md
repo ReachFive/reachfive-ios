@@ -1,17 +1,6 @@
 # Running the Demo Application
 
-Install [Cocoapods](https://cocoapods.org).
-
-```sh
-sudo gem install cocoapods
-
-cd Sandbox
-pod install
-
-open Sandbox.xcworkspace
-
-pod update
-```
+Open `Sandbox/Sandbox.xcworkspace` (or `.xcodeproj`) in Xcode; the Reach5, Reach5Google and Reach5Facebook dependencies are resolved automatically as local Swift packages (`../`, `../../reachfive-ios-google`, `../../reachfive-ios-facebook`).
 
 ### Configure the Sandbox
 
@@ -106,12 +95,9 @@ While you can develop across all modules while being in the `Sandbox.xcworkspace
 when you need to add a new file or rename one, you have to be in the specific module workspace and add it from within XCode so that the `project.pbxproj` is properly updated.
 
 ## Modules
-A podspec cannot reference, without resorting to dirty tricks, other locally changed pods.<br>
-Instead, they reference the latest version available on Cocoapods.<br>
-This means that the non-core pods will not have access to the core changes on CI until the core changes are deployed.<br>
-This problem does not impact local development.
-
-So, first, release Reach5 Core. Then you can use the new APIs from this release in the Facebook/Google/WeChat pods.
+The Sandbox references Reach5, Reach5Google and Reach5Facebook as local Swift packages (relative paths), so local changes to Core are immediately available to the other modules without releasing anything first.<br>
+Reach5Google and Reach5Facebook's own `Package.swift` also depend on Reach5 via a local path (`../reachfive-ios`), so this works outside of the Sandbox too, as long as the checkouts are siblings on disk.<br>
+Note that each satellite repo's own CI still builds against whatever Reach5 version its `Package.swift`/podspec declares, so a Core change only reaches their CI once a new Reach5 version is released.
 
 ### When to add a new module for a provider
 
@@ -124,10 +110,7 @@ Or one that would use `SFSafariViewController` instead of `ASWebAuthenticationSe
 ### How to add a new module (e.g. for a new provider)
 XCode > File > New > Project... > Framework.
 
-Create the Podfile and podspec (with pod commands or by copying from other modules).
+Create the `Package.swift` (by copying from other modules).
 
-Be aware, as per the point above, that the podspec does not reference the local version but the remote version.
-
-Add at least one file for now, push and tag.<br/>
-Push the new pod `pod trunk push` so that XCode can show the proper icon in the Products view
+Add at least one file for now, push and tag.
 
