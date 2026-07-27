@@ -5,7 +5,7 @@ public class ReachFiveApi {
 
     let sdkConfig: SdkConfig
     private let networkClient: NetworkClient
-    private let profile_fields = [
+    private let profileFields = [
         "birthdate",
         "bio",
         "middle_name",
@@ -61,7 +61,7 @@ public class ReachFiveApi {
         self.sdkConfig = sdkConfig
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        self.networkClient = NetworkClient(decoder: decoder)
+        networkClient = NetworkClient(decoder: decoder)
     }
 
     // MARK: - URL Construction
@@ -160,7 +160,7 @@ public class ReachFiveApi {
     // MARK: - Profile Management
 
     public func getProfile(authToken: AuthToken) async throws -> Profile {
-        try await networkClient.request(createUrl(path: "/identity/v1/userinfo", params: ["fields": profile_fields.joined(separator: ","), "flatcf": "true"]), headers: tokenHeader(authToken))
+        try await networkClient.request(createUrl(path: "/identity/v1/userinfo", params: ["fields": profileFields.joined(separator: ","), "flatcf": "true"]), headers: tokenHeader(authToken))
             .responseJson(type: Profile.self)
     }
 
@@ -185,12 +185,13 @@ public class ReachFiveApi {
     }
 
     // MARK: - Session devices
+
     public func listSessionDevices(authToken: AuthToken) async throws -> ListSessionDevices {
         try await networkClient.request(createUrl(path: "/identity/v1/session-devices"), method: .get, headers: tokenHeader(authToken))
             .responseJson(type: ListSessionDevices.self)
     }
 
-    public func deleteSessionDevice(id: String, authToken: AuthToken) async throws -> Void {
+    public func deleteSessionDevice(id: String, authToken: AuthToken) async throws {
         try await networkClient.request(createUrl(path: "/identity/v1/session-devices/\(id)"), method: .delete, headers: tokenHeader(authToken))
             .responseJson()
     }
@@ -369,7 +370,7 @@ public class ReachFiveApi {
     // MARK: - Helpers
 
     func tokenHeader(_ authToken: AuthToken) -> [String: String] {
-       ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
+        ["Authorization": "\(authToken.tokenType ?? "Bearer") \(authToken.accessToken)"]
     }
 }
 

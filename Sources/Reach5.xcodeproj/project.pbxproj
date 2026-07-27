@@ -24,7 +24,6 @@
 		2ADFF84F2BFE661300A659FE /* RequestAccountRecoveryRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */; };
 		2AE040E42C88E33900162014 /* AppleProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE040E32C88E33900162014 /* AppleProvider.swift */; };
 		2AE18CDB29FC1DAF00258D2B /* LoginWKWebview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE18CDA29FC1DAF00258D2B /* LoginWKWebview.swift */; };
-		2AE326CD2E3A6DC7007D6763 /* WebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE326CC2E3A6DBA007D6763 /* WebAuthentication.swift */; };
 		2AE326D72E3D099B007D6763 /* WebSessionLogoutRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE326D62E3D098D007D6763 /* WebSessionLogoutRequest.swift */; };
 		2AE533062994629400EF97E0 /* StringUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE533052994629400EF97E0 /* StringUtils.swift */; };
 		2AE5330B299462DD00EF97E0 /* ReachFiveWebviewLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE53307299462DD00EF97E0 /* ReachFiveWebviewLogin.swift */; };
@@ -126,7 +125,6 @@
 		2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestAccountRecoveryRequest.swift; sourceTree = "<group>"; };
 		2AE040E32C88E33900162014 /* AppleProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleProvider.swift; sourceTree = "<group>"; };
 		2AE18CDA29FC1DAF00258D2B /* LoginWKWebview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWKWebview.swift; sourceTree = "<group>"; };
-		2AE326CC2E3A6DBA007D6763 /* WebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAuthentication.swift; sourceTree = "<group>"; };
 		2AE326D62E3D098D007D6763 /* WebSessionLogoutRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSessionLogoutRequest.swift; sourceTree = "<group>"; };
 		2AE533052994629400EF97E0 /* StringUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringUtils.swift; sourceTree = "<group>"; };
 		2AE53307299462DD00EF97E0 /* ReachFiveWebviewLogin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReachFiveWebviewLogin.swift; sourceTree = "<group>"; };
@@ -269,7 +267,6 @@
 				34B5295922D376FF00B7B6AA /* Pkce.swift */,
 				349E16EF230C49E0002EA06B /* Storage.swift */,
 				2AE533052994629400EF97E0 /* StringUtils.swift */,
-				2AE326CC2E3A6DBA007D6763 /* WebAuthentication.swift */,
 			);
 			path = utils;
 			sourceTree = "<group>";
@@ -639,7 +636,6 @@
 				8496EB4325DEB141005098DD /* AuthenticationToken.swift in Sources */,
 				34BDDA4422E5D95B00D16DAE /* ReachFiveProfile.swift in Sources */,
 				2AE18CDB29FC1DAF00258D2B /* LoginWKWebview.swift in Sources */,
-				2AE326CD2E3A6DC7007D6763 /* WebAuthentication.swift in Sources */,
 				2A1957162E4215AE008393DB /* ReachFiveToken.swift in Sources */,
 				34BDDA4022E5D73900D16DAE /* ReachFiveProviders.swift in Sources */,
 				347FDB67229C02FE00660687 /* ReachFive.swift in Sources */,

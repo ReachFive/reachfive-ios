@@ -42,7 +42,7 @@ public class ReachFive: NSObject {
         self.storage = storage ?? UserDefaultsStorage()
         self.reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig)
         self.credentialManager = CredentialManager(reachFiveApi: reachFiveApi, storage: self.storage)
-        self.webAuthSession = WebAuthenticationSession(baseScheme: sdkConfig.customScheme)
+        self.webAuthSession = WebAuthenticationSession(baseScheme: sdkConfig.customScheme, sdkRedirectUri: sdkConfig.redirectUri)
 
         if let sdkInternalConfig {
             Logger.shared.enabled = sdkInternalConfig.loggingEnabled
