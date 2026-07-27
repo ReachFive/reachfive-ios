@@ -10,8 +10,8 @@ public enum SignupFlow {
     case AwaitingIdentifierVerification
 }
 
-public extension ReachFive {
-    func signup(profile: ProfileSignupRequest, redirectUrl: URL? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> SignupFlow {
+extension ReachFive {
+    public func signup(profile: ProfileSignupRequest, redirectUrl: URL? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> SignupFlow {
         let signupRequest = SignupRequest(
             clientId: sdkConfig.clientId,
             data: profile,
@@ -22,12 +22,11 @@ public extension ReachFive {
         let token = try await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
         guard let accessToken = token.accessToken else {
             return .AwaitingIdentifierVerification
-
         }
         return try .AchievedLogin(authToken: AuthToken.fromOpenIdTokenResponse(AccessTokenResponse(idToken: token.idToken, accessToken: accessToken, refreshToken: token.refreshToken, code: nil, tokenType: token.tokenType, expiresIn: token.expiresIn, error: nil, errorDescription: nil)))
     }
 
-    func loginWithPassword(
+    public func loginWithPassword(
         email: String? = nil,
         phoneNumber: String? = nil,
         customIdentifier: String? = nil,
