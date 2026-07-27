@@ -1,7 +1,6 @@
 * Introduction icon:book[]
 ** xref:index.adoc[]
 ** xref:guides/use-cases.adoc[]
-// ** xref:guides/auth-ios.adoc[]
 ** xref:reference/errors.adoc[]
 
 .Guides icon:book[]
