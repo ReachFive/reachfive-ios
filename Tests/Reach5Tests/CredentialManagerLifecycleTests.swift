@@ -1,5 +1,5 @@
-import XCTest
 import AuthenticationServices
+import XCTest
 @testable import Reach5
 
 /// Le cycle de vie des requêtes, piloté sans UI système : `perform` est lancée avec une closure de
@@ -16,7 +16,6 @@ import AuthenticationServices
 /// derrière un protocole.
 @MainActor
 final class CredentialManagerLifecycleTests: XCTestCase {
-
     /// La closure de soumission de `perform` y dépose le controller de la requête pour le test.
     @MainActor
     private final class ControllerBox {
@@ -42,7 +41,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         }
 
         await fulfillment(of: [submitted], timeout: 1)
-        return (try XCTUnwrap(box.controller), task)
+        return try (XCTUnwrap(box.controller), task)
     }
 
     /// Attend la fin d'une requête et rend l'erreur levée. Aucun test ne peut légitimement aboutir : une

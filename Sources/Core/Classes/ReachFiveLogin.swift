@@ -1,8 +1,7 @@
 import Foundation
 
-public extension ReachFive {
-
-    func logout(webSessionLogout request: WebSessionLogoutRequest? = nil, revoke token: AuthToken? = nil) async throws {
+extension ReachFive {
+    public func logout(webSessionLogout request: WebSessionLogoutRequest? = nil, revoke token: AuthToken? = nil) async throws {
         // Don't stop for errors along the way
 
         for provider in providers {
@@ -15,7 +14,7 @@ public extension ReachFive {
                 "origin": request.origin,
             ]
 
-            let _ = try? await webAuthSession.start(
+            _ = try? await webAuthSession.start(
                 url: reachFiveApi.buildLogoutURL(queryParams: options),
                 mode: .customScheme,
                 // A logout callback carries no `code` and is intercepted by the sheet, so the out-of-band
@@ -23,25 +22,26 @@ public extension ReachFive {
                 // and be swallowed (the logout's continuation ignores the URL).
                 expectsAuthorizationCode: false,
                 presentationContextProvider: request.presentationContextProvider,
-                prefersEphemeralWebBrowserSession: false)
+                prefersEphemeralWebBrowserSession: false
+            )
         }
 
         if let token {
             try? await revokeToken(authToken: token)
         }
 
-        try await self.reachFiveApi.logout()
+        try await reachFiveApi.logout()
     }
 
-    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {
+    public func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {
         let pkce = Pkce.generate()
         let scope = (scopes ?? scope).joined(separator: " ")
 
         let code = try await reachFiveApi.loginCallback(loginCallback: LoginCallback(sdkConfig: sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
-        return try await self.authWithCode(code: code, pkce: pkce)
+        return try await authWithCode(code: code, pkce: pkce)
     }
 
-    func buildAuthorizeURL(pkce: Pkce, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil, provider: String? = nil, redirectUri: URL? = nil, loginUrlFragment: [String: String]? = nil) -> URL {
+    public func buildAuthorizeURL(pkce: Pkce, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil, provider: String? = nil, redirectUri: URL? = nil, loginUrlFragment: [String: String]? = nil) -> URL {
         let scope = (scope ?? self.scope).joined(separator: " ")
         let options = [
             "provider": provider,
@@ -76,12 +76,13 @@ public extension ReachFive {
         return components.url ?? url
     }
 
-    func authWithCode(code: String, pkce: Pkce, redirectUri: URL? = nil) async throws -> AuthToken {
+    public func authWithCode(code: String, pkce: Pkce, redirectUri: URL? = nil) async throws -> AuthToken {
         let authCodeRequest = AuthCodeRequest(
             clientId: sdkConfig.clientId,
             code: code,
             redirectUri: redirectUri ?? sdkConfig.redirectUri,
-            pkce: pkce)
+            pkce: pkce
+        )
         let token = try await reachFiveApi.authWithCode(authCodeRequest: authCodeRequest)
         return try AuthToken.fromOpenIdTokenResponse(token)
     }

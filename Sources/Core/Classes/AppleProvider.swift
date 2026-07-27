@@ -16,9 +16,11 @@ public class AppleProvider: ProviderCreator {
         providerConfig: ProviderConfig,
         clientConfigResponse: ClientConfigResponse
     ) -> Provider {
-        ConfiguredAppleProvider(reachFive: reachFive,
-                                providerConfig: providerConfig,
-                                clientConfigResponse: clientConfigResponse)
+        ConfiguredAppleProvider(
+            reachFive: reachFive,
+            providerConfig: providerConfig,
+            clientConfigResponse: clientConfigResponse
+        )
     }
 }
 
@@ -27,21 +29,21 @@ class ConfiguredAppleProvider: NSObject, Provider {
 
     let providerConfig: ProviderConfig
     let clientConfigResponse: ClientConfigResponse
-    // `weak` : ReachFive retient ses providers, une référence forte ici créerait un cycle
-    // ReachFive ↔ ConfiguredAppleProvider et le graphe SDK ne serait jamais désalloué.
+    /// `weak` : ReachFive retient ses providers, une référence forte ici créerait un cycle
+    /// ReachFive ↔ ConfiguredAppleProvider et le graphe SDK ne serait jamais désalloué.
     private weak var reachfive: ReachFive?
 
-    public init(
+    init(
         reachFive: ReachFive,
         providerConfig: ProviderConfig,
         clientConfigResponse: ClientConfigResponse
     ) {
-        self.reachfive = reachFive
+        reachfive = reachFive
         self.providerConfig = providerConfig
         self.clientConfigResponse = clientConfigResponse
     }
 
-    public func login(
+    func login(
         scope: [String]?,
         origin: String,
         presenting: Presentation
@@ -55,13 +57,12 @@ class ConfiguredAppleProvider: NSObject, Provider {
         let flow = try await reachfive.credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self, reachFive: reachfive)
 
         switch flow {
-        case .AchievedLogin(let authToken): return authToken
-        case .OngoingStepUp:                throw ReachFiveError.TechnicalError(reason: "Should not happen: MFA Step Up in a Sign In with Apple flow")
+        case let .AchievedLogin(authToken): return authToken
+        case .OngoingStepUp: throw ReachFiveError.TechnicalError(reason: "Should not happen: MFA Step Up in a Sign In with Apple flow")
         }
     }
 
-    public func logout() {
-    }
+    func logout() {}
 
     override var description: String {
         "Provider: \(name)"
