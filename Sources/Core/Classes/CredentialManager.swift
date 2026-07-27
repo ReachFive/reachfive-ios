@@ -1,38 +1,38 @@
-import Foundation
 import AuthenticationServices
+import Foundation
 
-// Les deux protocoles d'ASAuthorizationController (delegate et presentationContextProvider) sont annotés
-// NS_SWIFT_UI_ACTOR : leurs callbacks arrivent donc sur le main actor, et l'isolation @MainActor de la
-// classe protège l'état mutable partagé entre les points d'entrée async et ces callbacks.
+/// Les deux protocoles d'ASAuthorizationController (delegate et presentationContextProvider) sont annotés
+/// NS_SWIFT_UI_ACTOR : leurs callbacks arrivent donc sur le main actor, et l'isolation @MainActor de la
+/// classe protège l'état mutable partagé entre les points d'entrée async et ces callbacks.
 @MainActor
 class CredentialManager: NSObject {
     // MARK: - Contexte de requête
 
-    // Les requêtes peuvent se chevaucher : une nouvelle requête annule celles en cours, mais le callback
-    // système d'une requête annulée peut encore arriver après. Tout l'état d'une requête vit donc dans un
-    // RequestContext indexé par son controller : chaque callback retrouve le contexte de sa requête, et
-    // une requête ne peut pas écraser l'état d'une autre.
+    /// Les requêtes peuvent se chevaucher : une nouvelle requête annule celles en cours, mais le callback
+    /// système d'une requête annulée peut encore arriver après. Tout l'état d'une requête vit donc dans un
+    /// RequestContext indexé par son controller : chaque callback retrouve le contexte de sa requête, et
+    /// une requête ne peut pas écraser l'état d'une autre.
     private struct RequestContext {
-        // retenu : maintient la requête système en vie jusqu'à sa complétion
+        /// retenu : maintient la requête système en vie jusqu'à sa complétion
         let controller: ASAuthorizationController
-        // anchor pour le presentationContextProvider
+        /// anchor pour le presentationContextProvider
         let anchor: ASPresentationAnchor
-        // continuation de l'appelant, reprise exactement une fois : toute reprise passe par le retrait
-        // du contexte du dictionnaire, et seul le retrait qui réussit reprend la continuation
+        /// continuation de l'appelant, reprise exactement une fois : toute reprise passe par le retrait
+        /// du contexte du dictionnaire, et seul le retrait qui réussit reprend la continuation
         let continuation: CheckedContinuation<ASAuthorization, Error>
     }
 
-    // Données d'un Sign In With Apple, à conserver entre la construction de la requête et sa complétion.
+    /// Données d'un Sign In With Apple, à conserver entre la construction de la requête et sa complétion.
     struct SignInWithApple {
         let nonce: Pkce
         let provider: ConfiguredAppleProvider
     }
 
-    // les requêtes en cours, indexées par leur controller
+    /// les requêtes en cours, indexées par leur controller
     private var contexts: [ObjectIdentifier: RequestContext] = [:]
 
-    // nonisolated : appelé depuis l'init synchrone de ReachFive, hors du main actor
-    nonisolated override init() {}
+    /// nonisolated : appelé depuis l'init synchrone de ReachFive, hors du main actor
+    override nonisolated init() {}
 
     // MARK: - Cycle de vie des requêtes
 
@@ -121,6 +121,7 @@ class CredentialManager: NSObject {
     }
 
     // MARK: - Signup
+
     @available(iOS 16.0, *)
     func signUp(withRequest request: SignupOptions, anchor: ASPresentationAnchor, originR5: String? = nil, reachFive: ReachFive) async throws -> AuthToken {
         let options = try await reachFive.reachFiveApi.createWebAuthnSignupOptions(webAuthnSignupOptions: request)
@@ -141,6 +142,7 @@ class CredentialManager: NSObject {
     }
 
     // MARK: - Register
+
     @available(iOS 16.0, *)
     func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken, reachFive: ReachFive) async throws {
         let options = try await reachFive.reachFiveApi.createWebAuthnRegistrationOptions(authToken: authToken, registrationRequest: RegistrationRequest(origin: request.originWebAuthn!, friendlyName: request.friendlyName))
@@ -155,6 +157,7 @@ class CredentialManager: NSObject {
     }
 
     // MARK: - Reset
+
     @available(iOS 16.0, *)
     func resetPasskeys(withRequest request: ResetPasskeyRequest, reachFive: ReachFive) async throws {
         let resetOptions = ResetOptions(email: request.email, phoneNumber: request.phoneNumber, verificationCode: request.verificationCode, friendlyName: request.friendlyName, origin: request.originWebAuthn!, clientId: reachFive.sdkConfig.clientId)
@@ -171,6 +174,7 @@ class CredentialManager: NSObject {
     }
 
     // MARK: - Auto-fill
+
     @available(macCatalyst, unavailable)
     @available(iOS 16.0, *)
     func beginAutoFillAssistedPasskeySignIn(request: NativeLoginRequest, reachFive: ReachFive) async throws -> AuthToken {
@@ -186,19 +190,19 @@ class CredentialManager: NSObject {
     }
 
     // MARK: - Modal
+
     func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode, reachFive: ReachFive) async throws -> AuthToken {
         let webAuthnLoginRequest = makeWebAuthnLoginRequest(for: request, reachFive: reachFive)
         switch username {
-
-        case .Unspecified(username: let username):
+        case let .Unspecified(username: username):
             if username.contains("@") {
                 webAuthnLoginRequest.email = username
             } else {
                 webAuthnLoginRequest.phoneNumber = username
             }
-        case .Email(email: let email):
+        case let .Email(email: email):
             webAuthnLoginRequest.email = email
-        case .PhoneNumber(phoneNumber: let phoneNumber):
+        case let .PhoneNumber(phoneNumber: phoneNumber):
             webAuthnLoginRequest.phoneNumber = phoneNumber
         }
 
@@ -231,10 +235,10 @@ class CredentialManager: NSObject {
         return try await completeModalLogin(authorization, scopes: request.scopes, siwa: built.siwa, reachFive: reachFive, originR5: request.origin)
     }
 
-    // Internal pour être testable
+    /// Internal pour être testable
     struct BuiltRequests {
         let requests: [ASAuthorizationRequest]
-        // renseigné si une requête Sign In With Apple fait partie du lot
+        /// renseigné si une requête Sign In With Apple fait partie du lot
         let siwa: SignInWithApple?
     }
 
@@ -264,10 +268,10 @@ class CredentialManager: NSObject {
                 let appleIDRequest = ASAuthorizationAppleIDProvider().createRequest()
                 var appleScopes: [ASAuthorization.Scope] = []
                 if let scope = appleProvider?.providerConfig.scope {
-                    if scope.contains(where: { s in s == "email"}) {
+                    if scope.contains(where: { s in s == "email" }) {
                         appleScopes.append(.email)
                     }
-                    if scope.contains(where: { s in s == "name"}) {
+                    if scope.contains(where: { s in s == "name" }) {
                         appleScopes.append(.fullName)
                     }
                 }
@@ -284,7 +288,7 @@ class CredentialManager: NSObject {
                 do {
                     // Allow the user to use a saved passkey, if they have one.
                     let authOptions = try await fetchAuthenticationOptions(reachFive, webAuthnLoginRequest)
-                    requests.append(try makePasskeyAssertionRequest(authOptions, restrictedToAllowedCredentials: restrictToAllowedCredentials))
+                    try requests.append(makePasskeyAssertionRequest(authOptions, restrictedToAllowedCredentials: restrictToAllowedCredentials))
                 } catch let error where requestTypes.count > 1 {
                     // if there are other types of requests, do not block auth if only passkey fails. Just eat the error
                     Logger.shared.log("Passkey request error ignored in multi-type authorization: \(error)")
@@ -315,6 +319,7 @@ class CredentialManager: NSObject {
 }
 
 // MARK: - ASAuthorizationControllerPresentationContextProviding
+
 extension CredentialManager: ASAuthorizationControllerPresentationContextProviding {
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         guard let anchor = contexts[ObjectIdentifier(controller)]?.anchor else {
@@ -329,8 +334,8 @@ extension CredentialManager: ASAuthorizationControllerPresentationContextProvidi
 }
 
 // MARK: - ASAuthorizationControllerDelegate
-extension CredentialManager: ASAuthorizationControllerDelegate {
 
+extension CredentialManager: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         takeContext(for: controller)?.continuation.resume(returning: authorization)
     }
@@ -339,14 +344,14 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
         takeContext(for: controller)?.continuation.resume(throwing: Self.adapt(error))
     }
 
-    // Retire le contexte à l'entrée du callback : garantit qu'une continuation est résolue exactement une
-    // fois (un second callback pour le même controller ne trouve plus rien), et qu'une annulation
-    // ultérieure ne peut plus toucher une requête déjà complétée.
+    /// Retire le contexte à l'entrée du callback : garantit qu'une continuation est résolue exactement une
+    /// fois (un second callback pour le même controller ne trouve plus rien), et qu'une annulation
+    /// ultérieure ne peut plus toucher une requête déjà complétée.
     private func takeContext(for controller: ASAuthorizationController) -> RequestContext? {
         contexts.removeValue(forKey: ObjectIdentifier(controller))
     }
 
-    // Fonction pure, extraite pour être testable unitairement
+    /// Fonction pure, extraite pour être testable unitairement
     nonisolated static func adapt(_ error: Error) -> ReachFiveError {
         if let authorizationError = error as? ASAuthorizationError {
             if authorizationError.code == .canceled {
@@ -362,6 +367,7 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
 }
 
 // MARK: - exploitation des credentials reçus
+
 extension CredentialManager {
     /// Extrait le credential d'enregistrement de passkey d'une autorisation (signup / add / reset)
     /// et le convertit dans notre format. Lève une erreur technique si l'autorisation n'en contient pas.
@@ -457,7 +463,7 @@ extension CredentialManager {
                 "nonce": siwa.nonce.codeVerifier,
                 "origin": originR5,
                 "given_name": appleIDCredential.fullName?.givenName,
-                "family_name": appleIDCredential.fullName?.familyName
+                "family_name": appleIDCredential.fullName?.familyName,
             ])
             let token = try await reachFive.authWithCode(code: code, pkce: pkce)
             return .AchievedLogin(authToken: token)
@@ -470,6 +476,7 @@ extension CredentialManager {
 }
 
 // MARK: - construction des requêtes
+
 extension CredentialManager {
     /// Le socle commun aux trois flux de connexion WebAuthn.
     private func makeWebAuthnLoginRequest(for request: NativeLoginRequest, reachFive: ReachFive) -> WebAuthnLoginRequest {

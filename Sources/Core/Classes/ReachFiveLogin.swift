@@ -1,8 +1,7 @@
 import Foundation
 
-public extension ReachFive {
-
-    func logout(webSessionLogout request: WebSessionLogoutRequest? = nil, revoke token: AuthToken? = nil) async throws {
+extension ReachFive {
+    public func logout(webSessionLogout request: WebSessionLogoutRequest? = nil, revoke token: AuthToken? = nil) async throws {
         // Don't stop for errors along the way
 
         for provider in providers {
@@ -15,31 +14,32 @@ public extension ReachFive {
                 "origin": request.origin,
             ]
 
-            let _ = try? await webAuthenticationSession(
+            _ = try? await webAuthenticationSession(
                 url: reachFiveApi.buildLogoutURL(queryParams: options),
                 callbackURLScheme: sdkConfig.customScheme,
                 presentationContextProvider: request.presentationContextProvider,
-                prefersEphemeralWebBrowserSession: false)
+                prefersEphemeralWebBrowserSession: false
+            )
         }
 
         if let token {
             try? await revokeToken(authToken: token)
         }
 
-        try await self.reachFiveApi.logout()
+        try await reachFiveApi.logout()
     }
 
-    func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {
+    public func loginCallback(tkn: String, scopes: [String]?, origin: String? = nil) async throws -> AuthToken {
         let pkce = Pkce.generate()
         let scope = (scopes ?? scope).joined(separator: " ")
 
         let code = try await reachFiveApi.loginCallback(loginCallback: LoginCallback(sdkConfig: sdkConfig, scope: scope, pkce: pkce, tkn: tkn, origin: origin))
-        return try await self.authWithCode(code: code, pkce: pkce)
+        return try await authWithCode(code: code, pkce: pkce)
     }
 
-    // Construction voisine mais distincte de l'appel authorize de Sign In With Apple (CredentialManager) :
-    // jambe OAuth différente (state et URL de navigation ici, id_token/nonce/noms Apple là-bas) ; factoriser n'apporterait rien.
-    func buildAuthorizeURL(pkce: Pkce, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil, provider: String? = nil) -> URL {
+    /// Construction voisine mais distincte de l'appel authorize de Sign In With Apple (CredentialManager) :
+    /// jambe OAuth différente (state et URL de navigation ici, id_token/nonce/noms Apple là-bas) ; factoriser n'apporterait rien.
+    public func buildAuthorizeURL(pkce: Pkce, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil, provider: String? = nil) -> URL {
         let scope = (scope ?? self.scope).joined(separator: " ")
         let options = [
             "provider": provider,
@@ -57,12 +57,13 @@ public extension ReachFive {
         return reachFiveApi.buildAuthorizeURL(queryParams: options)
     }
 
-    func authWithCode(code: String, pkce: Pkce) async throws -> AuthToken {
+    public func authWithCode(code: String, pkce: Pkce) async throws -> AuthToken {
         let authCodeRequest = AuthCodeRequest(
             clientId: sdkConfig.clientId,
             code: code,
             redirectUri: sdkConfig.redirectUri,
-            pkce: pkce)
+            pkce: pkce
+        )
         let token = try await reachFiveApi.authWithCode(authCodeRequest: authCodeRequest)
         return try AuthToken.fromOpenIdTokenResponse(token)
     }
