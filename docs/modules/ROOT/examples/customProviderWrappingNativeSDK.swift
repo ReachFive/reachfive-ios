@@ -21,12 +21,14 @@ class ConfiguredMyProvider: NSObject, Provider {
     }
 
     func login(scope: [String]?, origin: String, viewController: UIViewController?) async throws -> AuthToken {
+        guard let viewController else { throw ReachFiveError.TechnicalError(reason: "No presenting view controller") }
+
         // 1. Drive your native SDK's own login UI/flow here, e.g.:
         let code = try await MyNativeSDK.shared.login(presenting: viewController)
 
         // 2. Exchange its authorization code for a ReachFive AuthToken.
         guard let reachFive else { throw ReachFiveError.TechnicalError(reason: "ReachFive instance was deallocated") }
-        return try await reachFive.authWithCode(code: code, pkce: nil)
+        return try await reachFive.authWithCode(code: code, pkce: Pkce.generate())
     }
 
     func logout() {
