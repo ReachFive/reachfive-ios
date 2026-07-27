@@ -1,12 +1,11 @@
-import XCTest
 import AuthenticationServices
+import XCTest
 @testable import Reach5
 
 @MainActor
 final class CredentialManagerRegistrationRequestTests: XCTestCase {
-
-    // Le friendlyName des options est volontairement différent de celui demandé par l'application :
-    // c'est l'intention de l'application qui doit nommer la passkey, pas l'écho du serveur.
+    /// Le friendlyName des options est volontairement différent de celui demandé par l'application :
+    /// c'est l'intention de l'application qui doit nommer la passkey, pas l'écho du serveur.
     private func makeOptions(challenge: String, userID: String) -> RegistrationOptions {
         RegistrationOptions(
             friendlyName: "nom renvoyé par le serveur",
@@ -58,7 +57,6 @@ final class CredentialManagerRegistrationRequestTests: XCTestCase {
 /// La construction des requêtes d'assertion, pendant symétrique de l'enregistrement.
 @MainActor
 final class CredentialManagerAssertionRequestTests: XCTestCase {
-
     private func makeOptions(challenge: String = "AQID", allowCredentials: [R5PublicKeyCredentialDescriptor]? = nil) -> AuthenticationOptions {
         AuthenticationOptions(publicKey: R5PublicKeyCredentialRequestOptions(challenge: challenge, timeout: nil, rpId: "example.reach5.net", allowCredentials: allowCredentials, userVerification: "preferred"))
     }
@@ -106,7 +104,6 @@ final class CredentialManagerAssertionRequestTests: XCTestCase {
 /// `buildAuthorizationRequests`).
 @MainActor
 final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
-
     private let reachFive = ReachFive(sdkConfig: SdkConfig(domain: "example.reach5.net", clientId: "testclient"))
     private lazy var webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: "https://example.reach5.net", scope: nil)
 
