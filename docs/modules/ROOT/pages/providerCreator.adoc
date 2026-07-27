@@ -5,7 +5,7 @@ These specific providers use native calls or external libraries to authenticate 
 
 All providers except xref:docs:ROOT:apple.adoc[Apple] that you configure in the {cc} for which you don't use a specific provider creator will authenticate through an `ASWebAuthenticationSession`.
 
-You should define and configure these providers when you xref:index.adoc#configuration-5[configure the iOS SDK].
+You should define and configure these providers when you xref:index.adoc#configure-the-ios-sdk[configure the iOS SDK].
 
 == Examples
 
@@ -27,6 +27,52 @@ Otherwise, the default variant is chosen.
 |===
 |Name |Description
 
-include::partial$config/params.adoc[tags="GoogleProvider,FacebookProvider,AppleProvider,WeChat"]
+include::partial$config/params.adoc[tags="GoogleProvider,FacebookProvider,AppleProvider,WeChat,WebProvider"]
 
 |===
+
+== Universal-link web providers
+
+Some web providers finish login on an *https* universal link instead of the custom scheme.
+Use the checklist for your <<WebProvider,`WebProvider`>> `mode`; you do *not* need xref:guides/custom-provider.adoc[a custom provider] unless none of the built-in options fit.
+
+[tabs]
+====
+`.externalApp`::
++
+--
+Login may hand off to an external app (e.g. a banking app) that reopens yours via a universal link.
+
+[%interactive]
+* [ ] Configure the provider and variant on your {cc}.
+* [ ] Whitelist the provider's `universalLink` URL in *Allowed Callback URLs* (see xref:docs:ROOT:clients.adoc[Clients]).
+* [ ] Register a <<WebProvider,`WebProvider`>> with `mode: .externalApp` in `ReachFive(providersCreators:)`.
+* [ ] Initialize the SDK so provider configurations are fetched and `getProvider` can resolve your provider (see xref:application/applicationDidFinishLaunchingWithOptions.adoc[`applicationDidFinishLaunchingWithOptions(_:)`]).
+* [ ] Add `applinks:$\{host\}` to Associated Domains and the matching `applinks` section in `apple-app-site-association` (see xref:index.adoc#associated-domains-universal-link-providers[`apple-app-site-association`]).
+* [ ] Forward `application(_:continue:restorationHandler:)` to {company} and honour the returned `Bool` (see xref:application/applicationContinueUserActivity.adoc[`application(_:continue:restorationHandler:)`]).
+* [ ] Call xref:getProvider.adoc[`getProvider(name:).login(...)`] from a `UIViewController` that implements `ASWebAuthenticationPresentationContextProviding`.
+
+Do *not* use xref:loadLoginWebview.adoc[`loadLoginWebview`]: the callback is delivered through xref:application/applicationContinueUserActivity.adoc[`application(_:continue:)`], not an embedded webview.
+
+If iOS terminates your app while the user is in the external app, the in-flight login is lost and must be restarted (see xref:application/applicationContinueUserActivity.adoc[`application(_:continue:restorationHandler:)`]).
+--
+`.universalLink` (iOS 17.4+)::
++
+--
+This is the same flow as the default custom-scheme login, but the OAuth `redirect_uri` is the provider's `https://` universal link and the authentication sheet intercepts it *in-band* meaning no external-app handoff.
+
+[%interactive]
+* [ ] Configure the provider and variant on your {cc}.
+* [ ] Whitelist the provider's `universalLink` URL in *Allowed Callback URLs* (see xref:docs:ROOT:clients.adoc[Clients]).
+* [ ] Register a <<WebProvider,`WebProvider`>> with `mode: .universalLink` in `ReachFive(providersCreators:)` (iOS 17.4+).
+* [ ] Initialize the SDK so provider configurations are fetched and `getProvider` can resolve your provider (see xref:application/applicationDidFinishLaunchingWithOptions.adoc[`applicationDidFinishLaunchingWithOptions(_:)`]).
+* [ ] Add `webcredentials:$\{host\}` to Associated Domains and the matching `webcredentials` section in `apple-app-site-association` (see xref:index.adoc#associated-domains-universal-link-providers[`apple-app-site-association`]).
+* [ ] Call xref:getProvider.adoc[`getProvider(name:).login(...)`] from a `UIViewController` that implements `ASWebAuthenticationPresentationContextProviding`.
+
+No `application(_:continue:)` wiring is required for login completion; the `ASWebAuthenticationSession` completes inside the sheet.
+
+Do *not* use xref:loadLoginWebview.adoc[`loadLoginWebview`]: use `WebProvider` or xref:webviewLogin.adoc[`webviewLogin`] with a secure session instead of an embedded webview.
+--
+====
+
+TIP: None of these fit your case? See xref:guides/custom-provider.adoc[] to implement your own.
