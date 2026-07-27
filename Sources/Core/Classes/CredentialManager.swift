@@ -192,8 +192,7 @@ class CredentialManager: NSObject {
     // MARK: - Modal
 
     func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode, reachFive: ReachFive) async throws -> AuthToken {
-        let webAuthnLoginRequest = makeWebAuthnLoginRequest(for: request, reachFive: reachFive)
-        (webAuthnLoginRequest.email, webAuthnLoginRequest.phoneNumber) = username.identifiers
+        let webAuthnLoginRequest = makeWebAuthnLoginRequest(for: request, username: username, reachFive: reachFive)
 
         let built = try await buildAuthorizationRequests(
             webAuthnLoginRequest,
@@ -468,8 +467,8 @@ extension CredentialManager {
 
 extension CredentialManager {
     /// Le socle commun aux trois flux de connexion WebAuthn.
-    private func makeWebAuthnLoginRequest(for request: NativeLoginRequest, reachFive: ReachFive) -> WebAuthnLoginRequest {
-        WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: request.originWebAuthn!, scope: request.scopes)
+    private func makeWebAuthnLoginRequest(for request: NativeLoginRequest, username: Username? = nil, reachFive: ReachFive) -> WebAuthnLoginRequest {
+        WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: request.originWebAuthn!, username: username, scope: request.scopes)
     }
 
     /// Construit une requête d'enregistrement de passkey à partir des options renvoyées par le serveur.
