@@ -52,7 +52,7 @@ class ConfiguredAppleProvider: NSObject, Provider {
         guard let window = await viewController?.view.window else { throw ReachFiveError.TechnicalError(reason: "The view was not in the app's view hierarchy!") }
 
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
-        let request = NativeLoginRequest(anchor: window, originWebAuthn: "https://\(reachfive.sdkConfig.domain)", scopes: scope, origin: origin)
+        let request = ResolvedNativeLoginRequest(anchor: window, originWebAuthn: "https://\(reachfive.sdkConfig.domain)", scopes: scope, origin: origin)
 
         let flow = try await reachfive.credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self, reachFive: reachfive)
 

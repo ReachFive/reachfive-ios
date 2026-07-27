@@ -144,8 +144,8 @@ class CredentialManager: NSObject {
     // MARK: - Register
 
     @available(iOS 16.0, *)
-    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken, reachFive: ReachFive) async throws {
-        let options = try await reachFive.reachFiveApi.createWebAuthnRegistrationOptions(authToken: authToken, registrationRequest: RegistrationRequest(origin: request.originWebAuthn!, friendlyName: request.friendlyName))
+    func registerNewPasskey(withRequest request: NewPasskeyRequest, originWebAuthn: String, authToken: AuthToken, reachFive: ReachFive) async throws {
+        let options = try await reachFive.reachFiveApi.createWebAuthnRegistrationOptions(authToken: authToken, registrationRequest: RegistrationRequest(origin: originWebAuthn, friendlyName: request.friendlyName))
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
         let authorization = try await perform(requests: [registrationRequest], anchor: request.anchor) {
@@ -159,8 +159,8 @@ class CredentialManager: NSObject {
     // MARK: - Reset
 
     @available(iOS 16.0, *)
-    func resetPasskeys(withRequest request: ResetPasskeyRequest, reachFive: ReachFive) async throws {
-        let resetOptions = ResetOptions(email: request.email, phoneNumber: request.phoneNumber, verificationCode: request.verificationCode, friendlyName: request.friendlyName, origin: request.originWebAuthn!, clientId: reachFive.sdkConfig.clientId)
+    func resetPasskeys(withRequest request: ResetPasskeyRequest, originWebAuthn: String, reachFive: ReachFive) async throws {
+        let resetOptions = ResetOptions(email: request.email, phoneNumber: request.phoneNumber, verificationCode: request.verificationCode, friendlyName: request.friendlyName, origin: originWebAuthn, clientId: reachFive.sdkConfig.clientId)
         let options = try await reachFive.reachFiveApi.createWebAuthnResetOptions(resetOptions: resetOptions)
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
@@ -177,7 +177,7 @@ class CredentialManager: NSObject {
 
     @available(macCatalyst, unavailable)
     @available(iOS 16.0, *)
-    func beginAutoFillAssistedPasskeySignIn(request: NativeLoginRequest, reachFive: ReachFive) async throws -> AuthToken {
+    func beginAutoFillAssistedPasskeySignIn(request: ResolvedNativeLoginRequest, reachFive: ReachFive) async throws -> AuthToken {
         let assertionRequestOptions = try await reachFive.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: makeWebAuthnLoginRequest(for: request, reachFive: reachFive))
         let authorizationRequest = try makePasskeyAssertionRequest(assertionRequestOptions, restrictedToAllowedCredentials: false)
 
@@ -191,7 +191,7 @@ class CredentialManager: NSObject {
 
     // MARK: - Modal
 
-    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode, reachFive: ReachFive) async throws -> AuthToken {
+    func login(withNonDiscoverableUsername username: Username, forRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode, reachFive: ReachFive) async throws -> AuthToken {
         let webAuthnLoginRequest = makeWebAuthnLoginRequest(for: request, username: username, reachFive: reachFive)
 
         let built = try await buildAuthorizationRequests(
@@ -208,7 +208,7 @@ class CredentialManager: NSObject {
         return try await authenticateWithPasskey(authorization, scopes: request.scopes, reachFive: reachFive, originR5: request.origin)
     }
 
-    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, reachFive: ReachFive) async throws -> LoginFlow {
+    func login(withRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, reachFive: ReachFive) async throws -> LoginFlow {
         let built = try await buildAuthorizationRequests(
             makeWebAuthnLoginRequest(for: request, reachFive: reachFive),
             reachFive: reachFive,
@@ -375,9 +375,7 @@ extension CredentialManager {
     /// Extrait l'assertion de passkey d'une autorisation, la valide auprès du serveur et rend le jeton.
     /// Partagé par la connexion par passkey (auto-fill / non-discoverable) et la branche passkey de la
     /// connexion modale. Lève une erreur technique si l'autorisation n'est pas une assertion de passkey.
-    ///
-    /// `scopes` reste optionnel : `loginCallback` retombe sur les scopes du SDK, comme partout ailleurs.
-    private func authenticateWithPasskey(_ authorization: ASAuthorization, scopes: [String]?, reachFive: ReachFive, originR5: String?) async throws -> AuthToken {
+    private func authenticateWithPasskey(_ authorization: ASAuthorization, scopes: [String], reachFive: ReachFive, originR5: String?) async throws -> AuthToken {
         guard #available(iOS 16.0, *), let credentialAssertion = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialAssertion else {
             throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: expected a passkey assertion")
         }
@@ -395,11 +393,10 @@ extension CredentialManager {
 
     /// Complète une connexion modale, seul flux à pouvoir recevoir plusieurs types de credential
     /// (mot de passe, Sign In With Apple ou passkey).
-    private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String]?, siwa: SignInWithApple?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
+    private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
         let reachFiveApi = reachFive.reachFiveApi
         let sdkConfig = reachFive.sdkConfig
-        // même repli que loginCallback / loginFlow : à défaut de scopes demandés, ceux du SDK
-        let scope = (scopes ?? reachFive.scope).joined(separator: " ")
+        let scope = scopes.joined(separator: " ")
 
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
             // a password was selected to sign in
@@ -459,8 +456,8 @@ extension CredentialManager {
 
 extension CredentialManager {
     /// Le socle commun aux trois flux de connexion WebAuthn.
-    private func makeWebAuthnLoginRequest(for request: NativeLoginRequest, username: Username? = nil, reachFive: ReachFive) -> WebAuthnLoginRequest {
-        WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: request.originWebAuthn!, username: username, scope: request.scopes)
+    private func makeWebAuthnLoginRequest(for request: ResolvedNativeLoginRequest, username: Username? = nil, reachFive: ReachFive) -> WebAuthnLoginRequest {
+        WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: request.originWebAuthn, username: username, scope: request.scopes)
     }
 
     /// Construit une requête d'enregistrement de passkey à partir des options renvoyées par le serveur.
