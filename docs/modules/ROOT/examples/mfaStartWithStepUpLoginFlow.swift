@@ -5,9 +5,9 @@ let scope = ["openid", "email", "profile", "phone", "full_write", "offline_acces
 do {
     let response = try await AppDelegate.reachfive().mfaStart(
         stepUp: .LoginFlow(
-            authType: "email",
+            authType: .email,
             stepUpToken: "stepUpToken123",
-            redirectUri: "https://example.com/callback",
+            redirectUri: URL(string: "https://example.com/callback")!,
             origin: "ios-app"
         )
     )

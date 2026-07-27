@@ -6,8 +6,8 @@ do {
     try await AppDelegate.reachfive().updatePassword(
         .AccessTokenParams(
             authToken: profileAuthToken,
-            oldPassword: "gVc7piBn",
-            password: "ZPf7LFtc"
+            password: "ZPf7LFtc",
+            oldPassword: "gVc7piBn"
         )
     )
     // Do something

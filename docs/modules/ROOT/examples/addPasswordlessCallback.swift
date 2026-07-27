@@ -8,9 +8,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
       AppDelegate.reachfive().addPasswordlessCallback { result in
         switch (result) {
-          case .success(authToken):
+          case .success(let authToken):
             // Handle authToken
-          case .failure(error):
+          case .failure(let error):
             // Handle error
           }
       }

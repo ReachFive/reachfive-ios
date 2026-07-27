@@ -1,7 +1,7 @@
 do {
     try await AppDelegate.reachfive().requestPasswordReset(
         email: "john.doe@gmail.com",
-        redirectUrl: "reachfive-clientId://password-reset"
+        redirectUrl: URL(string: "reachfive-clientId://password-reset")!
     )
     // Do something
 } catch {
