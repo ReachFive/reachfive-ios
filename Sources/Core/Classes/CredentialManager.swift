@@ -186,7 +186,7 @@ class CredentialManager: NSObject {
             $0.performAutoFillAssistedRequests()
         }
 
-        return try await authenticateWithPasskey(authorization, scopes: request.scopes, reachFive: reachFive, originR5: request.origin)
+        return try await authenticate(with: authorization, scopes: request.scopes, reachFive: reachFive, originR5: request.origin)
     }
 
     // MARK: - Modal
@@ -205,7 +205,7 @@ class CredentialManager: NSObject {
             performRequests(on: $0, mode: mode)
         }
 
-        return try await authenticateWithPasskey(authorization, scopes: request.scopes, reachFive: reachFive, originR5: request.origin)
+        return try await authenticate(with: authorization, scopes: request.scopes, reachFive: reachFive, originR5: request.origin)
     }
 
     func login(withRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, reachFive: ReachFive) async throws -> LoginFlow {
@@ -372,19 +372,23 @@ extension CredentialManager {
         return RegistrationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: response)
     }
 
-    /// Extrait l'assertion de passkey d'une autorisation, la valide auprès du serveur et rend le jeton.
+    /// Extrait l'assertion WebAuthn d'une autorisation, la valide auprès du serveur et rend le jeton.
     /// Partagé par la connexion par passkey (auto-fill / non-discoverable) et la branche passkey de la
-    /// connexion modale. Lève une erreur technique si l'autorisation n'est pas une assertion de passkey.
-    private func authenticateWithPasskey(_ authorization: ASAuthorization, scopes: [String], reachFive: ReachFive, originR5: String?) async throws -> AuthToken {
-        guard #available(iOS 16.0, *), let credentialAssertion = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialAssertion else {
-            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: expected a passkey assertion")
+    /// connexion modale. Lève une erreur technique si l'autorisation n'est pas une assertion WebAuthn.
+    ///
+    /// Typée sur ``ASAuthorizationPublicKeyCredentialAssertion`` et non sur le credential de plateforme :
+    /// le protocole déclare tous les champs qu'on lit, et une assertion de clé de sécurité s'y conforme
+    /// aussi, donc supporter les clés de sécurité ne touchera pas cette méthode.
+    private func authenticate(with authorization: ASAuthorization, scopes: [String], reachFive: ReachFive, originR5: String?) async throws -> AuthToken {
+        guard #available(iOS 15.0, *), let assertion = authorization.credential as? any ASAuthorizationPublicKeyCredentialAssertion else {
+            throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: expected a WebAuthn assertion")
         }
 
-        let signature = credentialAssertion.signature.toBase64Url()
-        let clientDataJSON = credentialAssertion.rawClientDataJSON.toBase64Url()
-        let userID = credentialAssertion.userID.toBase64Url()
-        let id = credentialAssertion.credentialID.toBase64Url()
-        let authenticatorData = credentialAssertion.rawAuthenticatorData.toBase64Url()
+        let signature = assertion.signature.toBase64Url()
+        let clientDataJSON = assertion.rawClientDataJSON.toBase64Url()
+        let userID = assertion.userID.toBase64Url()
+        let id = assertion.credentialID.toBase64Url()
+        let authenticatorData = assertion.rawAuthenticatorData.toBase64Url()
         let response = R5AuthenticatorAssertionResponse(authenticatorData: authenticatorData, clientDataJSON: clientDataJSON, signature: signature, userHandle: userID)
 
         let authenticationToken = try await reachFive.reachFiveApi.authenticateWithWebAuthn(authenticationPublicKeyCredential: AuthenticationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: response))
@@ -444,7 +448,7 @@ extension CredentialManager {
             return .AchievedLogin(authToken: token)
         } else {
             // a passkey was selected to sign in
-            let authToken = try await authenticateWithPasskey(authorization, scopes: scopes, reachFive: reachFive, originR5: originR5)
+            let authToken = try await authenticate(with: authorization, scopes: scopes, reachFive: reachFive, originR5: originR5)
             return .AchievedLogin(authToken: authToken)
         }
     }
