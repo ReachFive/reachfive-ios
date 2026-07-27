@@ -95,6 +95,16 @@ public enum Username {
     case Unspecified(_ username: String)
     case Email(_ email: String)
     case PhoneNumber(_ phoneNumber: String)
+
+    /// The two identifier fields the server expects. `.Unspecified` is split by the only heuristic the SDK
+    /// has: an identifier containing "@" is an email, anything else is a phone number.
+    var identifiers: (email: String?, phoneNumber: String?) {
+        switch self {
+        case let .Unspecified(username): username.contains("@") ? (username, nil) : (nil, username)
+        case let .Email(email): (email, nil)
+        case let .PhoneNumber(phoneNumber): (nil, phoneNumber)
+        }
+    }
 }
 
 public enum ModalAuthorization: Equatable {
