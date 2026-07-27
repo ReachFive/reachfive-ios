@@ -193,18 +193,7 @@ class CredentialManager: NSObject {
 
     func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode, reachFive: ReachFive) async throws -> AuthToken {
         let webAuthnLoginRequest = makeWebAuthnLoginRequest(for: request, reachFive: reachFive)
-        switch username {
-        case let .Unspecified(username: username):
-            if username.contains("@") {
-                webAuthnLoginRequest.email = username
-            } else {
-                webAuthnLoginRequest.phoneNumber = username
-            }
-        case let .Email(email: email):
-            webAuthnLoginRequest.email = email
-        case let .PhoneNumber(phoneNumber: phoneNumber):
-            webAuthnLoginRequest.phoneNumber = phoneNumber
-        }
+        (webAuthnLoginRequest.email, webAuthnLoginRequest.phoneNumber) = username.identifiers
 
         let built = try await buildAuthorizationRequests(
             webAuthnLoginRequest,
@@ -415,15 +404,7 @@ extension CredentialManager {
 
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
             // a password was selected to sign in
-            let email: String?
-            let phoneNumber: String?
-            if passwordCredential.user.contains("@") {
-                email = passwordCredential.user
-                phoneNumber = nil
-            } else {
-                email = nil
-                phoneNumber = passwordCredential.user
-            }
+            let (email, phoneNumber) = Username.Unspecified(passwordCredential.user).identifiers
 
             let resp = try await reachFiveApi.loginWithPassword(loginRequest: LoginRequest(
                 email: email,
