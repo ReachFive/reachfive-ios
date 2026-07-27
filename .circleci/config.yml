@@ -60,6 +60,17 @@ jobs:
           name: Install CocoaPods
           command: gem install cocoapods --user-install
       - run: pod trunk push Reach5.podspec
+  check-doc-examples:
+    macos:
+      xcode: "16.4.0"
+    steps:
+      - checkout
+      - run:
+          name: Type-check the documentation code examples against the API
+          command: bash docs/verification/check.sh
+      - store_artifacts:
+          path: docs/verification/report.md
+          destination: doc-examples-report.md
   build-sandbox:
     macos:
       xcode: "16.4.0"
@@ -85,12 +96,24 @@ default_workflows_tags: &default_workflows_tags
     tags:
       only: /.*/
 
+# For the doc-examples check we want PR feedback only, not every push. CircleCI
+# filters can't test "is a PR" directly, so we run on all branches except the
+# base branch (and not on tags). Combined with the project setting
+# "Only build pull requests" (Project Settings › Advanced, set in the CircleCI
+# UI — not expressible here), this effectively limits the job to PR branches.
+pull_request_branches: &pull_request_branches
+  filters:
+    branches:
+      ignore: master
+
 workflows:
   version: 2
   build-and-deploy:
     jobs:
       - build:
           <<: *default_workflows_tags
+      - check-doc-examples:
+          <<: *pull_request_branches
       - build-for-release:
           <<: *default_workflows_filters
       - publish:
