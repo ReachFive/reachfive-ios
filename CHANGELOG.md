@@ -28,7 +28,9 @@
 
 ### New features
 - New `WebProvider` to register a web provider (e.g. B.connect) with a `variant` and a completion `mode`. See the [ProviderCreator](https://developer.reachfive.com/sdk-ios/providerCreator.html) and [custom provider guide](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) documentation.
-- `webviewLogin` accepts a `webSessionMode` parameter picking how the `ASWebAuthenticationSession` returns: `.sdkScheme`, `.externalAppScheme`, `.externalAppUniversalLink(_:)` or `.inSheetUniversalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
+- `webviewLogin` accepts a `webSessionMode` parameter picking the shape of the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
+
+  There is deliberately **no** "in-band vs out-of-band" axis. A provider can decide *mid-flight*, with the sheet already open, whether the login ends inside the sheet or leaves the app — B.connect picks `passive` or `active` only after the `/authorize` call. `.customScheme` therefore arms both return channels at once: the sheet intercepts `reachfive-<clientId>://callback` if the flow never leaves it, and `application(_:open:)` + `tryComplete` resolve it if the default browser delivers it instead. Nothing to choose, and nothing to get wrong.
 - `webviewLogin` accepts a new `loginUrlFragment` parameter to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
 
 ## v10.0.1

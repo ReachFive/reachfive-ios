@@ -14,10 +14,12 @@ public class LoginWKWebview: UIView {
     /// Loads the ReachFive **first-party** login form into this embedded webview and awaits the
     /// `AuthToken`. The flow completes in-band on the SDK's custom scheme, intercepted by the webview.
     ///
-    /// **Universal-link** providers are not supported by this path: their out-of-band callback comes
-    /// in through `application(_:continue:)` and completes the session held by `ReachFive`, not this
-    /// webview — and third-party OAuth providers generally reject embedded webviews. Use
-    /// ``ReachFive/webviewLogin(_:)`` (or a `WebProvider`) for them.
+    /// **`WebProvider` logins** are not supported by this path: their callback completes the
+    /// `ASWebAuthenticationSession` held by `ReachFive` — whether it lands in the sheet, in
+    /// `application(_:open:)` after a detour through a third-party app, or in
+    /// `application(_:continue:)` as a universal link — never in this webview. Third-party OAuth
+    /// providers also generally reject embedded webviews. Use ``ReachFive/webviewLogin(_:)`` (or a
+    /// `WebProvider`) for them.
     public func loadLoginWebview(reachfive: ReachFive, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> AuthToken {
         let pkce = Pkce.generate()
         self.reachfive = reachfive
