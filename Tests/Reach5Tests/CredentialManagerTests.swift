@@ -80,6 +80,7 @@ final class CredentialManagerAssertionRequestTests: XCTestCase {
         XCTAssertEqual(assertionRequest.allowedCredentials.map(\.credentialID), [Data([0x01, 0x02, 0x03])])
     }
 
+    @available(iOS 16.0, *)
     func testRestrictedRequestWithoutAllowedCredentialsThrowsAuthFailure() {
         XCTAssertThrowsError(try CredentialManager().makePasskeyAssertionRequest(makeOptions(allowCredentials: nil), restrictedToAllowedCredentials: true)) { error in
             guard case let ReachFiveError.AuthFailure(reason, _) = error else {
@@ -89,6 +90,7 @@ final class CredentialManagerAssertionRequestTests: XCTestCase {
         }
     }
 
+    @available(iOS 16.0, *)
     func testUnreadableChallengeThrowsTechnicalError() {
         XCTAssertThrowsError(try CredentialManager().makePasskeyAssertionRequest(makeOptions(challenge: "%%%"), restrictedToAllowedCredentials: false)) { error in
             guard case let ReachFiveError.TechnicalError(reason, _) = error else {
