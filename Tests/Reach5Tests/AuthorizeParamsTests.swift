@@ -122,7 +122,7 @@ final class AuthorizeParamsTests: XCTestCase {
         XCTAssertEqual(items["provider"], "franceconnect")
         XCTAssertEqual(items["code_challenge"], pkce.codeChallenge)
         XCTAssertEqual(items["platform"], "ios")
-        XCTAssertNotNil(items["sdk"])
+        XCTAssertNotNil(items["sdk"] ?? nil)
     }
 
     /// Only the webview call may redirect elsewhere than ``SdkConfig/redirectUri``, and its override has to
