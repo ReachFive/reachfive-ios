@@ -99,32 +99,32 @@ final class CredentialManagerAssertionRequestTests: XCTestCase {
     }
 }
 
-/// La construction des requêtes système pour le login modal, testée sans réseau : le réseau est
-/// coupé en substituant `fetchAuthenticationOptions` (appel réel par défaut, cf. signature de
-/// `buildAuthorizationRequests`).
+/// L'assemblage du lot de requêtes système pour le login modal, fonction pure testée sans réseau : le
+/// fetch de la passkey, quand il a lieu, est fait par l'appelant et `passkey` en porte le résultat.
 @MainActor
 final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
     private let reachFive = ReachFive(sdkConfig: SdkConfig(domain: "example.reach5.net", clientId: "testclient"))
-    private lazy var webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: "https://example.reach5.net", scope: nil)
 
-    private func failFetch(_: ReachFive, _: WebAuthnLoginRequest) async throws -> AuthenticationOptions {
-        XCTFail("fetchAuthenticationOptions ne doit pas être appelé")
-        throw ReachFiveError.TechnicalError(reason: "unexpected fetch")
+    /// Une requête d'assertion quelconque : le builder ne fait que la placer dans le lot.
+    @available(iOS 16.0, *)
+    private var somePasskeyRequest: ASAuthorizationRequest {
+        ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: "example.reach5.net")
+            .createCredentialAssertionRequest(challenge: Data())
     }
 
-    func testPasswordBuildsASinglePasswordRequest() async throws {
-        let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.Password], fetchAuthenticationOptions: failFetch)
+    func testPasswordBuildsASinglePasswordRequest() throws {
+        let built = try CredentialManager().buildAuthorizationRequests(authorizing: [.Password], appleProvider: nil, passkey: nil)
 
         XCTAssertEqual(built.requests.count, 1)
         XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
         XCTAssertNil(built.siwa)
     }
 
-    func testSignInWithAppleCarriesProviderScopesAndNonce() async throws {
+    func testSignInWithAppleCarriesProviderScopesAndNonce() throws {
         let providerConfig = try JSONDecoder().decode(ProviderConfig.self, from: Data(#"{"provider": "apple", "variant": "native", "scope": ["email", "name"]}"#.utf8))
         let appleProvider = ConfiguredAppleProvider(reachFive: reachFive, providerConfig: providerConfig, clientConfigResponse: ClientConfigResponse(scope: "openid profile", sms: false))
 
-        let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.SignInWithApple], appleProvider: appleProvider, fetchAuthenticationOptions: failFetch)
+        let built = try CredentialManager().buildAuthorizationRequests(authorizing: [.SignInWithApple], appleProvider: appleProvider, passkey: nil)
 
         let appleRequest = try XCTUnwrap(built.requests.first as? ASAuthorizationAppleIDRequest)
         XCTAssertEqual(appleRequest.requestedScopes, [.email, .fullName])
@@ -136,11 +136,8 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
     }
 
     @available(iOS 16.0, *)
-    func testPasskeyAloneFailureThrows() async {
-        do {
-            _ = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.Passkey], fetchAuthenticationOptions: { _, _ in throw ReachFiveError.TechnicalError(reason: "network down") })
-            XCTFail("expected the fetch error to propagate")
-        } catch {
+    func testPasskeyAloneFailureThrows() {
+        XCTAssertThrowsError(try CredentialManager().buildAuthorizationRequests(authorizing: [.Passkey], appleProvider: nil, passkey: .failure(ReachFiveError.TechnicalError(reason: "network down")))) { error in
             guard case let ReachFiveError.TechnicalError(reason, _) = error else {
                 return XCTFail("expected .TechnicalError, got \(error)")
             }
@@ -149,21 +146,24 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
     }
 
     @available(iOS 16.0, *)
-    func testPasskeyFailureIsSwallowedWhenCombinedWithAnotherType() async throws {
-        let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.Passkey, .Password], fetchAuthenticationOptions: { _, _ in throw ReachFiveError.TechnicalError(reason: "network down") })
+    func testPasskeyFailureIsSwallowedWhenCombinedWithAnotherType() throws {
+        let built = try CredentialManager().buildAuthorizationRequests(authorizing: [.Passkey, .Password], appleProvider: nil, passkey: .failure(ReachFiveError.TechnicalError(reason: "network down")))
 
         XCTAssertEqual(built.requests.count, 1, "la requête password doit survivre à l'échec passkey")
         XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
     }
 
-    /// Les options récupérées auprès du serveur sont bien celles qui construisent la requête d'assertion.
+    /// L'ordre des requêtes est un contrat Apple : le système présente les credentials dans cet ordre.
     @available(iOS 16.0, *)
-    func testPasskeyBuildsAnAssertionRequestFromTheFetchedOptions() async throws {
-        let options = AuthenticationOptions(publicKey: R5PublicKeyCredentialRequestOptions(challenge: "AQID", timeout: nil, rpId: "fetched.reach5.net", allowCredentials: nil, userVerification: "preferred"))
+    func testRequestsFollowTheRequestedOrder() throws {
+        let passkey: Result<ASAuthorizationRequest, Error> = .success(somePasskeyRequest)
 
-        let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.Passkey], fetchAuthenticationOptions: { _, _ in options })
+        let passkeyFirst = try CredentialManager().buildAuthorizationRequests(authorizing: [.Passkey, .Password], appleProvider: nil, passkey: passkey)
+        XCTAssertTrue(passkeyFirst.requests[0] is ASAuthorizationPlatformPublicKeyCredentialAssertionRequest)
+        XCTAssertTrue(passkeyFirst.requests[1] is ASAuthorizationPasswordRequest)
 
-        let assertionRequest = try XCTUnwrap(built.requests.first as? ASAuthorizationPlatformPublicKeyCredentialAssertionRequest)
-        XCTAssertEqual(assertionRequest.relyingPartyIdentifier, "fetched.reach5.net")
+        let passwordFirst = try CredentialManager().buildAuthorizationRequests(authorizing: [.Password, .Passkey], appleProvider: nil, passkey: passkey)
+        XCTAssertTrue(passwordFirst.requests[0] is ASAuthorizationPasswordRequest)
+        XCTAssertTrue(passwordFirst.requests[1] is ASAuthorizationPlatformPublicKeyCredentialAssertionRequest)
     }
 }

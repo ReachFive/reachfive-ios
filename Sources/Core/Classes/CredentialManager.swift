@@ -227,12 +227,19 @@ class CredentialManager: NSObject {
     // MARK: - Modal
 
     func login(withRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, reachFive: ReachFive) async throws -> LoginFlow {
-        let built = try await buildAuthorizationRequests(
-            makeWebAuthnLoginRequest(for: request, reachFive: reachFive),
-            reachFive: reachFive,
-            authorizing: requestTypes,
-            appleProvider: appleProvider
-        )
+        var passkey: Result<ASAuthorizationRequest, Error>?
+        if #available(iOS 16.0, *), requestTypes.contains(.Passkey) {
+            do {
+                let options = try await reachFive.reachFiveApi.createWebAuthnAuthenticationOptions(
+                    webAuthnLoginRequest: makeWebAuthnLoginRequest(for: request, reachFive: reachFive)
+                )
+                passkey = try .success(makePasskeyAssertionRequest(options, restrictedToAllowedCredentials: false))
+            } catch {
+                passkey = .failure(error)
+            }
+        }
+
+        let built = try buildAuthorizationRequests(authorizing: requestTypes, appleProvider: appleProvider, passkey: passkey)
 
         let authorization = try await perform(requests: built.requests, anchor: request.anchor) {
             performRequests(on: $0, mode: mode)
@@ -248,16 +255,18 @@ class CredentialManager: NSObject {
         let siwa: SignInWithApple?
     }
 
-    /// Construit les `ASAuthorizationRequest` pour les types demandés, sans toucher à l'état de la classe.
-    /// `fetchAuthenticationOptions` fait l'appel réseau par défaut ; un test peut le substituer pour
-    /// construire les requêtes sans réseau.
+    /// Assemble le lot de requêtes de la connexion modale, dans l'ordre demandé — le système présente les
+    /// credentials dans cet ordre. Fonction pure : aucun réseau, aucun état de la classe.
+    ///
+    /// - Parameter passkey: la requête d'assertion déjà construite par l'appelant, ou l'erreur rencontrée
+    ///   en la construisant ; nil si `.Passkey` n'a pas été demandé.
+    ///
+    /// Internal pour être testable.
     func buildAuthorizationRequests(
-        _ webAuthnLoginRequest: WebAuthnLoginRequest,
-        reachFive: ReachFive,
         authorizing requestTypes: [ModalAuthorization],
-        appleProvider: ConfiguredAppleProvider? = nil,
-        fetchAuthenticationOptions: (ReachFive, WebAuthnLoginRequest) async throws -> AuthenticationOptions = { try await $0.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: $1) }
-    ) async throws -> BuiltRequests {
+        appleProvider: ConfiguredAppleProvider?,
+        passkey: Result<ASAuthorizationRequest, Error>?
+    ) throws -> BuiltRequests {
         var requests: [ASAuthorizationRequest] = []
         var siwa: SignInWithApple? = nil
 
@@ -290,10 +299,10 @@ class CredentialManager: NSObject {
                 requests.append(appleIDRequest)
 
             case .Passkey:
+                guard let passkey else { break }
                 do {
                     // Allow the user to use a saved passkey, if they have one.
-                    let authOptions = try await fetchAuthenticationOptions(reachFive, webAuthnLoginRequest)
-                    try requests.append(makePasskeyAssertionRequest(authOptions, restrictedToAllowedCredentials: false))
+                    try requests.append(passkey.get())
                 } catch let error where requestTypes.count > 1 {
                     // if there are other types of requests, do not block auth if only passkey fails. Just eat the error
                     Logger.shared.log("Passkey request error ignored in multi-type authorization: \(error)")
