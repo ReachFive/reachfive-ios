@@ -1,58 +1,58 @@
 import AuthenticationServices
 import Foundation
 
-/// Les deux protocoles d'ASAuthorizationController (delegate et presentationContextProvider) sont annotés
-/// NS_SWIFT_UI_ACTOR : leurs callbacks arrivent donc sur le main actor, et l'isolation @MainActor de la
-/// classe protège l'état mutable partagé entre les points d'entrée async et ces callbacks.
+/// Both ASAuthorizationController protocols (delegate and presentationContextProvider) are annotated
+/// NS_SWIFT_UI_ACTOR: their callbacks are therefore delivered on the main actor, and the class's @MainActor
+/// isolation protects the mutable state shared between the async entry points and those callbacks.
 @MainActor
 class CredentialManager: NSObject {
-    // MARK: - Contexte de requête
+    // MARK: - Request context
 
-    /// Les requêtes peuvent se chevaucher : une nouvelle requête annule celles en cours, mais le callback
-    /// système d'une requête annulée peut encore arriver après. Tout l'état d'une requête vit donc dans un
-    /// RequestContext indexé par son controller : chaque callback retrouve le contexte de sa requête, et
-    /// une requête ne peut pas écraser l'état d'une autre.
+    /// Requests can overlap: a new request cancels the ones in flight, but the system callback of a
+    /// canceled request can still arrive afterwards. All of a request's state therefore lives in a
+    /// RequestContext indexed by its controller: each callback finds the context of its own request, and
+    /// one request can never overwrite another's state.
     private struct RequestContext {
-        /// retenu : maintient la requête système en vie jusqu'à sa complétion
+        /// retained: keeps the system request alive until it completes
         let controller: ASAuthorizationController
-        /// anchor pour le presentationContextProvider
+        /// anchor for the presentationContextProvider
         let anchor: ASPresentationAnchor
-        /// continuation de l'appelant, reprise exactement une fois : toute reprise passe par le retrait
-        /// du contexte du dictionnaire, et seul le retrait qui réussit reprend la continuation
+        /// the caller's continuation, resumed exactly once: every resumption goes through removing the
+        /// context from the dictionary, and only the removal that succeeds resumes the continuation
         let continuation: CheckedContinuation<ASAuthorization, Error>
     }
 
-    /// Données d'un Sign In With Apple, à conserver entre la construction de la requête et sa complétion.
+    /// Sign In With Apple data, kept between building the request and completing it.
     struct SignInWithApple {
         let nonce: Pkce
         let provider: ConfiguredAppleProvider
     }
 
-    /// les requêtes en cours, indexées par leur controller
+    /// requests in flight, indexed by their controller
     private var contexts: [ObjectIdentifier: RequestContext] = [:]
 
-    /// nonisolated : appelé depuis l'init synchrone de ReachFive, hors du main actor
+    /// nonisolated: called from ReachFive's synchronous init, outside the main actor
     override nonisolated init() {}
 
-    // MARK: - Cycle de vie des requêtes
+    // MARK: - Request lifecycle
 
-    /// Soumet une requête système et rend l'autorisation obtenue. Le post-traitement (validation serveur,
-    /// échange de jeton) reste dans la tâche de l'appelant, qui garde donc la main sur son annulation et
-    /// sur ses erreurs, et chaque flux se lit d'un seul tenant à son point d'entrée.
+    /// Submits a system request and returns the authorization obtained. Post-processing (server
+    /// validation, token exchange) stays in the caller's task, which therefore keeps control of its own
+    /// cancellation and errors, and each flow reads in one piece at its entry point.
     ///
-    /// Le contexte est enregistré avant la soumission : comme tout se passe sur le main actor, la
-    /// continuation est en place avant que le delegate puisse tirer.
+    /// The context is registered before submission: since everything runs on the main actor, the
+    /// continuation is in place before the delegate can be called.
     ///
-    /// Internal pour être testable : un test pilote la méthode avec un `submit` inerte (la requête n'est
-    /// jamais soumise au système) puis simule les callbacks du delegate.
+    /// Internal for testability: a test drives the method with an inert `submit` (the request is never
+    /// submitted to the system) then simulates the delegate callbacks.
     func perform(
         requests: [ASAuthorizationRequest],
         anchor: ASPresentationAnchor,
         using submit: (ASAuthorizationController) -> Void
     ) async throws -> ASAuthorization {
         guard !requests.isEmpty else {
-            // ASAuthorizationController exige au moins une requête. Sans cette garde, le système ne
-            // rappellerait jamais le delegate et l'appelant resterait suspendu indéfiniment.
+            // ASAuthorizationController requires at least one request. Without this guard, the system
+            // would never call the delegate back and the caller would hang forever.
             throw ReachFiveError.TechnicalError(reason: "No authorization request to perform")
         }
 
@@ -62,56 +62,56 @@ class CredentialManager: NSObject {
         let key = ObjectIdentifier(controller)
 
         return try await withTaskCancellationHandler {
-            // La tâche appelante peut avoir été annulée avant même d'arriver ici : ne rien soumettre.
+            // The caller's task may already be canceled by the time we get here: submit nothing.
             try Task.checkCancellation()
 
             return try await withCheckedThrowingContinuation { continuation in
-                // Annulation des requêtes en cours et soumission de la nouvelle dans le même bloc
-                // synchrone : aucune autre tâche du main actor ne peut s'exécuter entre les deux.
+                // Canceling requests in flight and submitting the new one in the same synchronous block:
+                // no other task can run on the main actor in between.
                 cancelInFlightRequests()
                 contexts[key] = RequestContext(controller: controller, anchor: anchor, continuation: continuation)
                 submit(controller)
             }
         } onCancel: {
-            // onCancel est appelé hors du main actor ; on y repasse pour toucher `contexts`. Le saut de
-            // tâche ne peut pas devancer l'enregistrement du contexte : le bloc ci-dessus ne rend la main
-            // au main actor qu'après la soumission.
+            // onCancel runs off the main actor; hop back onto it to touch `contexts`. The task hop cannot
+            // outrun registering the context: the block above only yields back to the main actor after
+            // submission.
             Task { @MainActor in self.cancelBecauseCallerWasCancelled(key) }
         }
     }
 
-    /// Annule les requêtes en cours, principalement pour annuler une requête auto-fill avant de démarrer
-    /// une requête modale (sinon cette dernière échouerait).
+    /// Cancels requests in flight, mainly to cancel an auto-fill request before starting a modal one
+    /// (otherwise the latter would fail).
     ///
-    /// La continuation de chaque requête annulée est reprise ici en `.AuthCanceled`, sans attendre le
-    /// `didCompleteWithError(.canceled)` du système : celui-ci n'est promis que si un flux tournait
-    /// effectivement (cf. la doc de `ASAuthorizationController.cancel()`), et une requête dont le système
-    /// ne rappelle jamais laisserait son appelant suspendu et son contexte en mémoire pour toujours. Le
-    /// callback tardif éventuel ne trouve plus de contexte et est ignoré.
+    /// Each canceled request's continuation is resumed here with `.AuthCanceled`, without waiting for the
+    /// system's `didCompleteWithError(.canceled)`: that callback is only promised if a flow was actually
+    /// running (see the doc of `ASAuthorizationController.cancel()`), and a request the system never calls
+    /// back on would leave its caller hanging and its context in memory forever. Any late callback then
+    /// finds no context left and is ignored.
     ///
-    /// Appelé par ``perform(requests:anchor:using:)`` dans le même bloc synchrone que la soumission de la
-    /// nouvelle requête : l'application ne peut donc pas relancer une requête auto-fill — sa réaction
-    /// habituelle à `.AuthCanceled` — avant que la nouvelle requête ne soit soumise.
+    /// Called by ``perform(requests:anchor:using:)`` in the same synchronous block as submitting the new
+    /// request: the app therefore cannot restart an auto-fill request — its usual reaction to
+    /// `.AuthCanceled` — before the new request has been submitted.
     ///
-    /// Internal pour être testable.
+    /// Internal for testability.
     func cancelInFlightRequests() {
         let inFlight = Array(contexts.values)
         contexts.removeAll()
         for context in inFlight {
-            if #available(iOS 16.0, *) { // cancel() n'existe qu'à partir d'iOS 16
+            if #available(iOS 16.0, *) { // cancel() only exists from iOS 16
                 context.controller.cancel()
             }
             context.continuation.resume(throwing: ReachFiveError.AuthCanceled)
         }
     }
 
-    /// Reprend la requête `key` en `CancellationError` parce que la tâche appelante a été annulée, et
-    /// arrête la requête système. Volontairement pas `.AuthCanceled` : cette erreur signale une annulation
-    /// par l'utilisateur, à laquelle les applications réagissent en relançant une requête auto-fill, alors
-    /// qu'ici c'est l'écran appelant qui disparaît.
+    /// Resumes the `key` request with `CancellationError` because the caller's task was canceled, and
+    /// stops the system request. Deliberately not `.AuthCanceled`: that error signals a user cancellation,
+    /// to which apps react by restarting an auto-fill request, whereas here it is the calling screen that
+    /// is going away.
     private func cancelBecauseCallerWasCancelled(_ key: ObjectIdentifier) {
         guard let context = contexts.removeValue(forKey: key) else {
-            // requête déjà complétée ou jamais enregistrée : rien à faire
+            // request already completed, or never registered: nothing to do
             return
         }
         if #available(iOS 16.0, *) {
@@ -127,8 +127,8 @@ class CredentialManager: NSObject {
         let options = try await reachFive.reachFiveApi.createWebAuthnSignupOptions(webAuthnSignupOptions: request)
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
-        // request.scope est déjà le join espace de la liste de scopes (cf. SignupOptions) ; on la retrouve
-        // sans dupliquer la valeur en paramètre, un token de scope OAuth ne pouvant pas contenir d'espace.
+        // request.scope is already the space-joined list of scopes (see SignupOptions); we recover it
+        // here rather than duplicating the value as a parameter, an OAuth scope token cannot contain a space.
         let scopes = request.scope.components(separatedBy: " ")
 
         let authorization = try await perform(requests: [registrationRequest], anchor: anchor) {
@@ -191,27 +191,27 @@ class CredentialManager: NSObject {
 
     // MARK: - Non-discoverable
 
-    /// La seule requête possible ici est une assertion restreinte aux credentials que le serveur associe
-    /// au username : il n'y a pas de lot à assembler, le flux construit sa requête lui-même.
+    /// The only possible request here is an assertion restricted to the credentials the server associates
+    /// with the username: there is no batch to assemble, the flow builds its own request.
     ///
-    /// Volontairement sans annotation `@available`, contrairement aux autres flux passkey : `.Passkey` est
-    /// le seul cas de `NonDiscoverableAuthorization` aujourd'hui, mais une assertion de clé de sécurité
-    /// existe dès iOS 15 et serait un second cas ici — cette méthode et
-    /// ``authenticate(with:scopes:reachFive:originR5:)`` sont écrites pour que l'ajouter ne demande pas de
-    /// relever la version minimale de ce flux.
+    /// Deliberately without an `@available` annotation, unlike the other passkey flows: `.Passkey` is the
+    /// only case of `NonDiscoverableAuthorization` today, but a security key assertion exists from iOS 15
+    /// already and would be a second case here — this method and
+    /// ``authenticate(with:scopes:reachFive:originR5:)`` are written so that adding it will not require
+    /// raising this flow's own minimum version.
     func login(withNonDiscoverableUsername username: Username, forRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode, reachFive: ReachFive) async throws -> AuthToken {
         let options = try await reachFive.reachFiveApi.createWebAuthnAuthenticationOptions(
             webAuthnLoginRequest: makeWebAuthnLoginRequest(for: request, username: username, reachFive: reachFive)
         )
 
-        // Une requête par type demandé, toutes construites sur les mêmes options serveur. Le compte est
-        // connu ici, donc chaque requête est restreinte aux credentials que le serveur lui associe.
+        // One request per requested type, all built from the same server options. The account is known
+        // here, so every request is restricted to the credentials the server associates with it.
         var requests: [ASAuthorizationRequest] = []
         for type in requestTypes {
             switch type {
             case .Passkey:
-                // `.Passkey` n'est pas constructible sous iOS 16, donc cette branche ne s'exécute jamais
-                // ailleurs — la garde est pour le compilateur, qui ne peut pas le savoir.
+                // `.Passkey` cannot be constructed below iOS 16, so this branch only ever runs there —
+                // the guard is for the compiler, which cannot know it.
                 if #available(iOS 16.0, *) {
                     try requests.append(makePasskeyAssertionRequest(options, restrictedToAllowedCredentials: true))
                 }
@@ -241,22 +241,22 @@ class CredentialManager: NSObject {
         return try await completeModalLogin(authorization, scopes: request.scopes, siwa: built.siwa, reachFive: reachFive, originR5: request.origin)
     }
 
-    /// Internal pour être testable
+    /// Internal for testability
     struct BuiltRequests {
         let requests: [ASAuthorizationRequest]
-        /// renseigné si une requête Sign In With Apple fait partie du lot
+        /// set when a Sign In With Apple request is part of the batch
         let siwa: SignInWithApple?
     }
 
-    /// Construit les `ASAuthorizationRequest` pour les types demandés, dans l'ordre demandé — le système
-    /// présente les credentials dans cet ordre.
+    /// Builds the `ASAuthorizationRequest`s for the requested types, in the requested order — the system
+    /// presents the credentials in that order.
     ///
-    /// Un type qu'on ne sait pas préparer (pas de provider Apple configuré, options passkey
-    /// inaccessibles) est écarté du lot plutôt que de bloquer la connexion quand un autre type peut
-    /// encore aboutir ; la raison du premier type écarté n'est remontée que si rien ne survit.
+    /// A type this function cannot prepare (no Apple provider configured, passkey options unreachable) is
+    /// dropped from the batch rather than blocking sign-in when another type can still succeed; the first
+    /// dropped reason only surfaces if nothing survives.
     ///
-    /// `fetchAuthenticationOptions` fait l'appel réseau par défaut ; un test peut le substituer pour
-    /// construire les requêtes sans réseau.
+    /// `fetchAuthenticationOptions` makes the network call by default; a test can substitute it to build
+    /// the requests without network.
     func buildAuthorizationRequests(
         _ webAuthnLoginRequest: WebAuthnLoginRequest,
         reachFive: ReachFive,
@@ -276,9 +276,9 @@ class CredentialManager: NSObject {
                     requests.append(ASAuthorizationPasswordProvider().createRequest())
 
                 case .SignInWithApple:
-                    // Sans provider Apple, la requête ne pourrait pas être complétée (cf.
-                    // completeModalLogin) : mieux vaut ne pas la proposer que d'authentifier
-                    // l'utilisateur pour échouer ensuite.
+                    // Without an Apple provider the request could not be completed (see
+                    // completeModalLogin): better not to offer it than to authenticate the user and fail
+                    // afterwards.
                     guard let appleProvider else {
                         throw ReachFiveError.TechnicalError(reason: "Sign In With Apple is not available: no Apple provider configured. Check that initialize() completed and that Apple is enabled for this client.")
                     }
@@ -302,8 +302,8 @@ class CredentialManager: NSObject {
                     requests.append(appleIDRequest)
 
                 case .Passkey:
-                    // `.Passkey` n'est pas constructible sous iOS 16, donc cette branche ne s'exécute
-                    // jamais ailleurs — la garde est pour le compilateur, qui ne peut pas le savoir.
+                    // `.Passkey` cannot be constructed below iOS 16, so this branch only ever runs there —
+                    // the guard is for the compiler, which cannot know it.
                     if #available(iOS 16.0, *) {
                         // Allow the user to use a saved passkey, if they have one.
                         let authOptions = try await fetchAuthenticationOptions(reachFive, webAuthnLoginRequest)
@@ -346,9 +346,9 @@ class CredentialManager: NSObject {
 extension CredentialManager: ASAuthorizationControllerPresentationContextProviding {
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         guard let anchor = contexts[ObjectIdentifier(controller)]?.anchor else {
-            // Ne devrait pas arriver : le contexte est enregistré avant la soumission de la requête et
-            // retiré à sa complétion. Une fenêtre détachée vaut mieux qu'un crash, mais elle serait
-            // invisible à l'écran : on la signale.
+            // Should not happen: the context is registered before the request is submitted and removed
+            // only once it completes. A detached window is better than a crash, but it would be invisible
+            // on screen: log it.
             Logger.shared.log("presentationAnchor: no in-flight request for this controller, falling back to a detached window")
             return ASPresentationAnchor()
         }
@@ -367,14 +367,14 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
         takeContext(for: controller)?.continuation.resume(throwing: Self.adapt(error))
     }
 
-    /// Retire le contexte à l'entrée du callback : garantit qu'une continuation est résolue exactement une
-    /// fois (un second callback pour le même controller ne trouve plus rien), et qu'une annulation
-    /// ultérieure ne peut plus toucher une requête déjà complétée.
+    /// Removes the context as soon as the callback arrives: guarantees a continuation is resumed exactly
+    /// once (a second callback for the same controller finds nothing left), and that a later cancellation
+    /// can no longer touch a request that already completed.
     private func takeContext(for controller: ASAuthorizationController) -> RequestContext? {
         contexts.removeValue(forKey: ObjectIdentifier(controller))
     }
 
-    /// Fonction pure, extraite pour être testable unitairement
+    /// Pure function, extracted to be unit-testable
     nonisolated static func adapt(_ error: Error) -> ReachFiveError {
         if let authorizationError = error as? ASAuthorizationError {
             if authorizationError.code == .canceled {
@@ -389,11 +389,11 @@ extension CredentialManager: ASAuthorizationControllerDelegate {
     }
 }
 
-// MARK: - exploitation des credentials reçus
+// MARK: - Extracting received credentials
 
 extension CredentialManager {
-    /// Extrait le credential d'enregistrement de passkey d'une autorisation (signup / add / reset)
-    /// et le convertit dans notre format. Lève une erreur technique si l'autorisation n'en contient pas.
+    /// Extracts a passkey registration credential from an authorization (signup / add / reset) and
+    /// converts it to our format. Throws a technical error if the authorization does not carry one.
     private func registrationCredential(from authorization: ASAuthorization) throws -> RegistrationPublicKeyCredential {
         guard #available(iOS 16.0, *), let credentialRegistration = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration else {
             throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: expected a passkey registration")
@@ -407,13 +407,13 @@ extension CredentialManager {
         return RegistrationPublicKeyCredential(id: id, rawId: id, type: "public-key", response: response)
     }
 
-    /// Extrait l'assertion WebAuthn d'une autorisation, la valide auprès du serveur et rend le jeton.
-    /// Partagé par la connexion par passkey (auto-fill / non-discoverable) et la branche passkey de la
-    /// connexion modale. Lève une erreur technique si l'autorisation n'est pas une assertion WebAuthn.
+    /// Extracts a WebAuthn assertion from an authorization, validates it against the server and returns
+    /// the token. Shared by passkey sign-in (auto-fill / non-discoverable) and by the passkey branch of
+    /// the modal sign-in. Throws a technical error if the authorization is not a WebAuthn assertion.
     ///
-    /// Typée sur ``ASAuthorizationPublicKeyCredentialAssertion`` et non sur le credential de plateforme :
-    /// le protocole déclare tous les champs qu'on lit, et une assertion de clé de sécurité s'y conforme
-    /// aussi, donc supporter les clés de sécurité ne touchera pas cette méthode.
+    /// Typed on ``ASAuthorizationPublicKeyCredentialAssertion`` rather than on the platform credential:
+    /// the protocol declares every field we read, and a security key assertion conforms to it too, so
+    /// supporting security keys will not touch this method.
     private func authenticate(with authorization: ASAuthorization, scopes: [String], reachFive: ReachFive, originR5: String?) async throws -> AuthToken {
         guard #available(iOS 15.0, *), let assertion = authorization.credential as? any ASAuthorizationPublicKeyCredentialAssertion else {
             throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: expected a WebAuthn assertion")
@@ -430,8 +430,8 @@ extension CredentialManager {
         return try await reachFive.loginCallback(tkn: authenticationToken.tkn, scopes: scopes, origin: originR5)
     }
 
-    /// Complète une connexion modale, seul flux à pouvoir recevoir plusieurs types de credential
-    /// (mot de passe, Sign In With Apple ou passkey).
+    /// Completes a modal sign-in, the only flow that can receive several kinds of credential (password,
+    /// Sign In With Apple, or passkey).
     private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
         let reachFiveApi = reachFive.reachFiveApi
         let sdkConfig = reachFive.sdkConfig
@@ -455,8 +455,8 @@ extension CredentialManager {
             return try await reachFive.loginFlow(afterPasswordGrant: resp, scopes: scopes, origin: originR5)
         } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard let siwa else {
-                // Garanti par buildAuthorizationRequests : une requête Sign In With Apple n'entre dans le
-                // lot qu'accompagnée de son SignInWithApple.
+                // Guaranteed by buildAuthorizationRequests: a Sign In With Apple request only ever makes
+                // it into the batch together with its SignInWithApple.
                 throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no nonce, no apple provider")
             }
             guard let identityToken = appleIDCredential.identityToken else {
@@ -491,22 +491,22 @@ extension CredentialManager {
     }
 }
 
-// MARK: - construction des requêtes
+// MARK: - Request construction
 
 extension CredentialManager {
-    /// Le socle commun aux trois flux de connexion WebAuthn.
+    /// The shared basis of the three WebAuthn login flows.
     private func makeWebAuthnLoginRequest(for request: ResolvedNativeLoginRequest, username: Username? = nil, reachFive: ReachFive) -> WebAuthnLoginRequest {
         WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: request.originWebAuthn, username: username, scope: request.scopes)
     }
 
-    /// Construit une requête d'enregistrement de passkey à partir des options renvoyées par le serveur.
-    /// Pendant symétrique de ``makePasskeyAssertionRequest(_:restrictedToAllowedCredentials:)``.
+    /// Builds a passkey registration request from the options returned by the server. Counterpart of
+    /// ``makePasskeyAssertionRequest(_:restrictedToAllowedCredentials:)``.
     ///
-    /// `friendlyName` est celui demandé par l'application, et non `options.friendlyName` : rien ne garantit
-    /// que le serveur renvoie la valeur qu'on lui a passée, et c'est bien l'intention de l'application qui
-    /// doit nommer la passkey dans le trousseau.
+    /// `friendlyName` is the one the app asked for, not `options.friendlyName`: nothing guarantees the
+    /// server echoes back the value it was given, and it is the app's intent that should name the passkey
+    /// in the keychain.
     ///
-    /// Internal pour être testable.
+    /// Internal for testability.
     @available(iOS 16.0, *)
     func makeCredentialRegistrationRequest(from options: RegistrationOptions, friendlyName: String) throws -> ASAuthorizationRequest {
         guard let challenge = options.options.publicKey.challenge.decodeBase64Url() else {
@@ -521,16 +521,16 @@ extension CredentialManager {
         return publicKeyCredentialProvider.createCredentialRegistrationRequest(challenge: challenge, name: friendlyName, userID: userID)
     }
 
-    /// Construit une requête d'assertion de passkey à partir des options renvoyées par le serveur.
+    /// Builds a passkey assertion request from the options returned by the server.
     ///
-    /// - Parameter restrictedToAllowedCredentials: restreint la requête aux credentials listés par le
-    ///   serveur — ce que fait la connexion non-discoverable, qui sait de quel compte il s'agit. L'auto-fill
-    ///   et la connexion modale laissent au contraire l'utilisateur choisir parmi ses passkeys.
+    /// - Parameter restrictedToAllowedCredentials: restricts the request to the credentials listed by the
+    ///   server — what the non-discoverable sign-in does, since it already knows the account. Auto-fill
+    ///   and the modal sign-in instead let the user choose among their own passkeys.
     ///
-    /// Ce sont les appelants qui portent la garde de disponibilité : `.Passkey` n'étant pas constructible
-    /// sous iOS 16, sa présence dans une demande implique déjà iOS 16 à l'exécution.
+    /// The callers carry the availability guard: `.Passkey` cannot be constructed below iOS 16, so its
+    /// presence in a request already implies iOS 16 at runtime.
     ///
-    /// Internal pour être testable.
+    /// Internal for testability.
     @available(iOS 16.0, *)
     func makePasskeyAssertionRequest(_ options: AuthenticationOptions, restrictedToAllowedCredentials: Bool) throws -> ASAuthorizationRequest {
         guard let challenge = options.publicKey.challenge.decodeBase64Url() else {
