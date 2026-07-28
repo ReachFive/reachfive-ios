@@ -15,6 +15,14 @@ public class SdkConfig {
     /// The redirect URI for email verification. Defaults to `reachfive-clientId://email-verification`
     public let emailVerificationUri: URL
 
+    /// The WebAuthn origin sent to the server for passkey requests, as a serialized origin
+    /// (`https://host`). Set it once here instead of repeating it on every passkey request.
+    ///
+    /// Defaults to `https://<domain>`, which is right unless your passkeys are scoped to a different
+    /// relying party — a custom domain, or one shared across several of your apps. A request that carries
+    /// its own `originWebAuthn` still wins over this value.
+    public let originWebAuthn: URL?
+
     public init(
         domain: String,
         clientId: String,
@@ -22,7 +30,8 @@ public class SdkConfig {
         redirectUri: URL? = nil,
         mfaUri: URL? = nil,
         accountRecoveryUri: URL? = nil,
-        emailVerificationUri: URL? = nil
+        emailVerificationUri: URL? = nil,
+        originWebAuthn: URL? = nil
     ) {
         self.domain = domain
         self.clientId = clientId
@@ -36,6 +45,33 @@ public class SdkConfig {
         self.mfaUri = mfaUri ?? Self.defaultUri(scheme: scheme, path: "mfa")
         self.emailVerificationUri = emailVerificationUri ?? Self.defaultUri(scheme: scheme, path: "email-verification")
         self.accountRecoveryUri = accountRecoveryUri ?? Self.defaultUri(scheme: scheme, path: "account-recovery")
+
+        if let originWebAuthn, Self.serializedOrigin(originWebAuthn) == nil {
+            preconditionFailure("""
+                '\(originWebAuthn)' is not a valid WebAuthn origin: it must be an absolute URL with a \
+                scheme and a host, e.g. https://auth.example.com.
+                """)
+        }
+        self.originWebAuthn = originWebAuthn
+    }
+
+    /// The WebAuthn origin to use when a request does not carry its own, serialized the way the server and
+    /// the system expect it: scheme, host and non-default port only. Neither a path nor a trailing slash
+    /// belongs in an origin, and `URL.absoluteString` would keep both.
+    ///
+    /// Only this configured value is normalized: the per-request `originWebAuthn` overrides are `String`s
+    /// and are sent as given.
+    var webAuthnOrigin: String {
+        guard let originWebAuthn, let origin = Self.serializedOrigin(originWebAuthn) else {
+            return "https://\(domain)"
+        }
+        return origin
+    }
+
+    private static func serializedOrigin(_ url: URL) -> String? {
+        guard let scheme = url.scheme?.lowercased(), let host = url.host else { return nil }
+        guard let port = url.port else { return "\(scheme)://\(host)" }
+        return "\(scheme)://\(host):\(port)"
     }
 
     /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing,
