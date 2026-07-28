@@ -189,24 +189,42 @@ class CredentialManager: NSObject {
         return try await authenticate(with: authorization, scopes: request.scopes, reachFive: reachFive, originR5: request.origin)
     }
 
-    // MARK: - Modal
+    // MARK: - Non-discoverable
 
+    /// La seule requête possible ici est une assertion restreinte aux credentials que le serveur associe
+    /// au username : il n'y a pas de lot à assembler, le flux construit sa requête lui-même.
+    ///
+    /// Volontairement sans annotation `@available`, contrairement aux autres flux passkey : `.Passkey` est
+    /// le seul cas de `NonDiscoverableAuthorization` aujourd'hui, mais une assertion de clé de sécurité
+    /// existe dès iOS 15 et serait un second cas ici — cette méthode et
+    /// ``authenticate(with:scopes:reachFive:originR5:)`` sont écrites pour que l'ajouter ne demande pas de
+    /// relever la version minimale de ce flux.
     func login(withNonDiscoverableUsername username: Username, forRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode, reachFive: ReachFive) async throws -> AuthToken {
-        let webAuthnLoginRequest = makeWebAuthnLoginRequest(for: request, username: username, reachFive: reachFive)
-
-        let built = try await buildAuthorizationRequests(
-            webAuthnLoginRequest,
-            reachFive: reachFive,
-            authorizing: requestTypes.compactMap { adaptAuthz($0) },
-            restrictingPasskeysToAllowedCredentials: true
+        let options = try await reachFive.reachFiveApi.createWebAuthnAuthenticationOptions(
+            webAuthnLoginRequest: makeWebAuthnLoginRequest(for: request, username: username, reachFive: reachFive)
         )
 
-        let authorization = try await perform(requests: built.requests, anchor: request.anchor) {
-            performRequests(on: $0, mode: mode)
+        // Une requête par type demandé, toutes construites sur les mêmes options serveur. Le compte est
+        // connu ici, donc chaque requête est restreinte aux credentials que le serveur lui associe.
+        var requests: [ASAuthorizationRequest] = []
+        for type in requestTypes {
+            switch type {
+            case .Passkey:
+                // `.Passkey` n'est pas constructible sous iOS 16, donc cette branche ne s'exécute jamais
+                // ailleurs — la garde est pour le compilateur, qui ne peut pas le savoir.
+                if #available(iOS 16.0, *) {
+                    try requests.append(makePasskeyAssertionRequest(options, restrictedToAllowedCredentials: true))
+                }
+            }
         }
 
+        let authorization = try await perform(requests: requests, anchor: request.anchor) {
+            performRequests(on: $0, mode: mode)
+        }
         return try await authenticate(with: authorization, scopes: request.scopes, reachFive: reachFive, originR5: request.origin)
     }
+
+    // MARK: - Modal
 
     func login(withRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, reachFive: ReachFive) async throws -> LoginFlow {
         let built = try await buildAuthorizationRequests(
@@ -238,7 +256,6 @@ class CredentialManager: NSObject {
         reachFive: ReachFive,
         authorizing requestTypes: [ModalAuthorization],
         appleProvider: ConfiguredAppleProvider? = nil,
-        restrictingPasskeysToAllowedCredentials restrictToAllowedCredentials: Bool = false,
         fetchAuthenticationOptions: (ReachFive, WebAuthnLoginRequest) async throws -> AuthenticationOptions = { try await $0.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: $1) }
     ) async throws -> BuiltRequests {
         var requests: [ASAuthorizationRequest] = []
@@ -276,7 +293,7 @@ class CredentialManager: NSObject {
                 do {
                     // Allow the user to use a saved passkey, if they have one.
                     let authOptions = try await fetchAuthenticationOptions(reachFive, webAuthnLoginRequest)
-                    try requests.append(makePasskeyAssertionRequest(authOptions, restrictedToAllowedCredentials: restrictToAllowedCredentials))
+                    try requests.append(makePasskeyAssertionRequest(authOptions, restrictedToAllowedCredentials: false))
                 } catch let error where requestTypes.count > 1 {
                     // if there are other types of requests, do not block auth if only passkey fails. Just eat the error
                     Logger.shared.log("Passkey request error ignored in multi-type authorization: \(error)")
@@ -516,12 +533,5 @@ extension CredentialManager {
             .map(ASAuthorizationPlatformPublicKeyCredentialDescriptor.init(credentialID:))
 
         return assertionRequest
-    }
-
-    private func adaptAuthz(_ nda: NonDiscoverableAuthorization) -> ModalAuthorization? {
-        if #available(iOS 16.0, *), nda == .Passkey {
-            return ModalAuthorization.Passkey
-        }
-        return nil
     }
 }
