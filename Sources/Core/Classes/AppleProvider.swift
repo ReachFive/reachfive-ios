@@ -29,8 +29,8 @@ class ConfiguredAppleProvider: NSObject, Provider {
 
     let providerConfig: ProviderConfig
     let clientConfigResponse: ClientConfigResponse
-    /// `weak` : ReachFive retient ses providers, une référence forte ici créerait un cycle
-    /// ReachFive ↔ ConfiguredAppleProvider et le graphe SDK ne serait jamais désalloué.
+    /// `weak`: ReachFive retains its providers, a strong reference here would create a
+    /// ReachFive ↔ ConfiguredAppleProvider cycle and the SDK graph would never be deallocated.
     private weak var reachfive: ReachFive?
 
     init(
