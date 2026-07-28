@@ -518,13 +518,12 @@ extension CredentialManager {
     ///   serveur — ce que fait la connexion non-discoverable, qui sait de quel compte il s'agit. L'auto-fill
     ///   et la connexion modale laissent au contraire l'utilisateur choisir parmi ses passkeys.
     ///
-    /// Volontairement sans annotation `@available` : la garde interne permet de l'appeler depuis les points
-    /// d'entrée qui ne peuvent pas être annotés (cf. `NonDiscoverableAuthorization`, ouvert aux Security
-    /// Keys d'iOS 15). Internal pour être testable.
+    /// Ce sont les appelants qui portent la garde de disponibilité : `.Passkey` n'étant pas constructible
+    /// sous iOS 16, sa présence dans une demande implique déjà iOS 16 à l'exécution.
+    ///
+    /// Internal pour être testable.
+    @available(iOS 16.0, *)
     func makePasskeyAssertionRequest(_ options: AuthenticationOptions, restrictedToAllowedCredentials: Bool) throws -> ASAuthorizationRequest {
-        guard #available(iOS 16.0, *) else {
-            throw ReachFiveError.TechnicalError(reason: "Passkey sign-in requires iOS 16 or later.")
-        }
         guard let challenge = options.publicKey.challenge.decodeBase64Url() else {
             throw ReachFiveError.TechnicalError(reason: "unreadable challenge: \(options.publicKey.challenge)")
         }
