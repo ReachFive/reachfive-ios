@@ -137,6 +137,29 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
         XCTAssertTrue(siwa.provider === appleProvider)
     }
 
+    /// Sans provider Apple, la requête ne pourrait pas être complétée : seule demandée, elle doit échouer
+    /// avant toute présentation à l'utilisateur, pas après Face ID.
+    func testSignInWithAppleAloneSurfacesTheMissingProvider() async {
+        do {
+            _ = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.SignInWithApple], fetchAuthenticationOptions: failFetch)
+            XCTFail("expected the missing provider to surface")
+        } catch {
+            guard case let ReachFiveError.TechnicalError(reason, _) = error else {
+                return XCTFail("expected .TechnicalError, got \(error)")
+            }
+            XCTAssertTrue(reason.contains("no Apple provider"))
+        }
+    }
+
+    /// Combinée à un autre type, l'absence de provider Apple est écartée : le mot de passe suffit encore.
+    func testSignInWithAppleIsDroppedWhenAnotherTypeCanStillSucceed() async throws {
+        let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.SignInWithApple, .Password], fetchAuthenticationOptions: failFetch)
+
+        XCTAssertEqual(built.requests.count, 1, "la requête password doit survivre à l'absence de provider Apple")
+        XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
+        XCTAssertNil(built.siwa)
+    }
+
     @available(iOS 16.0, *)
     func testPasskeyAloneFailureThrows() async {
         do {
