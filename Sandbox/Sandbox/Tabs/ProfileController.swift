@@ -1,5 +1,4 @@
 import UIKit
-import AuthenticationServices
 import Reach5
 
 //TODO:
@@ -289,7 +288,7 @@ extension ProfileController {
         Task {
 
             let request: WebSessionLogoutRequest? = if webLogout {
-                WebSessionLogoutRequest(presentationContextProvider: self, origin: "ProfileController.logoutAction")
+                try? WebSessionLogoutRequest(presenting: Presentation(from: self), origin: "ProfileController.logoutAction")
             } else { nil }
 
             let token: AuthToken? = if revoke {
@@ -439,12 +438,6 @@ extension ProfileController {
                 self.presentErrorAlert(title: "Remove identifier failed", error)
             }
         }
-    }
-}
-
-extension ProfileController: ASWebAuthenticationPresentationContextProviding {
-    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        view.window!
     }
 }
 

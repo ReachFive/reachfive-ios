@@ -2,9 +2,8 @@ import UIKit
 import Reach5
 //TODO: import Reach5Facebook
 import AppTrackingTransparency
-import AuthenticationServices
 
-class LoginWithProvidersController: UIViewController, UITableViewDataSource, UITableViewDelegate, ASWebAuthenticationPresentationContextProviding {
+class LoginWithProvidersController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var providers: [Provider] = []
 
     @IBOutlet weak var providersTableView: UITableView!
@@ -55,7 +54,7 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
             let scope = ["openid", "email", "profile", "phone", "full_write", "offline_access"]
             if let provider = AppDelegate.reachfive().getProvider(name: selectedProvider.name) {
                 await handleAuthToken(errorMessage: "Login with provider failed") {
-                    try await provider.login(scope: scope, origin: "LoginWithProvidersController.didSelectRowAt", viewController: self)
+                    try await provider.login(scope: scope, origin: "LoginWithProvidersController.didSelectRowAt", presenting: Presentation(from: self))
                 }
             }
         }
@@ -64,9 +63,5 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
 
     func numberOfSections(in tableView: UITableView) -> Int {
         1
-    }
-
-    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        view.window!
     }
 }

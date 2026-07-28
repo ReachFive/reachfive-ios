@@ -16,7 +16,17 @@ public protocol ProviderCreator {
 
 public protocol Provider {
     var name: String { get }
-    func login(scope: [String]?, origin: String, viewController: UIViewController?) async throws -> AuthToken
+    /// Starts the provider's login flow and returns the ReachFive token on success.
+    ///
+    /// - Parameters:
+    ///   - scope: The scopes to request; `nil` falls back to the client configuration's scope.
+    ///   - origin: Free-form origin string recorded in user events.
+    ///   - presenting: Where the provider presents its UI, built from the initiating view
+    ///     controller: `Presentation(from: self)`. The view controller must be attached to a
+    ///     window at call time (call from `viewDidAppear` or a user interaction, not
+    ///     `viewDidLoad`), otherwise the login fails with a `TechnicalError`. Providers that
+    ///     present no UI of their own ignore it.
+    func login(scope: [String]?, origin: String, presenting: Presentation) async throws -> AuthToken
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     func applicationDidBecomeActive(_ application: UIApplication)
