@@ -215,6 +215,11 @@ class CredentialManager: NSObject {
                 if #available(iOS 16.0, *) {
                     try requests.append(makePasskeyAssertionRequest(options, restrictedToAllowedCredentials: true))
                 }
+
+            case .SecurityKey:
+                if #available(iOS 15.0, *) {
+                    try requests.append(makeSecurityKeyAssertionRequest(options, restrictedToAllowedCredentials: true))
+                }
             }
         }
 
@@ -553,6 +558,42 @@ extension CredentialManager {
         assertionRequest.allowedCredentials = allowedCredentials
             .compactMap { $0.id.decodeBase64Url() }
             .map(ASAuthorizationPlatformPublicKeyCredentialDescriptor.init(credentialID:))
+
+        return assertionRequest
+    }
+
+    /// Mirror of ``makePasskeyAssertionRequest(_:restrictedToAllowedCredentials:)``, built on the security
+    /// key provider instead of the platform one — available from iOS 15, hence the lower annotation.
+    ///
+    /// Note that `transports` already exists on ``R5PublicKeyCredentialDescriptor``: the server model is
+    /// ready, only the values still have to be filled in on the backend side.
+    @available(iOS 15.0, *)
+    func makeSecurityKeyAssertionRequest(_ options: AuthenticationOptions, restrictedToAllowedCredentials: Bool) throws -> ASAuthorizationRequest {
+        guard let challenge = options.publicKey.challenge.decodeBase64Url() else {
+            throw ReachFiveError.TechnicalError(reason: "unreadable challenge: \(options.publicKey.challenge)")
+        }
+
+        let provider = ASAuthorizationSecurityKeyPublicKeyCredentialProvider(relyingPartyIdentifier: options.publicKey.rpId)
+        let assertionRequest = provider.createCredentialAssertionRequest(challenge: challenge)
+
+        guard restrictedToAllowedCredentials else { return assertionRequest }
+
+        guard let allowedCredentials = options.publicKey.allowCredentials else {
+            throw ReachFiveError.AuthFailure(reason: "no allowCredentials returned")
+        }
+        assertionRequest.allowedCredentials = allowedCredentials.compactMap { descriptor in
+            guard let id = descriptor.id.decodeBase64Url() else { return nil }
+            let transports = (descriptor.transports ?? []).compactMap { transport -> ASAuthorizationSecurityKeyPublicKeyCredentialDescriptor.Transport? in
+                switch transport {
+                case "usb": .usb
+                case "nfc": .nfc
+                case "ble": .bluetooth
+                // "internal" and "hybrid" describe platform authenticators, not security keys
+                default: nil
+                }
+            }
+            return ASAuthorizationSecurityKeyPublicKeyCredentialDescriptor(credentialID: id, transports: transports)
+        }
 
         return assertionRequest
     }

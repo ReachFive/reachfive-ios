@@ -114,6 +114,9 @@ public enum ModalAuthorization: Equatable {
 public enum NonDiscoverableAuthorization: Equatable {
     @available(iOS 16.0, *)
     case Passkey
+    /// No `@available` annotation: `ASAuthorizationSecurityKeyPublicKeyCredentialProvider` exists from
+    /// iOS 15, so this case is what makes the non-discoverable flow genuinely useful below iOS 16.
+    case SecurityKey
 }
 
 /// The behavior of the modal sheet when there are no credential available.
