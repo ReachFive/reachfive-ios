@@ -46,23 +46,16 @@ extension ReachFive {
             origin: origin
         )
         let resp = try await reachFiveApi.loginWithPassword(loginRequest: loginRequest)
-        return try await loginFlow(afterPasswordGrant: resp, scopes: scope, origin: origin)
-    }
 
-    /// Continues a password login once the server's response has been received: starts an MFA step-up if
-    /// the server requires one, otherwise completes the login.
-    /// Shared between ``loginWithPassword(email:phoneNumber:customIdentifier:password:scope:origin:)``
-    /// and the keychain password login (`CredentialManager`).
-    /// Not unit-testable until `ReachFiveApi` is abstracted behind a protocol (direct network calls).
-    func loginFlow(afterPasswordGrant resp: TknMfa, scopes: [String]?, origin: String?) async throws -> LoginFlow {
         guard resp.mfaRequired == true else {
-            let token = try await loginCallback(tkn: resp.tkn, scopes: scopes, origin: origin)
+            let token = try await loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
             return .AchievedLogin(authToken: token)
         }
 
+        // The step-up PKCE must outlive this call: the app comes back through the MFA redirect URI.
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
-        let stepUpResponse = try await reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: sdkConfig.redirectUri, pkce: pkce, scope: (scopes ?? scope).joined(separator: " "), tkn: resp.tkn))
+        let stepUpResponse = try await reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
         return LoginFlow.OngoingStepUp(token: stepUpResponse.token, availableMfaCredentialItemTypes: stepUpResponse.amr)
     }
 }
