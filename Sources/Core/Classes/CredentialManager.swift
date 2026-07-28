@@ -452,36 +452,11 @@ extension CredentialManager {
     /// Completes a modal sign-in, the only flow that can receive several kinds of credential (password,
     /// Sign In With Apple, or passkey).
     private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
-        let reachFiveApi = reachFive.reachFiveApi
-        let sdkConfig = reachFive.sdkConfig
-        let scope = scopes.joined(separator: " ")
-
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
-            // a password was selected to sign in
+            // a password was selected to sign in. No custom identifier: none can be used at signup either.
             let (email, phoneNumber) = Username.Unspecified(passwordCredential.user).identifiers
 
-            let resp = try await reachFiveApi.loginWithPassword(loginRequest: LoginRequest(
-                email: email,
-                phoneNumber: phoneNumber,
-                customIdentifier: nil, // No custom identifier for login because no custom identifier can be used for signup
-                password: passwordCredential.password,
-                grantType: "password",
-                clientId: sdkConfig.clientId,
-                scope: scope,
-                origin: originR5
-            ))
-
-            let loginFlow: LoginFlow
-            if resp.mfaRequired == true {
-                let pkce = Pkce.generate()
-                reachFive.storage.save(key: "PASSWORDLESS_PKCE", value: pkce)
-                let stepUpResp = try await reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: sdkConfig.redirectUri, pkce: pkce, scope: scope, tkn: resp.tkn))
-                loginFlow = .OngoingStepUp(token: stepUpResp.token, availableMfaCredentialItemTypes: stepUpResp.amr)
-            } else {
-                let token = try await reachFive.loginCallback(tkn: resp.tkn, scopes: scopes, origin: originR5)
-                loginFlow = .AchievedLogin(authToken: token)
-            }
-            return loginFlow
+            return try await reachFive.loginWithPassword(email: email, phoneNumber: phoneNumber, password: passwordCredential.password, scope: scopes, origin: originR5)
         } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard let siwa else {
                 // Guaranteed by buildAuthorizationRequests: a Sign In With Apple request only ever makes
@@ -495,22 +470,17 @@ extension CredentialManager {
                 throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: unreadable id token \(identityToken)")
             }
 
-            let pkce = Pkce.generate()
-            let code = try await reachFiveApi.authorize(params: [
-                "provider": siwa.provider.providerConfig.providerWithVariant,
-                "client_id": sdkConfig.clientId,
-                "id_token": idToken,
-                "response_type": "code",
-                "redirect_uri": sdkConfig.redirectUri.absoluteString,
-                "scope": scope,
-                "code_challenge": pkce.codeChallenge,
-                "code_challenge_method": pkce.codeChallengeMethod,
-                "nonce": siwa.nonce.codeVerifier,
-                "origin": originR5,
-                "given_name": appleIDCredential.fullName?.givenName,
-                "family_name": appleIDCredential.fullName?.familyName,
-            ])
-            let token = try await reachFive.authWithCode(code: code, pkce: pkce)
+            // Apple only hands out the full name on the user's very first authorization: forward it now
+            // or it is lost for good.
+            let token = try await reachFive.login(
+                withProvider: siwa.provider.providerConfig.providerWithVariant,
+                idToken: idToken,
+                nonce: siwa.nonce,
+                scope: scopes,
+                origin: originR5,
+                givenName: appleIDCredential.fullName?.givenName,
+                familyName: appleIDCredential.fullName?.familyName
+            )
             return .AchievedLogin(authToken: token)
         } else {
             // a passkey was selected to sign in
