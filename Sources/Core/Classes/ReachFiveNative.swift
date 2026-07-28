@@ -16,10 +16,9 @@ extension ReachFive {
     /// Signup with a passkey
     @available(iOS 16.0, *)
     public func signup(withRequest request: PasskeySignupRequest) async throws -> AuthToken {
-        let domain = sdkConfig.domain
         let scopes = request.scopes ?? scope
         let signupOptions = SignupOptions(
-            origin: request.originWebAuthn ?? "https://\(domain)",
+            origin: request.originWebAuthn ?? sdkConfig.webAuthnOrigin,
             friendlyName: request.friendlyName,
             profile: request.passkeyProfile,
             clientId: sdkConfig.clientId,
@@ -74,18 +73,18 @@ extension ReachFive {
     @available(iOS 16.0, *)
     public func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws {
         // TODO: delete the former key from the server
-        try await credentialManager.registerNewPasskey(withRequest: request, originWebAuthn: request.originWebAuthn ?? "https://\(sdkConfig.domain)", authToken: authToken, reachFive: self)
+        try await credentialManager.registerNewPasskey(withRequest: request, originWebAuthn: request.originWebAuthn ?? sdkConfig.webAuthnOrigin, authToken: authToken, reachFive: self)
     }
 
     @available(iOS 16.0, *)
     public func resetPasskeys(withRequest request: ResetPasskeyRequest) async throws {
-        try await credentialManager.resetPasskeys(withRequest: request, originWebAuthn: request.originWebAuthn ?? "https://\(sdkConfig.domain)", reachFive: self)
+        try await credentialManager.resetPasskeys(withRequest: request, originWebAuthn: request.originWebAuthn ?? sdkConfig.webAuthnOrigin, reachFive: self)
     }
 
     private func resolve(_ request: NativeLoginRequest) -> ResolvedNativeLoginRequest {
         ResolvedNativeLoginRequest(
             anchor: request.anchor,
-            originWebAuthn: request.originWebAuthn ?? "https://\(sdkConfig.domain)",
+            originWebAuthn: request.originWebAuthn ?? sdkConfig.webAuthnOrigin,
             scopes: request.scopes ?? scope,
             origin: request.origin
         )
