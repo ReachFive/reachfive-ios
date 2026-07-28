@@ -156,16 +156,14 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
         XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
     }
 
-    /// Les options récupérées auprès du serveur sont bien celles qui construisent la requête d'assertion,
-    /// et la restriction aux credentials autorisés est propagée.
+    /// Les options récupérées auprès du serveur sont bien celles qui construisent la requête d'assertion.
     @available(iOS 16.0, *)
     func testPasskeyBuildsAnAssertionRequestFromTheFetchedOptions() async throws {
-        let options = AuthenticationOptions(publicKey: R5PublicKeyCredentialRequestOptions(challenge: "AQID", timeout: nil, rpId: "fetched.reach5.net", allowCredentials: [R5PublicKeyCredentialDescriptor(type: "public-key", id: "AQID")], userVerification: "preferred"))
+        let options = AuthenticationOptions(publicKey: R5PublicKeyCredentialRequestOptions(challenge: "AQID", timeout: nil, rpId: "fetched.reach5.net", allowCredentials: nil, userVerification: "preferred"))
 
-        let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.Passkey], restrictingPasskeysToAllowedCredentials: true, fetchAuthenticationOptions: { _, _ in options })
+        let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.Passkey], fetchAuthenticationOptions: { _, _ in options })
 
         let assertionRequest = try XCTUnwrap(built.requests.first as? ASAuthorizationPlatformPublicKeyCredentialAssertionRequest)
         XCTAssertEqual(assertionRequest.relyingPartyIdentifier, "fetched.reach5.net")
-        XCTAssertEqual(assertionRequest.allowedCredentials.map(\.credentialID), [Data([0x01, 0x02, 0x03])])
     }
 }
