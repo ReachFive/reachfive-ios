@@ -136,6 +136,28 @@ The sample below includes both sections for a host used in both modes; for `.ext
 If you restrict `components` to a path, make sure it lets through both the success callback (`?code=...`) *and* the OAuth error callback (`?error=...`, e.g. when the user denies consent), so that the SDK can end the login cleanly with the error instead of leaving the authentication sheet open.
 ====
 
+=== Customise the WebAuthn origin
+
+Passkey requests carry an origin, which the server checks against the relying party your passkeys are
+registered for.
+It defaults to `https://$\{domain\}`, so you only need to set it when your passkeys are scoped to another
+relying party — a custom domain, or one shared across several of your applications.
+
+Set it once in the `SdkConfig` rather than on every passkey request.
+A request that carries its own `originWebAuthn` still takes precedence over this value.
+
+[source,swift,subs="verbatim,callouts"]
+----
+let ReachFive = ReachFive(
+    sdkConfig: SdkConfig(
+        domain: DOMAIN,
+        clientId: CLIENT_ID,
+        originWebAuthn: URL(string: "https://auth.example.com") <1>
+    )
+)
+----
+<1> Only the scheme, the host and a non-default port are sent: a path or a trailing slash is ignored.
+
 === Customise storage
 
 Storage is used by the iOS SDK to store the PKCE code during passwordless and MFA flows.
