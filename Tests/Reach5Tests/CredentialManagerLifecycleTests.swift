@@ -176,7 +176,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
 
     /// `ASAuthorizationController` exige au moins une requête ; sans garde, le système ne rappellerait
     /// jamais le delegate et l'appelant resterait suspendu. Atteignable via l'API publique avec
-    /// `usingModalAuthorizationFor: []`, ou avec `[.Passkey]` sous iOS 15.
+    /// `usingModalAuthorizationFor: []`.
     func testEmptyRequestsThrowsInsteadOfHanging() async {
         let manager = CredentialManager()
         do {
