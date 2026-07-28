@@ -12,7 +12,7 @@ Allows {company} to handle URLs in the following format:
 
 * `reachfive-clientId://`
 
-This includes the *custom-scheme out-of-band* login flow: when an external app finishes a login by reopening your app through the SDK's custom scheme, the SDK completes the in-flight web authentication session here. This is the custom-scheme counterpart of the universal-link flow handled by xref:applicationContinueUserActivity.adoc[`application(_:continue:)`].
+This includes the *custom-scheme out-of-band* login flow: when an external app finishes a login by reopening your app through the SDK's custom scheme, the SDK completes the in-flight web authentication session here. This is the custom-scheme counterpart of the universal-link flow handled by xref:application/applicationContinueUserActivity.adoc[`application(_:continue:)`].
 
 Additionally, the method allows configured providers to handle their own native links.
 
