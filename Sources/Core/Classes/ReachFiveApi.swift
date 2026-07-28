@@ -128,10 +128,6 @@ public class ReachFiveApi {
             .responseJson(type: TknMfa.self)
     }
 
-    public func loginCallback(loginCallback: LoginCallback) async throws -> String {
-        try await authorize(params: loginCallback.dictionary() as? [String: String])
-    }
-
     public func authorize(params: [String: String?]?) async throws -> String {
         let url = try await networkClient.request(createUrl(path: "/oauth/authorize", params: params)).redirect()
         return try url.authorizationCode()

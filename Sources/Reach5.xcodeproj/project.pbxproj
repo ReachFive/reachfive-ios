@@ -36,7 +36,6 @@
 		2AE5330D299462DD00EF97E0 /* CredentialManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE53309299462DD00EF97E0 /* CredentialManager.swift */; };
 		2AE5330E299462DD00EF97E0 /* ReachFiveNative.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE5330A299462DD00EF97E0 /* ReachFiveNative.swift */; };
 		2AE533152994632F00EF97E0 /* WebviewLoginRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE533132994632F00EF97E0 /* WebviewLoginRequest.swift */; };
-		2AE533162994632F00EF97E0 /* LoginCallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE533142994632F00EF97E0 /* LoginCallback.swift */; };
 		2AE5331D2994638000EF97E0 /* NativeLoginRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE533172994638000EF97E0 /* NativeLoginRequest.swift */; };
 		2AE5331E2994638000EF97E0 /* ProfilePasskeySignupRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE533182994638000EF97E0 /* ProfilePasskeySignupRequest.swift */; };
 		2AE5331F2994638100EF97E0 /* SignupOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE533192994638000EF97E0 /* SignupOptions.swift */; };
@@ -142,7 +141,6 @@
 		2AE53309299462DD00EF97E0 /* CredentialManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CredentialManager.swift; sourceTree = "<group>"; };
 		2AE5330A299462DD00EF97E0 /* ReachFiveNative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReachFiveNative.swift; sourceTree = "<group>"; };
 		2AE533132994632F00EF97E0 /* WebviewLoginRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebviewLoginRequest.swift; sourceTree = "<group>"; };
-		2AE533142994632F00EF97E0 /* LoginCallback.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginCallback.swift; sourceTree = "<group>"; };
 		2AE533172994638000EF97E0 /* NativeLoginRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NativeLoginRequest.swift; sourceTree = "<group>"; };
 		2AE533182994638000EF97E0 /* ProfilePasskeySignupRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePasskeySignupRequest.swift; sourceTree = "<group>"; };
 		2AE533192994638000EF97E0 /* SignupOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignupOptions.swift; sourceTree = "<group>"; };
@@ -298,7 +296,6 @@
 			children = (
 				3404A40B22CBA6DD002FFEDB /* AuthCodeRequest.swift */,
 				CA61910000000000000000F1 /* TokenType.swift */,
-				2AE533142994632F00EF97E0 /* LoginCallback.swift */,
 				34689A9822CDFC24002970F9 /* LoginProviderRequest.swift */,
 				34E18B8E22A6C32500952EBD /* LoginRequest.swift */,
 				9943B0862B6954F1007AD120 /* MfaCredentialsRequest.swift */,
@@ -593,7 +590,6 @@
 				2AE533202994638100EF97E0 /* RegistrationRequest.swift in Sources */,
 				9943B0852B6953C5007AD120 /* ReachFiveMfa.swift in Sources */,
 				34689AA122CE5D08002970F9 /* UpdateEmailRequest.swift in Sources */,
-				2AE533162994632F00EF97E0 /* LoginCallback.swift in Sources */,
 				8496EB4525DEB141005098DD /* R5PublicKeyCredentialUserEntity.swift in Sources */,
 				2AE040E42C88E33900162014 /* AppleProvider.swift in Sources */,
 				2AD4CC482D08A8B300761E63 /* ProfileUpdate.swift in Sources */,
