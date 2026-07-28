@@ -30,8 +30,10 @@
 - `ReachFive.login(withProvider:idToken:nonce:scope:origin:givenName:familyName:)`, the provider
   counterpart of `loginCallback`: it exchanges the ID token issued by a native provider SDK for a ReachFive
   `AuthToken`. Used internally by Sign In With Apple, and intended for integrators writing their own
-  `Provider`.
-
+  `Provider` — it replaces assembling `reachFiveApi.authorize(params:)` and `authWithCode` by hand.
+- `SdkConfig.originWebAuthn`: the WebAuthn origin can now be configured once, instead of being repeated on
+  every passkey request. It defaults to `https://<domain>`, and a request that carries its own
+  `originWebAuthn` still takes precedence.
 
 ## v10.0.1
 
