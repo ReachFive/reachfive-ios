@@ -59,7 +59,8 @@ class ActionController: UITableViewController {
                         }
                     }
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin"))
+                        // "secret" : Unicode 10.0 (2017) (bloc U+1B170–U+1B2FF)
+                        try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presentationContextProvider: self, origin: "ActionController.webviewLogin", loginUrlFragment: ["LoginURLParameter": "1234", "site": "Gourmet & L'Étudiant #1 / 100% déjanté?", "empty": "", "math": "a=b+c", "treats": "🥐☕️🎉", "secret": "\u{1B170}\u{1B171}\u{1B172}\u{1B173}\u{1B174}"]))
                     }
                 }
 
