@@ -113,4 +113,46 @@ final class SdkConfigTests: XCTestCase {
         XCTAssertEqual(config.accountRecoveryUri.absoluteString, "reachfive-abc://account-recovery")
         XCTAssertEqual(config.emailVerificationUri.absoluteString, "reachfive-abc://email-verification")
     }
+
+    // MARK: - WebAuthn origin
+
+    func testWebAuthnOriginDefaultsToTheDomain() {
+        let config = SdkConfig(domain: "example.reach5.net", clientId: "abc")
+
+        XCTAssertEqual(config.webAuthnOrigin, "https://example.reach5.net")
+    }
+
+    func testConfiguredOriginWins() {
+        let config = SdkConfig(
+            domain: "example.reach5.net",
+            clientId: "abc",
+            originWebAuthn: URL(string: "https://auth.example.com")!)
+
+        XCTAssertEqual(config.webAuthnOrigin, "https://auth.example.com")
+    }
+
+    /// An origin is a scheme, a host and a non-default port — nothing else. `absoluteString` would keep the
+    /// path and the trailing slash, which the server and the system both reject; hence the normalization.
+    func testTrailingSlashAndPathAreStripped() {
+        let withTrailingSlash = SdkConfig(
+            domain: "example.reach5.net",
+            clientId: "abc",
+            originWebAuthn: URL(string: "https://auth.example.com/")!)
+        let withPath = SdkConfig(
+            domain: "example.reach5.net",
+            clientId: "abc",
+            originWebAuthn: URL(string: "https://auth.example.com/webauthn")!)
+
+        XCTAssertEqual(withTrailingSlash.webAuthnOrigin, "https://auth.example.com")
+        XCTAssertEqual(withPath.webAuthnOrigin, "https://auth.example.com")
+    }
+
+    func testNonDefaultPortIsKept() {
+        let config = SdkConfig(
+            domain: "example.reach5.net",
+            clientId: "abc",
+            originWebAuthn: URL(string: "https://localhost:8443")!)
+
+        XCTAssertEqual(config.webAuthnOrigin, "https://localhost:8443")
+    }
 }
