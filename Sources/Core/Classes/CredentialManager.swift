@@ -248,7 +248,13 @@ class CredentialManager: NSObject {
         let siwa: SignInWithApple?
     }
 
-    /// Construit les `ASAuthorizationRequest` pour les types demandés, sans toucher à l'état de la classe.
+    /// Construit les `ASAuthorizationRequest` pour les types demandés, dans l'ordre demandé — le système
+    /// présente les credentials dans cet ordre.
+    ///
+    /// Un type qu'on ne sait pas préparer (pas de provider Apple configuré, options passkey
+    /// inaccessibles) est écarté du lot plutôt que de bloquer la connexion quand un autre type peut
+    /// encore aboutir ; la raison du premier type écarté n'est remontée que si rien ne survit.
+    ///
     /// `fetchAuthenticationOptions` fait l'appel réseau par défaut ; un test peut le substituer pour
     /// construire les requêtes sans réseau.
     func buildAuthorizationRequests(
@@ -260,51 +266,59 @@ class CredentialManager: NSObject {
     ) async throws -> BuiltRequests {
         var requests: [ASAuthorizationRequest] = []
         var siwa: SignInWithApple? = nil
+        var firstDropped: Error? = nil
 
         for type in requestTypes {
-            switch type {
-            case .Password:
-                // Allow the user to use a saved password, if they have one.
-                let passwordRequest = ASAuthorizationPasswordProvider().createRequest()
-                requests.append(passwordRequest)
+            do {
+                switch type {
+                case .Password:
+                    // Allow the user to use a saved password, if they have one.
+                    requests.append(ASAuthorizationPasswordProvider().createRequest())
 
-            case .SignInWithApple:
-                // Allow the user to use a Sign In With Apple, if they have one.
-                let appleIDRequest = ASAuthorizationAppleIDProvider().createRequest()
-                var appleScopes: [ASAuthorization.Scope] = []
-                if let scope = appleProvider?.providerConfig.scope {
-                    if scope.contains(where: { s in s == "email" }) {
-                        appleScopes.append(.email)
+                case .SignInWithApple:
+                    // Sans provider Apple, la requête ne pourrait pas être complétée (cf.
+                    // completeModalLogin) : mieux vaut ne pas la proposer que d'authentifier
+                    // l'utilisateur pour échouer ensuite.
+                    guard let appleProvider else {
+                        throw ReachFiveError.TechnicalError(reason: "Sign In With Apple is not available: no Apple provider configured. Check that initialize() completed and that Apple is enabled for this client.")
                     }
-                    if scope.contains(where: { s in s == "name" }) {
-                        appleScopes.append(.fullName)
+
+                    // Allow the user to use a Sign In With Apple, if they have one.
+                    let appleIDRequest = ASAuthorizationAppleIDProvider().createRequest()
+                    var appleScopes: [ASAuthorization.Scope] = []
+                    if let scope = appleProvider.providerConfig.scope {
+                        if scope.contains(where: { s in s == "email" }) {
+                            appleScopes.append(.email)
+                        }
+                        if scope.contains(where: { s in s == "name" }) {
+                            appleScopes.append(.fullName)
+                        }
                     }
-                }
-                appleIDRequest.requestedScopes = appleScopes
-                let siwaNonce = Pkce.generate()
-                appleIDRequest.nonce = siwaNonce.codeChallenge
-                if let appleProvider {
+                    appleIDRequest.requestedScopes = appleScopes
+                    let siwaNonce = Pkce.generate()
+                    appleIDRequest.nonce = siwaNonce.codeChallenge
                     siwa = SignInWithApple(nonce: siwaNonce, provider: appleProvider)
-                }
 
-                requests.append(appleIDRequest)
+                    requests.append(appleIDRequest)
 
-            case .Passkey:
-                // `.Passkey` n'est pas constructible sous iOS 16, donc cette branche ne s'exécute jamais
-                // ailleurs — la garde est pour le compilateur, qui ne peut pas le savoir.
-                if #available(iOS 16.0, *) {
-                    do {
+                case .Passkey:
+                    // `.Passkey` n'est pas constructible sous iOS 16, donc cette branche ne s'exécute
+                    // jamais ailleurs — la garde est pour le compilateur, qui ne peut pas le savoir.
+                    if #available(iOS 16.0, *) {
                         // Allow the user to use a saved passkey, if they have one.
                         let authOptions = try await fetchAuthenticationOptions(reachFive, webAuthnLoginRequest)
                         try requests.append(makePasskeyAssertionRequest(authOptions, restrictedToAllowedCredentials: false))
-                    } catch let error where requestTypes.count > 1 {
-                        // if there are other types of requests, do not block auth if only passkey fails. Just eat the error
-                        Logger.shared.log("Passkey request error ignored in multi-type authorization: \(error)")
                     }
                 }
+            } catch {
+                Logger.shared.log("Authorization request dropped for \(type): \(error)")
+                firstDropped = firstDropped ?? error
             }
         }
 
+        if requests.isEmpty, let firstDropped {
+            throw firstDropped
+        }
         return BuiltRequests(requests: requests, siwa: siwa)
     }
 
@@ -441,6 +455,8 @@ extension CredentialManager {
             return try await reachFive.loginFlow(afterPasswordGrant: resp, scopes: scopes, origin: originR5)
         } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard let siwa else {
+                // Garanti par buildAuthorizationRequests : une requête Sign In With Apple n'entre dans le
+                // lot qu'accompagnée de son SignInWithApple.
                 throw ReachFiveError.TechnicalError(reason: "didCompleteWithAuthorization: no nonce, no apple provider")
             }
             guard let identityToken = appleIDCredential.identityToken else {
