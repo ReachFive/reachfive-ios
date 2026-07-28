@@ -290,13 +290,17 @@ class CredentialManager: NSObject {
                 requests.append(appleIDRequest)
 
             case .Passkey:
-                do {
-                    // Allow the user to use a saved passkey, if they have one.
-                    let authOptions = try await fetchAuthenticationOptions(reachFive, webAuthnLoginRequest)
-                    try requests.append(makePasskeyAssertionRequest(authOptions, restrictedToAllowedCredentials: false))
-                } catch let error where requestTypes.count > 1 {
-                    // if there are other types of requests, do not block auth if only passkey fails. Just eat the error
-                    Logger.shared.log("Passkey request error ignored in multi-type authorization: \(error)")
+                // `.Passkey` n'est pas constructible sous iOS 16, donc cette branche ne s'exécute jamais
+                // ailleurs — la garde est pour le compilateur, qui ne peut pas le savoir.
+                if #available(iOS 16.0, *) {
+                    do {
+                        // Allow the user to use a saved passkey, if they have one.
+                        let authOptions = try await fetchAuthenticationOptions(reachFive, webAuthnLoginRequest)
+                        try requests.append(makePasskeyAssertionRequest(authOptions, restrictedToAllowedCredentials: false))
+                    } catch let error where requestTypes.count > 1 {
+                        // if there are other types of requests, do not block auth if only passkey fails. Just eat the error
+                        Logger.shared.log("Passkey request error ignored in multi-type authorization: \(error)")
+                    }
                 }
             }
         }
@@ -507,13 +511,12 @@ extension CredentialManager {
     ///   serveur — ce que fait la connexion non-discoverable, qui sait de quel compte il s'agit. L'auto-fill
     ///   et la connexion modale laissent au contraire l'utilisateur choisir parmi ses passkeys.
     ///
-    /// Volontairement sans annotation `@available` : la garde interne permet de l'appeler depuis les points
-    /// d'entrée qui ne peuvent pas être annotés (cf. `NonDiscoverableAuthorization`, ouvert aux Security
-    /// Keys d'iOS 15). Internal pour être testable.
+    /// Ce sont les appelants qui portent la garde de disponibilité : `.Passkey` n'étant pas constructible
+    /// sous iOS 16, sa présence dans une demande implique déjà iOS 16 à l'exécution.
+    ///
+    /// Internal pour être testable.
+    @available(iOS 16.0, *)
     func makePasskeyAssertionRequest(_ options: AuthenticationOptions, restrictedToAllowedCredentials: Bool) throws -> ASAuthorizationRequest {
-        guard #available(iOS 16.0, *) else {
-            throw ReachFiveError.TechnicalError(reason: "Passkey sign-in requires iOS 16 or later.")
-        }
         guard let challenge = options.publicKey.challenge.decodeBase64Url() else {
             throw ReachFiveError.TechnicalError(reason: "unreadable challenge: \(options.publicKey.challenge)")
         }
