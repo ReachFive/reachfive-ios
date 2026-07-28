@@ -11,7 +11,7 @@ public class WebviewLoginRequest {
     public let prefersEphemeralWebBrowserSession: Bool
     /// The `redirect_uri` of this login and its return channel. The resolved `redirect_uri` must be one
     /// of the client's authorized callback URLs, and is reused identically for the code exchange.
-    /// Default: ``WebSessionMode/sdkScheme``.
+    /// Default: ``WebSessionMode/customScheme``.
     public let webSessionMode: WebSessionMode
     /// Key/value pairs propagated in the **fragment** of the `/oauth/authorize` URL (`#key=value&key2=value2`).
     /// Intended for the token-orchestration flow: `/oauth/authorize` 302-redirects to the client's Login URL,
@@ -28,7 +28,7 @@ public class WebviewLoginRequest {
         origin: String? = nil,
         provider: String? = nil,
         prefersEphemeralWebBrowserSession: Bool = false,
-        webSessionMode: WebSessionMode = .sdkScheme,
+        webSessionMode: WebSessionMode = .customScheme,
         loginUrlFragment: [String: String]? = nil
     ) {
         self.state = state ?? "state"
@@ -56,7 +56,7 @@ public class WebviewLoginRequest {
         origin: String? = nil,
         provider: String? = nil,
         prefersEphemeralWebBrowserSession: Bool = false,
-        webSessionMode: WebSessionMode = .sdkScheme,
+        webSessionMode: WebSessionMode = .customScheme,
         loginUrlFragment: [String: String]? = nil
     ) throws {
         self.init(

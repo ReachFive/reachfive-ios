@@ -23,35 +23,22 @@ final class WebviewLoginRequestTests: XCTestCase {
         XCTAssertEqual(WebviewLoginRequest(nonce: "my-nonce", presentationContextProvider: provider).nonce, "my-nonce")
     }
 
-    func testWebSessionModeDefaultsToSdkScheme() {
+    func testWebSessionModeDefaultsToCustomScheme() {
         let mode = WebviewLoginRequest(presentationContextProvider: provider).webSessionMode
-        guard case .customScheme = mode.callback, mode.channel == .inBand else {
-            return XCTFail("webSessionMode should default to .sdkScheme (customScheme + inBand)")
+        guard case .customScheme = mode.callback else {
+            return XCTFail("webSessionMode should default to .customScheme")
         }
+        XCTAssertNil(mode.redirectUri, "the custom scheme carries no redirect_uri of its own; the SdkConfig's applies")
     }
 
-    func testExternalAppSchemeModeIsPreserved() {
-        let mode = WebviewLoginRequest(presentationContextProvider: provider, webSessionMode: .externalAppScheme).webSessionMode
-        guard case .customScheme = mode.callback, mode.channel == .outOfBand else {
-            return XCTFail("webSessionMode should be external-app custom scheme")
-        }
-    }
-
-    func testExternalAppUniversalLinkModeIsPreserved() {
-        let mode = WebviewLoginRequest(presentationContextProvider: provider, webSessionMode: .externalAppUniversalLink(URL(string: "https://h/cb")!)).webSessionMode
-        guard case .universalLink(let link) = mode.callback, mode.channel == .outOfBand else {
-            return XCTFail("webSessionMode should be external-app universal link")
+    func testUniversalLinkModeIsPreserved() throws {
+        guard #available(iOS 17.4, *) else { throw XCTSkip("Universal link callback requires iOS 17.4+") }
+        let mode = WebviewLoginRequest(presentationContextProvider: provider, webSessionMode: .universalLink(URL(string: "https://h/cb")!)).webSessionMode
+        guard case .universalLink(let link) = mode.callback else {
+            return XCTFail("webSessionMode should be .universalLink")
         }
         XCTAssertEqual(link.absoluteString, "https://h/cb")
-    }
-
-    func testInSheetUniversalLinkModeIsPreserved() throws {
-        guard #available(iOS 17.4, *) else { throw XCTSkip("In-sheet universal link requires iOS 17.4+") }
-        let mode = WebviewLoginRequest(presentationContextProvider: provider, webSessionMode: .inSheetUniversalLink(URL(string: "https://h/cb")!)).webSessionMode
-        guard case .universalLink(let link) = mode.callback, mode.channel == .inBand else {
-            return XCTFail("webSessionMode should be in-sheet universal link")
-        }
-        XCTAssertEqual(link.absoluteString, "https://h/cb")
+        XCTAssertEqual(mode.redirectUri?.absoluteString, "https://h/cb")
     }
 
     func testDefaultLoginUrlFragmentIsNil() {

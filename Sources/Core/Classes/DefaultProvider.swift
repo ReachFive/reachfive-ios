@@ -4,7 +4,7 @@ import AuthenticationServices
 /// Registers a **web** provider (one without a native SDK component, served by `DefaultProvider`) so the app
 /// can pick its **variant** and its **completion mode**
 ///
-/// Example: `WebProvider(name: .bconnect, variant: "natif", mode: .externalAppUniversalLink)`.
+/// Example: `WebProvider(name: .bconnect, variant: "natif", mode: .customScheme)`.
 public final class WebProvider: ProviderCreator {
     /// The SLO providers supported by the backend. `rawValue` is the backend name.
     public enum Name: String {
@@ -19,29 +19,15 @@ public final class WebProvider: ProviderCreator {
     }
 
     /// How this provider's login session completes. Same choices as ``WebSessionMode``, resolved into it by
-    /// `DefaultProvider.init` (a universal-link mode uses the provider's `universalLink` from its backend config).
-    public struct WebProviderMode {
-        enum Callback { case customScheme, universalLink }
-        let callback: Callback
-        let channel: WebSessionMode.Channel
-
-        private init(callback: Callback, channel: WebSessionMode.Channel) {
-            self.callback = callback
-            self.channel = channel
-        }
-
-        /// Custom scheme intercepted in the sheet — the default, on every iOS version.
-        public static let sdkScheme = WebProviderMode(callback: .customScheme, channel: .inBand)
-
-        /// An external app reopens the host app via the custom scheme.
-        public static let externalAppScheme = WebProviderMode(callback: .customScheme, channel: .outOfBand)
-
-        /// An external app reopens the host app via a universal link.
-        public static let externalAppUniversalLink = WebProviderMode(callback: .universalLink, channel: .outOfBand)
+    /// `DefaultProvider.init` (`universalLink` uses the provider's `universalLink` from its backend config).
+    public enum WebProviderMode {
+        /// Custom scheme — the default, on every iOS version. Covers both a redirection intercepted in
+        /// the sheet and one delivered by the default browser to `application(_:open:)`.
+        case customScheme
 
         /// Universal link intercepted in the sheet (via `callback: .https`).
         @available(iOS 17.4, *)
-        public static let inSheetUniversalLink = WebProviderMode(callback: .universalLink, channel: .inBand)
+        case universalLink
     }
 
     private let providerName: Name
@@ -49,7 +35,7 @@ public final class WebProvider: ProviderCreator {
     public let variant: String?
     public let mode: WebProviderMode
 
-    public init(name: Name, variant: String? = nil, mode: WebProviderMode = .sdkScheme) {
+    public init(name: Name, variant: String? = nil, mode: WebProviderMode = .customScheme) {
         self.providerName = name
         self.variant = variant
         self.mode = mode
@@ -73,34 +59,33 @@ class DefaultProvider: NSObject, Provider {
     public init(
         reachfive: ReachFive,
         providerConfig: ProviderConfig,
-        mode: WebProvider.WebProviderMode = .sdkScheme
+        mode: WebProvider.WebProviderMode = .customScheme
     ) {
         self.reachfive = reachfive
         self.providerConfig = providerConfig
         self.name = providerConfig.provider
 
-        switch mode.callback {
+        switch mode {
         case .customScheme:
             // Le custom scheme n'a pas besoin de l'`universalLink` du backend : la redirect_uri est celle
-            // du SdkConfig, in-band comme hors-bande.
-            webSessionMode = mode.channel == .inBand ? .sdkScheme : .externalAppScheme
+            // du SdkConfig.
+            webSessionMode = .customScheme
 
         case .universalLink:
+            // Deux causes d'échec différé : la configuration backend ne porte pas d'`universalLink`, ou
+            // l'OS est trop ancien. Le cas `.universalLink` est inconstructible sous iOS 17.4 côté
+            // appelant, mais il est ici résolu depuis la configuration backend — contrôle runtime.
             guard let link = providerConfig.universalLink else {
                 Logger.shared.log("No universal link configured for provider '\(providerConfig.provider)' in universal-link mode; login() will fail with a TechnicalError.")
                 webSessionMode = nil
                 return
             }
-            if mode.channel == .inBand {
-                guard #available(iOS 17.4, *) else {
-                    Logger.shared.log("In-sheet universal link requires iOS 17.4+; login() for provider '\(providerConfig.provider)' will fail with a TechnicalError.")
-                    webSessionMode = nil
-                    return
-                }
-                webSessionMode = .inSheetUniversalLink(link)
-            } else {
-                webSessionMode = .externalAppUniversalLink(link)
+            guard #available(iOS 17.4, *) else {
+                Logger.shared.log("Universal link callback requires iOS 17.4+; login() for provider '\(providerConfig.provider)' will fail with a TechnicalError.")
+                webSessionMode = nil
+                return
             }
+            webSessionMode = .universalLink(link)
         }
     }
 
