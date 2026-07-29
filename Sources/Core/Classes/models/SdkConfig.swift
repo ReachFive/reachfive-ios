@@ -63,7 +63,12 @@ public class SdkConfig {
     /// and are sent as given.
     var webAuthnOrigin: String {
         guard let originWebAuthn, let origin = Self.serializedOrigin(originWebAuthn) else {
-            return "https://\(domain)"
+            // `domain` is an unvalidated free-form String (unlike `originWebAuthn`, an `URL`): the same trust
+            // `ReachFiveApi.createUrl` already places in it to build every API request. A `domain` broken enough
+            // to matter here (a path, invalid characters) already crashes there first, so only lower-casing is
+            // worth doing on this fallback path — RFC 6454 requires it, and unlike other malformations, mixed
+            // case is a perfectly valid host that works fine everywhere else in the SDK.
+            return "https://\(domain.lowercased())"
         }
         return origin
     }
