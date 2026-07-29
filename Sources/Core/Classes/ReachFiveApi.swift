@@ -67,9 +67,7 @@ public class ReachFiveApi {
     // MARK: - URL Construction
 
     func createUrl(path: String, params: [String: String?]? = nil) -> URL {
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = sdkConfig.domain
+        var components = sdkConfig.baseUrlComponents
         components.path = path.starts(with: "/") ? path : "/" + path
 
         let defaultParams: [String: String] = [
@@ -81,8 +79,10 @@ public class ReachFiveApi {
         let allParams: [String: String] = defaultParams.merging(additionalParams) { current, _ in current }
 
         components.queryItems = allParams.map { key, value in URLQueryItem(name: key, value: value) }
-        // safe force-unwrap because the contract is respected:
-        // If the NSURLComponents has an authority component (user, password, host or port) and a path component, then the path must either begin with "/" or be an empty string.
+        // Safe force-unwrap: both halves of the URLComponents contract are guaranteed. The host comes from
+        // `sdkConfig.baseUrlComponents`, which only exists because it produced a URL at SdkConfig.init; and the
+        // path is forced above to satisfy "if the NSURLComponents has an authority component (user, password,
+        // host or port) and a path component, then the path must either begin with "/" or be an empty string".
         return components.url!
     }
 
