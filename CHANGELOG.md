@@ -9,6 +9,8 @@
   - Removed `scheme` field alias for `redirectUri`
   - Renamed `baseScheme` field to `customScheme`
   - The initializer now stops the program with a `preconditionFailure` when the scheme is not a valid URL scheme (either because of the `customScheme` parameter, or indirectly because the default scheme is derived from an ill-formatted `clientId`, e.g. one containing `_`). In that case, pass an explicit valid `customScheme` and declare it in your Info.plist and your ReachFive console.
+  - The initializer now stops the program with a `preconditionFailure` when `domain` is not a bare host — one carrying a `https://` prefix, a port, a path, a trailing slash or whitespace. Such a value already crashed, later and elsewhere, on the first API call, in a message that never named `domain`. In that case, pass only the host. `domain` is validated but never rewritten: it reads back exactly as it was passed.
+  - An empty `domain` is now rejected at init too. It used to build a host-less URL and make every request fail with an opaque network error, indistinguishable from a transient failure.
 
 - `application(_:continue:restorationHandler:)` and `application(_:open:options:)` now returns `false` when neither an SDK flow nor any registered provider consumed the activity or URL, instead of always returning `true`. If your app also routes universal links or custom-scheme URLs itself, only do so when the call returns `false`.
 
