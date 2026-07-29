@@ -1,14 +1,67 @@
 import XCTest
 @testable import Reach5
 
-/// Documents what is acceptable as a clientId/customScheme when initializing SdkConfig.
+/// Documents what is acceptable as a domain/clientId/customScheme when initializing SdkConfig.
 ///
 /// The default scheme is derived from the clientId as `reachfive-<clientId>`, so the clientId
 /// obeys the same rules as a scheme: it must contain only letters, digits, `+`, `-` or `.`.
 /// An invalid scheme stops the program with a `preconditionFailure` at init, which cannot be
-/// asserted directly in XCTest: the invalid cases below go through `SdkConfig.makeUri`,
-/// the single construction point on which the init's precondition relies.
+/// asserted directly in XCTest: the invalid cases below go through `SdkConfig.baseUrlComponents(domain:)`
+/// and `SdkConfig.makeUri`, the single construction points on which the init's precondition relies.
 final class SdkConfigTests: XCTestCase {
+
+    // MARK: - Domain
+
+    func testAcceptableDomains() {
+        let acceptable = [
+            "example.reach5.net",   // baseline
+            "Example.Reach5.NET",   // mixed case: DNS is case-insensitive, and the value is kept as given
+            "my-tenant.reach5.net", // hyphen
+            "localhost",            // a single label, no dot
+            "127.0.0.1",            // IPv4 literal
+            "[::1]",                // IPv6 literal: URLComponents requires the brackets
+            "café.example",         // non-ASCII: Foundation punycodes the host when it builds each request
+            "example.com.",         // trailing-dot FQDN: legitimate, and the dot is origin-significant
+            "my_host.example",      // not a legal DNS label, but the URL builds: only DNS can reject it
+            "x..example",           // same — an empty label is a DNS problem, not a parsing one
+        ]
+        for domain in acceptable {
+            XCTAssertNotNil(
+                SdkConfig.baseUrlComponents(domain: domain),
+                "domain '\(domain)' should be acceptable")
+        }
+    }
+
+    func testUnacceptableDomains() {
+        let unacceptable = [
+            "https://example.reach5.net",  // a scheme: the domain is a bare host, not a URL
+            "example.reach5.net/",         // trailing slash
+            "example.reach5.net/identity", // path
+            "example.reach5.net:8443",     // port — createUrl never sets one, honouring it is impossible
+            "user@example.reach5.net",     // userinfo
+            "example.reach5.net?a=b",      // query
+            "example.reach5.net#anchor",   // fragment
+            "example reach5.net",          // whitespace
+            " example.reach5.net",         // leading whitespace, e.g. a copy-paste
+            "::1",                         // IPv6 literal without its brackets
+            "",                            // empty: would build a host-less 'https:///path'
+        ]
+        for domain in unacceptable {
+            XCTAssertNil(
+                SdkConfig.baseUrlComponents(domain: domain),
+                "domain '\(domain)' should be rejected")
+        }
+    }
+
+    func testBaseUrlComponentsCarryOnlySchemeAndHost() {
+        let config = SdkConfig(domain: "example.reach5.net", clientId: "abc")
+
+        XCTAssertEqual(config.baseUrlComponents.scheme, "https")
+        XCTAssertEqual(config.baseUrlComponents.host, "example.reach5.net")
+        XCTAssertEqual(config.baseUrlComponents.path, "")
+        XCTAssertNil(config.baseUrlComponents.port)
+        XCTAssertNil(config.baseUrlComponents.queryItems)
+    }
 
     // MARK: - Acceptable clientIds
 
@@ -122,9 +175,8 @@ final class SdkConfigTests: XCTestCase {
         XCTAssertEqual(config.webAuthnOrigin, "https://example.reach5.net")
     }
 
-    /// `domain` is a free-form, unvalidated `String`, unlike `originWebAuthn`. Mixed case is the one
-    /// malformation that stays valid everywhere else in the SDK (DNS is case-insensitive) yet still needs
-    /// folding here, since RFC 6454 origins must be lower-case.
+    /// `domain` is validated at init but kept as given, so it can still carry mixed case. RFC 6454 origins
+    /// must be lower-case, so the fold happens here, at the point of use.
     func testWebAuthnOriginDefaultLowercasesTheDomain() {
         let config = SdkConfig(domain: "Example.Reach5.NET", clientId: "abc")
 
