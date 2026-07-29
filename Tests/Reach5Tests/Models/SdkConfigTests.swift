@@ -122,6 +122,15 @@ final class SdkConfigTests: XCTestCase {
         XCTAssertEqual(config.webAuthnOrigin, "https://example.reach5.net")
     }
 
+    /// `domain` is a free-form, unvalidated `String`, unlike `originWebAuthn`. Mixed case is the one
+    /// malformation that stays valid everywhere else in the SDK (DNS is case-insensitive) yet still needs
+    /// folding here, since RFC 6454 origins must be lower-case.
+    func testWebAuthnOriginDefaultLowercasesTheDomain() {
+        let config = SdkConfig(domain: "Example.Reach5.NET", clientId: "abc")
+
+        XCTAssertEqual(config.webAuthnOrigin, "https://example.reach5.net")
+    }
+
     func testConfiguredOriginWins() {
         let config = SdkConfig(
             domain: "example.reach5.net",
