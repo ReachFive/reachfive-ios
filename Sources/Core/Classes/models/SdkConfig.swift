@@ -71,11 +71,10 @@ public class SdkConfig {
     /// `internal`, like `makeUri` below: the single construction point on which the init's precondition
     /// relies, so tests can probe acceptable/unacceptable inputs without triggering it.
     ///
-    /// Mirrors the WHATWG "serialization of an origin" (https://html.spec.whatwg.org/multipage/browsers.html#origin)
-    /// applied to `Foundation.URL`, which parses URLs but does not itself normalize them to the WHATWG URL
-    /// Standard: hence lower-casing the host here (WHATWG's domain/IPv6 parsers lower-case as they go) and
-    /// dropping the port when it is the scheme's default (the WHATWG URL parser nulls it at parse time,
-    /// `URL.port` does not).
+    /// The WebAuthn spec requires `CollectedClientData.origin` to follow RFC 6454 ("The Web Origin
+    /// Concept"), §6.2 ASCII Serialization of an Origin — not the WHATWG HTML/URL origin concept, which is
+    /// a related but distinct text. RFC 6454 also requires the host lower-cased (§4.5) and the port
+    /// omitted when it is the scheme's default (§6.2.5); `Foundation.URL` does neither on its own.
     internal static func serializedOrigin(_ url: URL) -> String? {
         guard let scheme = url.scheme?.lowercased(), let rawHost = url.host else { return nil }
         // URL.host returns an IPv6 literal unbracketed ("::1"); an origin needs it back in brackets.
