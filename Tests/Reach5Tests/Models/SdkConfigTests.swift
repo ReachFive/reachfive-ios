@@ -155,4 +155,43 @@ final class SdkConfigTests: XCTestCase {
 
         XCTAssertEqual(config.webAuthnOrigin, "https://localhost:8443")
     }
+
+    /// Same style as `testAcceptableClientIds`/`testAcceptableCustomSchemes`: goes through
+    /// `SdkConfig.serializedOrigin` directly, the single construction point the init's precondition relies
+    /// on, so a malformed input can be checked without crashing the test process.
+    func testAcceptableWebAuthnOrigins() {
+        let acceptable: [(input: String, expected: String)] = [
+            ("https://auth.example.com", "https://auth.example.com"), // baseline
+            ("https://auth.example.com/", "https://auth.example.com"), // trailing slash stripped
+            ("https://auth.example.com/webauthn/register", "https://auth.example.com"), // path stripped
+            ("https://auth.example.com?client=abc", "https://auth.example.com"), // query stripped
+            ("https://auth.example.com#fragment", "https://auth.example.com"), // fragment stripped
+            ("https://user:pass@auth.example.com", "https://auth.example.com"), // userinfo dropped
+            ("HTTPS://auth.example.com", "https://auth.example.com"), // scheme is lowercased
+            ("https://localhost:8443", "https://localhost:8443"), // non-default port is kept
+            ("https://auth.example.com:443", "https://auth.example.com"), // default https port is stripped
+            ("http://auth.example.com:80", "http://auth.example.com"), // default http port is stripped
+            ("https://127.0.0.1:9000", "https://127.0.0.1:9000"), // IPv4 host, kept as-is
+            ("https://[::1]:8443", "https://[::1]:8443"), // IPv6 literal: URL.host drops the brackets, put them back
+        ]
+        for (input, expected) in acceptable {
+            let url = URL(string: input)!
+            XCTAssertEqual(SdkConfig.serializedOrigin(url), expected, "'\(input)' should serialize to '\(expected)'")
+        }
+    }
+
+    func testUnacceptableWebAuthnOrigins() {
+        let unacceptable = [
+            "auth.example.com", // no scheme: parses as a relative reference
+            "//auth.example.com", // scheme-relative: no scheme
+            "https://", // scheme but no host
+            "https:///webauthn", // scheme and a path, still no host
+            "mailto:test@example.com", // has a scheme, but no host
+            "file:///path/to/file", // has a scheme, but no host
+        ]
+        for input in unacceptable {
+            let url = URL(string: input)!
+            XCTAssertNil(SdkConfig.serializedOrigin(url), "'\(input)' should be rejected")
+        }
+    }
 }
