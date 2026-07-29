@@ -1,8 +1,14 @@
 import Foundation
 
 public class SdkConfig {
+    /// Your ReachFive domain, as a bare host: `example.reach5.net`. No scheme, port, path or trailing
+    /// slash — every API request is built on it. Kept exactly as given, never normalized.
     public let domain: String
     public let clientId: String
+
+    /// The base of every API URL: scheme and host, validated at init. `ReachFiveApi.createUrl` copies it and
+    /// adds a path and query items — a `struct`, so each caller gets its own copy.
+    internal let baseUrlComponents: URLComponents
 
     ///The scheme. Defaults to `reachfive-clientId`
     public let customScheme: String
@@ -33,6 +39,16 @@ public class SdkConfig {
         emailVerificationUri: URL? = nil,
         originWebAuthn: URL? = nil
     ) {
+        guard let baseUrlComponents = Self.baseUrlComponents(domain: domain) else {
+            preconditionFailure("""
+                '\(domain)' is not a valid domain: it must be a bare host, with no scheme, port, path or \
+                trailing slash, e.g. example.reach5.net. \
+                It is the domain of your ReachFive account, as shown in your ReachFive console, and the SDK \
+                builds every API request on it. \
+                Pass only the host, dropping any 'https://' prefix and any trailing '/'.
+                """)
+        }
+        self.baseUrlComponents = baseUrlComponents
         self.domain = domain
         self.clientId = clientId
 
@@ -63,11 +79,9 @@ public class SdkConfig {
     /// and are sent as given.
     var webAuthnOrigin: String {
         guard let originWebAuthn, let origin = Self.serializedOrigin(originWebAuthn) else {
-            // `domain` is an unvalidated free-form String (unlike `originWebAuthn`, an `URL`): the same trust
-            // `ReachFiveApi.createUrl` already places in it to build every API request. A `domain` broken enough
-            // to matter here (a path, invalid characters) already crashes there first, so only lower-casing is
-            // worth doing on this fallback path — RFC 6454 requires it, and unlike other malformations, mixed
-            // case is a perfectly valid host that works fine everywhere else in the SDK.
+            // `domain` is validated at init but kept as given, so it can still carry the mixed case DNS
+            // tolerates. RFC 6454 §4.5 requires a lower-cased host in an origin, hence the fold here, at the
+            // point of use — the same place `serializedOrigin` does it for the configured value.
             return "https://\(domain.lowercased())"
         }
         return origin
@@ -89,6 +103,30 @@ public class SdkConfig {
         let defaultPort = ["http": 80, "https": 443][scheme]
         guard let port = url.port, port != defaultPort else { return "\(scheme)://\(host)" }
         return "\(scheme)://\(host):\(port)"
+    }
+
+    /// `internal`, like `serializedOrigin` above and `makeUri` below: the single construction point on
+    /// which the init's precondition relies, so tests can probe acceptable/unacceptable inputs without
+    /// triggering it.
+    ///
+    /// Validation by construction, against the exact use the SDK makes of the value: it returns the very
+    /// components `ReachFiveApi.createUrl` will build every request on, so validating and using are the same
+    /// object rather than two places agreeing by convention. `URLComponents.url` returns nil whenever the
+    /// components cannot form a URL, and that nil is the whole answer — unlike a scheme, a host assigned to
+    /// its own component cannot be reinterpreted as another component, so no re-check of the parsed value is
+    /// needed (contrast `makeUri` below, where "my:app" slides into scheme + path).
+    ///
+    /// Foundation still accepts hosts that are well-formed but resolve to nothing (`my_host.example`,
+    /// `x..example`); those fail at DNS with an error naming the host, and no parsing can tell a dead domain
+    /// from a live one anyway.
+    internal static func baseUrlComponents(domain: String) -> URLComponents? {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = domain
+        // An empty host is the one malformation URLComponents accepts: it would build "https:///path", which
+        // only fails later, on the network, in the same channel as a transient failure.
+        guard !domain.isEmpty, components.url != nil else { return nil }
+        return components
     }
 
     /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing,
