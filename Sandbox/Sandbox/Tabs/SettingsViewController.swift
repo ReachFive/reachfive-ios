@@ -76,7 +76,13 @@ class SettingsViewController: UIViewController {
     }
 
     private func loadCookies() {
-        let sessionCookies = HTTPCookieStorage.shared.cookies?.filter({ $0.domain == AppDelegate.reachfive().sdkConfig.domain }) ?? []
+        // A domain-scoped cookie comes back dot-prefixed (".reach5.net") and case-folded, so neither an
+        // equality check nor a case-sensitive one finds it: compare host-suffix-wise, case-insensitively.
+        let domain = AppDelegate.reachfive().sdkConfig.domain.lowercased()
+        let sessionCookies = HTTPCookieStorage.shared.cookies?.filter { cookie in
+            let cookieDomain = cookie.domain.lowercased()
+            return cookieDomain == domain || domain.hasSuffix(cookieDomain.hasPrefix(".") ? cookieDomain : ".\(cookieDomain)")
+        } ?? []
 
         DispatchQueue.main.async {
             self.cookies = sessionCookies
