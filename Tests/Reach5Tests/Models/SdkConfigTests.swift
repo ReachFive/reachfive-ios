@@ -173,6 +173,9 @@ final class SdkConfigTests: XCTestCase {
             ("http://auth.example.com:80", "http://auth.example.com"), // default http port is stripped
             ("https://127.0.0.1:9000", "https://127.0.0.1:9000"), // IPv4 host, kept as-is
             ("https://[::1]:8443", "https://[::1]:8443"), // IPv6 literal: URL.host drops the brackets, put them back
+            ("https://AUTH.EXAMPLE.COM", "https://auth.example.com"), // host is lowercased, like the WHATWG domain parser does
+            ("https://[2001:DB8::1]", "https://[2001:db8::1]"), // IPv6 hex digits are lowercased too
+            ("https://café.example", "https://xn--caf-dma.example"), // IDNA: Foundation already punycode-encodes non-ASCII hosts
         ]
         for (input, expected) in acceptable {
             let url = URL(string: input)!
