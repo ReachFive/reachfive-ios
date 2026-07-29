@@ -68,9 +68,14 @@ public class SdkConfig {
         return origin
     }
 
-    private static func serializedOrigin(_ url: URL) -> String? {
-        guard let scheme = url.scheme?.lowercased(), let host = url.host else { return nil }
-        guard let port = url.port else { return "\(scheme)://\(host)" }
+    /// `internal`, like `makeUri` below: the single construction point on which the init's precondition
+    /// relies, so tests can probe acceptable/unacceptable inputs without triggering it.
+    internal static func serializedOrigin(_ url: URL) -> String? {
+        guard let scheme = url.scheme?.lowercased(), let rawHost = url.host else { return nil }
+        // URL.host returns an IPv6 literal unbracketed ("::1"); an origin needs it back in brackets.
+        let host = rawHost.contains(":") ? "[\(rawHost)]" : rawHost
+        let defaultPort = ["http": 80, "https": 443][scheme]
+        guard let port = url.port, port != defaultPort else { return "\(scheme)://\(host)" }
         return "\(scheme)://\(host):\(port)"
     }
 
