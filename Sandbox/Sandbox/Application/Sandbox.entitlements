@@ -6,14 +6,6 @@
 	<array>
 		<string>Default</string>
 	</array>
-	<!--
-	  Ces entrées n'ont pas de granularité de chemin : c'est l'apple-app-site-association servi par
-	  le host qui la porte, via `components`. Contrainte à y respecter, pour le harnais B.connect :
-	  NI cette app NI OneCheckBank ne doivent réclamer /_dev/bconnect/ — sinon l'UIApplication.open
-	  de OneCheckBank vers /_dev/bconnect/bank/return rouvrirait une app au lieu d'atteindre Safari,
-	  et le détour par le navigateur par défaut, qui est tout l'objet du test, n'aurait jamais lieu.
-	  OneCheckBank ne doit réclamer que /_dev/bank/.
-	-->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>webcredentials:local-sandbox.og4.me?mode=developer</string>

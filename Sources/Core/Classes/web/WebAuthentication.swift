@@ -5,10 +5,7 @@ import AuthenticationServices
 /// universel) le compléter (``tryComplete(externalCallbackURL:)``).
 ///
 /// **Les deux canaux sont armés pour tout login.** Un provider peut décider *en vol*, feuille déjà
-/// ouverte, s'il termine dedans ou s'il sort de l'app : b.connect choisit `passive` (302 direct vers la
-/// `redirect_uri`, intercepté par la feuille) ou `active` (détour par l'app banque, qui rouvre le
-/// **navigateur par défaut** ; c'est Safari qui livre le custom scheme à `application(_:open:)`, la
-/// feuille restant ouverte derrière jusqu'à sa fermeture par ``complete(attempt:_:)``). L'appelant ne
+/// ouverte, s'il termine dedans ou s'il sort de l'app. L'appelant ne
 /// peut donc pas choisir le canal à l'avance, et n'a pas à le faire.
 ///
 /// **Un seul login à la fois.** Sur iPhone, la feuille modale d'une `ASWebAuthenticationSession` rend
@@ -100,23 +97,12 @@ final class WebAuthenticationSession {
                 let session: ASWebAuthenticationSession
                 switch mode.callback {
                 case .customScheme:
-                    // Les deux canaux sont armés : la feuille intercepte le custom scheme si le flow ne la
-                    // quitte jamais (cas `passive`), et `tryComplete` résout si le retour arrive par le
-                    // navigateur par défaut (cas `active` : app externe → Safari → `application(_:open:)`).
-                    // `complete()` étant idempotent (garde `attempt` + `continuation != nil`), le canal
-                    // perdant est sans effet.
                     session = ASWebAuthenticationSession(
                         url: url,
                         callbackURLScheme: self.baseScheme,
                         completionHandler: completionHandler)
 
                 case let .universalLink(callback):
-                    // iOS 17.4+ : lien universel intercepté dans la webview via `callback: .https`
-                    // (nécessite l'Associated Domain `webcredentials:<host>`). Le cas est inatteignable à
-                    // la compilation sous 17.4 grâce à l'`@available` porté par la fabrique
-                    // ``WebSessionMode/universalLink(_:)``, mais `DefaultProvider` le résout depuis la
-                    // configuration backend, où le contrôle ne peut être que runtime — d'où ce filet (et
-                    // l'extraction du host, faillible).
                     guard #available(iOS 17.4, *), let host = callback.host else {
                         self.complete(attempt: attempt, .failure(.TechnicalError(reason: "Universal link callback requires iOS 17.4+ and a host: \(callback)")))
                         return
