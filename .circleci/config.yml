@@ -35,6 +35,24 @@ jobs:
             pod install
             cd ../
             pod lib lint Reach5.podspec
+  test:
+    macos:
+      xcode: "16.4.0"
+    steps:
+      - checkout
+      - run:
+          name: Run the Reach5Tests suite
+          command: |
+            # The simulators shipped with the CircleCI image change along with the
+            # Xcode version, so resolve a device at runtime instead of hardcoding a
+            # name that a future image bump would silently drop.
+            UDID=$(xcrun simctl list --json devices available | ruby -rjson -e '
+              iphone = JSON.parse(STDIN.read)["devices"].values.flatten.find { |device| device["name"].start_with?("iPhone") }
+              abort "No iPhone simulator available on this image" if iphone.nil?
+              warn "Using simulator #{iphone["name"]} (#{iphone["udid"]})"
+              puts iphone["udid"]
+            ')
+            xcodebuild -scheme Reach5 -destination "id=$UDID" test
   build-for-release:
     macos:
       xcode: "16.4.0"
@@ -112,6 +130,8 @@ workflows:
     jobs:
       - build:
           <<: *default_workflows_tags
+      - test:
+          <<: *default_workflows_tags
       - check-doc-examples:
           <<: *pull_request_branches
       - build-for-release:
@@ -119,4 +139,5 @@ workflows:
       - publish:
           requires:
             - build-for-release
+            - test
           <<: *default_workflows_filters
