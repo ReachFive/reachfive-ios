@@ -104,6 +104,7 @@ final class WebAuthenticationSession {
 
         // One login at a time, and the incumbent keeps its place.
         guard !loginInProgress else {
+            print("🔍 [WebAuth] start REFUSED — slot still held by attempt \(self.attempt) (continuation=\(continuation != nil), session=\(session != nil))") // TEMP DEBUG
             throw ReachFiveError.TechnicalError(reason: "A web login is already in progress. Wait for it to finish, or cancel the Task that started it.")
         }
         loginInProgress = true
@@ -152,7 +153,9 @@ final class WebAuthenticationSession {
                 session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
                 self.session = session
 
-                if !session.start() {
+                let started = session.start() // TEMP DEBUG: hoisted out of the `if` to log the value
+                print("🔍 [WebAuth] start() attempt=\(attempt) mode=\(mode.callback) → \(started)") // TEMP DEBUG
+                if !started {
                     // When start() returns false the completion handler may never be called, so the
                     // continuation is resumed with an error here.
                     self.complete(attempt: attempt, .failure(.TechnicalError(reason: "ASWebAuthenticationSession failed to start")))
@@ -180,6 +183,17 @@ final class WebAuthenticationSession {
     }
 
     private func handleSessionCompletion(attempt: Int, callbackURL: URL?, error: Error?) {
+        // TEMP DEBUG — the system called us back. Absence of this line means the completion handler never fired.
+        let ns = error as NSError?
+        let asCode = (error as? ASWebAuthenticationSessionError).map { "\($0.code) (\($0.code.rawValue))" } ?? "not an ASWebAuthenticationSessionError"
+        print("""
+              🔍 [WebAuth] handleSessionCompletion attempt=\(attempt) current=\(self.attempt) \
+              loginInProgress=\(loginInProgress) continuation=\(continuation != nil)
+                 callbackURL=\(callbackURL?.absoluteString ?? "nil")
+                 error=\(ns.map { "\($0.domain) code=\($0.code) — \($0.localizedDescription)" } ?? "nil")
+                 asWebAuthError=\(asCode)
+              """)
+
         if let error {
             complete(attempt: attempt, .failure(Self.reachFiveError(for: error)))
         } else if let callbackURL {
@@ -192,6 +206,9 @@ final class WebAuthenticationSession {
     /// The single resolution point: resumes the continuation with `result`, clears the state, and closes the
     /// sheet if it is still presented (out-of-band resolution, cancellation, replacement).
     private func complete(attempt: Int, _ result: Result<URL, ReachFiveError>) {
+        // TEMP DEBUG — did this resolution reach the continuation, or was it dropped (slot stays held)?
+        print("🔍 [WebAuth] complete attempt=\(attempt) current=\(self.attempt) continuation=\(continuation != nil) → \(attempt == self.attempt && continuation != nil ? "RESOLVES" : "DROPPED") result=\(result)")
+
         // Ignore a stale callback (a newer login came in) or a second resolution (`continuation` already nil).
         guard attempt == self.attempt, let continuation else { return }
         // Capture the session before nil-ing it, to close its sheet after the resume. The late cancellation
