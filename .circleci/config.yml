@@ -40,19 +40,13 @@ jobs:
       xcode: "16.4.0"
     steps:
       - checkout
+      # The destination has to name a concrete simulator: xcodebuild refuses
+      # "generic/platform=iOS Simulator" for the test action ("Tests must be run
+      # on a concrete device"). The name below is the one shipped by the Xcode
+      # image pinned just above, so update both together.
       - run:
           name: Run the Reach5Tests suite
-          command: |
-            # The simulators shipped with the CircleCI image change along with the
-            # Xcode version, so resolve a device at runtime instead of hardcoding a
-            # name that a future image bump would silently drop.
-            UDID=$(xcrun simctl list --json devices available | ruby -rjson -e '
-              iphone = JSON.parse(STDIN.read)["devices"].values.flatten.find { |device| device["name"].start_with?("iPhone") }
-              abort "No iPhone simulator available on this image" if iphone.nil?
-              warn "Using simulator #{iphone["name"]} (#{iphone["udid"]})"
-              puts iphone["udid"]
-            ')
-            xcodebuild -scheme Reach5 -destination "id=$UDID" test
+          command: xcodebuild -scheme Reach5 -destination 'platform=iOS Simulator,name=iPhone 16 Pro' test
   build-for-release:
     macos:
       xcode: "16.4.0"
