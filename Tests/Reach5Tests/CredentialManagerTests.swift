@@ -4,11 +4,11 @@ import XCTest
 
 @MainActor
 final class CredentialManagerRegistrationRequestTests: XCTestCase {
-    /// Le friendlyName des options est volontairement différent de celui demandé par l'application :
-    /// c'est l'intention de l'application qui doit nommer la passkey, pas l'écho du serveur.
+    /// The options' friendlyName deliberately differs from the one the app asked for: the app's intent
+    /// should name the passkey, not the server's echo.
     private func makeOptions(challenge: String, userID: String) -> RegistrationOptions {
         RegistrationOptions(
-            friendlyName: "nom renvoyé par le serveur",
+            friendlyName: "name returned by the server",
             options: CredentialCreationOptions(
                 publicKey: R5PublicKeyCredentialCreationOptions(
                     rp: R5PublicKeyCredentialRpEntity(id: "example.reach5.net", name: "Example"),
@@ -26,16 +26,16 @@ final class CredentialManagerRegistrationRequestTests: XCTestCase {
 
     @available(iOS 16.0, *)
     func testNominalCaseBuildsRequestWithRelyingPartyAndRequestedName() throws {
-        let request = try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "BAUG"), friendlyName: "iPhone de Test")
+        let request = try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "BAUG"), friendlyName: "Test iPhone")
 
         let registrationRequest = try XCTUnwrap(request as? ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest)
         XCTAssertEqual(registrationRequest.relyingPartyIdentifier, "example.reach5.net")
-        XCTAssertEqual(registrationRequest.name, "iPhone de Test")
+        XCTAssertEqual(registrationRequest.name, "Test iPhone")
     }
 
     @available(iOS 16.0, *)
     func testUnreadableChallengeThrowsTechnicalError() {
-        XCTAssertThrowsError(try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "%%%", userID: "BAUG"), friendlyName: "iPhone de Test")) { error in
+        XCTAssertThrowsError(try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "%%%", userID: "BAUG"), friendlyName: "Test iPhone")) { error in
             guard case let ReachFiveError.TechnicalError(reason, _) = error else {
                 return XCTFail("expected .TechnicalError, got \(error)")
             }
@@ -45,7 +45,7 @@ final class CredentialManagerRegistrationRequestTests: XCTestCase {
 
     @available(iOS 16.0, *)
     func testUnreadableUserIDThrowsTechnicalError() {
-        XCTAssertThrowsError(try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "%%%"), friendlyName: "iPhone de Test")) { error in
+        XCTAssertThrowsError(try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "%%%"), friendlyName: "Test iPhone")) { error in
             guard case let ReachFiveError.TechnicalError(reason, _) = error else {
                 return XCTFail("expected .TechnicalError, got \(error)")
             }
@@ -54,14 +54,14 @@ final class CredentialManagerRegistrationRequestTests: XCTestCase {
     }
 }
 
-/// La construction des requêtes d'assertion, pendant symétrique de l'enregistrement.
+/// Assertion request construction, the symmetric counterpart of registration.
 @MainActor
 final class CredentialManagerAssertionRequestTests: XCTestCase {
     private func makeOptions(challenge: String = "AQID", allowCredentials: [R5PublicKeyCredentialDescriptor]? = nil) -> AuthenticationOptions {
         AuthenticationOptions(publicKey: R5PublicKeyCredentialRequestOptions(challenge: challenge, timeout: nil, rpId: "example.reach5.net", allowCredentials: allowCredentials, userVerification: "preferred"))
     }
 
-    /// Auto-fill et connexion modale : l'utilisateur choisit parmi toutes ses passkeys du relying party.
+    /// Auto-fill and modal sign-in: the user picks among all their passkeys for the relying party.
     @available(iOS 16.0, *)
     func testUnrestrictedRequestListsNoAllowedCredential() throws {
         let request = try CredentialManager().makePasskeyAssertionRequest(makeOptions(allowCredentials: [R5PublicKeyCredentialDescriptor(type: "public-key", id: "AQID")]), restrictedToAllowedCredentials: false)
@@ -71,7 +71,7 @@ final class CredentialManagerAssertionRequestTests: XCTestCase {
         XCTAssertTrue(assertionRequest.allowedCredentials.isEmpty)
     }
 
-    /// Connexion non-discoverable : le compte est connu, la requête est restreinte aux credentials du serveur.
+    /// Non-discoverable sign-in: the account is known, so the request is restricted to the server's credentials.
     @available(iOS 16.0, *)
     func testRestrictedRequestCarriesTheDecodedAllowedCredentials() throws {
         let request = try CredentialManager().makePasskeyAssertionRequest(makeOptions(allowCredentials: [R5PublicKeyCredentialDescriptor(type: "public-key", id: "AQID")]), restrictedToAllowedCredentials: true)
@@ -101,16 +101,15 @@ final class CredentialManagerAssertionRequestTests: XCTestCase {
     }
 }
 
-/// La construction des requêtes système pour le login modal, testée sans réseau : le réseau est
-/// coupé en substituant `fetchAuthenticationOptions` (appel réel par défaut, cf. signature de
-/// `buildAuthorizationRequests`).
+/// System request construction for the modal login, tested without network by substituting
+/// `fetchAuthenticationOptions`.
 @MainActor
 final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
     private let reachFive = ReachFive(sdkConfig: SdkConfig(domain: "example.reach5.net", clientId: "testclient"))
     private lazy var webAuthnLoginRequest = WebAuthnLoginRequest(clientId: reachFive.sdkConfig.clientId, origin: "https://example.reach5.net", scope: nil)
 
     private func failFetch(_: ReachFive, _: WebAuthnLoginRequest) async throws -> AuthenticationOptions {
-        XCTFail("fetchAuthenticationOptions ne doit pas être appelé")
+        XCTFail("fetchAuthenticationOptions should not be called")
         throw ReachFiveError.TechnicalError(reason: "unexpected fetch")
     }
 
@@ -132,13 +131,13 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
         XCTAssertEqual(appleRequest.requestedScopes, [.email, .fullName])
 
         let siwa = try XCTUnwrap(built.siwa)
-        // le nonce envoyé à Apple est le code challenge ; le verifier correspondant partira au serveur
+        // the nonce sent to Apple is the code challenge; the matching verifier goes to the server
         XCTAssertEqual(appleRequest.nonce, siwa.nonce.codeChallenge)
         XCTAssertTrue(siwa.provider === appleProvider)
     }
 
-    /// Sans provider Apple, la requête ne pourrait pas être complétée : seule demandée, elle doit échouer
-    /// avant toute présentation à l'utilisateur, pas après Face ID.
+    /// Without an Apple provider the request could not be completed: requested alone, it must fail
+    /// before anything is presented to the user, not after Face ID.
     func testSignInWithAppleAloneSurfacesTheMissingProvider() async {
         do {
             _ = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.SignInWithApple], fetchAuthenticationOptions: failFetch)
@@ -151,11 +150,11 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
         }
     }
 
-    /// Combinée à un autre type, l'absence de provider Apple est écartée : le mot de passe suffit encore.
+    /// Combined with another type, the missing Apple provider is dropped: the password still suffices.
     func testSignInWithAppleIsDroppedWhenAnotherTypeCanStillSucceed() async throws {
         let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.SignInWithApple, .Password], fetchAuthenticationOptions: failFetch)
 
-        XCTAssertEqual(built.requests.count, 1, "la requête password doit survivre à l'absence de provider Apple")
+        XCTAssertEqual(built.requests.count, 1, "the password request must survive the missing Apple provider")
         XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
         XCTAssertNil(built.siwa)
     }
@@ -177,7 +176,7 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
     func testPasskeyFailureIsSwallowedWhenCombinedWithAnotherType() async throws {
         let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.Passkey, .Password], fetchAuthenticationOptions: { _, _ in throw ReachFiveError.TechnicalError(reason: "network down") })
 
-        XCTAssertEqual(built.requests.count, 1, "la requête password doit survivre à l'échec passkey")
+        XCTAssertEqual(built.requests.count, 1, "the password request must survive the passkey failure")
         XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
     }
 
@@ -185,11 +184,11 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
     func testSignInWithAppleIsDroppedAndPasskeyFailureIsSwallowedWhenCombinedWithAnotherType() async throws {
         let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.SignInWithApple, .Passkey, .Password], fetchAuthenticationOptions: { _, _ in throw ReachFiveError.TechnicalError(reason: "network down") })
 
-        XCTAssertEqual(built.requests.count, 1, "la requête password doit survivre à l'échec passkey & Sign in with Apple")
+        XCTAssertEqual(built.requests.count, 1, "the password request must survive both the passkey and Sign In With Apple failures")
         XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
     }
 
-    /// Les options récupérées auprès du serveur sont bien celles qui construisent la requête d'assertion.
+    /// The options fetched from the server are the ones that build the assertion request.
     @available(iOS 16.0, *)
     func testPasskeyBuildsAnAssertionRequestFromTheFetchedOptions() async throws {
         let options = AuthenticationOptions(publicKey: R5PublicKeyCredentialRequestOptions(challenge: "AQID", timeout: nil, rpId: "fetched.reach5.net", allowCredentials: nil, userVerification: "preferred"))

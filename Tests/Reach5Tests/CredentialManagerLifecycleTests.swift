@@ -2,21 +2,14 @@ import AuthenticationServices
 import XCTest
 @testable import Reach5
 
-/// Le cycle de vie des requêtes, piloté sans UI système : `perform` est lancée avec une closure de
-/// soumission inerte (la requête n'est jamais soumise au système), puis les callbacks du delegate sont
-/// simulés à la main.
+/// Request lifecycle, driven without any system UI: `perform` runs with an inert submit closure, then the
+/// delegate callbacks are simulated by hand.
 ///
-/// Couvert ici : une continuation par requête, reprise exactement une fois, sur tous les chemins d'échec
-/// (annulation utilisateur, erreur technique, annulation par une nouvelle requête, annulation de la tâche
-/// appelante, requête vide), et l'isolation de l'état entre une requête annulée et celle qui la remplace.
-///
-/// Non couvert, et pas couvrable ici : le chemin de succès. `ASAuthorization` n'a pas d'initialiseur
-/// public, il est donc impossible de fabriquer une autorisation de test ; et le post-traitement qui la
-/// suit dans chaque point d'entrée fait des appels réseau directs, `ReachFiveApi` n'étant pas abstrait
-/// derrière un protocole.
+/// The success path is out of reach here: `ASAuthorization` has no public initializer, and the
+/// post-processing that follows it makes direct network calls.
 @MainActor
 final class CredentialManagerLifecycleTests: XCTestCase {
-    /// La closure de soumission de `perform` y dépose le controller de la requête pour le test.
+    /// Where `perform`'s submit closure drops the request's controller for the test.
     @MainActor
     private final class ControllerBox {
         var controller: ASAuthorizationController?
@@ -24,14 +17,14 @@ final class CredentialManagerLifecycleTests: XCTestCase {
 
     private struct UnexpectedSuccess: Error {}
 
-    /// Démarre une requête inerte et rend la main une fois le contexte enregistré et la requête soumise.
+    /// Starts an inert request and returns once its context is registered and the request submitted.
     ///
-    /// La tâche est typée `Task<Void, Error>` et non `Task<ASAuthorization, Error>` : l'autorisation n'est
-    /// jamais inspectée (elle n'est pas fabricable en test) et la conformité de `ASAuthorization` à
-    /// `Sendable`, exigée par le paramètre `Success` d'une tâche, n'existe qu'à partir d'iOS 16.4.
+    /// Typed `Task<Void, Error>` rather than `Task<ASAuthorization, Error>`: the authorization is never
+    /// inspected, and its `Sendable` conformance — required by a task's `Success` — only exists from
+    /// iOS 16.4.
     private func startRequest(on manager: CredentialManager, anchor: ASPresentationAnchor) async throws -> (controller: ASAuthorizationController, result: Task<Void, Error>) {
         let box = ControllerBox()
-        let submitted = expectation(description: "requête soumise")
+        let submitted = expectation(description: "request submitted")
 
         let task = Task { @MainActor in
             _ = try await manager.perform(requests: [ASAuthorizationPasswordProvider().createRequest()], anchor: anchor) {
@@ -44,15 +37,15 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         return try (XCTUnwrap(box.controller), task)
     }
 
-    /// Attend la fin d'une requête et rend l'erreur levée. Aucun test ne peut légitimement aboutir : une
-    /// reprise en succès signifierait qu'une continuation a été résolue avec une autorisation fabriquée.
+    /// Waits for a request to end and returns the error thrown. No test can legitimately succeed: that
+    /// would mean a continuation was resumed with a fabricated authorization.
     private func failure(of result: Task<Void, Error>) async throws -> Error {
         do {
             _ = try await result.value
         } catch {
             return error
         }
-        XCTFail("la requête devait échouer")
+        XCTFail("the request should have failed")
         throw UnexpectedSuccess()
     }
 
@@ -67,8 +60,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
             return XCTFail("expected .AuthCanceled, got \(thrown)")
         }
 
-        // Le contexte a été retiré à la complétion : un second callback pour le même controller est ignoré
-        // (une continuation reprise deux fois ferait crasher le test).
+        // Context removed on completion, so a second callback is ignored — resuming twice would crash.
         manager.authorizationController(controller: controller, didCompleteWithError: ASAuthorizationError(.failed))
     }
 
@@ -76,10 +68,9 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         let manager = CredentialManager()
         let stranger = ASAuthorizationController(authorizationRequests: [ASAuthorizationPasswordProvider().createRequest()])
 
-        // Aucune requête en cours : rien à résoudre, et surtout pas de crash
+        // No request in flight: nothing to resolve, and above all no crash
         manager.authorizationController(controller: stranger, didCompleteWithError: ASAuthorizationError(.canceled))
 
-        // Le dictionnaire de contextes n'a pas été corrompu : une vraie requête se déroule normalement
         let anchor = ASPresentationAnchor()
         let (controller, result) = try await startRequest(on: manager, anchor: anchor)
         XCTAssertTrue(manager.presentationAnchor(for: controller) === anchor)
@@ -91,8 +82,8 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         }
     }
 
-    /// Le contrat central du refactor : une nouvelle requête annule celle en cours, et l'état de la
-    /// requête annulée disparaît sans jamais toucher à celui de la nouvelle.
+    /// The refactor's central contract: a new request cancels the one in flight, and the canceled
+    /// request's state disappears without ever touching the new one's.
     func testNewRequestCancelsTheInFlightOneWithoutDisturbingItsOwnState() async throws {
         let manager = CredentialManager()
         let autoFillAnchor = ASPresentationAnchor()
@@ -101,7 +92,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         let autoFill = try await startRequest(on: manager, anchor: autoFillAnchor)
         XCTAssertTrue(manager.presentationAnchor(for: autoFill.controller) === autoFillAnchor)
 
-        // La requête modale annule l'auto-fill en cours, sans attendre de callback système
+        // The modal request cancels the in-flight auto-fill, without waiting for a system callback
         let modal = try await startRequest(on: manager, anchor: modalAnchor)
 
         let thrown = try await failure(of: autoFill.result)
@@ -109,11 +100,10 @@ final class CredentialManagerLifecycleTests: XCTestCase {
             return XCTFail("expected .AuthCanceled, got \(thrown)")
         }
 
-        // L'état de la requête annulée a disparu, celui de la nouvelle est intact
         XCTAssertFalse(manager.presentationAnchor(for: autoFill.controller) === autoFillAnchor)
         XCTAssertTrue(manager.presentationAnchor(for: modal.controller) === modalAnchor)
 
-        // Le callback système tardif de la requête annulée n'a aucun effet : la modale reste en course
+        // The canceled request's late system callback has no effect: the modal stays in the race
         manager.authorizationController(controller: autoFill.controller, didCompleteWithError: ASAuthorizationError(.canceled))
 
         manager.authorizationController(controller: modal.controller, didCompleteWithError: ASAuthorizationError(.failed))
@@ -123,8 +113,8 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         }
     }
 
-    /// `cancelInFlightRequests` résout elle-même les continuations : elle ne dépend pas d'un
-    /// `didCompleteWithError(.canceled)` que le système ne promet que si un flux tournait vraiment.
+    /// `cancelInFlightRequests` resolves the continuations itself: it does not depend on a
+    /// `didCompleteWithError(.canceled)` the system only promises if a flow was really running.
     func testCancelInFlightRequestsResolvesTheRequestWithoutSystemCallback() async throws {
         let manager = CredentialManager()
         let anchor = ASPresentationAnchor()
@@ -136,12 +126,12 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         guard case ReachFiveError.AuthCanceled = thrown else {
             return XCTFail("expected .AuthCanceled, got \(thrown)")
         }
-        XCTAssertFalse(manager.presentationAnchor(for: controller) === anchor, "le contexte doit avoir été libéré")
+        XCTAssertFalse(manager.presentationAnchor(for: controller) === anchor, "the context should have been released")
     }
 
-    /// L'appelant qui annule sa tâche (écran quitté, `async let` abandonné) reçoit `CancellationError` et
-    /// non `.AuthCanceled` : cette dernière pousse les applications à relancer une requête auto-fill.
-    func testCallerCancellationResumesWithCancellationErrorAndFreesTheContext() async throws {
+    /// A caller that cancels its task (screen dismissed, `async let` abandoned) gets a technical error and
+    /// not `.AuthCanceled`, which pushes apps to restart an auto-fill request.
+    func testCallerCancellationResumesWithTechnicalErrorAndFreesTheContext() async throws {
         let manager = CredentialManager()
         let anchor = ASPresentationAnchor()
         let (controller, result) = try await startRequest(on: manager, anchor: anchor)
@@ -149,16 +139,19 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         result.cancel()
 
         let thrown = try await failure(of: result)
-        XCTAssertTrue(thrown is CancellationError, "expected CancellationError, got \(thrown)")
-        XCTAssertFalse(manager.presentationAnchor(for: controller) === anchor, "le contexte doit avoir été libéré")
+        guard case let ReachFiveError.TechnicalError(reason, _) = thrown else {
+            return XCTFail("expected .TechnicalError, got \(thrown)")
+        }
+        XCTAssertTrue(reason.contains("calling task was canceled"))
+        XCTAssertFalse(manager.presentationAnchor(for: controller) === anchor, "the context should have been released")
 
-        // Le callback système tardif ne trouve plus de contexte : pas de double reprise
+        // The late system callback finds no context left: no double resumption
         manager.authorizationController(controller: controller, didCompleteWithError: ASAuthorizationError(.canceled))
     }
 
     func testAlreadyCanceledCallerSubmitsNothing() async throws {
         let manager = CredentialManager()
-        let notSubmitted = expectation(description: "aucune requête soumise")
+        let notSubmitted = expectation(description: "no request submitted")
         notSubmitted.isInverted = true
 
         let task = Task { @MainActor in
@@ -166,22 +159,23 @@ final class CredentialManagerLifecycleTests: XCTestCase {
                 notSubmitted.fulfill()
             }
         }
-        // La tâche est isolée sur le main actor, qui exécute ce test : son corps n'a pas encore démarré
+        // The task is isolated on the main actor, which runs this test: its body has not started yet
         task.cancel()
 
         let thrown = try await failure(of: task)
-        XCTAssertTrue(thrown is CancellationError, "expected CancellationError, got \(thrown)")
+        guard case let ReachFiveError.TechnicalError(reason, _) = thrown else {
+            return XCTFail("expected .TechnicalError, got \(thrown)")
+        }
+        XCTAssertTrue(reason.contains("calling task was canceled"))
         await fulfillment(of: [notSubmitted], timeout: 0.2)
     }
 
-    /// `ASAuthorizationController` exige au moins une requête ; sans garde, le système ne rappellerait
-    /// jamais le delegate et l'appelant resterait suspendu. Atteignable via l'API publique avec
-    /// `usingModalAuthorizationFor: []`.
+    /// Reachable through the public API with `usingModalAuthorizationFor: []`.
     func testEmptyRequestsThrowsInsteadOfHanging() async {
         let manager = CredentialManager()
         do {
             _ = try await manager.perform(requests: [], anchor: ASPresentationAnchor()) { _ in
-                XCTFail("aucune requête ne doit être soumise")
+                XCTFail("no request should be submitted")
             }
             XCTFail("expected a .TechnicalError")
         } catch {
