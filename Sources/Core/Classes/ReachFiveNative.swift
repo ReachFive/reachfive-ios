@@ -6,8 +6,8 @@ extension ReachFive {
     // first argument indicates modality to distinguish the two primary way UI is shown to user: Modal and AutoFill
     // first argument label contains "with" instead of the method name in conformance to https://www.swift.org/documentation/api-design-guidelines/#give-prepositional-phrase-argument-label
     // non-discoverable methods also take a requestType parameter even though there is only one such type:
-//      1. to make it very clear that we are using passkeys
-//      2. to be future proof. For non-discoverable, there is already Security Keys that exist and that we could support.
+    //      1. to make it very clear that we are using passkeys
+    //      2. to be future proof. For non-discoverable, there is already Security Keys that exist and that we could support.
     // AutoFill is @available(iOS 16.0, *) because ASAuthorizationController.performAutoFillAssistedRequests() itself is.
     // The other methods control version availability with their respective Authorization enum to increase flexibility.
     // For example the non-discoverable cannot be declared @available(iOS 16.0, *)
@@ -17,15 +17,16 @@ extension ReachFive {
     @available(iOS 16.0, *)
     public func signup(withRequest request: PasskeySignupRequest) async throws -> AuthToken {
         let domain = sdkConfig.domain
+        let scopes = request.scopes ?? scope
         let signupOptions = SignupOptions(
             origin: request.originWebAuthn ?? "https://\(domain)",
             friendlyName: request.friendlyName,
             profile: request.passkeyProfile,
             clientId: sdkConfig.clientId,
-            scope: request.scopes ?? scope
+            scope: scopes
         )
 
-        return try await credentialManager.signUp(withRequest: signupOptions, anchor: request.anchor, originR5: request.origin, reachFive: self)
+        return try await credentialManager.signUp(withRequest: signupOptions, scopes: scopes, anchor: request.anchor, originR5: request.origin, reachFive: self)
     }
 
     /// Starts an auto-fill assisted passkey login request.
@@ -69,7 +70,7 @@ extension ReachFive {
     /// - Returns: A ReachFiveError, or nothing when the Registration was successfull.
     @available(iOS 16.0, *)
     public func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws {
-        // TODO: supprimer l'ancienne clé du server
+        // TODO: delete the former key from the server
         try await credentialManager.registerNewPasskey(withRequest: request, originWebAuthn: request.originWebAuthn ?? "https://\(sdkConfig.domain)", authToken: authToken, reachFive: self)
     }
 

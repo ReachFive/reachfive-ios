@@ -13,7 +13,11 @@ class CredentialManager: NSObject {
     /// RequestContext indexed by its controller: each callback finds the context of its own request, and
     /// one request can never overwrite another's state.
     private struct RequestContext {
-        /// retained: keeps the system request alive until it completes
+        /// Identifies the request for a cancellation that has to hop back onto the main actor. An `Int` is
+        /// `Sendable` — the controller is not, and capturing it in the `@Sendable` `onCancel` closure is an
+        /// error in the Swift 6 language mode — and it is never recycled, unlike the controller's address.
+        let id: Int
+        /// kept to be able to `cancel()` the system request
         let controller: ASAuthorizationController
         /// anchor for the presentationContextProvider
         let anchor: ASPresentationAnchor
@@ -30,6 +34,18 @@ class CredentialManager: NSObject {
 
     /// requests in flight, indexed by their controller
     private var contexts: [ObjectIdentifier: RequestContext] = [:]
+
+    /// Monotonic, never reset: a fresh identity for each request, so a cancellation that lands late can
+    /// never resolve a request submitted since.
+    private var lastRequestId = 0
+
+    /// The caller's task was canceled. Deliberately not `.AuthCanceled`: apps react to that one by
+    /// restarting an auto-fill request, whereas here the calling screen is going away.
+    private static let callerCanceled = ReachFiveError.TechnicalError(reason: "The calling task was canceled")
+
+    /// `ASAuthorizationController` requires at least one request; without this the system would never call
+    /// the delegate back and the caller would hang forever.
+    private static let noRequest = ReachFiveError.TechnicalError(reason: "No authorization request to perform")
 
     /// nonisolated: called from ReachFive's synchronous init, outside the main actor
     override nonisolated init() {}
@@ -50,33 +66,32 @@ class CredentialManager: NSObject {
         anchor: ASPresentationAnchor,
         using submit: (ASAuthorizationController) -> Void
     ) async throws -> ASAuthorization {
-        guard !requests.isEmpty else {
-            // ASAuthorizationController requires at least one request. Without this guard, the system
-            // would never call the delegate back and the caller would hang forever.
-            throw ReachFiveError.TechnicalError(reason: "No authorization request to perform")
-        }
+        guard !requests.isEmpty else { throw Self.noRequest }
 
         let controller = ASAuthorizationController(authorizationRequests: requests)
         controller.delegate = self
         controller.presentationContextProvider = self
-        let key = ObjectIdentifier(controller)
+        lastRequestId += 1
+        let id = lastRequestId
 
         return try await withTaskCancellationHandler {
             // The caller's task may already be canceled by the time we get here: submit nothing.
-            try Task.checkCancellation()
+            guard !Task.isCancelled else { throw Self.callerCanceled }
 
             return try await withCheckedThrowingContinuation { continuation in
                 // Canceling requests in flight and submitting the new one in the same synchronous block:
                 // no other task can run on the main actor in between.
                 cancelInFlightRequests()
-                contexts[key] = RequestContext(controller: controller, anchor: anchor, continuation: continuation)
+                contexts[ObjectIdentifier(controller)] = RequestContext(id: id, controller: controller, anchor: anchor, continuation: continuation)
                 submit(controller)
             }
         } onCancel: {
             // onCancel runs off the main actor; hop back onto it to touch `contexts`. The task hop cannot
             // outrun registering the context: the block above only yields back to the main actor after
-            // submission.
-            Task { @MainActor in self.cancelBecauseCallerWasCancelled(key) }
+            // submission. The request is named by its `id` rather than by its controller: an `Int` crosses
+            // into this `@Sendable` closure, and it cannot designate a later request the way a reused
+            // address could.
+            Task { @MainActor in self.cancelBecauseCallerWasCancelled(id) }
         }
     }
 
@@ -105,31 +120,28 @@ class CredentialManager: NSObject {
         }
     }
 
-    /// Resumes the `key` request with `CancellationError` because the caller's task was canceled, and
-    /// stops the system request. Deliberately not `.AuthCanceled`: that error signals a user cancellation,
-    /// to which apps react by restarting an auto-fill request, whereas here it is the calling screen that
-    /// is going away.
-    private func cancelBecauseCallerWasCancelled(_ key: ObjectIdentifier) {
-        guard let context = contexts.removeValue(forKey: key) else {
+    /// Stops request `id` and resumes it with ``callerCanceled``, because the caller's task was canceled.
+    ///
+    /// Looked up by scanning rather than by key: the dictionary is indexed by controller, for the delegate
+    /// callbacks, and only ever holds the one or two requests that overlap.
+    private func cancelBecauseCallerWasCancelled(_ id: Int) {
+        guard let key = contexts.first(where: { $0.value.id == id })?.key,
+              let context = contexts.removeValue(forKey: key) else {
             // request already completed, or never registered: nothing to do
             return
         }
         if #available(iOS 16.0, *) {
             context.controller.cancel()
         }
-        context.continuation.resume(throwing: CancellationError())
+        context.continuation.resume(throwing: Self.callerCanceled)
     }
 
     // MARK: - Signup
 
     @available(iOS 16.0, *)
-    func signUp(withRequest request: SignupOptions, anchor: ASPresentationAnchor, originR5: String? = nil, reachFive: ReachFive) async throws -> AuthToken {
+    func signUp(withRequest request: SignupOptions, scopes: [String], anchor: ASPresentationAnchor, originR5: String? = nil, reachFive: ReachFive) async throws -> AuthToken {
         let options = try await reachFive.reachFiveApi.createWebAuthnSignupOptions(webAuthnSignupOptions: request)
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
-
-        // request.scope is already the space-joined list of scopes (see SignupOptions); we recover it
-        // here rather than duplicating the value as a parameter, an OAuth scope token cannot contain a space.
-        let scopes = request.scope.components(separatedBy: " ")
 
         let authorization = try await perform(requests: [registrationRequest], anchor: anchor) {
             $0.performRequests()
@@ -204,6 +216,9 @@ class CredentialManager: NSObject {
     /// ``authenticate(with:scopes:reachFive:originR5:)`` are written so that adding it will not require
     /// raising this flow's own minimum version.
     func login(withNonDiscoverableUsername username: Username, forRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode, reachFive: ReachFive) async throws -> AuthToken {
+        // Checked before the round-trip: nothing to build means nothing to submit.
+        guard !requestTypes.isEmpty else { throw Self.noRequest }
+
         let options = try await reachFive.reachFiveApi.createWebAuthnAuthenticationOptions(
             webAuthnLoginRequest: makeWebAuthnLoginRequest(for: request, username: username, reachFive: reachFive)
         )
