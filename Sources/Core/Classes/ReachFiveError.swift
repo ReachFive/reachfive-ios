@@ -63,8 +63,14 @@ public enum ReachFiveError: Error, CustomStringConvertible, LocalizedError {
 
     case RequestError(apiError: ApiError)
     case AuthFailure(reason: String, apiError: ApiError? = nil)
-    /// Returned after signin requests. Either the system doesn't find any credentials and the authentification ends silently, or the user cancels the request.
-    /// This is a good time to show a traditional login form, or ask the user to create an account.
+    /// Nothing happened, and nothing is expected of the caller. Returned when the system finds no credential
+    /// and the authentication ends silently, when the user cancels the request, and when a web login is
+    /// dropped because another one is already in progress (a double tap on a login control — see
+    /// ``WebAuthenticationSession``).
+    ///
+    /// Ignoring it is a valid way to handle it. On the first two causes it is also a good time to show a
+    /// traditional login form, or ask the user to create an account; on the third there is nothing to show,
+    /// the login the user actually meant is still running.
     case AuthCanceled
     case TechnicalError(reason: String, apiError: ApiError? = nil)
 }
