@@ -28,6 +28,9 @@
 - `webviewLogin` accepts a `webSessionMode` parameter picking the shape of the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
 - `webviewLogin` accepts a new `loginUrlFragment` parameter to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
 
+### Other changes
+- **One web login at a time.** `webviewLogin`, a `login` on a web provider, and `logout(webSessionLogout:)` all share a single web session. A call started while another one is still in progress ends with `ReachFiveError.AuthCanceled` and leaves the login under way untouched. Nothing is expected of you: a double tap on a login control is absorbed by the SDK, and `AuthCanceled` is the outcome you already ignore. To end a web login early — a screen being torn down, a timeout — cancel the `Task` that started it.
+
 ## v10.0.1
 
 - Fix compilation issue in XCode 26

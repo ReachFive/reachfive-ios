@@ -18,6 +18,11 @@ public extension ReachFive {
         //     `interceptPasswordless`, delivering this web login's token on the `passwordlessCallback`.
         // The first is intentional, but the second is not.
         // And it seems that starting a web login while a passwordless is pending overwrites the PKCE, so its magic link then fails.
+        // Same cause, one more consequence: this write happens *before* `webAuthSession.start(...)` can drop
+        // the call, because the PKCE has to be in storage while the sheet is open. On a double tap the
+        // dropped call therefore leaves its own PKCE behind, and the login that survives no longer matches
+        // what the slot holds — so both rescues above would fail for it. Fixing the ordering needs a slot
+        // per login rather than one shared key, i.e. the storage-slot redesign.
         storage.save(key: pkceKey, value: pkce)
 
         let scope = (request.scope ?? scope)
