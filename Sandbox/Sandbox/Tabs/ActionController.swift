@@ -67,7 +67,8 @@ class ActionController: UITableViewController {
                 // secure webview completing via an https universal link, intercepted in the sheet (iOS 17.4+)
                 if indexPath.row == 1 {
                     guard #available(iOS 17.4, *) else { return }
-                    let universalLinkCallback = URL(string: "https://local-sandbox.og4.me/universal_link_internal")!
+                    let domain = AppDelegate.reachfive().sdkConfig.domain
+                    let universalLinkCallback = URL(string: "https://\(domain)/universal_link_internal")!
                     await handleAuthToken {
                         try await AppDelegate.reachfive().webviewLogin(WebviewLoginRequest(presenting: Presentation(from: self), origin: "ActionController.webviewLogin.universalLink", webSessionMode: .universalLink(universalLinkCallback)))
                     }
