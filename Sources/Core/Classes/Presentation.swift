@@ -59,9 +59,10 @@ public struct Presentation {
     }
 }
 
-// `ASWebAuthenticationSession.presentationContextProvider` est `weak` : l'adaptateur doit être
-// retenu ailleurs pendant la session. C'est le cas via `WebviewLoginRequest.presentationContextProvider`
-// (`let` fort), vivant pendant tout `webviewLogin` → `webAuthSession.start(...)`.
+// `ASWebAuthenticationSession.presentationContextProvider` is `weak`, so the adapter has to be retained
+// elsewhere for the duration of the session. It is, through
+// `WebviewLoginRequest.presentationContextProvider` (a strong `let`), which stays alive for the whole
+// `webviewLogin` → `webAuthSession.start(...)` call.
 private final class ViewControllerContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
     private weak var viewController: UIViewController?
 
@@ -70,6 +71,36 @@ private final class ViewControllerContextProvider: NSObject, ASWebAuthentication
     }
 
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        viewController?.view.window ?? ASPresentationAnchor()
+        if let window = viewController?.view.window {
+            return window
+        }
+        // The presenting view controller is gone — deallocated, or dismissed since the request was built
+        // (`WebviewLoginRequest.init(presenting:)` resolves this provider at construction time, the session
+        // asks for the anchor later). The protocol offers no way to fail, and a bare `ASPresentationAnchor()`
+        // belongs to no scene, so the system would always answer `presentationContextInvalid`. Falling back
+        // to the app's own key window lets the login go through, anchored elsewhere.
+        if let window = Self.activeSceneKeyWindow() {
+            Logger.shared.log("The presenting view controller is no longer attached to a window; anchoring the web session on the app's key window instead. Call login() after the view appeared (e.g. from viewDidAppear), not from viewDidLoad.")
+            return window
+        }
+        Logger.shared.log("No window available to anchor the web session: it will fail with presentationContextInvalid. Call login() after the view appeared (e.g. from viewDidAppear), not from viewDidLoad.")
+        return ASPresentationAnchor()
+    }
+
+    /// The key window of a foreground scene, if there is one.
+    ///
+    /// There is no app-level shortcut for this on purpose: `UIApplication.keyWindow` is deprecated since
+    /// iOS 13 ("returns a key window across all connected scenes"), and the standard replacement,
+    /// `UIWindowScene.keyWindow`, is per-scene and iOS 15+. Picking the relevant scene is the app's call, so
+    /// it has to be spelled out here — and scanning `windows` for `isKeyWindow` gives the same result while
+    /// staying on the iOS 13 floor this package targets.
+    private static func activeSceneKeyWindow() -> UIWindow? {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        // Prefer a foreground-active scene, but accept a foreground-inactive one: a programmatic login or
+        // logout can run while the app is still being brought back to the foreground — which is exactly the
+        // situation a return from a third-party app creates.
+        let candidates = scenes.filter { $0.activationState == .foregroundActive }
+            + scenes.filter { $0.activationState == .foregroundInactive }
+        return candidates.flatMap(\.windows).first(where: \.isKeyWindow)
     }
 }

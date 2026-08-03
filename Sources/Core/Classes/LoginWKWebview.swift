@@ -13,6 +13,8 @@ public class LoginWKWebview: UIView {
 
     /// Loads the ReachFive **first-party** login form into this embedded webview and awaits the
     /// `AuthToken`. The flow completes on the SDK's custom scheme, intercepted by the webview.
+    ///
+    /// **Only flows that never leave the app are supported by this path.**
     public func loadLoginWebview(reachfive: ReachFive, state: String? = nil, nonce: String? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> AuthToken {
         let pkce = Pkce.generate()
         self.reachfive = reachfive

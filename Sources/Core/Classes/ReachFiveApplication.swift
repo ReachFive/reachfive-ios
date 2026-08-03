@@ -4,19 +4,23 @@ import UIKit
 public extension ReachFive {
     @MainActor
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
-        // Canal hors-bande « custom scheme » : une app externe rouvre l'app hôte par le scheme du SDK.
-        // On teste la session web-auth d'abord — son matching est exact (scheme + host + path + code/error
-        // de la redirect_uri attendue, et n'est armé que pendant un login hors-bande en cours) — sinon
-        // `interceptUrl` avalerait le lien comme un callback passwordless.
+        // Out-of-band "custom scheme" channel: a third-party app reopens the host app through the SDK's
+        // scheme. The web-auth session is tried first — its matching is exact (scheme + host + path +
+        // code/error of the expected redirect_uri, and it is only armed while a login is in flight) —
+        // otherwise `routeUrl` would swallow the link as a passwordless callback.
         if webAuthSession.tryComplete(externalCallbackURL: url) {
             return true
         }
 
-        interceptUrl(url)
+        // Returns true only if the URL was consumed (same contract as `application(_:continue:)`): a host
+        // app that forwards all of its links to us must be able to route the ones that aren't ours. That is
+        // why `routeUrl` does not fall back to `interceptPasswordless`, unlike `interceptUrl` called
+        // directly.
+        var handled = routeUrl(url)
         for provider in providers {
-            let _ = provider.application(app, open: url, options: options)
+            handled = provider.application(app, open: url, options: options) || handled
         }
-        return true
+        return handled
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -42,20 +46,9 @@ public extension ReachFive {
         }
     }
 
-    @MainActor
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        // D'abord la session web-auth : son matching est exact (host + path + code/error du
-        // redirect_uri attendu), aucun risque d'avaler un lien qui ne lui est pas destiné — alors
-        // qu'un provider custom peut consommer l'activité plus largement et lui masquer son callback.
-        if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-           let url = userActivity.webpageURL,
-           webAuthSession.tryComplete(externalCallbackURL: url) {
-            return true
-        }
-
-        // …puis les providers. Ne renvoie true QUE si l'un d'eux a consommé l'activité (sinon false,
-        // pour que l'app hôte — qui nous forwarde tous ses liens — route elle-même les liens que
-        // ReachFive ne gère pas).
+        // Returns true only if a provider consumed the activity (false otherwise, so the host app — which
+        // forwards all of its links to us — routes the ones ReachFive does not handle).
         var handled = false
         for provider in providers {
             handled = provider.application(application, continue: userActivity, restorationHandler: restorationHandler) || handled

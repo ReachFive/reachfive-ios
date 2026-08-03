@@ -32,7 +32,7 @@ public class ReachFive: NSObject {
     internal var clientConfig: ClientConfigResponse? = nil
     public let storage: Storage
     let credentialManager: CredentialManager
-    // Session de login web en cours (cf. ``WebAuthenticationSession``).
+    // The web login in progress (see ``WebAuthenticationSession``).
     let webAuthSession: WebAuthenticationSession
     public let pkceKey = "PASSWORDLESS_PKCE"
 
@@ -57,27 +57,34 @@ public class ReachFive: NSObject {
         """
     }
 
+    /// Routes an incoming URL to the matching SDK interception (passwordless, MFA, account recovery,
+    /// email verification). An URL that matches none of the ``SdkConfig`` URIs falls back to
+    /// `interceptPasswordless`, as it always has.
     public func interceptUrl(_ url: URL) -> () {
-        let receivedUrl = URLComponents(url: url, resolvingAgainstBaseURL: true)
-
-        let recovery = URLComponents(url: sdkConfig.accountRecoveryUri, resolvingAgainstBaseURL: true)
-        let mfa = URLComponents(url: sdkConfig.mfaUri, resolvingAgainstBaseURL: true)
-        let passwordless = URLComponents(url: sdkConfig.redirectUri, resolvingAgainstBaseURL: true)
-        let emailVerification = URLComponents(url: sdkConfig.emailVerificationUri, resolvingAgainstBaseURL: true)
-
-        switch (receivedUrl?.host, receivedUrl?.path) {
-
-        case (recovery?.host, recovery?.path): interceptAccountRecovery(url)
-        case (mfa?.host, mfa?.path): interceptVerifyMfaCredential(url)
-        case (passwordless?.host, passwordless?.path): interceptPasswordless(url)
-        case (emailVerification?.host, emailVerification?.path): interceptEmailVerification(url)
-
-            // fallback to old way of doing things if url components are not properly extracted
-        case ("account-recovery", _): interceptAccountRecovery(url)
-        case ("mfa", _): interceptVerifyMfaCredential(url)
-        case ("callback", _): interceptPasswordless(url)
-
-        default: interceptPasswordless(url)
+        if !routeUrl(url) {
+            interceptPasswordless(url)
         }
+    }
+
+    /// Same routing as ``interceptUrl(_:)``, but reports whether the URL actually matched one of the
+    /// ``SdkConfig`` URIs instead of falling back to passwordless.
+    /// Used by `application(_:open:)`, which must tell the host app when nothing of ours consumed the URL.
+    ///
+    /// The matching goes through ``matchesEndpoint(of:)``, the same matcher
+    /// `WebAuthenticationSession.isOurCallback` uses, so the two entry hooks can't disagree
+    @discardableResult
+    internal func routeUrl(_ url: URL) -> Bool {
+        if url.matchesEndpoint(of: sdkConfig.accountRecoveryUri) {
+            interceptAccountRecovery(url)
+        } else if url.matchesEndpoint(of: sdkConfig.mfaUri) {
+            interceptVerifyMfaCredential(url)
+        } else if url.matchesEndpoint(of: sdkConfig.redirectUri) {
+            interceptPasswordless(url)
+        } else if url.matchesEndpoint(of: sdkConfig.emailVerificationUri) {
+            interceptEmailVerification(url)
+        } else {
+           return false
+        }
+        return true
     }
 }
