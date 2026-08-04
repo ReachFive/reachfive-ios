@@ -24,6 +24,10 @@ public class ReachFive: NSObject {
     var accountRecoveryCallback: AccountRecoveryCallback? = nil
     var emailVerificationCallback: EmailVerificationCallback? = nil
     var state: State = .NotInitialized
+    /// The initialization currently in flight, if any, so concurrent `initialize()` calls share it
+    /// instead of each fetching the configuration and creating its own set of providers.
+    /// Only ever read and written on the main actor, from `initialize()`.
+    var initialization: Task<[Provider], Error>? = nil
     public let sdkConfig: SdkConfig
     let providersCreators: Array<ProviderCreator>
     public let reachFiveApi: ReachFiveApi
