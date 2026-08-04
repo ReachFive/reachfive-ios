@@ -9,6 +9,21 @@ public extension ReachFive {
     /// default browser — can complete it, even for a direct call to this public API.
     func webviewLogin(_ request: WebviewLoginRequest) async throws -> AuthToken {
 
+        // Asked here and not only inside `webAuthSession.start(...)`, because the PKCE write below has to
+        // happen before the sheet opens and lands in a slot shared by every authorize-style flow: a call that
+        // is going to be dropped must not leave its PKCE where the login already under way expects its own.
+        // Measured on a device: the first web login of a session waits on iOS launching its browser process,
+        // and an impatient user taps a couple of dozen more times before the sheet appears — that many
+        // overwrites, one per dropped call.
+        //
+        // Not airtight: reading the session suspends, so two calls in the same turn can still both get past
+        // this and only be told apart by `start(...)`. Closing that window means arming the storage in the
+        // same main-actor turn as the slot, which the shared slot makes pointless — see the FIXME below.
+        guard !(await webAuthSession.isLoginInProgress) else {
+            Logger.shared.log("A web login is already in progress; this call is dropped before arming anything.")
+            throw ReachFiveError.AuthCanceled
+        }
+
         let pkce = Pkce.generate()
         // FIXME: this write lands in the *passwordless* PKCE slot, shared by every authorize-style flow.
         // Two behaviours follows:

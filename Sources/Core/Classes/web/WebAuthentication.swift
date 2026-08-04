@@ -89,6 +89,14 @@ final class WebAuthenticationSession {
         var session: ASWebAuthenticationSession?
     }
 
+    /// Whether the slot is taken, for a caller that has side effects to arm *before* presenting and must not
+    /// arm them for a call `start(...)` is going to drop (see `webviewLogin` and the shared PKCE slot).
+    /// Internal on purpose: an integrator has nothing to check, a dropped call already ends with
+    /// `.AuthCanceled`.
+    var isLoginInProgress: Bool {
+        if case .idle = state { false } else { true }
+    }
+
     private var state = State.idle
     /// Monotonic, never reset: a fresh identity for each accepted login, so the callback of a session
     /// belonging to a previous one can never resolve a newer login.
