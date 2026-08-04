@@ -28,6 +28,10 @@ public class ReachFive: NSObject {
     /// instead of each fetching the configuration and creating its own set of providers.
     /// Only ever read and written on the main actor, from `initialize()`.
     var initialization: Task<[Provider], Error>? = nil
+    /// The last app-lifecycle event whose delivery to the providers was deferred, waiting for them to
+    /// exist. Each new deferred event chains onto it, so the providers see the events in the order
+    /// UIKit sent them. Only ever read and written on the main actor, from `withProviders(_:)`.
+    var lifecycleDelivery: Task<Void, Never>? = nil
     public let sdkConfig: SdkConfig
     let providersCreators: Array<ProviderCreator>
     public let reachFiveApi: ReachFiveApi

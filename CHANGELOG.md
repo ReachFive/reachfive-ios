@@ -12,6 +12,8 @@
 
 - `application(_:continue:restorationHandler:)` now returns `false` when neither ReachFive's web-auth session nor any registered provider consumed the activity, instead of always returning `true`. If your app also routes universal links itself, only do so when this call returns `false`.
 
+- `applicationDidBecomeActive(_:)` and `application(_:didFinishLaunchingWithOptions:)` are `@MainActor`, like the two other app-lifecycle hooks. Calling them from your `UIApplicationDelegate`, which is main-actor isolated already, is unaffected.
+
 - ProviderCreator : the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can
   reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
 
@@ -30,6 +32,9 @@
 - New `WebProvider` to register a web provider (e.g. B.connect) with a `variant` and a completion `mode`. See the [ProviderCreator](https://developer.reachfive.com/sdk-ios/providerCreator.html) and [custom provider guide](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) documentation.
 - `webviewLogin` accepts a `webSessionMode` parameter picking how the `ASWebAuthenticationSession` returns: `.sdkScheme`, `.externalAppScheme`, `.externalAppUniversalLink(_:)` or `.inSheetUniversalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
 - `webviewLogin` accepts a new `loginUrlFragment` parameter to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
+
+### Bug fixes
+- The app-lifecycle hooks no longer drop the events that reach the SDK before its initialization has created the providers. On a cold start that window covers the launch itself and everything in the first ~200 ms: a universal link or a custom scheme opening the app was silently lost for the providers, and Facebook never got its `AppEvents.shared.activateApp()`. Such an event is now forwarded as soon as the providers exist, in the order UIKit sent it. The hooks stay synchronous and never block the main thread.
 
 ## v10.0.1
 
