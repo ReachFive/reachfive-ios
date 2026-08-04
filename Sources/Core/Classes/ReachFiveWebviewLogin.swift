@@ -9,35 +9,31 @@ public extension ReachFive {
     /// default browser — can complete it, even for a direct call to this public API.
     func webviewLogin(_ request: WebviewLoginRequest) async throws -> AuthToken {
 
-        // Asked here and not only inside `webAuthSession.start(...)`, because the PKCE write below has to
-        // happen before the sheet opens and lands in a slot shared by every authorize-style flow: a call that
-        // is going to be dropped must not leave its PKCE where the login already under way expects its own.
-        // Measured on a device: the first web login of a session waits on iOS launching its browser process,
-        // and an impatient user taps a couple of dozen more times before the sheet appears — that many
-        // overwrites, one per dropped call.
-        //
-        // Not airtight: reading the session suspends, so two calls in the same turn can still both get past
-        // this and only be told apart by `start(...)`. Closing that window means arming the storage in the
-        // same main-actor turn as the slot, which the shared slot makes pointless — see the FIXME below.
+        // Dropped here rather than by `webAuthSession.start(...)`, because the PKCE write below has to happen
+        // before the sheet opens and lands in a slot shared by every authorize-style flow (see the FIXME): a
+        // call that is going to be dropped must not leave its PKCE where the login under way expects its own.
+        // Measured on a device: the first web login waits on iOS launching its browser process, and an
+        // impatient user taps a couple of dozen more times meanwhile — that many overwrites otherwise.
+        // Not airtight: reading the session suspends, so two calls in the same turn both get past this and
+        // are only told apart by `start(...)`.
         guard !(await webAuthSession.isLoginInProgress) else {
             Logger.shared.log("A web login is already in progress; this call is dropped before arming anything.")
             throw ReachFiveError.AuthCanceled
         }
 
         let pkce = Pkce.generate()
-        // FIXME: this write lands in the *passwordless* PKCE slot, shared by every authorize-style flow.
-        // Two behaviours follows:
-        //   - a magic link tapped after the hosted login page switched to passwordless is completed by
-        //     `interceptPasswordless` using this PKCE;
-        //   - if iOS kills the app mid-detour, the callback received on relaunch is likewise completed by
-        //     `interceptPasswordless`, delivering this web login's token on the `passwordlessCallback`.
-        // The first is intentional, but the second is not.
-        // And it seems that starting a web login while a passwordless is pending overwrites the PKCE, so its magic link then fails.
-        // Same cause, one more consequence: this write happens *before* `webAuthSession.start(...)` can drop
-        // the call, because the PKCE has to be in storage while the sheet is open. On a double tap the
-        // dropped call therefore leaves its own PKCE behind, and the login that survives no longer matches
-        // what the slot holds — so both rescues above would fail for it. Fixing the ordering needs a slot
-        // per login rather than one shared key, i.e. the storage-slot redesign.
+        // FIXME: this write lands in the *passwordless* PKCE slot, shared by every authorize-style flow, which
+        // makes three behaviours possible:
+        //   - intentional: a magic link tapped after the hosted login page switched to passwordless is
+        //     completed by `interceptPasswordless` using this PKCE;
+        //   - not intentional: if iOS kills the app mid-detour, the callback received on relaunch is likewise
+        //     completed by `interceptPasswordless`, delivering this web login's token on the
+        //     `passwordlessCallback` — a channel no caller asked for, but which does rescue the `code`;
+        //   - not intentional: starting a web login while a passwordless is pending overwrites its PKCE, so
+        //     its magic link then fails.
+        // The guard above keeps a dropped call from adding a fourth. The fix is a slot per flow instead of one
+        // shared key, which would also let the login in progress be persisted and resumed after an app kill:
+        // see the storage-slot redesign.
         storage.save(key: pkceKey, value: pkce)
 
         let scope = (request.scope ?? scope)

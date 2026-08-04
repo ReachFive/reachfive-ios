@@ -3,57 +3,35 @@ import AuthenticationServices
 /// Carries the web login in progress: starts an `ASWebAuthenticationSession`, waits for its callback, and
 /// lets a link received through `application(_:open:)` complete it (``tryComplete(externalCallbackURL:)``).
 ///
-/// **A custom-scheme login arms both channels.** A provider may decide *midway*, sheet already open,
-/// whether it finishes inside the sheet or leaves the app for a third-party one — b.connect picks
-/// `passive`/`active` only after `/authorize`. The caller therefore cannot pick the channel up front, and
-/// does not have to. A universal-link login is the exception: it is built with `callback: .https(...)`, so
-/// the sheet itself intercepts the redirection and no out-of-band channel is armed for it.
+/// **A custom-scheme login arms both channels**, because a provider may decide *midway*, sheet already open,
+/// whether it finishes inside the sheet or leaves for a third-party app — b.connect picks `passive`/`active`
+/// only after `/authorize`, so neither the caller nor the SDK can choose up front. Two calls leave the
+/// out-of-band channel unarmed: a universal-link login, whose `callback: .https(...)` makes the sheet
+/// intercept the redirection itself, and `logout`, whose callback carries no `code`
+/// (`expectsAuthorizationCode: false`).
 ///
-/// **One login at a time, the incumbent keeps its place, and the newcomer is dropped silently.** A
-/// `start(...)` called while another login is in progress ends with `.AuthCanceled` — the error every
-/// integration already treats as "nothing happened" — and the login already under way is left alone. The
-/// caller has nothing to do about it: this is the SDK absorbing a double tap, not a failure to report.
+/// **One login at a time, and the newcomer is dropped silently** with `.AuthCanceled` — the error every
+/// integration already treats as "nothing happened" — leaving the login under way untouched. Nothing is
+/// expected of the caller: this is the SDK absorbing a double tap, not a failure to report.
 ///
-/// Refusing rather than replacing is the fix for a concrete bug. Replacing the incumbent means cancelling
-/// its sheet and presenting the replacement right behind it; `session.start()` then answers `false` while the
-/// outgoing sheet is still animating away, and retrying until it answers `true` only moves the failure —
-/// the presentation fails asynchronously in the completion handler with `presentationContextInvalid`, and
-/// *both* logins are lost. Measured on an iOS device with two very fast taps on the same web-login button
-/// (not reproducible on Mac Catalyst). Refusing the newcomer removes the cancel-then-present sequence
-/// altogether, which is the only way found to remove the failure rather than race with it — and on a double
-/// tap the first tap is the one the user meant anyway.
+/// Refusing rather than replacing is a measured choice. Replacing means cancelling the incumbent's sheet and
+/// presenting the newcomer behind it; `session.start()` then answers `false` while the outgoing sheet
+/// animates away, and retrying until it answers `true` only moves the failure — the presentation then fails
+/// asynchronously with `presentationContextInvalid`, and *both* logins are lost. Reproduced on an iOS device
+/// with two fast taps on the same button (never on Mac Catalyst). Refusing removes the cancel-then-present
+/// sequence entirely, and on a double tap the first tap is the one the user meant. No legitimate caller wants
+/// the other behaviour: a logout is always a manual action, so it cannot start while a login sheet is on
+/// screen. Multi-window (iPad, Mac Catalyst) is the one place two concurrent logins would make sense, and is
+/// out of scope while one session is shared by the whole `ReachFive` instance.
 ///
-/// Every other concurrent caller would be programmatic, and there is none: a logout is always a manual
-/// action, so it cannot be triggered while a login sheet is on screen. Multi-window setups (iPad,
-/// Mac Catalyst) are the one place where two concurrent logins would be legitimate; they are out of scope
-/// while a single session is shared by the whole `ReachFive` instance.
+/// The way out if a login never resolves: cancel the `Task` that started it — `onCancel` closes the sheet and
+/// frees the slot, which a view being torn down does on its own. No extra API is needed for it.
 ///
-/// The way out, if a login somehow never resolves: cancel the `Task` that started it. `onCancel` closes the
-/// sheet and resumes with `.AuthCanceled`, which frees the slot — a view being torn down does this on its
-/// own, and no extra API is needed for it.
-///
-/// Late or duplicated callbacks are neutralised by ``State``: a resolution has to name the login it belongs
-/// to (`Login.id`), and the winning one puts the state back to `idle`, so any later arrival finds nothing to
-/// resolve.
-///
-/// **The out-of-band channel is only armed for a login**: `logout` also goes through `start(...)`, but with
-/// `expectsAuthorizationCode: false`. Its callback (`post_logout_redirect_uri`) carries no `code` and is
-/// intercepted by the sheet itself, so `expectedCallback` stays `nil`.
-///
-/// **Accepted imprecision in the matching**: arming `expectedCallback` for *every* web login widens the
-/// window in which a passwordless magic link, tapped while a sheet is open, would be consumed by
-/// `tryComplete` instead of being routed to `interceptPasswordless` (``ReachFive/interceptUrl(_:)``).
-///
-/// **Limitation (out-of-band)**: the state of a login in progress only lives in memory. If iOS kills the app
-/// during the detour outside it, the callback received on relaunch matches nothing (`tryComplete` returns
-/// `false`, the host app routes the link). It is then *accidentally* rescued: `webviewLogin` left its PKCE
-/// in the passwordless storage slot, so `interceptPasswordless` completes the login and delivers the token
-/// on the `passwordlessCallback` — a web login surfacing on the passwordless channel, which no caller asked
-/// for. That accident is the one thing standing between this limitation and a lost `code`, and the real
-/// detour can be long, so the window is not negligible. A proper
-/// resume after relaunch would mean persisting the login in progress (redirect_uri + PKCE, already in
-/// storage) and a channel to deliver the result to the app. Both the accident and the proper fix are out of
-/// scope here; see the PKCE storage-slot redesign.
+/// **Two accepted imprecisions**, both rooted in the shared PKCE slot and described by the FIXME in
+/// ``ReachFive/webviewLogin(_:)``: `expectedCallback` is armed for every custom-scheme login, which widens
+/// the window in which a passwordless magic link tapped while a sheet is open is consumed by `tryComplete`
+/// instead of ``ReachFive/interceptUrl(_:)``; and the login in progress lives only in memory, so an app kill
+/// mid-detour leaves its callback matching nothing on relaunch.
 ///
 /// `@MainActor`: the whole `ASWebAuthenticationSession` domain is already main-thread.
 @MainActor
@@ -82,17 +60,15 @@ final class WebAuthenticationSession {
         /// The `redirect_uri` expected out-of-band; `nil` for a universal-link login (the sheet intercepts
         /// the redirection itself) → `tryComplete` then matches nothing.
         let expectedCallback: URL?
-        /// The presented session, to be closed if a resolution comes from somewhere else. Set back to `nil`
-        /// as soon as the session reports its own completion: its sheet is then already on its way out, and
-        /// `cancel()`ing it at that point makes UIKit load the view of a deallocating
-        /// `SFAuthenticationViewController`.
+        /// The presented session, to close its sheet when the resolution comes from somewhere else
+        /// (out-of-band, or the calling `Task` cancelled). Set back to `nil` as soon as the session reports
+        /// its own completion: the system is then done with it and there is no sheet left to close.
         var session: ASWebAuthenticationSession?
     }
 
-    /// Whether the slot is taken, for a caller that has side effects to arm *before* presenting and must not
-    /// arm them for a call `start(...)` is going to drop (see `webviewLogin` and the shared PKCE slot).
-    /// Internal on purpose: an integrator has nothing to check, a dropped call already ends with
-    /// `.AuthCanceled`.
+    /// Whether the slot is taken — for a caller with side effects to arm *before* presenting, which must not
+    /// arm them for a call `start(...)` is going to drop (see ``ReachFive/webviewLogin(_:)``). Internal on
+    /// purpose: an integrator has nothing to check, a dropped call already ends with `.AuthCanceled`.
     var isLoginInProgress: Bool {
         if case .idle = state { false } else { true }
     }
@@ -111,17 +87,14 @@ final class WebAuthenticationSession {
     }
 
     /// Starts a web login and waits for its callback (success, error or cancellation). The
-    /// ``WebSessionMode`` describes the shape of the callback (custom scheme or universal link) and drives
-    /// how the session is built. For a custom scheme both channels are armed: the sheet intercepts if the
-    /// flow never leaves it, and ``tryComplete(externalCallbackURL:)`` resolves if the return comes back
-    /// out-of-band — a provider can pick either one midway, sheet already open. If the calling `Task` is
-    /// cancelled (view torn down, timeout…), the sheet is closed and the call ends with `.AuthCanceled`.
+    /// ``WebSessionMode`` drives how the session is built and which channels are armed, as described above.
+    /// If the calling `Task` is cancelled (view torn down, timeout…), the sheet is closed and the call ends
+    /// with `.AuthCanceled`.
     ///
     /// - Parameter expectsAuthorizationCode: `false` for a call whose callback carries no `code` (logout):
     ///   the out-of-band channel is then not armed at all.
-    /// - Throws: `.AuthCanceled` when a web login is already in progress — the call is dropped and the
-    ///   login under way is untouched. Callers do not have to single this case out: it is the same
-    ///   "nothing happened" outcome as a user tapping Cancel.
+    /// - Throws: `.AuthCanceled` when a web login is already in progress — the call is dropped, the login
+    ///   under way is untouched, and the caller has nothing to single out.
     func start(url: URL,
                mode: WebSessionMode,
                expectsAuthorizationCode: Bool = true,
@@ -269,17 +242,17 @@ final class WebAuthenticationSession {
         state = .idle
         login.continuation.resume(with: result)
         // Only reached when the resolution came from somewhere other than the session itself, which is why
-        // this cannot land on a session that has already reported.
+        // this cannot land on a session that has already reported. Unrelated to the "Attempting to load the
+        // view … while it is deallocating (SFAuthenticationViewController)" iOS logs when tearing a cancelled
+        // sheet down: that one shows up on a plain user cancel too, with no `cancel()` of ours involved.
         login.session?.cancel()
     }
 
     /// `true` when the incoming URL designates the same endpoint as the `redirect_uri` we sent
-    /// (``matchesEndpoint(of:)``, the matcher shared with ``ReachFive/interceptUrl(_:)``) and carries a
-    /// `code` (success) or an `error` parameter (OAuth refusal, e.g. `access_denied` — the login then ends
-    /// cleanly with the callback's `ApiError` instead of hanging on the sheet). Comparing the scheme keeps a
-    /// login expected on a custom scheme from matching an https URL, and the other way round. Since the
-    /// expected path is the one we declare (the redirect_uri), this matching is enough to tell our callback
-    /// apart from the app's other links.
+    /// (``matchesEndpoint(of:)``, shared with ``ReachFive/interceptUrl(_:)``) and carries a `code` or an
+    /// `error` parameter — an OAuth refusal such as `access_denied` then ends the login cleanly with the
+    /// callback's `ApiError` instead of leaving it on the sheet. Comparing the scheme and the path we declared
+    /// is enough to tell our callback apart from the app's other links.
     nonisolated static func isOurCallback(_ url: URL, expectedCallback expected: URL) -> Bool {
         url.matchesEndpoint(of: expected)
         && (url.queryValue("code") != nil || url.queryValue("error") != nil)

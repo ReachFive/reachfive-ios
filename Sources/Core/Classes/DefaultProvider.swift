@@ -49,8 +49,8 @@ public final class WebProvider: ProviderCreator {
 class DefaultProvider: NSObject, Provider {
     let name: String
 
-    // `weak` : ReachFive retient ses providers, une référence forte ici créerait un cycle
-    // ReachFive ↔ DefaultProvider et le graphe SDK ne serait jamais désalloué (même pattern que
+    // `weak`: ReachFive retains its providers, so a strong reference here would create a
+    // ReachFive ↔ DefaultProvider cycle and the SDK graph would never be deallocated (same pattern as
     // LoginWKWebview).
     private weak var reachfive: ReachFive?
     let providerConfig: ProviderConfig
@@ -67,14 +67,13 @@ class DefaultProvider: NSObject, Provider {
 
         switch mode {
         case .customScheme:
-            // Le custom scheme n'a pas besoin de l'`universalLink` du backend : la redirect_uri est celle
-            // du SdkConfig.
+            // A custom scheme needs no `universalLink` from the backend: the redirect_uri is the SdkConfig's.
             webSessionMode = .customScheme
 
         case .universalLink:
-            // Deux causes d'échec différé : la configuration backend ne porte pas d'`universalLink`, ou
-            // l'OS est trop ancien. Le cas `.universalLink` est inconstructible sous iOS 17.4 côté
-            // appelant, mais il est ici résolu depuis la configuration backend — contrôle runtime.
+            // Two causes of deferred failure: the backend configuration carries no `universalLink`, or the OS
+            // is too old. `.universalLink` cannot be constructed below iOS 17.4 on the caller's side, but here
+            // it is resolved from the backend configuration, hence the runtime check.
             guard let link = providerConfig.universalLink else {
                 Logger.shared.log("No universal link configured for provider '\(providerConfig.provider)' in universal-link mode; login() will fail with a TechnicalError.")
                 webSessionMode = nil
