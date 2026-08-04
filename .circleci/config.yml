@@ -35,6 +35,18 @@ jobs:
             pod install
             cd ../
             pod lib lint Reach5.podspec
+  test:
+    macos:
+      xcode: "16.4.0"
+    steps:
+      - checkout
+      # The destination has to name a concrete simulator: xcodebuild refuses
+      # "generic/platform=iOS Simulator" for the test action ("Tests must be run
+      # on a concrete device"). The name below is the one shipped by the Xcode
+      # image pinned just above, so update both together.
+      - run:
+          name: Run the Reach5Tests suite
+          command: xcodebuild -scheme Reach5 -destination 'platform=iOS Simulator,name=iPhone 16 Pro' test
   build-for-release:
     macos:
       xcode: "16.4.0"
@@ -112,6 +124,8 @@ workflows:
     jobs:
       - build:
           <<: *default_workflows_tags
+      - test:
+          <<: *default_workflows_tags
       - check-doc-examples:
           <<: *pull_request_branches
       - build-for-release:
@@ -119,4 +133,5 @@ workflows:
       - publish:
           requires:
             - build-for-release
+            - test
           <<: *default_workflows_filters
