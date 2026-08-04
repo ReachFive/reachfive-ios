@@ -236,14 +236,21 @@ final class WebAuthenticationSession {
     }
 
     private func handleSessionCompletion(id: Int, callbackURL: URL?, error: Error?) {
+        // A session that is no longer the one in place reports late — typically the `canceledLogin` our own
+        // `cancel()` draws after an out-of-band resolution. Nothing to resolve, and nothing worth logging.
+        guard case var .running(login) = state, login.id == id else { return }
+
         // The session reported, so its sheet is already going away: forget it, so the resolution below does
         // not `cancel()` a session the system is done with (see `Login.session`).
-        if case var .running(login) = state, login.id == id {
-            login.session = nil
-            state = .running(login)
-        }
+        login.session = nil
+        state = .running(login)
 
         if let error {
+            // Logged because `canceledLogin` covers more than the user tapping Cancel: the system also
+            // reports it when the app is not associated with the host of an `.https` callback, and the
+            // reason only shows up in `localizedDescription`. Only reached for an error this call is about
+            // to deliver, so it never fires for a sheet we closed ourselves.
+            Logger.shared.log("The web session ended without a callback: \(error.localizedDescription)")
             complete(id: id, .failure(Self.reachFiveError(for: error)))
         } else if let callbackURL {
             complete(id: id, .success(callbackURL))
@@ -278,19 +285,18 @@ final class WebAuthenticationSession {
         && (url.queryValue("code") != nil || url.queryValue("error") != nil)
     }
 
-    /// Maps an `ASWebAuthenticationSession` error onto a `ReachFiveError`.
+    /// Maps an `ASWebAuthenticationSession` error onto a `ReachFiveError`. Pure: the raw error is logged by
+    /// `handleSessionCompletion(id:callbackURL:error:)`, which knows whether it is about to be delivered.
     ///
     /// `canceledLogin` is not only "the user tapped Cancel": the system also reports it when the app is not
-    /// associated with the host of an `.https` callback (measured on iOS and Mac Catalyst — the reason only
-    /// appears in `localizedDescription`). It is logged here so a misconfigured Associated Domain does not
-    /// vanish into the `.AuthCanceled` every integration ignores.
+    /// associated with the host of an `.https` callback, and when a sheet is closed by `cancel()` — measured
+    /// on iOS and Mac Catalyst. Only `localizedDescription` tells the three apart.
     nonisolated static func reachFiveError(for error: Error) -> ReachFiveError {
         guard let sessionError = error as? ASWebAuthenticationSessionError else {
             return .TechnicalError(reason: "Unknown Error \(error.localizedDescription)")
         }
         switch sessionError.code {
         case .canceledLogin:
-            Logger.shared.log("The web session ended without a callback: \(error.localizedDescription)")
             return .AuthCanceled
         case .presentationContextNotProvided:
             return .TechnicalError(reason: "Presentation context not provided: \(error.localizedDescription)")
