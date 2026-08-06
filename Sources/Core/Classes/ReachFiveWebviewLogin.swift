@@ -28,8 +28,10 @@ public extension ReachFive {
         //     completed by `interceptPasswordless` using this PKCE;
         //   - not intentional: if iOS kills the app mid-detour, the callback received on relaunch is likewise
         //     completed by `interceptPasswordless`, delivering this web login's token on the
-        //     `passwordlessCallback` — a channel no caller asked for, but which does rescue the `code`;
-        //   - not intentional: starting a web login while a passwordless is pending overwrites its PKCE, so
+	    //     `passwordlessCallback` — a channel no caller asked for, but which does rescue the `code`.
+	    //     The same happens without a kill: cancel the login locally (sheet closed, `Task` cancelled) while the browser
+	    //     is still on its way, and the callback that lands afterwards takes that same detour;
+	    //   - not intentional: starting a web login while a passwordless is pending overwrites its PKCE, so
         //     its magic link then fails.
         // The guard above keeps a dropped call from adding a fourth. The fix is a slot per flow instead of one
         // shared key, which would also let the login in progress be persisted and resumed after an app kill:

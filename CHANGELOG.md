@@ -10,7 +10,7 @@
   - Renamed `baseScheme` field to `customScheme`
   - The initializer now stops the program with a `preconditionFailure` when the scheme is not a valid URL scheme (either because of the `customScheme` parameter, or indirectly because the default scheme is derived from an ill-formatted `clientId`, e.g. one containing `_`). In that case, pass an explicit valid `customScheme` and declare it in your Info.plist and your ReachFive console.
 
-- `application(_:continue:restorationHandler:)` and `application(_:open:options:)` now returns `false` when no the SDK flow or any registered provider consumed the activity or URL.
+- `application(_:continue:restorationHandler:)` and `application(_:open:options:)` now returns `false` when neither an SDK flow nor any registered provider consumed the activity or URL, instead of always returning `true`. If your app also routes universal links or custom-scheme URLs itself, only do so when the call returns `false`.
 
 - ProviderCreator : the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
 
@@ -27,9 +27,6 @@
 - New `WebProvider` to register a web provider with a `variant` and a completion `mode`. See the [ProviderCreator](https://developer.reachfive.com/sdk-ios/providerCreator.html) and [custom provider guide](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) documentation.
 - `webviewLogin` accepts a `webSessionMode` parameter picking the shape of the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
 - `webviewLogin` accepts a new `loginUrlFragment` parameter to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
-
-### Other changes
-- **One web login at a time.** `webviewLogin`, a `login` on a web provider, and `logout(webSessionLogout:)` all share a single web session. A call started while another one is still in progress ends with `ReachFiveError.AuthCanceled` and leaves the login under way untouched. Nothing is expected of you: a double tap on a login control is absorbed by the SDK, and `AuthCanceled` is the outcome you already ignore. To end a web login early — a screen being torn down, a timeout — cancel the `Task` that started it.
 
 ## v10.0.1
 
