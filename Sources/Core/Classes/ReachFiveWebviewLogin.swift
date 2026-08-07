@@ -26,12 +26,14 @@ public extension ReachFive {
         // makes three behaviours possible:
         //   - intentional: a magic link tapped after the hosted login page switched to passwordless is
         //     completed by `interceptPasswordless` using this PKCE;
-        //   - not intentional: if iOS kills the app mid-detour, the callback received on relaunch is likewise
-        //     completed by `interceptPasswordless`, delivering this web login's token on the
-	    //     `passwordlessCallback` — a channel no caller asked for, but which does rescue the `code`.
-	    //     The same happens without a kill: cancel the login locally (sheet closed, `Task` cancelled) while the browser
-	    //     is still on its way, and the callback that lands afterwards takes that same detour;
-	    //   - not intentional: starting a web login while a passwordless is pending overwrites its PKCE, so
+        //   - not intentional: the `code` gets rescued on a channel no caller asked for. The active b.connect
+        //     detour finishes on its own whatever we do to the sheet — the bank app, then the default browser,
+        //     carry the rest of the chain and deliver the callback to `application(_:open:)` regardless. If
+        //     the slot is empty by then (the login cancelled locally at any point of the detour, or the app
+        //     killed and relaunched by the link itself), `tryComplete` matches nothing and `routeUrl` hands our
+        //     own callback to `interceptPasswordless`, which delivers this web login's token on the
+        //     `passwordlessCallback`;
+        //   - not intentional: starting a web login while a passwordless is pending overwrites its PKCE, so
         //     its magic link then fails.
         // The guard above keeps a dropped call from adding a fourth. The fix is a slot per flow instead of one
         // shared key, which would also let the login in progress be persisted and resumed after an app kill:
