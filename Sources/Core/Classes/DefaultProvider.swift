@@ -55,6 +55,10 @@ class DefaultProvider: NSObject, Provider {
     private weak var reachfive: ReachFive?
     let providerConfig: ProviderConfig
     public let webSessionMode: WebSessionMode?
+    /// Why `webSessionMode` is `nil`, reported verbatim by `login()`. `init` has two distinct causes of
+    /// failure — no `universalLink` in the backend configuration, or an OS that is too old — and naming only
+    /// one of them sends the integrator off to fix a configuration that is already correct.
+    private let unavailableModeReason: String?
 
     public init(
         reachfive: ReachFive,
@@ -69,22 +73,28 @@ class DefaultProvider: NSObject, Provider {
         case .customScheme:
             // A custom scheme needs no `universalLink` from the backend: the redirect_uri is the SdkConfig's.
             webSessionMode = .customScheme
+            unavailableModeReason = nil
 
         case .universalLink:
             // Two causes of deferred failure: the backend configuration carries no `universalLink`, or the OS
             // is too old. `.universalLink` cannot be constructed below iOS 17.4 on the caller's side, but here
             // it is resolved from the backend configuration, hence the runtime check.
             guard let link = providerConfig.universalLink else {
-                Logger.shared.log("No universal link configured for provider '\(providerConfig.provider)' in universal-link mode; login() will fail with a TechnicalError.")
+                let reason = "No universal link configured for provider '\(providerConfig.provider)' in universal-link mode"
+                Logger.shared.log("\(reason); login() will fail with a TechnicalError.")
                 webSessionMode = nil
+                unavailableModeReason = reason
                 return
             }
             guard #available(iOS 17.4, *) else {
-                Logger.shared.log("Universal link callback requires iOS 17.4+; login() for provider '\(providerConfig.provider)' will fail with a TechnicalError.")
+                let reason = "Universal link callback requires iOS 17.4+ (provider '\(providerConfig.provider)')"
+                Logger.shared.log("\(reason); login() will fail with a TechnicalError.")
                 webSessionMode = nil
+                unavailableModeReason = reason
                 return
             }
             webSessionMode = .universalLink(link)
+            unavailableModeReason = nil
         }
     }
 
@@ -97,7 +107,7 @@ class DefaultProvider: NSObject, Provider {
         let presentationContextProvider = try await presenting.webAuthContextProvider()
 
         guard let webSessionMode else {
-            throw ReachFiveError.TechnicalError(reason: "No universal link configured for provider \(name)")
+            throw ReachFiveError.TechnicalError(reason: unavailableModeReason ?? "No web session mode resolved for provider \(name)")
         }
 
         guard let reachfive else {
