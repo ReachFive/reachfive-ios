@@ -6,8 +6,7 @@ public extension ReachFive {
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
         // Out-of-band "custom scheme" channel: a third-party app reopens the host app through the SDK's
         // scheme. The web-auth session is tried first — its matching is exact (scheme + host + path +
-        // code/error of the expected redirect_uri, and it is only armed while a login is in flight) —
-        // otherwise `routeUrl` would swallow the link as a passwordless callback.
+        // code/error of the expected redirect_uri) — otherwise `routeUrl` would swallow the link as a passwordless callback.
         if webAuthSession.tryComplete(externalCallbackURL: url) {
             return true
         }

@@ -31,9 +31,7 @@ import AuthenticationServices
 @MainActor
 final class WebAuthenticationSession {
 
-    /// Whether a login is in progress, and everything its resolution needs — as **one** value rather than an
-    /// agreement to maintain by hand between a session, a continuation, an expected callback and a boolean.
-    /// Being `idle` and holding a continuation is not a state that can be written.
+    /// Whether a login is in progress, and everything its resolution needs between a session, a continuation, an expected callback and a boolean.
     private enum State {
         case idle
 
@@ -60,9 +58,8 @@ final class WebAuthenticationSession {
         var session: ASWebAuthenticationSession?
     }
 
-    /// Whether the slot is taken — for a caller with side effects to arm *before* presenting, which must not
-    /// arm them for a call `start(...)` is going to drop (see ``ReachFive/webviewLogin(_:)``). Internal on
-    /// purpose: an integrator has nothing to check, a dropped call already ends with `.AuthCanceled`.
+    /// Whether the slot is taken: a caller must not apply side effects *before* calling a `start(...)` that would  be knwon to be refused (see ``ReachFive/webviewLogin(_:)``).
+    /// Internal onpurpose: an integrator has nothing to check, a dropped call already ends with `.AuthCanceled`.
     var isLoginInProgress: Bool {
         if case .idle = state { false } else { true }
     }
@@ -81,12 +78,12 @@ final class WebAuthenticationSession {
     }
 
     /// Starts a web login and waits for its callback (success, error or cancellation). The
-    /// ``WebSessionMode`` drives how the session is built and which channels are armed, as described above.
+    /// ``WebSessionMode`` drives how the session is built and which channels are prepared, as described above.
     /// If the calling `Task` is cancelled (view torn down, timeout…), the sheet is closed and the call ends
     /// with `.AuthCanceled`.
     ///
     /// - Parameter expectsAuthorizationCode: `false` for a call whose callback carries no `code` (logout):
-    ///   the out-of-band channel is then not armed at all.
+    ///   the out-of-band channel is then not prepared at all.
     /// - Throws: `.AuthCanceled` when a web login is already in progress — the call is dropped, the login
     ///   under way is untouched, and the caller has nothing to single out.
     func start(url: URL,
@@ -99,10 +96,9 @@ final class WebAuthenticationSession {
         // already, to no effect, before the continuation was installed).
         try Task.checkCancellation()
 
-        // One login at a time, and the incumbent keeps its place. Silently: a second call is a double tap,
-        // and `.AuthCanceled` is what every integration already ignores.
+        // One login at a time, and the incumbent keeps its place.
         guard case .idle = state else {
-            Logger.shared.log("A web login is already in progress; this call is dropped. Nothing to handle: the login under way keeps the slot.")
+            Logger.shared.log("A web login is already in progress; this call is dropped, the login under way continues.")
             throw ReachFiveError.AuthCanceled
         }
 
@@ -161,7 +157,7 @@ final class WebAuthenticationSession {
         let expectedCallback: URL?
         switch mode.callback {
         case .customScheme:
-            // Arm the out-of-band channel: the provider may decide midway to leave for a third-party app,
+            // Prepare the out-of-band channel: the provider may decide midway to leave for a third-party app,
             // sheet already open, and come back through `application(_:open:)`.
             expectedCallback = expectsAuthorizationCode ? sdkRedirectUri : nil
             session = ASWebAuthenticationSession(
@@ -173,7 +169,7 @@ final class WebAuthenticationSession {
             guard #available(iOS 17.4, *), let host = callback.host else {
                 throw ReachFiveError.TechnicalError(reason: "Universal link callback requires iOS 17.4+ and a host: \(callback)")
             }
-            // No out-of-band channel to arm: `callback: .https(...)` makes the sheet itself intercept the
+            // No out-of-band channel to prepare: `callback: .https(...)` makes the sheet itself intercept the
             // redirection, and nothing else can deliver that link to us — `application(_:open:)` never
             // sees https URLs.
             expectedCallback = nil
@@ -213,7 +209,7 @@ final class WebAuthenticationSession {
         state = .running(login)
 
         if let error {
-            // Logged because `canceledLogin` covers more than the user tapping Cancel: the system also
+            // Logged because `.canceledLogin` covers more than the user tapping Cancel: the system also
             // reports it when the app is not associated with the host of an `.https` callback, and the
             // reason only shows up in `localizedDescription`. Only reached for an error this call is about
             // to deliver, so it never fires for a sheet we closed ourselves.
@@ -244,8 +240,7 @@ final class WebAuthenticationSession {
 
     /// `true` when the incoming URL designates the same endpoint as the `redirect_uri` we sent
     /// (``matchesEndpoint(of:)``, shared with ``ReachFive/interceptUrl(_:)``) and carries a `code` or an
-    /// `error` parameter — an OAuth refusal such as `access_denied` then ends the login cleanly with the
-    /// callback's `ApiError` instead of leaving it on the sheet. Comparing the scheme and the path we declared
+    /// `error` parameter. Comparing the scheme and the path we declared
     /// is enough to tell our callback apart from the app's other links.
     nonisolated static func isOurCallback(_ url: URL, expectedCallback expected: URL) -> Bool {
         url.matchesEndpoint(of: expected)
