@@ -39,6 +39,14 @@ When logging in with secure webview, a dialog pops up where you must select *Con
 
 image::sdk-ios:ROOT:secure-login-dialog.png[width=500px,role=zoom]
 
+=== One web login at a time
+
+`{docname}`, a `login` on a xref:providerCreator.adoc[web provider] and xref:logout.adoc[`logout(webSessionLogout:)`] share a single web session. A call made while another one is still in progress ends with `AuthCanceled` and leaves the login under way untouched.
+
+There is nothing to add on your side: a double tap on a login control is absorbed by the SDK, and `AuthCanceled` means "nothing happened" (see <<ReachFiveError>>). Refusing the second call is deliberate — replacing the login in progress means dismissing its sheet and presenting another one behind it, which iOS fails asynchronously, losing *both* logins.
+
+To end a web login early, cancel the `Task` that started it: the sheet closes and the call returns `AuthCanceled`. A SwiftUI `.task` or any `Task` you cancel when tearing down your screen does this for you.
+
 == Usage
 
 Build the request with `presenting: Presentation(from: self)` from the initiating link:https://developer.apple.com/documentation/uikit/uiviewcontroller[UIViewController^]: the SDK derives the presentation context itself, as it does for xref:getProvider.adoc[`provider.login`].
