@@ -168,7 +168,7 @@ It authenticates the profile with the provider otherwise it returns a `ReachFive
 
 Based on the problem, the `ReachFiveError` will be:
 
-* `AuthCanceled`: The user cancelled the request or no credential was available in the keychain.
+* `AuthCanceled`: Nothing happened, and nothing is expected of you — ignoring it is a valid way to handle it. The user cancelled the request, no credential was available in the keychain, or a web login was dropped because another one was already in progress (see xref:webviewLogin.adoc[]).
 * `RequestError(apiError: ApiError)` for a Bad Request (status 400) error.
 * `AuthFailure(reason: String, apiError: ApiError?)` mainly for Unauthorized (status 401) error.
 * `TechnicalError(reason: String, apiError: ApiError?)` if it's an Internal Server Error (status 500) or other internal errors.
