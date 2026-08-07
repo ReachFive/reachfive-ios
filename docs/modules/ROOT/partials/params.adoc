@@ -402,18 +402,21 @@ TIP: For more, see link:https://developer.apple.com/documentation/authentication
 
 The value of this property is false by default.
 
+NOTE: An ephemeral session gets its own cookie store, isolated from the default browser's. That matters only for a provider whose flow carries state in a cookie *and* detours out of the sheet: if the login leaves for a third-party app and comes back through the default browser, the cookie set inside the ephemeral sheet is not there to be read. No {company} provider depends on this today — the SDK's own leg is stateless, carrying everything in the `state` — but it is the failure mode to look at first if an otherwise-working provider breaks only when this flag is on.
+
 TIP: For more, see link:https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession/prefersephemeralwebbrowsersession[here^].
 
 // end::prefersEphemeralWebBrowserSession[]
 
 // tag::webSessionMode[]
 |[[webSessionMode,webSessionMode]] webSessionMode `WebSessionMode`
-|Controls the return channel of the `ASWebAuthenticationSession` and its `redirect_uri`. Defaults to `.sdkScheme`.
+|Controls the shape of the `ASWebAuthenticationSession` callback and its `redirect_uri`. Defaults to `.customScheme`.
 
 .Values
-* `.sdkScheme`: custom scheme, intercepted inside the session. Works on all supported iOS versions.
-* `.universalLink(URL)`: universal link intercepted inside the session (iOS 17.4+). Requires the `webcredentials:` Associated Domain.
-* `.externalApp(URL)`: *out-of-band* — an external app reopens the host app via the universal link, forwarded to {company} through xref:application/applicationContinueUserActivity.adoc[]. Requires the `applinks:` Associated Domain.
+* `.customScheme`: the SDK's custom scheme, on all supported iOS versions. Both return paths are armed — the sheet intercepts the redirect when the login never leaves it, and xref:application/applicationOpenUrl.adoc[] resolves it when the default browser delivers it instead.
+* `.universalLink(URL)`: universal link intercepted inside the sheet (iOS 17.4+). Requires the `webcredentials:` Associated Domain.
+
+NOTE: There is no "in-band vs out-of-band" choice to make. A provider may decide *mid-flight*, sheet already open, whether to hand off to another app: B.connect only picks `passive` or `active` after the `/authorize` call. `.customScheme` covers both outcomes.
 
 TIP: See the "Associated Domains" section of xref:index.adoc[] for entitlement setup, and the xref:providerCreator.adoc[WebProvider] entry for a ready-made provider using this mechanism.
 // end::webSessionMode[]
