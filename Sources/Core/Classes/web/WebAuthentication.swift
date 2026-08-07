@@ -1,18 +1,16 @@
 import AuthenticationServices
 
-/// Carries the web login in progress: starts an `ASWebAuthenticationSession`, waits for its callback, and
-/// lets a link received through `application(_:open:)` complete it (``tryComplete(externalCallbackURL:)``).
+/// Carries the web login in progress: starts an `ASWebAuthenticationSession`, waits for its callback, and either complete it locally,
+/// or lets a link received through `application(_:open:)` complete it (``tryComplete(externalCallbackURL:)``).
 ///
-/// **A custom-scheme login arms both channels**, because a provider may decide *midway*, sheet already open,
-/// whether it finishes inside the sheet or leaves for a third-party app — b.connect picks `passive`/`active`
-/// only after `/authorize`, so neither the caller nor the SDK can choose up front. Two calls leave the
-/// out-of-band channel unarmed: a universal-link login, whose `callback: .https(...)` makes the sheet
+/// **A custom-scheme login prepares both channels**, because a provider may decide *midway*, sheet already open,
+/// whether it finishes inside the sheet or leaves for a third-party app. Two calls leave the
+/// out-of-band channel inactive: a universal-link login, whose `callback: .https(...)` makes the sheet
 /// intercept the redirection itself, and `logout`, whose callback carries no `code`
 /// (`expectsAuthorizationCode: false`).
 ///
-/// **One login at a time, and the newcomer is dropped silently** with `.AuthCanceled` — the error every
-/// integration already treats as "nothing happened" — leaving the login under way untouched. Nothing is
-/// expected of the caller: this is the SDK absorbing a double tap, not a failure to report.
+/// **One login at a time, and the newcomer is dropped silently** with `.AuthCanceled`, leaving the login under way untouched.
+/// Nothing is expected of the caller: this is the SDK absorbing a double tap, not a failure to report.
 ///
 /// Refusing rather than replacing is a measured choice. Replacing means cancelling the incumbent's sheet and
 /// presenting the newcomer behind it; `session.start()` then answers `false` while the outgoing sheet
@@ -25,13 +23,9 @@ import AuthenticationServices
 /// out of scope while one session is shared by the whole `ReachFive` instance.
 ///
 /// The way out if a login never resolves: cancel the `Task` that started it — `onCancel` closes the sheet and
-/// frees the slot, which a view being torn down does on its own. No extra API is needed for it.
+/// frees the slot, which a view being torn down does on its own.
 ///
-/// **Two accepted imprecisions**, both rooted in the shared PKCE slot and described by the FIXME in
-/// ``ReachFive/webviewLogin(_:)``: `expectedCallback` is armed for every custom-scheme login, which widens
-/// the window in which a passwordless magic link tapped while a sheet is open is consumed by `tryComplete`
-/// instead of ``ReachFive/interceptUrl(_:)``; and the login in progress lives only in memory, so an app kill
-/// mid-detour leaves its callback matching nothing on relaunch.
+/// **Two accepted imprecisions**, both rooted in the shared PKCE slot and described by the FIXME in ``ReachFive/webviewLogin(_:)``
 ///
 /// `@MainActor`: the whole `ASWebAuthenticationSession` domain is already main-thread.
 @MainActor
