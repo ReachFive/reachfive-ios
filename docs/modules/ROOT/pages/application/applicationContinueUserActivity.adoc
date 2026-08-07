@@ -10,7 +10,12 @@ AppDelegate.reachfive().application(<<application, application>>, continue: <<ap
 
 Allows {company} to handle user activity continuation such as handoffs, and more importantly, universal links.
 
-This method is required by xref:index.adoc#wechat-connect[WeChat] and by any *universal-link provider* (such as B.connect): when an external app reopens your app via a universal link to finish a login, the SDK completes the in-flight web authentication session out-of-band through this hook.
+This method is required by xref:index.adoc#wechat-connect[WeChat] and by providers whose login finishes on a universal link.
+
+[NOTE]
+====
+This is *not* how a login that leaves your app comes back. When a provider hands the user off to a third-party app (B.connect sending them to their bank app), that app reopens the *default browser*, not your app — so the callback arrives through xref:applicationOpenUrl.adoc[`application(_:open:)`] as a custom scheme. Forward that method for those providers.
+====
 
 Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/[`application(_:continue:restorationHandler:)`^]. If your app uses scenes, forward link:https://developer.apple.com/documentation/uikit/uiscenedelegate/[`scene(_:continue:)`^] here as well.
 
@@ -18,9 +23,7 @@ Call this method in response to the equivalent UIKit method link:https://develop
 ====
 The method returns a `Bool` that tells you whether {company} actually consumed the activity. It returns `true` only when a {company} login was waiting for that universal link; otherwise it returns `false` so your app can route the link itself. Do not assume {company} handles every universal link you forward — honour the returned value.
 
-Universal-link delivery requires an `applinks:<host>` Associated Domain (see xref:index.adoc#configure-the-ios-sdk[Configure the SDK]).
-
-The in-flight login only lives in memory. If iOS terminates your app while the user is in the external app, the login is lost: when the universal link relaunches your app, this method returns `false` and the user must start the login again.
+Universal-link delivery requires an `applinks:<host>` Associated Domain (see xref:index.adoc#configure-the-ios-sdk[Configure the SDK]). A `.universalLink(_:)` web session additionally needs `webcredentials:<host>`, because the sheet intercepts the callback itself via `ASWebAuthenticationSession`'s `.https` callback (iOS 17.4+).
 ====
 
 == Examples

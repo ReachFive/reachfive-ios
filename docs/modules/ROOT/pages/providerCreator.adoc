@@ -31,35 +31,38 @@ include::partial$config/params.adoc[tags="GoogleProvider,FacebookProvider,AppleP
 
 |===
 
-== Universal-link web providers
+== Web providers that leave the app
 
-Some web providers finish login on an *https* universal link instead of the custom scheme.
-Use the checklist for your <<WebProvider,`WebProvider`>> `mode`; you do *not* need xref:guides/custom-provider.adoc[a custom provider] unless none of the built-in options fit.
+Some providers hand the user off to a third-party app mid-login — B.connect sends them to their bank app for strong authentication.
 
-[tabs]
-====
-`.externalApp`::
-+
---
-Login may hand off to an external app (e.g. a banking app) that reopens yours via a universal link.
+**This needs no special mode.** The bank app does not reopen your app: it opens the user's *default browser*, which follows the rest of the OAuth flow and finally redirects to `reachfive-clientId://callback`, delivered to xref:application/applicationOpenUrl.adoc[`application(_:open:)`]. The default `.customScheme` already covers it, because the SDK arms both return paths for every login.
+
+It has to work that way: the provider decides whether to make the detour only *after* the authentication sheet is open. The very same `login()` call may finish without ever leaving the sheet (B.connect's `passive` case, when the user already has a valid session) or take the full detour (`active`). Neither you nor the SDK can know in advance.
 
 [%interactive]
 * [ ] Configure the provider and variant on your {cc}.
-* [ ] Whitelist the provider's `universalLink` URL in *Allowed Callback URLs* (see xref:docs:ROOT:clients.adoc[Clients]).
-* [ ] Register a <<WebProvider,`WebProvider`>> with `mode: .externalApp` in `ReachFive(providersCreators:)`.
+* [ ] Register a <<WebProvider,`WebProvider`>> with `mode: .customScheme` (or omit `mode`) in `ReachFive(providersCreators:)`.
 * [ ] Initialize the SDK so provider configurations are fetched and `getProvider` can resolve your provider (see xref:application/applicationDidFinishLaunchingWithOptions.adoc[`applicationDidFinishLaunchingWithOptions(_:)`]).
-* [ ] Add `applinks:$\{host\}` to Associated Domains and the matching `applinks` section in `apple-app-site-association` (see xref:index.adoc#associated-domains-universal-link-providers[`apple-app-site-association`]).
-* [ ] Forward `application(_:continue:restorationHandler:)` to {company} and honour the returned `Bool` (see xref:application/applicationContinueUserActivity.adoc[`application(_:continue:restorationHandler:)`]).
+* [ ] Whitelist `reachfive-$\{clientId\}://callback` in *Allowed Callback URLs* (see xref:docs:ROOT:clients.adoc[Clients]).
+* [ ] Forward `application(_:open:options:)` to {company} (see xref:application/applicationOpenUrl.adoc[]).
 * [ ] Call xref:getProvider.adoc[`getProvider(name:).login(...)`] with a `Presentation` built from a `UIViewController` attached to a window; see xref:getProvider.adoc[] for details.
 
-Do *not* use xref:loadLoginWebview.adoc[`loadLoginWebview`]: the callback is delivered through xref:application/applicationContinueUserActivity.adoc[`application(_:continue:)`], not an embedded webview.
+No Associated Domain is required — the return is a custom scheme, not a universal link.
 
-If iOS terminates your app while the user is in the external app, the in-flight login is lost and must be restarted (see xref:application/applicationContinueUserActivity.adoc[`application(_:continue:restorationHandler:)`]).
---
-`.universalLink` (iOS 17.4+)::
-+
---
-This is the same flow as the default custom-scheme login, but the OAuth `redirect_uri` is the provider's `https://` universal link and the authentication sheet intercepts it *in-band* meaning no external-app handoff.
+Do *not* use xref:loadLoginWebview.adoc[`loadLoginWebview`]: the callback comes back through the app delegate, not an embedded webview.
+
+If iOS terminates your app during the detour — which spans a third-party app *and* the browser — the in-flight login is lost and must be restarted.
+
+== Universal-link web providers
+
+A provider can instead finish login on an *https* universal link intercepted inside the authentication sheet.
+You do *not* need xref:guides/custom-provider.adoc[a custom provider] for this.
+
+=== `.universalLink` (iOS 17.4+)
+
+This is the same flow as the default custom-scheme login, but the OAuth `redirect_uri` is the provider's `https://` universal link, intercepted by the authentication sheet itself — the login never leaves the app.
+
+There is no fallback below iOS 17.4: the final redirect happens *inside* the sheet, and iOS does not follow a universal link on a navigation the user didn't initiate. Use `.customScheme` on older versions.
 
 [%interactive]
 * [ ] Configure the provider and variant on your {cc}.
@@ -72,7 +75,5 @@ This is the same flow as the default custom-scheme login, but the OAuth `redirec
 No `application(_:continue:)` wiring is required for login completion; the `ASWebAuthenticationSession` completes inside the sheet.
 
 Do *not* use xref:loadLoginWebview.adoc[`loadLoginWebview`]: use `WebProvider` or xref:webviewLogin.adoc[`webviewLogin`] with a secure session instead of an embedded webview.
---
-====
 
 TIP: None of these fit your case? See xref:guides/custom-provider.adoc[] to implement your own.
