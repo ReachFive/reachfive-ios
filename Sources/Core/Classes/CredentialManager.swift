@@ -196,10 +196,17 @@ class CredentialManager: NSObject {
             authorization = try await perform(requests: [registrationRequest], anchor: request.anchor, cancelsOngoing: false) {
                 $0.performRequests()
             }
-        } catch ReachFiveError.AuthCanceled {
+        } catch is CancellationError {
+            // The calling screen went away. Not a decline, and swallowing it would break the caller's
+            // cancellation.
+            throw CancellationError()
+        } catch {
             // One of the system's preconditions was not met: no credential manager available, the password
-            // was not just used, or the device is not set up for passkeys. The system says no more than
-            // that, and there is nothing for the app to do about it.
+            // was not just used, or the device is not set up for passkeys. Every system-level failure is
+            // treated as a decline, not just `.canceled`: Apple documents the conditional request as
+            // failing silently without promising which code comes back. Logged rather than dropped, so a
+            // silent upgrade that never happens can still be diagnosed.
+            Logger.shared.log("Automatic passkey upgrade declined by the system: \(error)")
             return false
         }
 
