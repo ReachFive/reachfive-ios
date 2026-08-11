@@ -33,6 +33,28 @@ final class CredentialManagerRegistrationRequestTests: XCTestCase {
         XCTAssertEqual(registrationRequest.name, "Test iPhone")
     }
 
+    /// L'enregistrement explicite — inscription, ajout, réinitialisation — présente une feuille système :
+    /// le style conditionnel doit rester l'exception qu'on demande.
+    @available(iOS 18.0, *)
+    func testRequestIsStandardByDefault() throws {
+        let request = try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "BAUG"), friendlyName: "iPhone de Test")
+
+        let registrationRequest = try XCTUnwrap(request as? ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest)
+        XCTAssertEqual(registrationRequest.requestStyle, .standard)
+    }
+
+    /// L'upgrade automatique : ce seul drapeau rend la création silencieuse, tout le reste de la requête
+    /// est celui d'un enregistrement ordinaire.
+    @available(iOS 18.0, *)
+    func testConditionalRequestCarriesTheConditionalStyle() throws {
+        let request = try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "AQID", userID: "BAUG"), friendlyName: "iPhone de Test", conditional: true)
+
+        let registrationRequest = try XCTUnwrap(request as? ASAuthorizationPlatformPublicKeyCredentialRegistrationRequest)
+        XCTAssertEqual(registrationRequest.requestStyle, .conditional)
+        XCTAssertEqual(registrationRequest.relyingPartyIdentifier, "example.reach5.net")
+        XCTAssertEqual(registrationRequest.name, "iPhone de Test")
+    }
+
     @available(iOS 16.0, *)
     func testUnreadableChallengeThrowsTechnicalError() {
         XCTAssertThrowsError(try CredentialManager().makeCredentialRegistrationRequest(from: makeOptions(challenge: "%%%", userID: "BAUG"), friendlyName: "Test iPhone")) { error in
