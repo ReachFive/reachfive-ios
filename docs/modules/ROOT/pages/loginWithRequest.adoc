@@ -6,7 +6,9 @@
 AppDelegate.reachfive().login(
     <<withRequest>>,
     <<usingModalAuthorizationFor>>,
-    <<display>>
+    <<display>>,
+    // Optional argument
+    <<upgradingToPasskeyName,upgradingToPasskey>>
 )
 ----
 
@@ -42,6 +44,7 @@ include::example${docname}.swift[]
 include::partial$params.adoc[tag="withRequest"]
 include::partial$params.adoc[tag="usingModalAuthorizationFor"]
 include::partial$params.adoc[tag="display"]
+include::partial$params.adoc[tag="upgradingToPasskeyName"]
 
 |===
 

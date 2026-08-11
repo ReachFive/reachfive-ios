@@ -1,0 +1,58 @@
+= {docname}
+
+[.signature]
+[subs="normal"]
+----
+AppDelegate.reachfive().upgradeToPasskey(
+    <<NewPasskeyRequest,withRequest>>,
+    <<authToken>>
+)
+----
+
+== Description
+
+Creates a passkey in the background for an account that signs in with a password. Requires iOS 18 or later.
+
+Unlike xref:registerNewPasskey.adoc[], nothing is shown to the user: no sheet, no upsell screen, no error to
+display. The system checks its own preconditions — a credential manager is available, the password for this
+account was just used, the device is set up for passkeys — and declines silently when one of them is not
+met. The password keeps working either way; the passkey is only added as a second, simpler way to sign in.
+
+The SDK also checks Apple's documented precondition for you: an account that already has a passkey is left
+alone.
+
+== Usage
+
+Call it right after a successful password sign-in, on every sign-in — the upgrade stops on its own once the
+account has a passkey.
+
+Both password sign-ins can do it for you instead, through their `upgradingToPasskey` parameter:
+xref:loginWithPassword.adoc[] and xref:loginWithRequest.adoc[] with `.Password`. Call this method directly
+when you want to know the outcome, or to keep its two round trips off the sign-in path.
+
+== Examples
+
+[source, swift]
+----
+include::example${docname}.swift[]
+----
+
+== Parameters
+
+[cols="3,7a"]
+|===
+|Parameter |Description
+
+include::partial$params.adoc[tag="NewPasskeyRequest"]
+include::partial$params.adoc[tag="authtoken"]
+
+|===
+
+== Response
+
+*Success*: `true` when a passkey was created and registered, `false` when the system declined or the account
+already had one. Neither is an error.
+
+*Error*: <<ReachFiveError>>
+
+include::partial$models.adoc[tag=reachfiveerror]

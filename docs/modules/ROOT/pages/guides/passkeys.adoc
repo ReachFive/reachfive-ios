@@ -14,6 +14,14 @@ include::partial$passkeys/r_prerequisites.adoc[leveloffset=+1]
 // initialize passkeys for ios
 include::partial$passkeys/p_get-started.adoc[leveloffset=+1]
 
+== Bringing existing accounts along
+
+Users who already sign in with a password do not have to be asked to switch.
+From iOS 18, xref:upgradeToPasskey.adoc[] creates a passkey for them in the background, right after a
+password sign-in: no upsell screen, no extra tap, and their password keeps working.
+Both password sign-ins take care of it through their `upgradingToPasskey` parameter —
+xref:loginWithPassword.adoc[] and xref:loginWithRequest.adoc[] with `.Password`.
+
 // follow-up screenshots for below
 
 // // passkeys signup flow for ios
