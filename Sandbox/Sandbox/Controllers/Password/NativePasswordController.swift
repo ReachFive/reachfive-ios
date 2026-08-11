@@ -43,7 +43,9 @@ class NativePasswordController: UIViewController {
 
             let request = NativeLoginRequest(anchor: window, origin: "NativePasswordController.viewDidAppear")
             await handleLoginFlow {
-                try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Password], display: .Always)
+                // The keychain has just filled in the password, so this is the flow automatic passkey
+                // upgrades were designed for: only the name is needed, the request carries the rest.
+                try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Password], display: .Always, upgradingToPasskey: UIDevice.current.name)
             }
         }
     }
