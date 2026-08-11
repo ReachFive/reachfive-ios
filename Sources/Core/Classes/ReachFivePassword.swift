@@ -32,7 +32,8 @@ extension ReachFive {
         customIdentifier: String? = nil,
         password: String,
         scope: [String]? = nil,
-        origin: String? = nil
+        origin: String? = nil,
+        upgradingToPasskey passkeyRequest: NewPasskeyRequest? = nil
     ) async throws -> LoginFlow {
         let strScope = (scope ?? self.scope).joined(separator: " ")
         let loginRequest = LoginRequest(
@@ -49,6 +50,7 @@ extension ReachFive {
 
         guard resp.mfaRequired == true else {
             let token = try await loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
+            await upgradeToPasskeyIfRequested(passkeyRequest, authToken: token)
             return .AchievedLogin(authToken: token)
         }
 
@@ -57,5 +59,22 @@ extension ReachFive {
         storage.save(key: pkceKey, value: pkce)
         let stepUpResponse = try await reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
         return LoginFlow.OngoingStepUp(token: stepUpResponse.token, availableMfaCredentialItemTypes: stepUpResponse.amr)
+    }
+
+    /// Runs the automatic passkey upgrade a password sign-in asked for, if the OS supports it.
+    ///
+    /// Swallows every error on purpose: the sign-in has already succeeded, and an upgrade — invisible by
+    /// nature — must never be what turns it into a failure. Callers that want to know the outcome, or to
+    /// keep the two round trips off the sign-in path, call ``upgradeToPasskey(withRequest:authToken:)``
+    /// themselves instead of passing `upgradingToPasskey`.
+    private func upgradeToPasskeyIfRequested(_ passkeyRequest: NewPasskeyRequest?, authToken: AuthToken) async {
+        guard #available(iOS 18.0, *), let passkeyRequest else { return }
+
+        do {
+            let upgraded = try await upgradeToPasskey(withRequest: passkeyRequest, authToken: authToken)
+            Logger.shared.log("Automatic passkey upgrade: \(upgraded ? "passkey created" : "declined by the system, or the account already has one")")
+        } catch {
+            Logger.shared.log("Automatic passkey upgrade failed: \(error)")
+        }
     }
 }
