@@ -45,13 +45,16 @@ extension ReachFive {
     ///   - request: the anchor for the modal sheet, plus scope and origin configuration
     ///   - requestTypes: choose between Password and/or Passkey
     ///   - mode: choose the behavior when there are no credentials available
+    ///   - passkeyFriendlyName: when set and the user signs in with a password, creates a passkey for them
+    ///     in the background under that name — see ``upgradeToPasskey(withRequest:authToken:)``. Only the
+    ///     name is needed: the anchor and both origins come from `request`.
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError.
     ///   `.OngoingStepUp` can only occur when `.Password` is among `requestTypes`: only a password grant
     ///   ever requires a step-up. Requesting only `.Passkey` and/or `.SignInWithApple` always yields
     ///   `.AchievedLogin`.
-    public func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) async throws -> LoginFlow {
+    public func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, upgradingToPasskey passkeyFriendlyName: String? = nil) async throws -> LoginFlow {
         let appleProvider = providers.first { $0.name == AppleProvider.NAME } as? ConfiguredAppleProvider
-        return try await credentialManager.login(withRequest: resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider, reachFive: self)
+        return try await credentialManager.login(withRequest: resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider, upgradingToPasskey: passkeyFriendlyName, reachFive: self)
     }
 
     /// Signs in the user using credentials stored in the keychain, letting the system display the credentials corresponding to the given username in a modal sheet.
@@ -74,6 +77,30 @@ extension ReachFive {
     public func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws {
         // TODO: delete the former key from the server
         try await credentialManager.registerNewPasskey(withRequest: request, originWebAuthn: request.originWebAuthn ?? sdkConfig.webAuthnOrigin, authToken: authToken, reachFive: self)
+    }
+
+    /// Creates a passkey in the background for an account that signs in with a password, to be called right
+    /// after a successful password sign-in. No UI, no upsell screen, nothing to show the user: the system
+    /// notifies them itself once the passkey exists, and the password keeps working.
+    ///
+    /// The system checks its own preconditions — a credential manager is available, the password for this
+    /// account was just used, the device is set up for passkeys — and declines silently when one is
+    /// missing. That outcome is reported as `false`, not as an error.
+    ///
+    /// - Parameters:
+    ///   - request: the anchor, the friendlyName under which the passkey will be saved, and origin
+    ///   - authToken: the token for the user who just signed in
+    /// - Returns: whether a passkey was created and registered on the server.
+    @available(iOS 18.0, *)
+    public func upgradeToPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws -> Bool {
+        // Apple's documented precondition: only upgrade an account that has no passkey yet. Checked here
+        // rather than left to the app, which would have to learn the rule and call the very endpoint this
+        // SDK already owns.
+        guard try await listWebAuthnCredentials(authToken: authToken).isEmpty else {
+            return false
+        }
+
+        return try await credentialManager.upgradeToPasskey(withRequest: request, originWebAuthn: request.originWebAuthn ?? sdkConfig.webAuthnOrigin, authToken: authToken, reachFive: self)
     }
 
     @available(iOS 16.0, *)

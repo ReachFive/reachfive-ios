@@ -22,12 +22,12 @@ final class CredentialManagerLifecycleTests: XCTestCase {
     /// Typed `Task<Void, Error>` rather than `Task<ASAuthorization, Error>`: the authorization is never
     /// inspected, and its `Sendable` conformance — required by a task's `Success` — only exists from
     /// iOS 16.4.
-    private func startRequest(on manager: CredentialManager, anchor: ASPresentationAnchor) async throws -> (controller: ASAuthorizationController, result: Task<Void, Error>) {
+    private func startRequest(on manager: CredentialManager, anchor: ASPresentationAnchor, cancelsOngoing: Bool = true) async throws -> (controller: ASAuthorizationController, result: Task<Void, Error>) {
         let box = ControllerBox()
         let submitted = expectation(description: "request submitted")
 
         let task = Task { @MainActor in
-            _ = try await manager.perform(requests: [ASAuthorizationPasswordProvider().createRequest()], anchor: anchor) {
+            _ = try await manager.perform(requests: [ASAuthorizationPasswordProvider().createRequest()], anchor: anchor, cancelsOngoing: cancelsOngoing) {
                 box.controller = $0
                 submitted.fulfill()
             }
@@ -110,6 +110,37 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         let modalThrown = try await failure(of: modal.result)
         guard case ReachFiveError.TechnicalError = modalThrown else {
             return XCTFail("expected .TechnicalError, got \(modalThrown)")
+        }
+    }
+
+    /// Le miroir du test précédent, pour la requête conditionnelle de l'upgrade automatique : invisible,
+    /// elle ne doit pas emporter la requête auto-fill que l'utilisateur, lui, a sous les yeux. Elle reste
+    /// en revanche annulable par la requête modale suivante, comme n'importe quelle autre.
+    func testConditionalRequestLeavesTheOngoingOneAlone() async throws {
+        let manager = CredentialManager()
+        let autoFillAnchor = ASPresentationAnchor()
+        let upgradeAnchor = ASPresentationAnchor()
+
+        let autoFill = try await startRequest(on: manager, anchor: autoFillAnchor)
+        let upgrade = try await startRequest(on: manager, anchor: upgradeAnchor, cancelsOngoing: false)
+
+        // Les deux requêtes coexistent, chacune avec son propre anchor
+        XCTAssertTrue(manager.presentationAnchor(for: autoFill.controller) === autoFillAnchor)
+        XCTAssertTrue(manager.presentationAnchor(for: upgrade.controller) === upgradeAnchor)
+
+        // Le refus silencieux de l'upgrade ne touche pas l'auto-fill, toujours en course
+        manager.authorizationController(controller: upgrade.controller, didCompleteWithError: ASAuthorizationError(.canceled))
+        let upgradeThrown = try await failure(of: upgrade.result)
+        guard case ReachFiveError.AuthCanceled = upgradeThrown else {
+            return XCTFail("expected .AuthCanceled, got \(upgradeThrown)")
+        }
+        XCTAssertTrue(manager.presentationAnchor(for: autoFill.controller) === autoFillAnchor)
+
+        // Et l'auto-fill se fait bien annuler par la requête suivante, elle ordinaire
+        _ = try await startRequest(on: manager, anchor: ASPresentationAnchor())
+        let autoFillThrown = try await failure(of: autoFill.result)
+        guard case ReachFiveError.AuthCanceled = autoFillThrown else {
+            return XCTFail("expected .AuthCanceled, got \(autoFillThrown)")
         }
     }
 
