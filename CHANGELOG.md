@@ -33,6 +33,13 @@
   counterpart of `loginCallback`: it exchanges the ID token issued by a native provider SDK for a ReachFive
   `AuthToken`. Used internally by Sign In With Apple, and intended for integrators writing their own
   `Provider`.
+- `ReachFive.upgradeToPasskey(withRequest:authToken:)` (iOS 18+): creates a passkey in the background for
+  an account that signs in with a password, with no UI at all. The system checks its own preconditions and
+  declines silently when one is not met — reported as `false`, not as an error — and the SDK skips accounts
+  that already have a passkey. Both password sign-ins can run it for you through a new optional
+  `upgradingToPasskey` parameter: `loginWithPassword(...)` takes a `NewPasskeyRequest`, and
+  `login(withRequest:usingModalAuthorizationFor:display:)` takes just the passkey name, since it already
+  carries the anchor and the origins.
 - `SdkConfig.originWebAuthn`: the WebAuthn origin can now be configured once, instead of being repeated on
   every passkey request. It defaults to `https://<domain>`, and a request that carries its own
   `originWebAuthn` still takes precedence.
