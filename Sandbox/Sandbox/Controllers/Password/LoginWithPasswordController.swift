@@ -52,6 +52,10 @@ class LoginWithPasswordController: UIViewController {
         let customIdentifier = customIdentifierInput.text
         let password = passwordInput.text ?? ""
 
+        // Automatic passkey upgrade: an account that has no passkey yet gets one created in the
+        // background, with no UI at all. The SDK ignores it below iOS 18.
+        let passkeyUpgrade = NewPasskeyRequest(presenting: Presentation(from: self), friendlyName: UIDevice.current.name, origin: "LoginWithPasswordController.upgradeToPasskey")
+
         Task {
             await handleLoginFlow {
                 try await AppDelegate.reachfive()
@@ -61,7 +65,8 @@ class LoginWithPasswordController: UIViewController {
                         customIdentifier: customIdentifier,
                         password: password,
                         scope: selectedScopes,
-                        origin: "LoginWithPasswordController.loginWithPassword"
+                        origin: "LoginWithPasswordController.loginWithPassword",
+                        upgradingToPasskey: passkeyUpgrade
                     )
             }
         }
