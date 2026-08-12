@@ -1,11 +1,9 @@
 import XCTest
 @testable import Reach5
 
-/// Les trois appels `/oauth/authorize` du SDK partagent le même socle de paramètres et ne diffèrent que
-/// par ce qu'ils ajoutent. C'est la seule partie de ces appels qui soit testable — `ReachFiveApi` n'étant
-/// pas abstrait derrière un protocole, tout le reste part sur le réseau. Ces tests figent donc les
-/// dictionnaires attendus : un paramètre qui bouge devient une question tranchée par la CI, pas par la
-/// relecture.
+/// The SDK's three `/oauth/authorize` calls share one basis of parameters and differ only by what they
+/// add. That basis is the only testable part of them: everything else goes to the network. These tests
+/// pin the expected dictionaries, so a parameter that moves is settled by CI rather than by review.
 final class AuthorizeParamsTests: XCTestCase {
     private let pkce = Pkce.generate()
 
@@ -15,8 +13,8 @@ final class AuthorizeParamsTests: XCTestCase {
         return reachFive
     }
 
-    /// Les valeurs `nil` sont conservées dans le dictionnaire et filtrées plus tard par `ReachFiveApi` ;
-    /// pour comparer, on ne garde que les clés réellement renseignées.
+    /// `nil` values stay in the dictionary and are filtered later by `ReachFiveApi`; for comparison, keep
+    /// only the keys actually set.
     private func present(_ params: [String: String?]) -> [String: String] {
         params.compactMapValues { $0 }
     }
@@ -56,7 +54,7 @@ final class AuthorizeParamsTests: XCTestCase {
 
         XCTAssertEqual(params["provider"], "apple:native")
         XCTAssertEqual(params["id_token"], "the-id-token")
-        // le nonce envoyé au serveur est le verifier du challenge donné au provider
+        // the nonce sent to the server is the verifier of the challenge given to the provider
         XCTAssertEqual(params["nonce"], nonce.codeVerifier)
         XCTAssertEqual(params["given_name"], "Jane")
         XCTAssertEqual(params["family_name"], "Doe")
@@ -75,7 +73,7 @@ final class AuthorizeParamsTests: XCTestCase {
         XCTAssertNil(params["id_token"])
     }
 
-    /// Les noms optionnels non fournis ne doivent pas apparaître dans l'URL finale.
+    /// Optional names left out must not appear in the final URL.
     func testAbsentOptionalsAreNotSent() {
         let params = present(makeReachFive().authorizeParams(pkce: pkce, scope: nil, origin: nil, adding: [
             "given_name": nil,
@@ -94,7 +92,7 @@ final class AuthorizeParamsTests: XCTestCase {
         XCTAssertEqual(present(reachFive.authorizeParams(pkce: pkce, scope: ["email"], origin: nil, adding: [:]))["scope"], "email")
     }
 
-    /// Le socle gagne sur `extra` : un appelant ne peut pas redéfinir par accident le grant qu'il demande.
+    /// The basis wins over `extra`: a caller cannot accidentally redefine the grant it is asking for.
     func testSharedParametersWinOverColliding() {
         let params = present(makeReachFive().authorizeParams(pkce: pkce, scope: ["openid"], origin: nil, adding: [
             "response_type": "token",
@@ -105,8 +103,8 @@ final class AuthorizeParamsTests: XCTestCase {
         XCTAssertEqual(params["client_id"], "testclient")
     }
 
-    /// Bout en bout sur le seul appel sans réseau. L'ordre des query items d'un Dictionary n'est pas
-    /// déterministe : on compare des ensembles, jamais l'absoluteString.
+    /// End to end on the only call without network. Query item order coming from a Dictionary is not
+    /// deterministic, so compare sets and never the absoluteString.
     func testBuildAuthorizeURLCarriesTheParamsPlusPlatformAndSdk() throws {
         let url = makeReachFive(scope: ["openid"]).buildAuthorizeURL(pkce: pkce, state: "the-state", provider: "franceconnect")
 
