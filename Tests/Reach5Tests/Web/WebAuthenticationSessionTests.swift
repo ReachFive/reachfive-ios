@@ -10,7 +10,7 @@ final class WebAuthenticationSessionTests: XCTestCase {
                                  sdkRedirectUri: URL(string: "reachfive-clientId://callback")!)
     }
 
-    /// Outside a login the out-of-band channel is not armed, even for a URL perfectly shaped for this SDK:
+    /// Outside a login the out-of-band channel is not prepared, even for a URL perfectly shaped for this SDK:
     /// what decides is `expectedCallback` (nil at rest), not the shape of the URL. The host app must get its
     /// link back (`false`), not see it swallowed by the SDK.
     func testTryCompleteMatchesNothingOutsideALogin() {
@@ -57,5 +57,36 @@ final class WebAuthenticationSessionTests: XCTestCase {
                 }
             }
         }
+    }
+
+    /// A caller whose task is already cancelled is refused before anything is presented, and with a
+    /// `ReachFiveError`: the public entry points document reporting nothing else, so a bare
+    /// `CancellationError` would escape every `catch let error as ReachFiveError` an integrator writes.
+    func testAnAlreadyCancelledCallerIsRefusedWithAuthCanceledAndHoldsNoSlot() async throws {
+        let session = makeSession()
+        let task = Task { @MainActor in
+            _ = try await session.start(url: URL(string: "https://example.reach5.net/oauth/authorize")!,
+                                        mode: .customScheme,
+                                        presentationContextProvider: DummyContextProvider())
+        }
+        // The task is isolated on the main actor, which runs this test: its body has not started yet.
+        task.cancel()
+
+        do {
+            _ = try await task.value
+            XCTFail("start should have thrown for an already-cancelled task")
+        } catch let error as ReachFiveError {
+            switch error {
+            case .AuthCanceled:
+                break
+            default:
+                XCTFail("the cancelled caller failed with an unexpected error: \(error)")
+            }
+        } catch {
+            XCTFail("the cancelled caller failed with \(type(of: error)), not a ReachFiveError: \(error)")
+        }
+
+        // Nothing was claimed, so nothing was presented: the next login is free to go through.
+        XCTAssertFalse(session.isLoginInProgress)
     }
 }

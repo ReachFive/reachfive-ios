@@ -85,16 +85,17 @@ final class WebAuthenticationSession {
     /// - Parameter expectsAuthorizationCode: `false` for a call whose callback carries no `code` (logout):
     ///   the out-of-band channel is then not prepared at all.
     /// - Throws: `.AuthCanceled` when a web login is already in progress — the call is dropped, the login
-    ///   under way is untouched, and the caller has nothing to single out.
+    ///   under way is untouched, and the caller has nothing to single out — or when the calling `Task` was
+    ///   already cancelled, in which case nothing is presented at all.
     func start(url: URL,
                mode: WebSessionMode,
                expectsAuthorizationCode: Bool = true,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
 
-        // An already-cancelled Task must not present a sheet (its `onCancel` below would have fired
-        // already, to no effect, before the continuation was installed).
-        try Task.checkCancellation()
+        // An already-cancelled Task must not present a sheet (its `onCancel` below would already have run,
+        // to no effect, before the continuation was installed).
+        guard !Task.isCancelled else { throw ReachFiveError.AuthCanceled }
 
         // One login at a time, and the incumbent keeps its place.
         guard case .idle = state else {
@@ -212,7 +213,7 @@ final class WebAuthenticationSession {
             // Logged because `.canceledLogin` covers more than the user tapping Cancel: the system also
             // reports it when the app is not associated with the host of an `.https` callback, and the
             // reason only shows up in `localizedDescription`. Only reached for an error this call is about
-            // to deliver, so it never fires for a sheet we closed ourselves.
+            // to deliver, so it never runs for a sheet we closed ourselves.
             Logger.shared.log("The web session ended without a callback: \(error.localizedDescription)")
             complete(id: id, .failure(Self.reachFiveError(for: error)))
         } else if let callbackURL {

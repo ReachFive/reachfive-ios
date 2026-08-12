@@ -15,7 +15,7 @@ public extension ReachFive {
         // Not airtight: reading the session suspends, so two calls in the same turn both get past this and
         // are only told apart by `start(...)`.
         guard !(await webAuthSession.isLoginInProgress) else {
-            Logger.shared.log("A web login is already in progress; this call is dropped before arming anything.")
+            Logger.shared.log("A web login is already in progress; this call is dropped before preparing anything.")
             throw ReachFiveError.AuthCanceled
         }
 
