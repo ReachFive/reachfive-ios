@@ -68,7 +68,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         let manager = CredentialManager()
         let stranger = ASAuthorizationController(authorizationRequests: [ASAuthorizationPasswordProvider().createRequest()])
 
-        // No request in flight: nothing to resolve, and above all no crash
+        // No ongoing request: nothing to resolve, and above all no crash
         manager.authorizationController(controller: stranger, didCompleteWithError: ASAuthorizationError(.canceled))
 
         let anchor = ASPresentationAnchor()
@@ -82,9 +82,9 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         }
     }
 
-    /// The refactor's central contract: a new request cancels the one in flight, and the canceled
+    /// The refactor's central contract: a new request cancels the ongoing one, and the canceled
     /// request's state disappears without ever touching the new one's.
-    func testNewRequestCancelsTheInFlightOneWithoutDisturbingItsOwnState() async throws {
+    func testNewRequestCancelsTheOngoingOneWithoutDisturbingItsOwnState() async throws {
         let manager = CredentialManager()
         let autoFillAnchor = ASPresentationAnchor()
         let modalAnchor = ASPresentationAnchor()
@@ -92,7 +92,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         let autoFill = try await startRequest(on: manager, anchor: autoFillAnchor)
         XCTAssertTrue(manager.presentationAnchor(for: autoFill.controller) === autoFillAnchor)
 
-        // The modal request cancels the in-flight auto-fill, without waiting for a system callback
+        // The modal request cancels the ongoing auto-fill, without waiting for a system callback
         let modal = try await startRequest(on: manager, anchor: modalAnchor)
 
         let thrown = try await failure(of: autoFill.result)
@@ -113,14 +113,14 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         }
     }
 
-    /// `cancelInFlightRequests` resolves the continuations itself: it does not depend on a
+    /// `cancelOngoingRequests` resolves the continuations itself: it does not depend on a
     /// `didCompleteWithError(.canceled)` the system only promises if a flow was really running.
-    func testCancelInFlightRequestsResolvesTheRequestWithoutSystemCallback() async throws {
+    func testCancelOngoingRequestsResolvesTheRequestWithoutSystemCallback() async throws {
         let manager = CredentialManager()
         let anchor = ASPresentationAnchor()
         let (controller, result) = try await startRequest(on: manager, anchor: anchor)
 
-        manager.cancelInFlightRequests()
+        manager.cancelOngoingRequests()
 
         let thrown = try await failure(of: result)
         guard case ReachFiveError.AuthCanceled = thrown else {
