@@ -181,6 +181,14 @@ final class CredentialManagerAuthorizationRequestsTests: XCTestCase {
         XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
     }
 
+    @available(iOS 16.0, *)
+    func testSignInWithAppleIsDroppedAndPasskeyFailureIsSwallowedWhenCombinedWithAnotherType() async throws {
+        let built = try await CredentialManager().buildAuthorizationRequests(webAuthnLoginRequest, reachFive: reachFive, authorizing: [.SignInWithApple, .Passkey, .Password], fetchAuthenticationOptions: { _, _ in throw ReachFiveError.TechnicalError(reason: "network down") })
+
+        XCTAssertEqual(built.requests.count, 1, "la requête password doit survivre à l'échec passkey & Sign in with Apple")
+        XCTAssertTrue(built.requests.first is ASAuthorizationPasswordRequest)
+    }
+
     /// Les options récupérées auprès du serveur sont bien celles qui construisent la requête d'assertion.
     @available(iOS 16.0, *)
     func testPasskeyBuildsAnAssertionRequestFromTheFetchedOptions() async throws {
