@@ -8,7 +8,7 @@ import Foundation
 class CredentialManager: NSObject {
     // MARK: - Request context
 
-    /// Requests can overlap: a new request cancels the ones in flight, but the system callback of a
+    /// Requests can overlap: a new request cancels the ongoing ones, but the system callback of a
     /// canceled request can still arrive afterwards. All of a request's state therefore lives in a
     /// RequestContext indexed by its controller: each callback finds the context of its own request, and
     /// one request can never overwrite another's state.
@@ -32,7 +32,7 @@ class CredentialManager: NSObject {
         let provider: ConfiguredAppleProvider
     }
 
-    /// requests in flight, indexed by their controller
+    /// ongoing requests, indexed by their controller
     private var contexts: [ObjectIdentifier: RequestContext] = [:]
 
     /// Monotonic, never reset: a fresh identity for each request, so a cancellation that lands late can
@@ -79,9 +79,9 @@ class CredentialManager: NSObject {
             guard !Task.isCancelled else { throw Self.callerCanceled }
 
             return try await withCheckedThrowingContinuation { continuation in
-                // Canceling requests in flight and submitting the new one in the same synchronous block:
+                // Canceling the ongoing requests and submitting the new one in the same synchronous block:
                 // no other task can run on the main actor in between.
-                cancelInFlightRequests()
+                cancelOngoingRequests()
                 contexts[ObjectIdentifier(controller)] = RequestContext(id: id, controller: controller, anchor: anchor, continuation: continuation)
                 submit(controller)
             }
@@ -95,7 +95,7 @@ class CredentialManager: NSObject {
         }
     }
 
-    /// Cancels requests in flight, mainly to cancel an auto-fill request before starting a modal one
+    /// Cancels the ongoing requests, mainly to cancel an auto-fill request before starting a modal one
     /// (otherwise the latter would fail).
     ///
     /// Each canceled request's continuation is resumed here with `.AuthCanceled`, without waiting for the
@@ -109,10 +109,10 @@ class CredentialManager: NSObject {
     /// `.AuthCanceled` — before the new request has been submitted.
     ///
     /// Internal for testability.
-    func cancelInFlightRequests() {
-        let inFlight = Array(contexts.values)
+    func cancelOngoingRequests() {
+        let ongoing = Array(contexts.values)
         contexts.removeAll()
-        for context in inFlight {
+        for context in ongoing {
             if #available(iOS 16.0, *) { // cancel() only exists from iOS 16
                 context.controller.cancel()
             }
@@ -368,7 +368,7 @@ extension CredentialManager: ASAuthorizationControllerPresentationContextProvidi
             // Should not happen: the context is registered before the request is submitted and removed
             // only once it completes. A detached window is better than a crash, but it would be invisible
             // on screen: log it.
-            Logger.shared.log("presentationAnchor: no in-flight request for this controller, falling back to a detached window")
+            Logger.shared.log("presentationAnchor: no ongoing request for this controller, falling back to a detached window")
             return ASPresentationAnchor()
         }
         return anchor
