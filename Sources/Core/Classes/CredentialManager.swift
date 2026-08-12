@@ -179,7 +179,11 @@ class CredentialManager: NSObject {
     @available(iOS 16.0, *)
     func beginAutoFillAssistedPasskeySignIn(request: ResolvedNativeLoginRequest, reachFive: ReachFive) async throws -> AuthToken {
         let assertionRequestOptions = try await reachFive.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: makeWebAuthnLoginRequest(for: request, reachFive: reachFive))
-        let authorizationRequest = try makePasskeyAssertionRequest(assertionRequestOptions, restrictedToAllowedCredentials: false)
+        let authorizationRequest = if #available(iOS 16.0, *) {
+            try makePasskeyAssertionRequest(assertionRequestOptions, restrictedToAllowedCredentials: false)
+        } else {
+            throw ReachFiveError.TechnicalError(reason: "Passkey AutoFill-assisted sign-in requires iOS 16 or later.")
+        }
 
         // AutoFill-assisted requests only support ASAuthorizationPlatformPublicKeyCredentialAssertionRequest.
         let authorization = try await perform(requests: [authorizationRequest], anchor: request.anchor) {
