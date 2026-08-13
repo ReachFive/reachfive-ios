@@ -24,10 +24,9 @@ class SignupPasskeyController: UIViewController {
         }
 
         if #available(iOS 16.0, *) {
-            let window: UIWindow = view.window!
             Task {
                 await handleAuthToken(errorMessage: "Signup with Passkey failed") {
-                    try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "SignupPasskeyController.signup"))
+                    try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, presenting: Presentation(from: self), origin: "SignupPasskeyController.signup"))
                 }
             }
         } else {

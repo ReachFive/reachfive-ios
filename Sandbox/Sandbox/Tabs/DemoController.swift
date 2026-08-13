@@ -50,7 +50,6 @@ class DemoController: UIViewController {
         print("DemoController.viewDidAppear")
         super.viewDidAppear(animated)
 
-        guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         var types: [ModalAuthorization] = [.Password, .SignInWithApple]
         if #available(iOS 16.0, *) {
             types.append(.Passkey)
@@ -63,7 +62,7 @@ class DemoController: UIViewController {
         }
         Task { @MainActor in
             do {
-                let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
+                let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
                 flowTheLogin(flow)
             } catch {
                 self.usernameField.isHidden = false
@@ -81,7 +80,7 @@ class DemoController: UIViewController {
                 #else
                     if #available(iOS 16.0, *) {
                         await handleAuthToken {
-                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.viewDidAppear.AuthCanceled"))
+                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.viewDidAppear.AuthCanceled"))
                         }
                     }
                 #endif
@@ -92,7 +91,6 @@ class DemoController: UIViewController {
     }
 
     @IBAction func createAccount(_ sender: Any) {
-        guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         guard let username = usernameField.text else { return }
 
         @MainActor
@@ -114,7 +112,7 @@ class DemoController: UIViewController {
 
             Task {
                 do {
-                    let authToken = try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "DemoController.createAccount"))
+                    let authToken = try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, presenting: Presentation(from: self), origin: "DemoController.createAccount"))
                     goToProfile(authToken)
                 } catch ReachFiveError.AuthCanceled {
                     goToSignup()
@@ -133,7 +131,6 @@ class DemoController: UIViewController {
     }
 
     @IBAction func login(_ sender: Any) {
-        guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         guard let pass = passwordField.text, let username = usernameField.text else { return }
 
         if !pass.isEmpty {
@@ -144,7 +141,7 @@ class DemoController: UIViewController {
         }
 
         if #available(iOS 16.0, *) {
-            let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
+            let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.login")
 
             Task {
                 do {
@@ -160,7 +157,7 @@ class DemoController: UIViewController {
                         return
                     #else
                         await handleAuthToken {
-                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.login.AuthCanceled"))
+                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.login.AuthCanceled"))
                         }
                     #endif
                 } catch {
@@ -192,10 +189,9 @@ class DemoController: UIViewController {
 
     @objc func handleAuthorizationAppleIDButtonPress() {
         print("handleAuthorizationAppleIDButtonPress")
-        guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         Task {
             await handleLoginFlow(errorMessage: "Signup with Apple failed") {
-                try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(anchor: window, origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
+                try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.handleAuthorizationAppleIDButtonPress"), usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
             }
         }
     }

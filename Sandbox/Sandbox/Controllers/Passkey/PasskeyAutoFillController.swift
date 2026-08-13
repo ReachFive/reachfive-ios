@@ -10,9 +10,8 @@ class PasskeyAutoFillController: UIViewController {
 
             if #available(iOS 16.0, *) {
                 Task {
-                    guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "PasskeyAutoFillController.viewDidAppear"))
+                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "PasskeyAutoFillController.viewDidAppear"))
                     }
                 }
             }
