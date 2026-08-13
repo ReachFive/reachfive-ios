@@ -49,10 +49,8 @@ class ConfiguredAppleProvider: NSObject, Provider {
         presenting: Presentation
     ) async throws -> AuthToken {
         guard let reachfive else { throw ReachFiveError.TechnicalError(reason: "ReachFive instance was deallocated") }
-        let window = try await presenting.anchor()
-
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
-        let request = ResolvedNativeLoginRequest(anchor: window, originWebAuthn: reachfive.sdkConfig.originWebAuthn, scopes: scope, origin: origin)
+        let request = ResolvedNativeLoginRequest(presenting: presenting, originWebAuthn: reachfive.sdkConfig.originWebAuthn, scopes: scope, origin: origin)
 
         let flow = try await reachfive.credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self, reachFive: reachfive)
 

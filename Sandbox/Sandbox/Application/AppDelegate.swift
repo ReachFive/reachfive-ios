@@ -114,7 +114,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     if #available(iOS 16, *) {
                         Task {
                             await rootViewController.handleLoginFlow {
-                                let loginRequest = NativeLoginRequest(anchor: window, scopes: SettingsViewController.selectedScopes, origin: #function)
+                                let loginRequest = NativeLoginRequest(presenting: Presentation(from: rootViewController), scopes: SettingsViewController.selectedScopes, origin: #function)
                                 return try await self.reachfive.login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey, .Password, .SignInWithApple], display: .IfImmediatelyAvailableCredentials)
                             }
                         }
