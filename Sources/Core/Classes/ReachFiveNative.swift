@@ -25,14 +25,14 @@ extension ReachFive {
             scope: scopes
         )
 
-        return try await credentialManager.signUp(withRequest: signupOptions, scopes: scopes, anchor: request.anchor, originR5: request.origin, reachFive: self)
+        return try await credentialManager.signUp(withRequest: signupOptions, scopes: scopes, presenting: request.presenting, originR5: request.origin, reachFive: self)
     }
 
     /// Starts an auto-fill assisted passkey login request.
     /// The passkey will be shown in the QuickType bar when selecting a field of content type Username.
     /// Start the request automatically early in the view lifecycle (e.g. in viewDidAppear), alone or in reaction to a modal request .IfImmediatelyAvailableCredentials that resulted in an .AuthCanceled.
     /// - Parameters:
-    ///   - request: the anchor for the QuickType bar, plus scope and origin configuration
+    ///   - request: where the QuickType bar is presented from, plus scope and origin configuration
     /// - Returns: an AuthToken when the user was successfully logged in, or a ReachFiveError
     @available(macCatalyst, unavailable)
     @available(iOS 16.0, *)
@@ -42,12 +42,12 @@ extension ReachFive {
 
     /// Signs in the user using credentials stored in the keychain, letting the system display all credentials available to choose from in a modal sheet.
     /// - Parameters:
-    ///   - request: the anchor for the modal sheet, plus scope and origin configuration
+    ///   - request: where the modal sheet is presented from, plus scope and origin configuration
     ///   - requestTypes: choose between Password and/or Passkey
     ///   - mode: choose the behavior when there are no credentials available
     ///   - passkeyFriendlyName: when set and the user signs in with a password, creates a passkey for them
     ///     in the background under that name — see ``upgradeToPasskey(withRequest:authToken:)``. Only the
-    ///     name is needed: the anchor and both origins come from `request`.
+    ///     name is needed: the presentation and both origins come from `request`.
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError.
     ///   `.OngoingStepUp` can only occur when `.Password` is among `requestTypes`: only a password grant
     ///   ever requires a step-up. Requesting only `.Passkey` and/or `.SignInWithApple` always yields
@@ -60,7 +60,7 @@ extension ReachFive {
     /// Signs in the user using credentials stored in the keychain, letting the system display the credentials corresponding to the given username in a modal sheet.
     /// - Parameters:
     ///   - username: the username to log in the user with
-    ///   - request: the anchor for the modal sheet, plus scope and origin configuration
+    ///   - request: where the modal sheet is presented from, plus scope and origin configuration
     ///   - requestTypes: only passkey are supported for now
     ///   - mode: choose the behavior when there are no credentials available
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
@@ -70,7 +70,7 @@ extension ReachFive {
 
     /// Registers a new passkey for an existing user which currently has none in the keychain, or replace the existing passkey by a new one
     /// - Parameters:
-    ///   - request: the anchor for the modal sheet, the friendlyName under which the passkey will be saved, and origin
+    ///   - request: where the modal sheet is presented from, the friendlyName under which the passkey will be saved, and origin
     ///   - authToken: the token for the currently logged-in user
     /// - Returns: A ReachFiveError, or nothing when the Registration was successfull.
     @available(iOS 16.0, *)
@@ -88,7 +88,7 @@ extension ReachFive {
     /// missing. That outcome is reported as `false`, not as an error.
     ///
     /// - Parameters:
-    ///   - request: the anchor, the friendlyName under which the passkey will be saved, and origin
+    ///   - request: where the sheet is presented from, the friendlyName under which the passkey will be saved, and origin
     ///   - authToken: the token for the user who just signed in
     /// - Returns: whether a passkey was created and registered on the server.
     @available(iOS 18.0, *)
@@ -110,7 +110,7 @@ extension ReachFive {
 
     private func resolve(_ request: NativeLoginRequest) -> ResolvedNativeLoginRequest {
         ResolvedNativeLoginRequest(
-            anchor: request.anchor,
+            presenting: request.presenting,
             originWebAuthn: request.originWebAuthn ?? sdkConfig.webAuthnOrigin,
             scopes: request.scopes ?? scope,
             origin: request.origin

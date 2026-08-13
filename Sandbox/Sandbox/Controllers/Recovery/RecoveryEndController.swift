@@ -10,7 +10,6 @@ class RecoveryEndController: UIViewController {
     @IBOutlet weak var newPassword: UITextField!
 
     @IBAction func newPasskey(_ sender: Any) {
-        guard let window = self.view.window else { fatalError("The view was not in the app's view hierarchy!") }
         guard let verificationCode else {
             print("no verificationCode")
             return
@@ -22,7 +21,7 @@ class RecoveryEndController: UIViewController {
         Task { @MainActor in
             if #available(iOS 16.0, *) {
                 do {
-                    try await AppDelegate.reachfive().resetPasskeys(withRequest: ResetPasskeyRequest(verificationCode: verificationCode, friendlyName: username, anchor: window, email: email, phoneNumber: phoneNumber, origin: "RecoveryEndController.newPasskey"))
+                    try await AppDelegate.reachfive().resetPasskeys(withRequest: ResetPasskeyRequest(verificationCode: verificationCode, friendlyName: username, presenting: Presentation(from: self), email: email, phoneNumber: phoneNumber, origin: "RecoveryEndController.newPasskey"))
                     print("reset passkey success")
                     self.navigationController?.popViewController(animated: true)
                     self.navigationController?.popViewController(animated: true)

@@ -53,11 +53,8 @@ class LoginWithPasswordController: UIViewController {
         let password = passwordInput.text ?? ""
 
         // Automatic passkey upgrade: an account that has no passkey yet gets one created in the
-        // background, with no UI at all. The SDK ignores it below iOS 18; all it needs here is a window to
-        // hang the (never shown) request on.
-        let passkeyUpgrade = view.window.map {
-            NewPasskeyRequest(anchor: $0, friendlyName: UIDevice.current.name, origin: "LoginWithPasswordController.upgradeToPasskey")
-        }
+        // background, with no UI at all. The SDK ignores it below iOS 18.
+        let passkeyUpgrade = NewPasskeyRequest(presenting: Presentation(from: self), friendlyName: UIDevice.current.name, origin: "LoginWithPasswordController.upgradeToPasskey")
 
         Task {
             await handleLoginFlow {

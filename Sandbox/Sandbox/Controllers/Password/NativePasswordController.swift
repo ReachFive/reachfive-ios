@@ -39,9 +39,8 @@ class NativePasswordController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         Task {
-            guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
 
-            let request = NativeLoginRequest(anchor: window, origin: "NativePasswordController.viewDidAppear")
+            let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "NativePasswordController.viewDidAppear")
             await handleLoginFlow {
                 // The keychain has just filled in the password, so this is the flow automatic passkey
                 // upgrades were designed for: only the name is needed, the request carries the rest.

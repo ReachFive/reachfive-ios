@@ -45,7 +45,6 @@ class PasskeyCredentialController: UIViewController {
     @available(iOS 16.0, *)
     func registerNewPasskey() async {
         print("registerNewPasskey")
-        guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         do {
             let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
             let friendlyName = ProfileController.username(profile: profile)
@@ -63,7 +62,7 @@ class PasskeyCredentialController: UIViewController {
             let registerAction = UIAlertAction(title: "Add", style: .default) { [unowned alert] (_) in
                 let textField = alert.textFields?[0]
                 Task {
-                    let request = NewPasskeyRequest(anchor: window, friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey")
+                    let request = NewPasskeyRequest(presenting: Presentation(from: self), friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey")
                     do {
                         try await AppDelegate.reachfive().registerNewPasskey(withRequest: request, authToken: self.authToken)
                         await self.reloadCredentials()
