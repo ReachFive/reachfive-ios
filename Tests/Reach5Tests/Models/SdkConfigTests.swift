@@ -197,6 +197,8 @@ final class SdkConfigTests: XCTestCase {
             "auth.example.com", // no scheme: parses as a relative reference
             "//auth.example.com", // scheme-relative: no scheme
             "https://", // scheme but no host
+            "https://:8443", // an authority with a port but no host: URL.host is "", not nil
+            "https://@:8443", // userinfo and port, still no host
             "https:///webauthn", // scheme and a path, still no host
             "mailto:test@example.com", // has a scheme, but no host
             "file:///path/to/file", // has a scheme, but no host

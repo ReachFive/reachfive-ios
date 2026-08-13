@@ -81,7 +81,9 @@ public class SdkConfig {
     /// a related but distinct text. RFC 6454 also requires the host lower-cased (§4.5) and the port
     /// omitted when it is the scheme's default (§6.2.5); `Foundation.URL` does neither on its own.
     internal static func serializedOrigin(_ url: URL) -> String? {
-        guard let scheme = url.scheme?.lowercased(), let rawHost = url.host else { return nil }
+        // `URL.host` is "", not nil, when the authority carries no host at all, as in "https://:8443":
+        // an origin needs a host, so reject it rather than serialize "https://:8443".
+        guard let scheme = url.scheme?.lowercased(), let rawHost = url.host, !rawHost.isEmpty else { return nil }
         // URL.host returns an IPv6 literal unbracketed ("::1"); an origin needs it back in brackets.
         let host = (rawHost.contains(":") ? "[\(rawHost)]" : rawHost).lowercased()
         let defaultPort = ["http": 80, "https": 443][scheme]
