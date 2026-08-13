@@ -94,7 +94,7 @@ This new underlying system may make different choices of execution queue in some
 .Example
 [source,swift]
 ----
-let nativeRequest = NativeLoginRequest(anchor: window, origin: "Password Manager")
+let nativeRequest = NativeLoginRequest(presenting: Presentation(from: self), origin: "Password Manager")
 AppDelegate.reachfive()
     .login(withRequest: nativeRequest, usingModalAuthorizationFor: [.Password], display: .Always)
     .onSuccess(DispatchQueue.main.context) { loginFlow in
@@ -125,7 +125,7 @@ You can call `Future`-based methods from the *Reach5Future SDK* alongside `async
     }
 
     // Using Reach5Future SDK with BrightFutures
-    let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
+    let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.login")
     AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
     .onSuccess(callback: handleLoginFlow)
     .onFailure { error in
