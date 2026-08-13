@@ -183,6 +183,30 @@ final class SdkConfigTests: XCTestCase {
         XCTAssertEqual(config.webAuthnOrigin, "https://example.reach5.net")
     }
 
+    /// The `domain` fallback and a configured origin go through the same serializer, so they cannot disagree
+    /// on a host that needs normalizing. An internationalized domain is where they would: RFC 6454 §6.2 ASCII
+    /// Serialization expects the host in its A-label form, whereas returning `café.example` verbatim is the
+    /// §6.1 *Unicode* serialization — a different algorithm. The A-label form is also the host `createUrl`
+    /// sends every API request to, since both start from `baseUrlComponents`.
+    func testWebAuthnOriginDefaultUsesTheAsciiFormOfAnInternationalizedDomain() {
+        let fromDomain = SdkConfig(domain: "café.example", clientId: "abc")
+        let configured = SdkConfig(
+            domain: "example.reach5.net",
+            clientId: "abc",
+            originWebAuthn: URL(string: "https://café.example")!)
+
+        XCTAssertEqual(fromDomain.webAuthnOrigin, "https://xn--caf-dma.example")
+        XCTAssertEqual(fromDomain.webAuthnOrigin, configured.webAuthnOrigin)
+        // The very host the API requests go to, so the server sees a consistent pair
+        XCTAssertEqual(fromDomain.baseUrlComponents.url?.host, "xn--caf-dma.example")
+    }
+
+    /// An IPv6 domain is valid (`testAcceptableDomains` covers it) and needs the brackets an origin requires,
+    /// which a bare `"https://\(domain)"` interpolation would not add back.
+    func testWebAuthnOriginDefaultBracketsAnIPv6Domain() {
+        XCTAssertEqual(SdkConfig(domain: "[::1]", clientId: "abc").webAuthnOrigin, "https://[::1]")
+    }
+
     func testConfiguredOriginWins() {
         let config = SdkConfig(
             domain: "example.reach5.net",

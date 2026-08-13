@@ -78,10 +78,16 @@ public class SdkConfig {
     /// Only this configured value is normalized: the per-request `originWebAuthn` overrides are `String`s
     /// and are sent as given.
     var webAuthnOrigin: String {
-        guard let originWebAuthn, let origin = Self.serializedOrigin(originWebAuthn) else {
-            // `domain` is validated at init but kept as given, so it can still carry the mixed case DNS
-            // tolerates. RFC 6454 §4.5 requires a lower-cased host in an origin, hence the fold here, at the
-            // point of use — the same place `serializedOrigin` does it for the configured value.
+        if let originWebAuthn, let origin = Self.serializedOrigin(originWebAuthn) {
+            return origin
+        }
+        // `domain` is validated at init but kept as given, so it can still carry the mixed case DNS tolerates
+        // — or non-ASCII labels. Serializing it through `serializedOrigin`, from the very components every API
+        // request is built on, is what keeps this path and the configured one from disagreeing: both then fold
+        // the case (RFC 6454 §4.5) and both send the host in the A-label form §6.2 ASCII Serialization expects
+        // (§4, step 5 note). Returning `café.example` verbatim would be the §6.1 *Unicode* serialization, a
+        // different algorithm, and not the one `CollectedClientData.origin` is specified against.
+        guard let url = baseUrlComponents.url, let origin = Self.serializedOrigin(url) else {
             return "https://\(domain.lowercased())"
         }
         return origin
