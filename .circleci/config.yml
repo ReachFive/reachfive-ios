@@ -108,6 +108,15 @@ default_workflows_tags: &default_workflows_tags
     tags:
       only: /.*/
 
+# check-doc-examples only needs to run when preparing a release (branch named
+# after the version, per RELEASE.md) — not on every PR (counter-productive,
+# see #146), and not on the tag: under SPM the tag itself is the publication,
+# resolved by consumers before any CircleCI pipeline on it even starts.
+release_branches: &release_branches
+  filters:
+    branches:
+      only: /^[0-9]+\.[0-9]+\.[0-9]+$/
+
 workflows:
   version: 2
   build-and-deploy:
@@ -117,12 +126,11 @@ workflows:
       - test:
           <<: *default_workflows_tags
       - check-doc-examples:
-          <<: *default_workflows_filters
+          <<: *release_branches
       - build-for-release:
           <<: *default_workflows_filters
       - publish:
           requires:
             - build-for-release
             - test
-            - check-doc-examples
           <<: *default_workflows_filters
