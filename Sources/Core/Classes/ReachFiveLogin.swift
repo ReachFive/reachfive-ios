@@ -17,7 +17,11 @@ public extension ReachFive {
 
             let _ = try? await webAuthSession.start(
                 url: reachFiveApi.buildLogoutURL(queryParams: options),
-                mode: .sdkScheme,
+                mode: .customScheme,
+                // A logout callback carries no `code` and is intercepted by the sheet, so the out-of-band
+                // channel must not be prepared: a login code straying in would otherwise resolve this logout
+                // and be swallowed (the logout's continuation ignores the URL).
+                expectsAuthorizationCode: false,
                 presentationContextProvider: request.presentationContextProvider,
                 prefersEphemeralWebBrowserSession: false)
         }

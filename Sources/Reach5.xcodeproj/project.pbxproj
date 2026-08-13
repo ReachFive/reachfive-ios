@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CA61910000000000000000E2 /* Presentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA61910000000000000000E1 /* Presentation.swift */; };
+		CA61910000000000000000F2 /* TokenType.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA61910000000000000000F1 /* TokenType.swift */; };
+		CA61910000000000000000B2 /* URL+WebAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA61910000000000000000B1 /* URL+WebAuth.swift */; };
+		CA61910000000000000000C2 /* WebAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA61910000000000000000C1 /* WebAuthentication.swift */; };
+		CA61910000000000000000D2 /* WebSessionMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA61910000000000000000D1 /* WebSessionMode.swift */; };
 		06FA9FFD97F751D36D924E4B /* SdkVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */; };
 		2A0305102C04DBE500A92524 /* ResetOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A03050F2C04DBE500A92524 /* ResetOptions.swift */; };
 		2A0305122C04F07900A92524 /* ResetPasskeyRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0305112C04F07900A92524 /* ResetPasskeyRequest.swift */; };
@@ -108,6 +113,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CA61910000000000000000E1 /* Presentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presentation.swift; sourceTree = "<group>"; };
+		CA61910000000000000000F1 /* TokenType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenType.swift; sourceTree = "<group>"; };
+		CA61910000000000000000B1 /* URL+WebAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+WebAuth.swift"; sourceTree = "<group>"; };
+		CA61910000000000000000C1 /* WebAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebAuthentication.swift"; sourceTree = "<group>"; };
+		CA61910000000000000000D1 /* WebSessionMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebSessionMode.swift"; sourceTree = "<group>"; };
 		2A03050F2C04DBE500A92524 /* ResetOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetOptions.swift; sourceTree = "<group>"; };
 		2A0305112C04F07900A92524 /* ResetPasskeyRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasskeyRequest.swift; sourceTree = "<group>"; };
 		2A0305132C063DEA00A92524 /* ResetPublicKeyCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPublicKeyCredential.swift; sourceTree = "<group>"; };
@@ -235,6 +245,7 @@
 				2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */,
 				2AE18CDA29FC1DAF00258D2B /* LoginWKWebview.swift */,
 				347FDB53229BE8F800660687 /* Provider.swift */,
+				CA61910000000000000000E1 /* Presentation.swift */,
 				347FDB66229C02FE00660687 /* ReachFive.swift */,
 				34F7D3E322A54AA2003A7BC0 /* ReachFiveApi.swift */,
 				2AB29A0A2C1225F500D0C5C8 /* ReachFiveApplication.swift */,
@@ -250,6 +261,7 @@
 				2AE53307299462DD00EF97E0 /* ReachFiveWebviewLogin.swift */,
 				34E18B8D22A6C13100952EBD /* models */,
 				34689A9A22CE3E34002970F9 /* utils */,
+				CA61910000000000000000A1 /* web */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -271,10 +283,21 @@
 			path = utils;
 			sourceTree = "<group>";
 		};
+		CA61910000000000000000A1 /* web */ = {
+			isa = PBXGroup;
+			children = (
+				CA61910000000000000000B1 /* URL+WebAuth.swift */,
+				CA61910000000000000000C1 /* WebAuthentication.swift */,
+				CA61910000000000000000D1 /* WebSessionMode.swift */,
+			);
+			path = web;
+			sourceTree = "<group>";
+		};
 		34689A9F22CE5CF9002970F9 /* requests */ = {
 			isa = PBXGroup;
 			children = (
 				3404A40B22CBA6DD002FFEDB /* AuthCodeRequest.swift */,
+				CA61910000000000000000F1 /* TokenType.swift */,
 				2AE533142994632F00EF97E0 /* LoginCallback.swift */,
 				34689A9822CDFC24002970F9 /* LoginProviderRequest.swift */,
 				34E18B8E22A6C32500952EBD /* LoginRequest.swift */,
@@ -622,6 +645,11 @@
 				8496EB2B25DEAFCF005098DD /* WebAuthnLoginRequest.swift in Sources */,
 				2AE5331D2994638000EF97E0 /* NativeLoginRequest.swift in Sources */,
 				2A624FDA2B2BDBC400BF33A7 /* DefaultProvider.swift in Sources */,
+				CA61910000000000000000E2 /* Presentation.swift in Sources */,
+				CA61910000000000000000F2 /* TokenType.swift in Sources */,
+				CA61910000000000000000B2 /* URL+WebAuth.swift in Sources */,
+				CA61910000000000000000C2 /* WebAuthentication.swift in Sources */,
+				CA61910000000000000000D2 /* WebSessionMode.swift in Sources */,
 				8496EB3C25DEB141005098DD /* R5PublicKeyCredentialParameter.swift in Sources */,
 				2AE533222994638100EF97E0 /* PasskeySignupRequest.swift in Sources */,
 				2AE5331F2994638100EF97E0 /* SignupOptions.swift in Sources */,

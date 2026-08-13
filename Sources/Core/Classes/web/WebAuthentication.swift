@@ -1,41 +1,75 @@
 import AuthenticationServices
 
-/// Porte le login web en cours : démarre une `ASWebAuthenticationSession`, attend son callback,
-/// et — pour les logins hors-bande — laisse un lien reçu via `application(_:open:)` (custom scheme)
-/// ou `application(_:continue:)` (lien universel) le compléter (``tryComplete(externalCallbackURL:)``).
+/// Carries the web login in progress: starts an `ASWebAuthenticationSession`, waits for its callback, and either complete it locally,
+/// or lets a link received through `application(_:open:)` complete it (``tryComplete(externalCallbackURL:)``).
 ///
-/// **Un seul login à la fois.** Sur iPhone, la feuille modale d'une `ASWebAuthenticationSession` rend
-/// un second `start(...)` inatteignable par l'interaction utilisateur : tant qu'elle est présentée rien
-/// d'autre n'est déclenchable, et sa disparition passe par une résolution (callback, Annuler) qui reprend
-/// la continuation. Restent les appels **programmatiques** (logout/login déclenché par une logique d'app
-/// sans interaction, double invocation), le multi-fenêtres (iPad/macCatalyst), et un completion handler
-/// que le système ne rappellerait jamais : dans tous ces cas, le dernier arrivé gagne — le login
-/// précédent est repris avec `.AuthCanceled` et sa feuille est fermée, aucune continuation ne gèle.
+/// **A custom-scheme login prepares both channels**, because a provider may decide *midway*, sheet already open,
+/// whether it finishes inside the sheet or leaves for a third-party app. Two calls leave the
+/// out-of-band channel inactive: a universal-link login, whose `callback: .https(...)` makes the sheet
+/// intercept the redirection itself, and `logout`, whose callback carries no `code`
+/// (`expectsAuthorizationCode: false`).
 ///
-/// Les callbacks tardifs ou dupliqués sont neutralisés de deux façons : un **jeton par tentative**
-/// (`attempt`) — pour qu'un callback d'une `ASWebAuthenticationSession` périmée ne puisse jamais
-/// reprendre la continuation d'un login plus récent — et la remise à `nil` de `continuation` dans
-/// `complete(_:)` — pour que la résolution gagnante (in-band, hors-bande, ou annulation) reprenne la
-/// continuation exactement une fois.
+/// **One login at a time, and the newcomer is dropped silently** with `.AuthCanceled`, leaving the login under way untouched.
+/// Nothing is expected of the caller: this is the SDK absorbing a double tap, not a failure to report.
 ///
-/// **Limitation (hors-bande)** : l'état d'un login en vol ne vit qu'en mémoire. Si iOS tue l'app
-/// pendant l'aller-retour vers l'app externe, le callback reçu au relancement ne matche rien
-/// (`tryComplete` renvoie `false`, l'app hôte route le lien) et le `code` est perdu : l'utilisateur
-/// doit relancer le login. Une reprise après relancement demanderait de persister le login en vol
-/// (redirect_uri + PKCE, déjà en storage) et un canal pour livrer le résultat à l'app — assumé hors
-/// périmètre tant que l'usage ne le justifie pas.
+/// Refusing rather than replacing is a measured choice. Replacing means cancelling the incumbent's sheet and
+/// presenting the newcomer behind it; `session.start()` then answers `false` while the outgoing sheet
+/// animates away, and retrying until it answers `true` only moves the failure — the presentation then fails
+/// asynchronously with `presentationContextInvalid`, and *both* logins are lost. Reproduced on an iOS device
+/// with two fast taps on the same button (never on Mac Catalyst). Refusing removes the cancel-then-present
+/// sequence entirely, and on a double tap the first tap is the one the user meant. No legitimate caller wants
+/// the other behaviour: a logout is always a manual action, so it cannot start while a login sheet is on
+/// screen. Multi-window (iPad, Mac Catalyst) is the one place two concurrent logins would make sense, and is
+/// out of scope while one session is shared by the whole `ReachFive` instance.
 ///
-/// `@MainActor` : tout le domaine `ASWebAuthenticationSession` est déjà main-thread.
+/// The way out if a login never resolves: cancel the `Task` that started it — `onCancel` closes the sheet and
+/// frees the slot, which a view being torn down does on its own.
+///
+/// **Two accepted imprecisions**, both rooted in the shared PKCE slot and described by the FIXME in ``ReachFive/webviewLogin(_:)``
+///
+/// `@MainActor`: the whole `ASWebAuthenticationSession` domain is already main-thread.
 @MainActor
 final class WebAuthenticationSession {
-    private var session: ASWebAuthenticationSession?
-    private var continuation: CheckedContinuation<URL, Error>?
-    /// La `redirect_uri` attendue pour cette tentative ; `nil` hors d'un login → `tryComplete` ne matche rien.
-    private var expectedCallback: URL?
-    /// Identifie la tentative en cours ; un callback capturant un `attempt` périmé est ignoré.
-    private var attempt = 0
+
+    /// Whether a login is in progress, and everything its resolution needs between a session, a continuation, an expected callback and a boolean.
+    private enum State {
+        case idle
+
+        /// `start(...)` was accepted and the slot is taken, but the continuation does not exist yet: it is
+        /// only handed to us inside `withCheckedThrowingContinuation`. Nothing else runs on the main actor
+        /// between the two, so no resolution can observe this state — it exists so the slot can be claimed
+        /// *before* the first suspension point, which is what a double tap needs.
+        case claimed(id: Int)
+
+        /// The continuation is installed; this is the only state a resolution can act on.
+        case running(Login)
+    }
+
+    private struct Login {
+        /// Identifies the login; a callback capturing a stale `id` is ignored.
+        let id: Int
+        let continuation: CheckedContinuation<URL, Error>
+        /// The `redirect_uri` expected out-of-band; `nil` for a universal-link login (the sheet intercepts
+        /// the redirection itself) → `tryComplete` then matches nothing.
+        let expectedCallback: URL?
+        /// The presented session, to close its sheet when the resolution comes from somewhere else
+        /// (out-of-band, or the calling `Task` cancelled). Set back to `nil` as soon as the session reports
+        /// its own completion: the system is then done with it and there is no sheet left to close.
+        var session: ASWebAuthenticationSession?
+    }
+
+    /// Whether the slot is taken: a caller must not apply side effects *before* calling a `start(...)` that would  be knwon to be refused (see ``ReachFive/webviewLogin(_:)``).
+    /// Internal onpurpose: an integrator has nothing to check, a dropped call already ends with `.AuthCanceled`.
+    var isLoginInProgress: Bool {
+        if case .idle = state { false } else { true }
+    }
+
+    private var state = State.idle
+    /// Monotonic, never reset: a fresh identity for each accepted login, so the callback of a session
+    /// belonging to a previous one can never resolve a newer login.
+    private var lastLoginId = 0
     private let baseScheme: String
-    /// La `redirect_uri` du `SdkConfig`, utilisée par défaut quand le mode n'en porte pas (custom scheme).
+    /// The `SdkConfig`'s `redirect_uri`, which is the one a custom-scheme login uses.
     private let sdkRedirectUri: URL
 
     nonisolated init(baseScheme: String, sdkRedirectUri: URL) {
@@ -43,148 +77,183 @@ final class WebAuthenticationSession {
         self.sdkRedirectUri = sdkRedirectUri
     }
 
-    /// Démarre un login web et attend son callback (succès, erreur ou annulation). Le ``WebSessionMode``
-    /// décrit comment la session se termine — croisement de deux axes (custom scheme vs lien universel,
-    /// in-band vs hors-bande) — et pilote donc à la fois la construction de la session et le canal du
-    /// callback. Si le `Task` appelant est annulé (vue démontée, timeout…), la feuille est fermée et
-    /// l'appel se termine par `.AuthCanceled`.
+    /// Starts a web login and waits for its callback (success, error or cancellation). The
+    /// ``WebSessionMode`` drives how the session is built and which channels are prepared, as described above.
+    /// If the calling `Task` is cancelled (view torn down, timeout…), the sheet is closed and the call ends
+    /// with `.AuthCanceled`.
+    ///
+    /// - Parameter expectsAuthorizationCode: `false` for a call whose callback carries no `code` (logout):
+    ///   the out-of-band channel is then not prepared at all.
+    /// - Throws: `.AuthCanceled` when a web login is already in progress — the call is dropped, the login
+    ///   under way is untouched, and the caller has nothing to single out — or when the calling `Task` was
+    ///   already cancelled, in which case nothing is presented at all.
     func start(url: URL,
                mode: WebSessionMode,
+               expectsAuthorizationCode: Bool = true,
                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
                prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
 
-        // Un Task déjà annulé ne doit pas présenter de feuille (son `onCancel` ci-dessous aurait
-        // déjà tiré, à vide, avant que la continuation soit posée).
-        try Task.checkCancellation()
+        // An already-cancelled Task must not present a sheet (its `onCancel` below would already have run,
+        // to no effect, before the continuation was installed).
+        guard !Task.isCancelled else { throw ReachFiveError.AuthCanceled }
 
-        // Dernier arrivé gagne : reprend l'éventuel login encore en attente avec `.AuthCanceled` et
-        // ferme sa feuille, pour ne jamais laisser une continuation geler sans résolution.
-        complete(attempt: attempt, .failure(.AuthCanceled))
-        attempt += 1
-        let attempt = attempt
+        // One login at a time, and the incumbent keeps its place.
+        guard case .idle = state else {
+            Logger.shared.log("A web login is already in progress; this call is dropped, the login under way continues.")
+            throw ReachFiveError.AuthCanceled
+        }
+
+        // Built before the slot is claimed, so its only failure path — a universal-link callback this OS or
+        // this URL cannot support — throws without leaving a slot to release or a continuation to resume.
+        let id = lastLoginId + 1
+        let prepared = try prepareSession(id: id,
+                                         url: url,
+                                         mode: mode,
+                                         expectsAuthorizationCode: expectsAuthorizationCode,
+                                         presentationContextProvider: presentationContextProvider,
+                                         prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession)
+        lastLoginId = id
+        state = .claimed(id: id)
 
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
-                self.continuation = continuation
-                // Seul le mode hors-bande arme `tryComplete` ; en in-band, la session se complète elle-même.
-                // La `redirect_uri` attendue est celle du mode (lien universel) ou, à défaut, celle du SdkConfig.
-                self.expectedCallback = mode.channel == .outOfBand ? (mode.redirectUri ?? sdkRedirectUri) : nil
+                self.state = .running(Login(id: id,
+                                            continuation: continuation,
+                                            expectedCallback: prepared.expectedCallback,
+                                            session: prepared.session))
 
-                let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
-                    // Tout passe sur le main thread pour éviter les situations de compétition.
-                    Task { @MainActor in
-                        self?.handleSessionCompletion(attempt: attempt, callbackURL: callbackURL, error: error)
-                    }
-                }
-
-                let session: ASWebAuthenticationSession
-                switch (mode.channel, mode.callback) {
-                case (.inBand, .customScheme):
-                    // Scheme custom intercepté par la session (historique, tout iOS).
-                    session = ASWebAuthenticationSession(
-                        url: url,
-                        callbackURLScheme: self.baseScheme,
-                        completionHandler: completionHandler)
-
-                case let (.inBand, .universalLink(callback)):
-                    // iOS 17.4+ : lien universel intercepté in-band dans la webview via `callback: .https`
-                    // (nécessite l'Associated Domain `webcredentials:<host>`). La disponibilité est déjà
-                    // garantie en amont par la fabrique `@available` de ``WebSessionMode``, on garde ici
-                    // un filet runtime (et l'extraction du host, faillible).
-                    guard #available(iOS 17.4, *), let host = callback.host else {
-                        self.complete(attempt: attempt, .failure(.TechnicalError(reason: "In-sheet universal link callback requires iOS 17.4+ and a host: \(callback)")))
-                        return
-                    }
-                    session = ASWebAuthenticationSession(
-                        url: url,
-                        callback: .https(host: host, path: callback.path),
-                        completionHandler: completionHandler)
-
-                case (.outOfBand, _):
-                    // Le flow se termine dans une app externe : la session ne recevra jamais le callback
-                    // (traité hors-bande par `tryComplete`, quel que soit le type de lien), on ne lui donne
-                    // donc aucun scheme à intercepter.
-                    session = ASWebAuthenticationSession(
-                        url: url,
-                        callbackURLScheme: nil,
-                        completionHandler: completionHandler)
-                }
-
-                // Fenêtre qui sert d'ancre de présentation à la session.
-                session.presentationContextProvider = presentationContextProvider
-                session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
-                self.session = session
-
-                if !session.start() {
-                    // Si start() renvoie false, le completion handler peut ne jamais être appelé : on
-                    // reprend la continuation avec une erreur.
-                    self.complete(attempt: attempt, .failure(.TechnicalError(reason: "ASWebAuthenticationSession failed to start")))
+                if !prepared.session.start() {
+                    // When start() returns false the completion handler may never be called, so the
+                    // continuation is resumed with an error here.
+                    self.complete(id: id, .failure(.TechnicalError(reason: "ASWebAuthenticationSession failed to start")))
                 }
             }
         } onCancel: {
-            // L'annulation peut arriver sur n'importe quel thread → hop sur le main actor. Sans effet
-            // si la tentative est déjà résolue ou remplacée par un login plus récent (gardes de `complete`).
+            // Cancellation can arrive on any thread → hop onto the main actor. No effect if the login is
+            // already resolved (`complete`'s guard).
             Task { @MainActor in
-                self.complete(attempt: attempt, .failure(.AuthCanceled))
+                self.complete(id: id, .failure(.AuthCanceled))
             }
         }
     }
 
-    /// Complète le login en cours si l'URL entrante est bien notre callback, et ferme la feuille
-    /// encore ouverte. Renvoie `true` seulement dans ce cas — sinon `false`, pour que l'app hôte puisse
-    /// router elle-même le lien.
+    /// Builds the session for `mode` and says which `redirect_uri`, if any, the out-of-band channel should
+    /// watch for. Deliberately free of any state mutation: `start(...)` calls it before claiming the slot.
+    private func prepareSession(id: Int,
+                                url: URL,
+                                mode: WebSessionMode,
+                                expectsAuthorizationCode: Bool,
+                                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
+                                prefersEphemeralWebBrowserSession: Bool)
+    throws -> (session: ASWebAuthenticationSession, expectedCallback: URL?) {
+
+        let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
+            // Everything hops to the main thread to avoid races.
+            Task { @MainActor in
+                self?.handleSessionCompletion(id: id, callbackURL: callbackURL, error: error)
+            }
+        }
+
+        let session: ASWebAuthenticationSession
+        let expectedCallback: URL?
+        switch mode.callback {
+        case .customScheme:
+            // Prepare the out-of-band channel: the provider may decide midway to leave for a third-party app,
+            // sheet already open, and come back through `application(_:open:)`.
+            expectedCallback = expectsAuthorizationCode ? sdkRedirectUri : nil
+            session = ASWebAuthenticationSession(
+                url: url,
+                callbackURLScheme: baseScheme,
+                completionHandler: completionHandler)
+
+        case let .universalLink(callback):
+            guard #available(iOS 17.4, *), let host = callback.host else {
+                throw ReachFiveError.TechnicalError(reason: "Universal link callback requires iOS 17.4+ and a host: \(callback)")
+            }
+            // No out-of-band channel to prepare: `callback: .https(...)` makes the sheet itself intercept the
+            // redirection, and nothing else can deliver that link to us — `application(_:open:)` never
+            // sees https URLs.
+            expectedCallback = nil
+            session = ASWebAuthenticationSession(
+                url: url,
+                callback: .https(host: host, path: callback.path),
+                completionHandler: completionHandler)
+        }
+
+        // The window that acts as the session's presentation anchor.
+        session.presentationContextProvider = presentationContextProvider
+        session.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
+        return (session, expectedCallback)
+    }
+
+    /// Completes the login in progress if the incoming URL really is our callback, and closes the sheet if it
+    /// is still open. Returns `true` only in that case — otherwise `false`, so the host app can route the
+    /// link itself.
     func tryComplete(externalCallbackURL url: URL) -> Bool {
-        guard let expectedCallback,
+        guard case let .running(login) = state,
+              let expectedCallback = login.expectedCallback,
               Self.isOurCallback(url, expectedCallback: expectedCallback) else {
             return false
         }
-        complete(attempt: attempt, .success(url))
+        complete(id: login.id, .success(url))
         return true
     }
 
-    private func handleSessionCompletion(attempt: Int, callbackURL: URL?, error: Error?) {
+    private func handleSessionCompletion(id: Int, callbackURL: URL?, error: Error?) {
+        // A session that is no longer the one in place reports late — typically the `canceledLogin` our own
+        // `cancel()` draws after an out-of-band resolution. Nothing to resolve, and nothing worth logging.
+        guard case var .running(login) = state, login.id == id else { return }
+
+        // The session reported, so its sheet is already going away: forget it, so the resolution below does
+        // not `cancel()` a session the system is done with (see `Login.session`).
+        login.session = nil
+        state = .running(login)
+
         if let error {
-            complete(attempt: attempt, .failure(Self.reachFiveError(for: error)))
+            // Logged because `.canceledLogin` covers more than the user tapping Cancel: the system also
+            // reports it when the app is not associated with the host of an `.https` callback, and the
+            // reason only shows up in `localizedDescription`. Only reached for an error this call is about
+            // to deliver, so it never runs for a sheet we closed ourselves.
+            Logger.shared.log("The web session ended without a callback: \(error.localizedDescription)")
+            complete(id: id, .failure(Self.reachFiveError(for: error)))
         } else if let callbackURL {
-            complete(attempt: attempt, .success(callbackURL))
+            complete(id: id, .success(callbackURL))
         } else {
-            complete(attempt: attempt, .failure(.TechnicalError(reason: "No callback URL")))
+            complete(id: id, .failure(.TechnicalError(reason: "No callback URL")))
         }
     }
 
-    /// L'unique point de résolution : reprend la continuation avec `result`, nettoie l'état, et ferme
-    /// la feuille si elle est encore présentée (résolution hors-bande, annulation, remplacement).
-    private func complete(attempt: Int, _ result: Result<URL, ReachFiveError>) {
-        // Ignore un callback périmé (login plus récent) ou une seconde résolution (`continuation` déjà nil).
-        guard attempt == self.attempt, let continuation else { return }
-        // Capture la session avant de la nil-er pour fermer sa feuille après la reprise. Le callback
-        // d'annulation tardif qui en résulte est ignoré (continuation désormais nil) ; sur une session
-        // déjà terminée ou jamais présentée, `cancel()` est sans effet.
-        let openSession = session
-        self.continuation = nil
-        self.session = nil
-        self.expectedCallback = nil
-        continuation.resume(with: result)
-        openSession?.cancel()
+    /// The single resolution point: resumes the continuation with `result`, releases the slot, and closes the
+    /// sheet if it is still presented (out-of-band resolution, cancellation).
+    private func complete(id: Int, _ result: Result<URL, ReachFiveError>) {
+        // Ignore a stale callback (it names a login that is no longer the one in place) or a second
+        // resolution (the state is back to `idle`).
+        guard case let .running(login) = state, login.id == id else { return }
+        // Released before the resume so the slot is free for whatever the caller does next.
+        state = .idle
+        login.continuation.resume(with: result)
+        // Only reached when the resolution came from somewhere other than the session itself, which is why
+        // this cannot land on a session that has already reported. Unrelated to the "Attempting to load the
+        // view … while it is deallocating (SFAuthenticationViewController)" iOS logs when tearing a cancelled
+        // sheet down: that one shows up on a plain user cancel too, with no `cancel()` of ours involved.
+        login.session?.cancel()
     }
 
-    /// `true` si l'URL entrante a le même scheme et le même host (insensibles à la casse) et le même
-    /// path que le `redirect_uri` envoyé, et porte un paramètre `code` (succès) ou `error` (refus OAuth,
-    /// ex. `access_denied` — le login se termine alors proprement avec l'`ApiError` du callback au lieu
-    /// de rester bloqué sur la feuille). Comparer le scheme est ce qui permet aux deux canaux hors-bande
-    /// (custom scheme via `application(_:open:)`, lien universel via `application(_:continue:)`) de
-    /// partager ce même matcher sans faux positif : un login attendu en scheme ne matche que des URL de
-    /// ce scheme, un login attendu en https que des liens universels. Le path attendu étant celui qu'on
-    /// déclare (AASA pour l'https, redirect_uri pour le scheme), ce matching exact suffit à distinguer
-    /// notre callback des autres liens de l'app.
+    /// `true` when the incoming URL designates the same endpoint as the `redirect_uri` we sent
+    /// (``matchesEndpoint(of:)``, shared with ``ReachFive/interceptUrl(_:)``) and carries a `code` or an
+    /// `error` parameter. Comparing the scheme and the path we declared
+    /// is enough to tell our callback apart from the app's other links.
     nonisolated static func isOurCallback(_ url: URL, expectedCallback expected: URL) -> Bool {
-        url.scheme?.lowercased() == expected.scheme?.lowercased()
-        && url.host?.lowercased() == expected.host?.lowercased()
-        && url.path == expected.path
+        url.matchesEndpoint(of: expected)
         && (url.queryValue("code") != nil || url.queryValue("error") != nil)
     }
 
-    /// Mappe une erreur d'`ASWebAuthenticationSession` vers une `ReachFiveError`.
+    /// Maps an `ASWebAuthenticationSession` error onto a `ReachFiveError`. Pure: the raw error is logged by
+    /// `handleSessionCompletion(id:callbackURL:error:)`, which knows whether it is about to be delivered.
+    ///
+    /// `canceledLogin` is not only "the user tapped Cancel": the system also reports it when the app is not
+    /// associated with the host of an `.https` callback, and when a sheet is closed by `cancel()` — measured
+    /// on iOS and Mac Catalyst. Only `localizedDescription` tells the three apart.
     nonisolated static func reachFiveError(for error: Error) -> ReachFiveError {
         guard let sessionError = error as? ASWebAuthenticationSessionError else {
             return .TechnicalError(reason: "Unknown Error \(error.localizedDescription)")

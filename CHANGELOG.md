@@ -10,12 +10,11 @@
   - Renamed `baseScheme` field to `customScheme`
   - The initializer now stops the program with a `preconditionFailure` when the scheme is not a valid URL scheme (either because of the `customScheme` parameter, or indirectly because the default scheme is derived from an ill-formatted `clientId`, e.g. one containing `_`). In that case, pass an explicit valid `customScheme` and declare it in your Info.plist and your ReachFive console.
 
-- `application(_:continue:restorationHandler:)` now returns `false` when neither ReachFive's web-auth session nor any registered provider consumed the activity, instead of always returning `true`. If your app also routes universal links itself, only do so when this call returns `false`.
+- `application(_:continue:restorationHandler:)` and `application(_:open:options:)` now returns `false` when neither an SDK flow nor any registered provider consumed the activity or URL, instead of always returning `true`. If your app also routes universal links or custom-scheme URLs itself, only do so when the call returns `false`.
 
-- ProviderCreator : the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can
-  reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
+- ProviderCreator : the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
 
-- `Provider.login` takes a `Presentation` instead of a `UIViewController?`:
+- `Provider.login` takes a `Presentation` instead of a `UIViewController?` to handle the different type of conformance itself (either conforming to `ASWebAuthenticationPresentationContextProviding` or needing a `ASPresentationAnchor` ) 
 
   ```swift
   // Before
@@ -24,11 +23,9 @@
   try await provider.login(scope: scope, origin: origin, presenting: Presentation(from: self))
   ```
 
-  The view controller no longer needs to conform to `ASWebAuthenticationPresentationContextProviding` for web providers: the SDK derives the presentation context itself (a conforming view controller keeps precedence if you have one). It must simply be attached to a window at call time — call `login` from `viewDidAppear` or a user interaction, not from `viewDidLoad`. When calling `webviewLogin` or `logout(webSessionLogout:)` directly, the existing request initializers are unchanged; `WebviewLoginRequest` and `WebSessionLogoutRequest` also gain a convenience initializer taking `presenting: Presentation`, which lifts the conformance requirement there too.
-
 ### New features
-- New `WebProvider` to register a web provider (e.g. B.connect) with a `variant` and a completion `mode`. See the [ProviderCreator](https://developer.reachfive.com/sdk-ios/providerCreator.html) and [custom provider guide](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) documentation.
-- `webviewLogin` accepts a `webSessionMode` parameter picking how the `ASWebAuthenticationSession` returns: `.sdkScheme`, `.externalAppScheme`, `.externalAppUniversalLink(_:)` or `.inSheetUniversalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
+- New `WebProvider` to register a web provider with a `variant` and a completion `mode`. See the [ProviderCreator](https://developer.reachfive.com/sdk-ios/providerCreator.html) and [custom provider guide](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) documentation.
+- `webviewLogin` accepts a `webSessionMode` parameter picking the shape of the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
 - `webviewLogin` accepts a new `loginUrlFragment` parameter to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
 
 ## v10.0.1
