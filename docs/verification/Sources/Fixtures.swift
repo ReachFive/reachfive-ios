@@ -35,7 +35,7 @@ func goToProfile(_ authToken: AuthToken) {}
 let profileAuthToken: AuthToken = __placeholder()
 let freshProfileAuthToken: AuthToken = __placeholder()
 let authToken: AuthToken = __placeholder()
-let window: ASPresentationAnchor = __placeholder()
+let presenting: Presentation = __placeholder()
 let profile: ProfilePasskeySignupRequest = __placeholder()
 let verificationCode: String = __placeholder()
 let verificationCodeInput: String = __placeholder()
