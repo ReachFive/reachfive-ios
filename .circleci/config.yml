@@ -108,15 +108,14 @@ default_workflows_tags: &default_workflows_tags
     tags:
       only: /.*/
 
-# For the doc-examples check we want PR feedback only, not every push. CircleCI
-# filters can't test "is a PR" directly, so we run on all branches except the
-# base branch (and not on tags). Combined with the project setting
-# "Only build pull requests" (Project Settings › Advanced, set in the CircleCI
-# UI — not expressible here), this effectively limits the job to PR branches.
-pull_request_branches: &pull_request_branches
+# check-doc-examples only needs to run when preparing a release (branch named
+# after the version, per RELEASE.md) — not on every PR (counter-productive,
+# see #146), and not on the tag: under SPM the tag itself is the publication,
+# resolved by consumers before any CircleCI pipeline on it even starts.
+release_branches: &release_branches
   filters:
     branches:
-      ignore: master
+      only: /^[0-9]+\.[0-9]+\.[0-9]+$/
 
 workflows:
   version: 2
@@ -127,7 +126,7 @@ workflows:
       - test:
           <<: *default_workflows_tags
       - check-doc-examples:
-          <<: *pull_request_branches
+          <<: *release_branches
       - build-for-release:
           <<: *default_workflows_filters
       - publish:
