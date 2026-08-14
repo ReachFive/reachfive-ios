@@ -56,11 +56,11 @@ public class SdkConfig {
         self.customScheme = scheme
 
         // Built unconditionally so that an invalid scheme is caught at init even when every URI is provided explicitly
-        let defaultRedirectUri = Self.defaultUri(scheme: scheme, path: "callback")
+        let defaultRedirectUri = Self.defaultUri(scheme: scheme, host: "callback")
         self.redirectUri = redirectUri ?? defaultRedirectUri
-        self.mfaUri = mfaUri ?? Self.defaultUri(scheme: scheme, path: "mfa")
-        self.emailVerificationUri = emailVerificationUri ?? Self.defaultUri(scheme: scheme, path: "email-verification")
-        self.accountRecoveryUri = accountRecoveryUri ?? Self.defaultUri(scheme: scheme, path: "account-recovery")
+        self.mfaUri = mfaUri ?? Self.defaultUri(scheme: scheme, host: "mfa")
+        self.emailVerificationUri = emailVerificationUri ?? Self.defaultUri(scheme: scheme, host: "email-verification")
+        self.accountRecoveryUri = accountRecoveryUri ?? Self.defaultUri(scheme: scheme, host: "account-recovery")
 
         if let originWebAuthn, Self.serializedOrigin(originWebAuthn) == nil {
             preconditionFailure("""
@@ -102,11 +102,9 @@ public class SdkConfig {
     /// a related but distinct text. RFC 6454 also requires the host lower-cased (§4.5) and the port
     /// omitted when it is the scheme's default (§6.2.5); `Foundation.URL` does neither on its own.
     internal static func serializedOrigin(_ url: URL) -> String? {
-        // `URL.host` is "", not nil, when the authority carries no host at all, as in "https://:8443":
-        // an origin needs a host, so reject it rather than serialize "https://:8443".
-        guard let scheme = url.scheme?.lowercased(), let rawHost = url.host, !rawHost.isEmpty else { return nil }
-        // URL.host returns an IPv6 literal unbracketed ("::1"); an origin needs it back in brackets.
-        let host = (rawHost.contains(":") ? "[\(rawHost)]" : rawHost).lowercased()
+        // `normalizedScheme`/`normalizedHost` carry the case folding RFC 6454 §4.5 asks for, the brackets an
+        // IPv6 literal needs, and the rejection of a host-less authority such as "https://:8443".
+        guard let scheme = url.normalizedScheme, let host = url.normalizedHost else { return nil }
         let defaultPort = ["http": 80, "https": 443][scheme]
         guard let port = url.port, port != defaultPort else { return "\(scheme)://\(host)" }
         return "\(scheme)://\(host):\(port)"
@@ -120,10 +118,10 @@ public class SdkConfig {
     /// components `ReachFiveApi.createUrl` will build every request on, so validating and using are the same
     /// object rather than two places agreeing by convention.
     ///
-    /// The check reads the host back off the built URL instead of trusting the assignment, because
-    /// `URLComponents` accepts two host-less spellings that would otherwise only fail on the network, in the
-    /// same channel as a transient failure: the empty string (`https:///path`) and `[]`, an empty IPv6
-    /// literal, which builds `https://[]` and parses back with an empty host.
+    /// The check reads the host back off the built URL — via `normalizedHost`, which reports a host-less
+    /// authority as `nil` — instead of trusting the assignment, because `URLComponents` accepts two host-less
+    /// spellings that would otherwise only fail on the network, in the same channel as a transient failure:
+    /// the empty string (`https:///path`) and `[]`, an empty IPv6 literal building `https://[]`.
     ///
     /// Foundation still accepts hosts that are well-formed but resolve to nothing (`my_host.example`,
     /// `x..example`); those fail at DNS with an error naming the host, and no parsing can tell a dead domain
@@ -132,7 +130,7 @@ public class SdkConfig {
         var components = URLComponents()
         components.scheme = "https"
         components.host = domain
-        guard let url = components.url, let host = url.host, !host.isEmpty else { return nil }
+        guard let url = components.url, url.normalizedHost != nil else { return nil }
         return components
     }
 
@@ -141,18 +139,21 @@ public class SdkConfig {
     /// Checking the parsed scheme is required because a malformed input can still parse,
     /// just not as intended: with "my:app", "my" becomes the scheme and "app://callback" the path;
     /// with "my/app" the whole string parses as a scheme-less relative reference.
-    internal static func makeUri(scheme: String, path: String) -> URL? {
+    ///
+    /// The second component is the URL's *host*, not its path: `reachfive-abc://callback` parses as the host
+    /// `callback` with an empty path, which is what `URL.matchesEndpoint(of:)` compares the callbacks on.
+    internal static func makeUri(scheme: String, host: String) -> URL? {
         guard !scheme.isEmpty, // "://callback" parses, with an empty scheme
-              let url = URL(string: "\(scheme)://\(path)"),
-              url.scheme?.lowercased() == scheme.lowercased()
+              let url = URL(string: "\(scheme)://\(host)"),
+              url.normalizedScheme == scheme.lowercased()
         else {
             return nil
         }
         return url
     }
 
-    private static func defaultUri(scheme: String, path: String) -> URL {
-        guard let url = makeUri(scheme: scheme, path: path) else {
+    private static func defaultUri(scheme: String, host: String) -> URL {
+        guard let url = makeUri(scheme: scheme, host: host) else {
             preconditionFailure("""
                 '\(scheme)' is not a valid URL scheme: it must start with a letter and contain only letters, digits, '+', '-' or '.'. \
                 If no customScheme is passed, the scheme is derived from the clientId as 'reachfive-<clientId>'. \

@@ -107,7 +107,7 @@ final class SdkConfigTests: XCTestCase {
         ]
         for clientId in acceptable {
             XCTAssertNotNil(
-                SdkConfig.makeUri(scheme: "reachfive-\(clientId)", path: "callback"),
+                SdkConfig.makeUri(scheme: "reachfive-\(clientId)", host: "callback"),
                 "clientId '\(clientId)' should be acceptable")
         }
     }
@@ -123,7 +123,7 @@ final class SdkConfigTests: XCTestCase {
         ]
         for clientId in unacceptable {
             XCTAssertNil(
-                SdkConfig.makeUri(scheme: "reachfive-\(clientId)", path: "callback"),
+                SdkConfig.makeUri(scheme: "reachfive-\(clientId)", host: "callback"),
                 "clientId '\(clientId)' should be rejected")
         }
     }
@@ -146,7 +146,7 @@ final class SdkConfigTests: XCTestCase {
         ]
         for scheme in acceptable {
             XCTAssertNotNil(
-                SdkConfig.makeUri(scheme: scheme, path: "callback"),
+                SdkConfig.makeUri(scheme: scheme, host: "callback"),
                 "customScheme '\(scheme)' should be acceptable")
         }
     }
@@ -165,7 +165,7 @@ final class SdkConfigTests: XCTestCase {
         ]
         for scheme in unacceptable {
             XCTAssertNil(
-                SdkConfig.makeUri(scheme: scheme, path: "callback"),
+                SdkConfig.makeUri(scheme: scheme, host: "callback"),
                 "customScheme '\(scheme)' should be rejected")
         }
     }
