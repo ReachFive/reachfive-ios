@@ -12,23 +12,43 @@ final class SdkConfigTests: XCTestCase {
 
     // MARK: - Domain
 
+    /// One representative per class of input, not an exhaustive sweep: each row teaches a distinct rule.
+    /// Shared with `testEveryAcceptableDomainSerializesToAnOrigin`, which holds these same values to the
+    /// invariant `webAuthnOrigin` depends on.
+    private static let acceptableDomains = [
+        "example.reach5.net",   // baseline
+        "Example.Reach5.NET",   // mixed case: DNS is case-insensitive, and the value is kept as given
+        "my-tenant.reach5.net", // hyphen
+        "localhost",            // a single label, no dot
+        "127.0.0.1",            // IPv4 literal
+        "[::1]",                // IPv6 literal: URLComponents requires the brackets
+        "café.example",         // non-ASCII: Foundation punycodes the host when it builds each request
+        "example.com.",         // trailing-dot FQDN: legitimate, and the dot is origin-significant
+        "my_host.example",      // not a legal DNS label, but the URL builds: only DNS can reject it
+        "x..example",           // same — an empty label is a DNS problem, not a parsing one
+    ]
+
     func testAcceptableDomains() {
-        let acceptable = [
-            "example.reach5.net",   // baseline
-            "Example.Reach5.NET",   // mixed case: DNS is case-insensitive, and the value is kept as given
-            "my-tenant.reach5.net", // hyphen
-            "localhost",            // a single label, no dot
-            "127.0.0.1",            // IPv4 literal
-            "[::1]",                // IPv6 literal: URLComponents requires the brackets
-            "café.example",         // non-ASCII: Foundation punycodes the host when it builds each request
-            "example.com.",         // trailing-dot FQDN: legitimate, and the dot is origin-significant
-            "my_host.example",      // not a legal DNS label, but the URL builds: only DNS can reject it
-            "x..example",           // same — an empty label is a DNS problem, not a parsing one
-        ]
-        for domain in acceptable {
+        for domain in Self.acceptableDomains {
             XCTAssertNotNil(
                 SdkConfig.baseUrlComponents(domain: domain),
                 "domain '\(domain)' should be acceptable")
+        }
+    }
+
+    /// The invariant `webAuthnOrigin` force-unwraps on: a domain the init accepted always serializes to an
+    /// origin. It holds because `baseUrlComponents(domain:)` only returns components whose URL carries a
+    /// non-empty host — exactly what `serializedOrigin` needs. Loosening that check would turn the
+    /// force-unwrap into a crash, and no other test here would notice.
+    func testEveryAcceptableDomainSerializesToAnOrigin() {
+        for domain in Self.acceptableDomains {
+            guard let components = SdkConfig.baseUrlComponents(domain: domain), let url = components.url else {
+                XCTFail("domain '\(domain)' was accepted but produced no URL")
+                continue
+            }
+            XCTAssertNotNil(
+                SdkConfig.serializedOrigin(url),
+                "domain '\(domain)' was accepted but its URL does not serialize to an origin")
         }
     }
 
