@@ -64,6 +64,7 @@
 		347FDB67229C02FE00660687 /* ReachFive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347FDB66229C02FE00660687 /* ReachFive.swift */; };
 		347FDB69229C04C200660687 /* ProviderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347FDB68229C04C200660687 /* ProviderConfig.swift */; };
 		349E16F0230C49E0002EA06B /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349E16EF230C49E0002EA06B /* Storage.swift */; };
+		AA11URLNORM0002 /* URL+Normalization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11URLNORM0001 /* URL+Normalization.swift */; };
 		34B5295A22D376FF00B7B6AA /* Pkce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34B5295922D376FF00B7B6AA /* Pkce.swift */; };
 		34BDDA3622E5BE6000D16DAE /* ProfileAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BDDA3522E5BE6000D16DAE /* ProfileAddress.swift */; };
 		34BDDA3822E5BE8C00D16DAE /* LoginSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BDDA3722E5BE8C00D16DAE /* LoginSummary.swift */; };
@@ -171,6 +172,7 @@
 		347FDB66229C02FE00660687 /* ReachFive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFive.swift; sourceTree = "<group>"; };
 		347FDB68229C04C200660687 /* ProviderConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderConfig.swift; sourceTree = "<group>"; };
 		349E16EF230C49E0002EA06B /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
+		AA11URLNORM0001 /* URL+Normalization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Normalization.swift"; sourceTree = "<group>"; };
 		34B5295922D376FF00B7B6AA /* Pkce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pkce.swift; sourceTree = "<group>"; };
 		34BDDA3522E5BE6000D16DAE /* ProfileAddress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAddress.swift; sourceTree = "<group>"; };
 		34BDDA3722E5BE8C00D16DAE /* LoginSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginSummary.swift; sourceTree = "<group>"; };
@@ -276,6 +278,7 @@
 				2AD29ABC2E2EE27700B26535 /* NetworkClient.swift */,
 				34B5295922D376FF00B7B6AA /* Pkce.swift */,
 				349E16EF230C49E0002EA06B /* Storage.swift */,
+				AA11URLNORM0001 /* URL+Normalization.swift */,
 				2AE533052994629400EF97E0 /* StringUtils.swift */,
 			);
 			path = utils;
@@ -584,6 +587,7 @@
 				8496EB2925DEAFCF005098DD /* R5AuthenticatorAttestationResponse.swift in Sources */,
 				3417FF6C22FAD6CB0009EC84 /* StartPasswordlessRequest.swift in Sources */,
 				349E16F0230C49E0002EA06B /* Storage.swift in Sources */,
+				AA11URLNORM0002 /* URL+Normalization.swift in Sources */,
 				8496EB4225DEB141005098DD /* CredentialCreationOptions.swift in Sources */,
 				347FDB54229BE8F800660687 /* Provider.swift in Sources */,
 				34E18B8C22A6BEC900952EBD /* AccessTokenResponse.swift in Sources */,
