@@ -21,27 +21,21 @@ public class SdkConfig {
     /// The redirect URI for email verification. Defaults to `reachfive-clientId://email-verification`
     public let emailVerificationUri: URL
 
-    /// The WebAuthn origin sent to the server for passkey requests, as a serialized origin
-    /// (`https://host`). Set it once here instead of repeating it on every passkey request.
+    /// The WebAuthn origin sent to the server for every passkey request that does not carry its own, as a
+    /// serialized origin (`https://host`): scheme, host and non-default port only, since neither a path nor
+    /// a trailing slash belongs in an origin.
     ///
-    /// Defaults to `https://<domain>`, which is right unless your passkeys are scoped to a different
-    /// relying party — a custom domain, or one shared across several of your apps. A request that carries
-    /// its own `originWebAuthn` still wins over this value.
-    public let originWebAuthn: URL?
-
-    /// The WebAuthn origin to use when a request does not carry its own, serialized the way the server and
-    /// the system expect it: scheme, host and non-default port only. Neither a path nor a trailing slash
-    /// belongs in an origin, and `URL.absoluteString` would keep both.
+    /// It is the `originWebAuthn` passed at init, or `https://<domain>` when none was — the latter being
+    /// right unless your passkeys are scoped to a different relying party, such as a custom domain or one
+    /// shared across several of your apps. Resolved once here, so this always holds the value the SDK will
+    /// actually send, never the raw input.
     ///
-    /// Only this configured value is normalized: the per-request `originWebAuthn` overrides are `String`s
-    /// and are sent as given.
-    ///
-    /// Both the configured origin and the `domain` fallback go through `serializedOrigin`, so they cannot
-    /// disagree on a host that needs normalizing: both fold the case (RFC 6454 §4.5) and both send the host
-    /// in the A-label form §6.2 ASCII Serialization expects (§4, step 5 note). Returning `café.example`
-    /// verbatim would be the §6.1 *Unicode* serialization, a different algorithm, and not the one
-    /// `CollectedClientData.origin` is specified against.
-    let webAuthnOrigin: String
+    /// Both paths go through `serializedOrigin`, so they cannot disagree on a host that needs normalizing:
+    /// both fold the case (RFC 6454 §4.5) and both send the host in the A-label form §6.2 ASCII
+    /// Serialization expects (§4, step 5 note). Returning `café.example` verbatim would be the §6.1
+    /// *Unicode* serialization, a different algorithm, and not the one `CollectedClientData.origin` is
+    /// specified against.
+    public let webAuthnOrigin: String
 
     public init(
         domain: String,
@@ -91,7 +85,6 @@ public class SdkConfig {
             // drift apart.
             self.webAuthnOrigin = base.origin
         }
-        self.originWebAuthn = originWebAuthn
     }
 
     /// `internal`, like `makeUri` below: the single construction point on which the init's precondition
