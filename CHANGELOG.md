@@ -37,6 +37,11 @@
   every passkey request. It defaults to `https://<domain>`, and a request that carries its own
   `originWebAuthn` still takes precedence.
 
+### Bug fixes
+- `loadLoginWebview` no longer hangs forever when the custom scheme contains uppercase letters, which is the
+  default case since it is derived from the clientId. The callback comparison lowercased only one side, so the
+  webview never recognised its own callback.
+
 ## v10.0.1
 
 - Fix compilation issue in XCode 26
