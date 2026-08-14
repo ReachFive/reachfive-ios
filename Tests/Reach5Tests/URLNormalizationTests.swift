@@ -2,9 +2,10 @@ import XCTest
 @testable import Reach5
 
 /// `normalizedScheme` and `normalizedHost` are the SDK's single answer to what Foundation leaves undone on a
-/// parsed URL. Four places depend on them — `SdkConfig.serializedOrigin`, `SdkConfig.baseUrlComponents`,
-/// `SdkConfig.makeUri` and `URL.matchesEndpoint(of:)` — and each of the three rules below has already cost a
-/// bug when one of them got it wrong, so they are pinned here rather than only through their callers.
+/// parsed URL. Three places depend on them — `SdkConfig.serializedOrigin`, on which `SdkConfig.baseComponents`
+/// in turn rests, `SdkConfig.makeUri` and `URL.matchesEndpoint(of:)` — and each of the three rules below has
+/// already cost a bug when one of them got it wrong, so they are pinned here rather than only through their
+/// callers.
 final class URLNormalizationTests: XCTestCase {
 
     // MARK: - Scheme

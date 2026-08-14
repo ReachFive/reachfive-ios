@@ -29,6 +29,20 @@ public class SdkConfig {
     /// its own `originWebAuthn` still wins over this value.
     public let originWebAuthn: URL?
 
+    /// The WebAuthn origin to use when a request does not carry its own, serialized the way the server and
+    /// the system expect it: scheme, host and non-default port only. Neither a path nor a trailing slash
+    /// belongs in an origin, and `URL.absoluteString` would keep both.
+    ///
+    /// Only this configured value is normalized: the per-request `originWebAuthn` overrides are `String`s
+    /// and are sent as given.
+    ///
+    /// Both the configured origin and the `domain` fallback go through `serializedOrigin`, so they cannot
+    /// disagree on a host that needs normalizing: both fold the case (RFC 6454 §4.5) and both send the host
+    /// in the A-label form §6.2 ASCII Serialization expects (§4, step 5 note). Returning `café.example`
+    /// verbatim would be the §6.1 *Unicode* serialization, a different algorithm, and not the one
+    /// `CollectedClientData.origin` is specified against.
+    let webAuthnOrigin: String
+
     public init(
         domain: String,
         clientId: String,
@@ -39,7 +53,7 @@ public class SdkConfig {
         emailVerificationUri: URL? = nil,
         originWebAuthn: URL? = nil
     ) {
-        guard let baseUrlComponents = Self.baseUrlComponents(domain: domain) else {
+        guard let base = Self.baseComponents(domain: domain) else {
             preconditionFailure("""
                 '\(domain)' is not a valid domain: it must be a bare host, with no scheme, port, path or \
                 trailing slash, e.g. example.reach5.net. \
@@ -48,7 +62,7 @@ public class SdkConfig {
                 Pass only the host, dropping any 'https://' prefix and any trailing '/'.
                 """)
         }
-        self.baseUrlComponents = baseUrlComponents
+        self.baseUrlComponents = base.components
         self.domain = domain
         self.clientId = clientId
 
@@ -62,36 +76,22 @@ public class SdkConfig {
         self.emailVerificationUri = emailVerificationUri ?? Self.defaultUri(scheme: scheme, host: "email-verification")
         self.accountRecoveryUri = accountRecoveryUri ?? Self.defaultUri(scheme: scheme, host: "account-recovery")
 
-        if let originWebAuthn, Self.serializedOrigin(originWebAuthn) == nil {
-            preconditionFailure("""
-                '\(originWebAuthn)' is not a valid WebAuthn origin: it must be an absolute URL with a \
-                scheme and a host, e.g. https://auth.example.com.
-                """)
+        if let originWebAuthn {
+            guard let origin = Self.serializedOrigin(originWebAuthn) else {
+                preconditionFailure("""
+                    '\(originWebAuthn)' is not a valid WebAuthn origin: it must be an absolute URL with a \
+                    scheme and a host, e.g. https://auth.example.com.
+                    """)
+            }
+            self.webAuthnOrigin = origin
+        } else {
+            // `domain` is validated at init but kept as given, so it can still carry the mixed case DNS
+            // tolerates — or non-ASCII labels. The fallback is the origin `baseComponents` already
+            // serialized, from the very components every API request is built on, so the two can never
+            // drift apart.
+            self.webAuthnOrigin = base.origin
         }
         self.originWebAuthn = originWebAuthn
-    }
-
-    /// The WebAuthn origin to use when a request does not carry its own, serialized the way the server and
-    /// the system expect it: scheme, host and non-default port only. Neither a path nor a trailing slash
-    /// belongs in an origin, and `URL.absoluteString` would keep both.
-    ///
-    /// Only this configured value is normalized: the per-request `originWebAuthn` overrides are `String`s
-    /// and are sent as given.
-    var webAuthnOrigin: String {
-        if let originWebAuthn, let origin = Self.serializedOrigin(originWebAuthn) {
-            return origin
-        }
-        // `domain` is validated at init but kept as given, so it can still carry the mixed case DNS tolerates
-        // — or non-ASCII labels. Serializing it through `serializedOrigin`, from the very components every API
-        // request is built on, is what keeps this path and the configured one from disagreeing: both then fold
-        // the case (RFC 6454 §4.5) and both send the host in the A-label form §6.2 ASCII Serialization expects
-        // (§4, step 5 note). Returning `café.example` verbatim would be the §6.1 *Unicode* serialization, a
-        // different algorithm, and not the one `CollectedClientData.origin` is specified against.
-        //
-        // Both force-unwraps hold by construction, and are the same guarantee `ReachFiveApi.createUrl` relies
-        // on: `baseUrlComponents` exists only because `baseUrlComponents(domain:)` built a URL from it and
-        // read a non-empty host back off it — precisely what `serializedOrigin` needs to return a value.
-        return Self.serializedOrigin(baseUrlComponents.url!)!
     }
 
     /// `internal`, like `makeUri` below: the single construction point on which the init's precondition
@@ -118,20 +118,26 @@ public class SdkConfig {
     /// components `ReachFiveApi.createUrl` will build every request on, so validating and using are the same
     /// object rather than two places agreeing by convention.
     ///
-    /// The check reads the host back off the built URL — via `normalizedHost`, which reports a host-less
-    /// authority as `nil` — instead of trusting the assignment, because `URLComponents` accepts two host-less
-    /// spellings that would otherwise only fail on the network, in the same channel as a transient failure:
-    /// the empty string (`https:///path`) and `[]`, an empty IPv6 literal building `https://[]`.
+    /// It returns the serialized origin alongside them for the same reason: validating a domain and
+    /// normalizing it are one step, not two. A domain accepted here has an origin by construction, so no
+    /// caller has to force-unwrap one back out of the components, and no invariant has to be argued for in a
+    /// comment.
+    ///
+    /// The check goes through `serializedOrigin`, which reads the host back off the built URL — via
+    /// `normalizedHost`, reporting a host-less authority as `nil` — instead of trusting the assignment,
+    /// because `URLComponents` accepts two host-less spellings that would otherwise only fail on the network,
+    /// in the same channel as a transient failure: the empty string (`https:///path`) and `[]`, an empty IPv6
+    /// literal building `https://[]`.
     ///
     /// Foundation still accepts hosts that are well-formed but resolve to nothing (`my_host.example`,
     /// `x..example`); those fail at DNS with an error naming the host, and no parsing can tell a dead domain
     /// from a live one anyway.
-    internal static func baseUrlComponents(domain: String) -> URLComponents? {
+    internal static func baseComponents(domain: String) -> (components: URLComponents, origin: String)? {
         var components = URLComponents()
         components.scheme = "https"
         components.host = domain
-        guard let url = components.url, url.normalizedHost != nil else { return nil }
-        return components
+        guard let url = components.url, let origin = serializedOrigin(url) else { return nil }
+        return (components, origin)
     }
 
     /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing,
