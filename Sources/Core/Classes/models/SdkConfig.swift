@@ -37,6 +37,26 @@ public class SdkConfig {
     /// specified against.
     public let webAuthnOrigin: String
 
+    /// The origin a passkey request must carry: the one the request sets, or `webAuthnOrigin` when it sets
+    /// none. An override is normalized through the very same `serializedOrigin`, so a per-request value and
+    /// the configured one can never send two spellings of the same host.
+    ///
+    /// It throws rather than stopping the program, unlike the two `preconditionFailure`s in `init`: a
+    /// configuration is written once and checked at launch, where a crash is a fast, unmissable signal,
+    /// whereas this is runtime data reaching a call that already is `async throws` — and an integrator can
+    /// act on an error there.
+    func webAuthnOrigin(overriddenBy override: String?) throws -> String {
+        guard let override else { return webAuthnOrigin }
+        guard let url = URL(string: override), let origin = Self.serializedOrigin(url) else {
+            throw ReachFiveError.TechnicalError(reason: """
+                '\(override)' is not a valid WebAuthn origin: it must be an absolute URL with a scheme and \
+                a host, e.g. https://auth.example.com. Leave the request's originWebAuthn unset to use the \
+                one configured on SdkConfig.
+                """)
+        }
+        return origin
+    }
+
     public init(
         domain: String,
         clientId: String,
