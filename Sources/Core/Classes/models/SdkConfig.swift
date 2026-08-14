@@ -87,10 +87,11 @@ public class SdkConfig {
         // the case (RFC 6454 §4.5) and both send the host in the A-label form §6.2 ASCII Serialization expects
         // (§4, step 5 note). Returning `café.example` verbatim would be the §6.1 *Unicode* serialization, a
         // different algorithm, and not the one `CollectedClientData.origin` is specified against.
-        guard let url = baseUrlComponents.url, let origin = Self.serializedOrigin(url) else {
-            return "https://\(domain.lowercased())"
-        }
-        return origin
+        //
+        // Both force-unwraps hold by construction, and are the same guarantee `ReachFiveApi.createUrl` relies
+        // on: `baseUrlComponents` exists only because `baseUrlComponents(domain:)` built a URL from it and
+        // read a non-empty host back off it — precisely what `serializedOrigin` needs to return a value.
+        return Self.serializedOrigin(baseUrlComponents.url!)!
     }
 
     /// `internal`, like `makeUri` below: the single construction point on which the init's precondition
@@ -117,10 +118,12 @@ public class SdkConfig {
     ///
     /// Validation by construction, against the exact use the SDK makes of the value: it returns the very
     /// components `ReachFiveApi.createUrl` will build every request on, so validating and using are the same
-    /// object rather than two places agreeing by convention. `URLComponents.url` returns nil whenever the
-    /// components cannot form a URL, and that nil is the whole answer — unlike a scheme, a host assigned to
-    /// its own component cannot be reinterpreted as another component, so no re-check of the parsed value is
-    /// needed (contrast `makeUri` below, where "my:app" slides into scheme + path).
+    /// object rather than two places agreeing by convention.
+    ///
+    /// The check reads the host back off the built URL instead of trusting the assignment, because
+    /// `URLComponents` accepts two host-less spellings that would otherwise only fail on the network, in the
+    /// same channel as a transient failure: the empty string (`https:///path`) and `[]`, an empty IPv6
+    /// literal, which builds `https://[]` and parses back with an empty host.
     ///
     /// Foundation still accepts hosts that are well-formed but resolve to nothing (`my_host.example`,
     /// `x..example`); those fail at DNS with an error naming the host, and no parsing can tell a dead domain
@@ -129,9 +132,7 @@ public class SdkConfig {
         var components = URLComponents()
         components.scheme = "https"
         components.host = domain
-        // An empty host is the one malformation URLComponents accepts: it would build "https:///path", which
-        // only fails later, on the network, in the same channel as a transient failure.
-        guard !domain.isEmpty, components.url != nil else { return nil }
+        guard let url = components.url, let host = url.host, !host.isEmpty else { return nil }
         return components
     }
 
