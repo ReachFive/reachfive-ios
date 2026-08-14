@@ -45,6 +45,7 @@ final class SdkConfigTests: XCTestCase {
             " example.reach5.net",         // leading whitespace, e.g. a copy-paste
             "::1",                         // IPv6 literal without its brackets
             "",                            // empty: would build a host-less 'https:///path'
+            "[]",                          // empty IPv6 literal: builds 'https://[]', whose host reads back empty
         ]
         for domain in unacceptable {
             XCTAssertNil(
