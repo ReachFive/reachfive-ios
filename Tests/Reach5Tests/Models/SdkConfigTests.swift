@@ -319,12 +319,12 @@ final class SdkConfigTests: XCTestCase {
     ]
 
     /// Same style as `testAcceptableClientIds`/`testAcceptableCustomSchemes`: goes through
-    /// `SdkConfig.serializedOrigin` directly, the single construction point the init's precondition relies
+    /// `URL.serializedOrigin` directly, the single construction point the init's precondition relies
     /// on, so a malformed input can be checked without crashing the test process.
     func testAcceptableWebAuthnOrigins() {
         for (input, expected) in Self.acceptableOrigins {
             let url = URL(string: input)!
-            XCTAssertEqual(SdkConfig.serializedOrigin(url), expected, "'\(input)' should serialize to '\(expected)'")
+            XCTAssertEqual(url.serializedOrigin, expected, "'\(input)' should serialize to '\(expected)'")
         }
     }
 
@@ -338,10 +338,15 @@ final class SdkConfigTests: XCTestCase {
             "https:///webauthn", // scheme and a path, still no host
             "mailto:test@example.com", // has a scheme, but no host
             "file:///path/to/file", // has a scheme, but no host
+            // `URL.host` percent-*decodes*, so these read back as the hosts "a b.example" and "a/b.example".
+            // Interpolating those would emit an origin carrying a raw space, or one whose slash reads as a
+            // path; reassembling through URLComponents refuses them instead.
+            "https://a%20b.example",
+            "https://a%2Fb.example",
         ]
         for input in unacceptable {
             let url = URL(string: input)!
-            XCTAssertNil(SdkConfig.serializedOrigin(url), "'\(input)' should be rejected")
+            XCTAssertNil(url.serializedOrigin, "'\(input)' should be rejected")
         }
     }
 
@@ -375,12 +380,12 @@ final class SdkConfigTests: XCTestCase {
             + Self.acceptableOrigins.map { URL(string: $0.input)! }
 
         for url in urls {
-            guard let origin = SdkConfig.serializedOrigin(url) else {
+            guard let origin = url.serializedOrigin else {
                 XCTFail("'\(url)' should serialize to an origin")
                 continue
             }
             XCTAssertEqual(
-                URL(string: origin).flatMap(SdkConfig.serializedOrigin), origin,
+                URL(string: origin)?.serializedOrigin, origin,
                 "origin '\(origin)' does not survive being parsed and serialized again")
         }
     }
