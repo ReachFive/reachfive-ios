@@ -1,4 +1,5 @@
 import Foundation
+import Reach5URLValidation
 
 public class SdkConfig {
     /// Your ReachFive domain, as a bare host: `example.reach5.net`. No scheme, port, path or trailing
@@ -97,17 +98,11 @@ public class SdkConfig {
     /// `internal`, like `makeUri` below: the single construction point on which the init's precondition
     /// relies, so tests can probe acceptable/unacceptable inputs without triggering it.
     ///
-    /// The WebAuthn spec requires `CollectedClientData.origin` to follow RFC 6454 ("The Web Origin
-    /// Concept"), §6.2 ASCII Serialization of an Origin — not the WHATWG HTML/URL origin concept, which is
-    /// a related but distinct text. RFC 6454 also requires the host lower-cased (§4.5) and the port
-    /// omitted when it is the scheme's default (§6.2.5); `Foundation.URL` does neither on its own.
+    /// The rule itself lives in `Reach5URLValidation`, the one target the `#WebAuthnOrigin` macro plugin can
+    /// also link: an origin refused at compile time and an origin refused here are refused by the same
+    /// function, not by two copies expected to stay in step.
     internal static func serializedOrigin(_ url: URL) -> String? {
-        // `normalizedScheme`/`normalizedHost` carry the case folding RFC 6454 §4.5 asks for, the brackets an
-        // IPv6 literal needs, and the rejection of a host-less authority such as "https://:8443".
-        guard let scheme = url.normalizedScheme, let host = url.normalizedHost else { return nil }
-        let defaultPort = ["http": 80, "https": 443][scheme]
-        guard let port = url.port, port != defaultPort else { return "\(scheme)://\(host)" }
-        return "\(scheme)://\(host):\(port)"
+        WebAuthnOrigin.serialized(url)
     }
 
     /// `internal`, like `serializedOrigin` above and `makeUri` below: the single construction point on

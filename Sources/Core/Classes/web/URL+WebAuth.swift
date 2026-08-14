@@ -1,4 +1,5 @@
 import Foundation
+import Reach5URLValidation
 
 extension URL {
     /// Value of the `name` query parameter, or `nil` if absent.
