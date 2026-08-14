@@ -32,4 +32,33 @@ extension URL {
         // colon would have been parsed as the port delimiter.
         return lowercased.contains(":") ? "[\(lowercased)]" : lowercased
     }
+
+    /// This URL reduced to its origin, serialized as RFC 6454 §6.2 (ASCII Serialization of an Origin)
+    /// defines it: scheme, host, and the port only when it differs from the scheme's default. `nil` when
+    /// there is no scheme or no host to build one from — a URL is not necessarily an origin.
+    ///
+    /// This is the form WebAuthn requires for `CollectedClientData.origin`, and it is not
+    /// `URL.absoluteString`, which would keep the path, the query and the trailing slash an origin has no
+    /// room for.
+    ///
+    /// Reassembled through `URLComponents` rather than by interpolating the parts, because `URL.host`
+    /// percent-*decodes*: `https://a%20b.example` reads back as the host `a b.example`, and interpolating
+    /// that would emit an origin containing a raw space. `URLComponents` refuses to build a URL from such a
+    /// host, which is the answer we want — the nil says "not an origin" just as much as a missing host does.
+    var serializedOrigin: String? {
+        guard let scheme = normalizedScheme, let host = normalizedHost else { return nil }
+        var components = URLComponents()
+        components.scheme = scheme
+        components.host = host
+        if let port, port != Self.defaultPort(forScheme: scheme) {
+            components.port = port
+        }
+        return components.url?.absoluteString
+    }
+
+    /// The port RFC 6454 §6.2 step 5 lets an origin leave out. Only the two schemes WebAuthn allows are
+    /// listed: anything else keeps whatever port it carries.
+    private static func defaultPort(forScheme scheme: String) -> Int? {
+        ["http": 80, "https": 443][scheme]
+    }
 }

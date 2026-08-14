@@ -45,9 +45,9 @@ public class SdkConfig {
     /// configuration is written once and checked at launch, where a crash is a fast, unmissable signal,
     /// whereas this is runtime data reaching a call that already is `async throws` — and an integrator can
     /// act on an error there.
-    func webAuthnOrigin(overriddenBy override: String?) throws -> String {
+    public func webAuthnOrigin(overriddenBy override: String? = nil) throws -> String {
         guard let override else { return webAuthnOrigin }
-        guard let url = URL(string: override), let origin = Self.serializedOrigin(url) else {
+        guard let origin = URL(string: override)?.serializedOrigin else {
             throw ReachFiveError.TechnicalError(reason: """
                 '\(override)' is not a valid WebAuthn origin: it must be an absolute URL with a scheme and \
                 a host, e.g. https://auth.example.com. Leave the request's originWebAuthn unset to use the \
@@ -91,7 +91,7 @@ public class SdkConfig {
         self.accountRecoveryUri = accountRecoveryUri ?? Self.defaultUri(scheme: scheme, host: "account-recovery")
 
         if let originWebAuthn {
-            guard let origin = Self.serializedOrigin(originWebAuthn) else {
+            guard let origin = originWebAuthn.serializedOrigin else {
                 preconditionFailure("""
                     '\(originWebAuthn)' is not a valid WebAuthn origin: it must be an absolute URL with a \
                     scheme and a host, e.g. https://auth.example.com.
@@ -107,23 +107,7 @@ public class SdkConfig {
         }
     }
 
-    /// `internal`, like `makeUri` below: the single construction point on which the init's precondition
-    /// relies, so tests can probe acceptable/unacceptable inputs without triggering it.
-    ///
-    /// The WebAuthn spec requires `CollectedClientData.origin` to follow RFC 6454 ("The Web Origin
-    /// Concept"), §6.2 ASCII Serialization of an Origin — not the WHATWG HTML/URL origin concept, which is
-    /// a related but distinct text. RFC 6454 also requires the host lower-cased (§4.5) and the port
-    /// omitted when it is the scheme's default (§6.2.5); `Foundation.URL` does neither on its own.
-    internal static func serializedOrigin(_ url: URL) -> String? {
-        // `normalizedScheme`/`normalizedHost` carry the case folding RFC 6454 §4.5 asks for, the brackets an
-        // IPv6 literal needs, and the rejection of a host-less authority such as "https://:8443".
-        guard let scheme = url.normalizedScheme, let host = url.normalizedHost else { return nil }
-        let defaultPort = ["http": 80, "https": 443][scheme]
-        guard let port = url.port, port != defaultPort else { return "\(scheme)://\(host)" }
-        return "\(scheme)://\(host):\(port)"
-    }
-
-    /// `internal`, like `serializedOrigin` above and `makeUri` below: the single construction point on
+    /// `internal`, like `makeUri` below: the single construction point on
     /// which the init's precondition relies, so tests can probe acceptable/unacceptable inputs without
     /// triggering it.
     ///
@@ -149,7 +133,7 @@ public class SdkConfig {
         var components = URLComponents()
         components.scheme = "https"
         components.host = domain
-        guard let url = components.url, let origin = serializedOrigin(url) else { return nil }
+        guard let origin = components.url?.serializedOrigin else { return nil }
         return (components, origin)
     }
 
@@ -158,9 +142,6 @@ public class SdkConfig {
     /// Checking the parsed scheme is required because a malformed input can still parse,
     /// just not as intended: with "my:app", "my" becomes the scheme and "app://callback" the path;
     /// with "my/app" the whole string parses as a scheme-less relative reference.
-    ///
-    /// The second component is the URL's *host*, not its path: `reachfive-abc://callback` parses as the host
-    /// `callback` with an empty path, which is what `URL.matchesEndpoint(of:)` compares the callbacks on.
     internal static func makeUri(scheme: String, host: String) -> URL? {
         guard !scheme.isEmpty, // "://callback" parses, with an empty scheme
               let url = URL(string: "\(scheme)://\(host)"),
