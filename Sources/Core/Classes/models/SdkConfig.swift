@@ -142,10 +142,18 @@ public class SdkConfig {
     /// Checking the parsed scheme is required because a malformed input can still parse,
     /// just not as intended: with "my:app", "my" becomes the scheme and "app://callback" the path;
     /// with "my/app" the whole string parses as a scheme-less relative reference.
+    ///
+    /// The host is read back for the same reason, and interpolation makes it the likelier of the two to
+    /// slip: a `/`, `?`, `#` or `@` inside it silently moves part of the value into the path, the query, the
+    /// fragment or the userinfo — `a@b` builds the host `b` — and an empty one builds a host-less URI, the
+    /// same malformation `baseComponents` rejects above. Comparing against `normalizedHost` also refuses a
+    /// host Foundation had to rewrite to accept it: percent-encoding, which `URL.host` decodes back to a raw
+    /// space, or a non-ASCII label it punycodes.
     internal static func makeUri(scheme: String, host: String) -> URL? {
         guard !scheme.isEmpty, // "://callback" parses, with an empty scheme
               let url = URL(string: "\(scheme)://\(host)"),
-              url.normalizedScheme == scheme.lowercased()
+              url.normalizedScheme == scheme.lowercased(),
+              url.normalizedHost == host.lowercased()
         else {
             return nil
         }

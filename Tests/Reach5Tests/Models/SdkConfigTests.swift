@@ -154,6 +154,43 @@ final class SdkConfigTests: XCTestCase {
         }
     }
 
+    // MARK: - The host makeUri builds on
+
+    /// The four hosts `SdkConfig` actually builds on. They are literals, never integrator input, so what
+    /// follows pins an internal invariant rather than a contract: the callers stay within what `makeUri`
+    /// can honour.
+    func testTheHostsSdkConfigBuildsOnAreKeptIntact() {
+        for host in ["callback", "mfa", "email-verification", "account-recovery"] {
+            let url = SdkConfig.makeUri(scheme: "reachfive-abc", host: host)
+
+            XCTAssertEqual(url?.host, host, "host '\(host)' should be kept intact")
+            XCTAssertEqual(url?.path, "", "host '\(host)' should not spill into the path")
+        }
+    }
+
+    /// Interpolating a host into a URL string is the half parsing alone cannot check, so the built URL is
+    /// read back through `normalizedHost`. Without that, every row below still builds a URL — one quietly
+    /// holding something other than the host it was given.
+    func testUnacceptableHosts() {
+        let unacceptable = [
+            "",              // builds 'reachfive-abc://', whose host reads back nil
+            "[]",            // empty IPv6 literal: the host reads back empty
+            "callback/",     // trailing slash: a path, not part of the host
+            "call/back",     // slash: the remainder becomes the path
+            "call?back",     // question mark: the remainder becomes the query
+            "call#back",     // hash: the remainder becomes the fragment
+            "call@back",     // at sign: 'call' is read as userinfo and the host is 'back'
+            "callback:8443", // port: not part of the host
+            "call%20back",   // percent-encoding: URL.host decodes it back to a raw space
+            "cállback",      // non-ASCII: Foundation punycodes it to 'xn--cllback-hwa'
+        ]
+        for host in unacceptable {
+            XCTAssertNil(
+                SdkConfig.makeUri(scheme: "reachfive-abc", host: host),
+                "host '\(host)' should be rejected")
+        }
+    }
+
     // MARK: - Explicit URIs
 
     func testExplicitUrisAreKeptAsIs() {
