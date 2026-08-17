@@ -6,12 +6,14 @@
 - Changed type of redirect URL fields to URL instead of String
 - SdkConfig:
   - As above, changed type of redirect URL fields to URL instead of String
-  - Removed `scheme` field alias for `redirectUri`
-  - Renamed `baseScheme` field to `customScheme`
+  - Removed field `scheme` alias for `redirectUri`
+  - Renamed field `baseScheme` to `customScheme`
   - The initializer now stops the program with a `preconditionFailure` when the scheme is not a valid URL scheme (either because of the `customScheme` parameter, or indirectly because the default scheme is derived from an ill-formatted `clientId`, e.g. one containing `_`). In that case, pass an explicit valid `customScheme` and declare it in your Info.plist and your ReachFive console.
   - The initializer now stops the program with a `preconditionFailure` when `domain` is not a bare host — one carrying a `https://` prefix, a port, a path, a trailing slash or whitespace. Such a value already crashed, later and elsewhere, on the first API call, in a message that never named `domain`. In that case, pass only the host. `domain` is validated but never rewritten: it reads back exactly as it was passed.
   - The `originWebAuthn` a passkey request carries is now validated and normalized like the configured one, instead of being sent to the server as typed. The parameter stays a `String`, but a value that is not a serialized origin makes the call throw a `ReachFiveError.TechnicalError` naming it, rather than reaching the server and coming back as an opaque rejection. Affects `signup(withRequest:)`, `login(withRequest:…)`, `login(withNonDiscoverableUsername:…)`, `beginAutoFillAssistedPasskeyLogin(withRequest:)`, `registerNewPasskey(withRequest:authToken:)` and `resetPasskeys(withRequest:)`.
   - An empty `domain` is now rejected at init too. It used to build a host-less URL and make every request fail with an opaque network error, indistinguishable from a transient failure.
+  - `customScheme` — whether passed explicitly or derived from `clientId` — is now lower-cased, and so are `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` when left to their default. A scheme is case-insensitive (RFC 3986 §3.1)
+  - An explicit `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` now also stops the program with a `preconditionFailure` when it has no scheme or no host. Such a value used to be accepted and silently never match any incoming callback.
 
 - `application(_:continue:restorationHandler:)` and `application(_:open:options:)` now returns `false` when neither an SDK flow nor any registered provider consumed the activity or URL, instead of always returning `true`. If your app also routes universal links or custom-scheme URLs itself, only do so when the call returns `false`.
 
@@ -39,11 +41,9 @@
   own `originWebAuthn` still takes precedence. The resolved value is exposed as `SdkConfig.webAuthnOrigin`,
   already serialized the way the server expects it — that is what the SDK sends, so it is what you can read
   back and compare against.
-
-### Bug fixes
-- `loadLoginWebview` no longer hangs forever when the custom scheme contains uppercase letters, which is the
-  default case since it is derived from the clientId. The callback comparison lowercased only one side, so the
-  webview never recognised its own callback.
+- `SdkConfig.normalizedDomain`: `domain` folded the way RFC 6454 requires for comparing hosts (lower-cased,
+  with an IPv6 literal's brackets restored). `domain` itself stays exactly as given, so use this instead
+  whenever you compare it against another host rather than just displaying it.
 
 ## v10.0.1
 

@@ -39,10 +39,7 @@ extension LoginWKWebview: WKNavigationDelegate {
               let pkce,
               let continuation,
               let url = navigationAction.request.url,
-              // Both sides folded. `URL.scheme` comes back with the case the redirect_uri was registered
-              // with, so comparing it raw to an already-lowercased scheme never matched once the custom
-              // scheme held an uppercase letter — the default case, since it derives from the clientId.
-              url.normalizedScheme == reachfive.sdkConfig.customScheme.lowercased()
+              url.normalizedScheme == reachfive.sdkConfig.customScheme
         else {
             return .allow
         }

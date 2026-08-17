@@ -4,13 +4,21 @@ public class SdkConfig {
     /// Your ReachFive domain, as a bare host: `example.reach5.net`. No scheme, port, path or trailing
     /// slash — every API request is built on it. Kept exactly as given, never normalized.
     public let domain: String
+
+    /// `domain`, normalized the way RFC 6454 §4.5 requires for comparing hosts: lower-cased, with an IPv6
+    /// literal's brackets restored (`URL.host` strips them). `domain` itself is kept exactly as given, so
+    /// prefer this whenever you compare it against another host
+    public var normalizedDomain: String {
+        baseUrlComponents.url?.normalizedHost ?? domain.lowercased()
+    }
+
     public let clientId: String
 
     /// The base of every API URL: scheme and host, validated at init. `ReachFiveApi.createUrl` copies it and
     /// adds a path and query items — a `struct`, so each caller gets its own copy.
     internal let baseUrlComponents: URLComponents
 
-    ///The scheme. Defaults to `reachfive-clientId`
+    /// The scheme. Defaults to `reachfive-clientId`, lower-cased — a scheme is case-insensitive (RFC 3986 §3.1)
     public let customScheme: String
     /// The redirect URI for passwordless. Defaults to `reachfive-clientId://callback`
     public let redirectUri: URL
@@ -58,15 +66,12 @@ public class SdkConfig {
     }
 
     /// Validates everything eagerly and stops the program with a `preconditionFailure` at the first
-    /// problem, rather than letting a bad value reach a network call later — crashing at launch is a fast,
-    /// unmissable signal, and the message names the offending parameter and its fix.
+    /// problem, rather than letting a bad value reach a network call later.
     ///
-    /// Three independent checks, in this order: `domain` must be a bare host (see `domain`); the scheme —
-    /// `customScheme`, or the one derived from `clientId` when it is `nil` — must be a valid URL scheme; and
-    /// `originWebAuthn`, if provided, must be a valid origin. The scheme check always runs, even when every
-    /// `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` is passed explicitly — each is then
-    /// kept exactly as given, but building the discarded default is what catches an invalid scheme early
-    /// rather than only on whichever URI is left to derive from it.
+    /// - `domain` must be a bare host (see `domain`);
+    /// - `customScheme` must be a valid URL scheme (RFC 3986 §3.1);
+    /// - `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` must have both a scheme and a host;
+    /// - `originWebAuthn` must be a valid origin.
     public init(
         domain: String,
         clientId: String,
@@ -90,14 +95,25 @@ public class SdkConfig {
         self.domain = domain
         self.clientId = clientId
 
-        let scheme = customScheme ?? "reachfive-\(clientId)"
+        // RFC 3986 §3.1 makes a scheme case-insensitive, but `Foundation.URL` is case sensitive
+        // so we lowercase it to avoid problems
+        let scheme = (customScheme ?? "reachfive-\(clientId)").lowercased()
+        guard Self.isValidScheme(scheme) else {
+            preconditionFailure("""
+                '\(scheme)' is not a valid URL scheme: it must start with a letter and contain only letters, digits, '+', '-' or '.'. \
+                If no customScheme is passed, the scheme is derived from the clientId as 'reachfive-<clientId>'. \
+                Pass an explicit valid customScheme, and declare it in your app's Info.plist (CFBundleURLSchemes) and in your ReachFive console.
+                """)
+        }
         self.customScheme = scheme
 
-        let defaultRedirectUri = Self.defaultUri(scheme: scheme, host: "callback")
-        self.redirectUri = redirectUri ?? defaultRedirectUri
-        self.mfaUri = mfaUri ?? Self.defaultUri(scheme: scheme, host: "mfa")
-        self.emailVerificationUri = emailVerificationUri ?? Self.defaultUri(scheme: scheme, host: "email-verification")
-        self.accountRecoveryUri = accountRecoveryUri ?? Self.defaultUri(scheme: scheme, host: "account-recovery")
+        // Checked once above, not once per URI: a scheme that round-trips for one host round-trips for any
+        // of them, so building each of these four from a fixed, safe literal host can never fail once the
+        // scheme itself is proven valid.
+        self.redirectUri = Self.checkedUri(redirectUri, named: "redirectUri", orDefault: URL(string: "\(scheme)://callback")!)
+        self.mfaUri = Self.checkedUri(mfaUri, named: "mfaUri", orDefault: URL(string: "\(scheme)://mfa")!)
+        self.emailVerificationUri = Self.checkedUri(emailVerificationUri, named: "emailVerificationUri", orDefault: URL(string: "\(scheme)://email-verification")!)
+        self.accountRecoveryUri = Self.checkedUri(accountRecoveryUri, named: "accountRecoveryUri", orDefault: URL(string: "\(scheme)://account-recovery")!)
 
         if let originWebAuthn {
             guard let origin = originWebAuthn.serializedOrigin else {
@@ -116,7 +132,7 @@ public class SdkConfig {
         }
     }
 
-    /// `internal`, like `makeUri` below: the single construction point on
+    /// `internal`, like `isValidScheme` below: the single construction point on
     /// which the init's precondition relies, so tests can probe acceptable/unacceptable inputs without
     /// triggering it.
     ///
@@ -146,37 +162,48 @@ public class SdkConfig {
         return (components, origin)
     }
 
-    /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing,
-    /// the same rules the rest of the system will enforce on every redirect.
-    /// Checking the parsed scheme is required because a malformed input can still parse,
-    /// just not as intended: with "my:app", "my" becomes the scheme and "app://callback" the path;
-    /// with "my/app" the whole string parses as a scheme-less relative reference.
+    /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing, the same rules the
+    /// rest of the system will enforce on every redirect. Checking the parsed scheme is required because a
+    /// malformed input can still parse, just not as intended: with "my:app", "my" becomes the scheme and
+    /// "app://callback" the path; with "my/app" the whole string parses as a scheme-less relative reference.
     ///
-    /// The host is read back for the same reason, and interpolation makes it the likelier of the two to
-    /// slip: a `/`, `?`, `#` or `@` inside it silently moves part of the value into the path, the query, the
-    /// fragment or the userinfo — `a@b` builds the host `b` — and an empty one builds a host-less URI, the
-    /// same malformation `baseComponents` rejects above. Comparing against `normalizedHost` also refuses a
-    /// host Foundation had to rewrite to accept it: percent-encoding, which `URL.host` decodes back to a raw
-    /// space, or a non-ASCII label it punycodes.
-    internal static func makeUri(scheme: String, host: String) -> URL? {
-        guard !scheme.isEmpty, // "://callback" parses, with an empty scheme
-              let url = URL(string: "\(scheme)://\(host)"),
-              url.normalizedScheme == scheme.lowercased(),
-              url.normalizedHost == host.lowercased()
+    /// `internal`, like `baseComponents` above, so tests can probe acceptable/unacceptable schemes without
+    /// triggering the `preconditionFailure` in `init`. Checked against a throwaway host purely to exercise
+    /// the round-trip: unlike `domain`/`originWebAuthn`, nothing here ever interpolates a host that isn't
+    /// one of `init`'s four fixed, safe literals ("callback", "mfa", …), so there is nothing to validate on
+    /// that side.
+    internal static func isValidScheme(_ scheme: String) -> Bool {
+        guard !scheme.isEmpty, // "://x" parses, with an empty scheme
+              let url = URL(string: "\(scheme)://y")
         else {
-            return nil
+            return false
         }
-        return url
+        return url.normalizedScheme == scheme.lowercased()
     }
 
-    private static func defaultUri(scheme: String, host: String) -> URL {
-        guard let url = makeUri(scheme: scheme, host: host) else {
+    /// Whether this URL could ever match an incoming callback: it must have both a scheme and a host, the
+    /// two ``URL/matchesEndpoint(of:)`` compares (through `normalizedScheme`/`normalizedHost`, so the same
+    /// case-folding rules apply here). `internal`, like `isValidScheme` above, so tests can probe
+    /// acceptable/unacceptable values without triggering the `preconditionFailure` in `checkedUri` below.
+    internal static func isValidCallbackUri(_ uri: URL) -> Bool {
+        uri.normalizedScheme != nil && uri.normalizedHost != nil
+    }
+
+    /// `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` all go through this: kept exactly
+    /// as given when explicit, since — unlike the derived defaults — they may legitimately use a scheme and
+    /// host that have nothing to do with `customScheme` (a universal link redirect, for instance). Left
+    /// unchecked, a scheme-less or host-less value would still be accepted, and the flow that relies on it
+    /// would then fail silently the first time an incoming callback is compared against it, deep inside
+    /// ``ReachFive/interceptUrl(_:)`` — in a way that never points back at `SdkConfig`.
+    private static func checkedUri(_ uri: URL?, named parameterName: String, orDefault fallback: URL) -> URL {
+        guard let uri else { return fallback }
+        guard isValidCallbackUri(uri) else {
             preconditionFailure("""
-                '\(scheme)' is not a valid URL scheme: it must start with a letter and contain only letters, digits, '+', '-' or '.'. \
-                If no customScheme is passed, the scheme is derived from the clientId as 'reachfive-<clientId>'. \
-                Pass an explicit valid customScheme, and declare it in your app's Info.plist (CFBundleURLSchemes) and in your ReachFive console.
+                '\(uri)' is not a valid \(parameterName): it must have both a scheme and a host, e.g. \
+                'reachfive-clientId://callback' or 'https://your-app.com/callback'. \
+                Leave '\(parameterName)' unset to use the default derived from customScheme.
                 """)
         }
-        return url
+        return uri
     }
 }
