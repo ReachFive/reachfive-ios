@@ -8,10 +8,6 @@ import Foundation
 /// lower-case form when comparing or serializing. `URL` returns both with the case they were written in.
 extension URL {
     /// The scheme, lower-cased, or `nil` when the URL carries none.
-    ///
-    /// Comparing a scheme without folding its case has already cost a bug: `loadLoginWebview` never
-    /// recognised its own callback whenever the custom scheme held an uppercase letter — which is the
-    /// default, since it is derived from the clientId.
     var normalizedScheme: String? {
         scheme?.lowercased()
     }

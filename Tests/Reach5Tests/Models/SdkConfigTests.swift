@@ -7,7 +7,7 @@ import XCTest
 /// obeys the same rules as a scheme: it must contain only letters, digits, `+`, `-` or `.`.
 /// An invalid scheme stops the program with a `preconditionFailure` at init, which cannot be
 /// asserted directly in XCTest: the invalid cases below go through `SdkConfig.baseComponents(domain:)`
-/// and `SdkConfig.makeUri`, the single construction points on which the init's precondition relies.
+/// and `SdkConfig.isValidScheme`, the single construction points on which the init's precondition relies.
 final class SdkConfigTests: XCTestCase {
 
     // MARK: - Domain
@@ -58,6 +58,23 @@ final class SdkConfigTests: XCTestCase {
         }
     }
 
+    /// `normalizedDomain` must fold exactly like `webAuthnOrigin`'s default fallback, since both come from
+    /// the same validated components — a mismatch here would mean the two silently disagree on the same host.
+    func testNormalizedDomainFoldsLikeTheDefaultWebAuthnOrigin() {
+        for domain in Self.acceptableDomains {
+            let config = SdkConfig(domain: domain, clientId: "abc")
+
+            XCTAssertEqual(
+                "https://\(config.normalizedDomain)", config.webAuthnOrigin,
+                "normalizedDomain and webAuthnOrigin disagree on domain '\(domain)'")
+        }
+    }
+
+    func testNormalizedDomainLowercasesAndBracketsTheHost() {
+        XCTAssertEqual(SdkConfig(domain: "Example.Reach5.NET", clientId: "abc").normalizedDomain, "example.reach5.net")
+        XCTAssertEqual(SdkConfig(domain: "[::1]", clientId: "abc").normalizedDomain, "[::1]")
+    }
+
     func testBaseUrlComponentsCarryOnlySchemeAndHost() {
         let config = SdkConfig(domain: "example.reach5.net", clientId: "abc")
 
@@ -70,14 +87,17 @@ final class SdkConfigTests: XCTestCase {
 
     // MARK: - Acceptable clientIds
 
+    /// The clientId is deliberately mixed-case: the derived scheme must lowercase it, since a scheme is
+    /// case-insensitive (RFC 3986 §3.1) and every comparison against an incoming callback assumes the
+    /// lower-cased form
     func testDefaultUrisAreDerivedFromClientId() {
         let config = SdkConfig(domain: "example.reach5.net", clientId: "9DKRdQyDLpaJqQQQAR9K")
 
-        XCTAssertEqual(config.customScheme, "reachfive-9DKRdQyDLpaJqQQQAR9K")
-        XCTAssertEqual(config.redirectUri.absoluteString, "reachfive-9DKRdQyDLpaJqQQQAR9K://callback")
-        XCTAssertEqual(config.mfaUri.absoluteString, "reachfive-9DKRdQyDLpaJqQQQAR9K://mfa")
-        XCTAssertEqual(config.emailVerificationUri.absoluteString, "reachfive-9DKRdQyDLpaJqQQQAR9K://email-verification")
-        XCTAssertEqual(config.accountRecoveryUri.absoluteString, "reachfive-9DKRdQyDLpaJqQQQAR9K://account-recovery")
+        XCTAssertEqual(config.customScheme, "reachfive-9dkrdqydlpajqqqqar9k")
+        XCTAssertEqual(config.redirectUri.absoluteString, "reachfive-9dkrdqydlpajqqqqar9k://callback")
+        XCTAssertEqual(config.mfaUri.absoluteString, "reachfive-9dkrdqydlpajqqqqar9k://mfa")
+        XCTAssertEqual(config.emailVerificationUri.absoluteString, "reachfive-9dkrdqydlpajqqqqar9k://email-verification")
+        XCTAssertEqual(config.accountRecoveryUri.absoluteString, "reachfive-9dkrdqydlpajqqqqar9k://account-recovery")
     }
 
     func testAcceptableClientIds() {
@@ -90,8 +110,8 @@ final class SdkConfigTests: XCTestCase {
             "my+client",            // plus
         ]
         for clientId in acceptable {
-            XCTAssertNotNil(
-                SdkConfig.makeUri(scheme: "reachfive-\(clientId)", host: "callback"),
+            XCTAssertTrue(
+                SdkConfig.isValidScheme("reachfive-\(clientId)"),
                 "clientId '\(clientId)' should be acceptable")
         }
     }
@@ -106,8 +126,8 @@ final class SdkConfigTests: XCTestCase {
             "cliént",     // non-ASCII letter
         ]
         for clientId in unacceptable {
-            XCTAssertNil(
-                SdkConfig.makeUri(scheme: "reachfive-\(clientId)", host: "callback"),
+            XCTAssertFalse(
+                SdkConfig.isValidScheme("reachfive-\(clientId)"),
                 "clientId '\(clientId)' should be rejected")
         }
     }
@@ -129,8 +149,8 @@ final class SdkConfigTests: XCTestCase {
             "my-app+x.y",      // '+', '-' and '.' are allowed
         ]
         for scheme in acceptable {
-            XCTAssertNotNil(
-                SdkConfig.makeUri(scheme: scheme, host: "callback"),
+            XCTAssertTrue(
+                SdkConfig.isValidScheme(scheme),
                 "customScheme '\(scheme)' should be acceptable")
         }
     }
@@ -148,46 +168,9 @@ final class SdkConfigTests: XCTestCase {
             "",                    // empty
         ]
         for scheme in unacceptable {
-            XCTAssertNil(
-                SdkConfig.makeUri(scheme: scheme, host: "callback"),
+            XCTAssertFalse(
+                SdkConfig.isValidScheme(scheme),
                 "customScheme '\(scheme)' should be rejected")
-        }
-    }
-
-    // MARK: - The host makeUri builds on
-
-    /// The four hosts `SdkConfig` actually builds on. They are literals, never integrator input, so what
-    /// follows pins an internal invariant rather than a contract: the callers stay within what `makeUri`
-    /// can honour.
-    func testTheHostsSdkConfigBuildsOnAreKeptIntact() {
-        for host in ["callback", "mfa", "email-verification", "account-recovery"] {
-            let url = SdkConfig.makeUri(scheme: "reachfive-abc", host: host)
-
-            XCTAssertEqual(url?.host, host, "host '\(host)' should be kept intact")
-            XCTAssertEqual(url?.path, "", "host '\(host)' should not spill into the path")
-        }
-    }
-
-    /// Interpolating a host into a URL string is the half parsing alone cannot check, so the built URL is
-    /// read back through `normalizedHost`. Without that, every row below still builds a URL — one quietly
-    /// holding something other than the host it was given.
-    func testUnacceptableHosts() {
-        let unacceptable = [
-            "",              // builds 'reachfive-abc://', whose host reads back nil
-            "[]",            // empty IPv6 literal: the host reads back empty
-            "callback/",     // trailing slash: a path, not part of the host
-            "call/back",     // slash: the remainder becomes the path
-            "call?back",     // question mark: the remainder becomes the query
-            "call#back",     // hash: the remainder becomes the fragment
-            "call@back",     // at sign: 'call' is read as userinfo and the host is 'back'
-            "callback:8443", // port: not part of the host
-            "call%20back",   // percent-encoding: URL.host decodes it back to a raw space
-            "cállback",      // non-ASCII: Foundation punycodes it to 'xn--cllback-hwa'
-        ]
-        for host in unacceptable {
-            XCTAssertNil(
-                SdkConfig.makeUri(scheme: "reachfive-abc", host: host),
-                "host '\(host)' should be rejected")
         }
     }
 
@@ -207,6 +190,38 @@ final class SdkConfigTests: XCTestCase {
         // The other URIs still get their defaults
         XCTAssertEqual(config.accountRecoveryUri.absoluteString, "reachfive-abc://account-recovery")
         XCTAssertEqual(config.emailVerificationUri.absoluteString, "reachfive-abc://email-verification")
+    }
+
+    /// An explicit URI may legitimately use a scheme and host that have nothing to do with `customScheme` —
+    /// a universal link redirect on the integrator's own domain, for instance — so only "has both a scheme
+    /// and a host" is checked, the two `matchesEndpoint(of:)` compares an incoming callback against.
+    func testAcceptableExplicitUris() {
+        let acceptable = [
+            "https://example.com/callback",        // universal link, unrelated to customScheme
+            "com.example.app://mfa",                // a different custom scheme than the derived default
+            "reachfive-abc://callback",              // the shape of the default itself
+            "https://example.com",                  // no path: matchesEndpoint treats "" and "/" the same
+        ]
+        for uri in acceptable {
+            XCTAssertTrue(
+                SdkConfig.isValidCallbackUri(URL(string: uri)!),
+                "'\(uri)' should be acceptable")
+        }
+    }
+
+    func testUnacceptableExplicitUris() {
+        let unacceptable = [
+            "not-a-url",              // no scheme, no host: parses as a relative reference
+            "//example.com/callback", // scheme-relative: a host, but no scheme
+            "reachfive-abc:///path",  // a scheme, but an empty authority: no host
+            "reachfive-abc://",       // a scheme, no authority at all: no host
+            "custom:opaque",         // a scheme with an opaque part, no authority: no host
+        ]
+        for uri in unacceptable {
+            XCTAssertFalse(
+                SdkConfig.isValidCallbackUri(URL(string: uri)!),
+                "'\(uri)' should be rejected")
+        }
     }
 
     // MARK: - Per-request override

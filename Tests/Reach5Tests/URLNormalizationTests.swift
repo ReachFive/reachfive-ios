@@ -3,9 +3,9 @@ import XCTest
 
 /// `normalizedScheme` and `normalizedHost` are the SDK's single answer to what Foundation leaves undone on a
 /// parsed URL. Three places depend on them — `URL.serializedOrigin`, on which `SdkConfig.baseComponents`
-/// in turn rests, `SdkConfig.makeUri` and `URL.matchesEndpoint(of:)` — and each of the three rules below has
-/// already cost a bug when one of them got it wrong, so they are pinned here rather than only through their
-/// callers.
+/// in turn rests, `SdkConfig.isValidCallbackUri` and `URL.matchesEndpoint(of:)` — and each of the three
+/// rules below has already cost a bug when one of them got it wrong, so they are pinned here rather than
+/// only through their callers.
 final class URLNormalizationTests: XCTestCase {
 
     // MARK: - Scheme
@@ -14,8 +14,7 @@ final class URLNormalizationTests: XCTestCase {
         let cases: [(input: String, expected: String)] = [
             ("https://example.com", "https"), // already lower-case
             ("HTTPS://example.com", "https"), // upper-case
-            // The default custom scheme is derived from the clientId, so it usually carries mixed case —
-            // exactly the shape that made loadLoginWebview miss its own callback.
+            // The default custom scheme is derived from the clientId, so it usually carries mixed case
             ("reachfive-AbC://callback", "reachfive-abc"),
         ]
         for (input, expected) in cases {
