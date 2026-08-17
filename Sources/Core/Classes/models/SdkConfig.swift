@@ -57,6 +57,16 @@ public class SdkConfig {
         return origin
     }
 
+    /// Validates everything eagerly and stops the program with a `preconditionFailure` at the first
+    /// problem, rather than letting a bad value reach a network call later — crashing at launch is a fast,
+    /// unmissable signal, and the message names the offending parameter and its fix.
+    ///
+    /// Three independent checks, in this order: `domain` must be a bare host (see `domain`); the scheme —
+    /// `customScheme`, or the one derived from `clientId` when it is `nil` — must be a valid URL scheme; and
+    /// `originWebAuthn`, if provided, must be a valid origin. The scheme check always runs, even when every
+    /// `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` is passed explicitly — each is then
+    /// kept exactly as given, but building the discarded default is what catches an invalid scheme early
+    /// rather than only on whichever URI is left to derive from it.
     public init(
         domain: String,
         clientId: String,
@@ -83,7 +93,6 @@ public class SdkConfig {
         let scheme = customScheme ?? "reachfive-\(clientId)"
         self.customScheme = scheme
 
-        // Built unconditionally so that an invalid scheme is caught at init even when every URI is provided explicitly
         let defaultRedirectUri = Self.defaultUri(scheme: scheme, host: "callback")
         self.redirectUri = redirectUri ?? defaultRedirectUri
         self.mfaUri = mfaUri ?? Self.defaultUri(scheme: scheme, host: "mfa")
