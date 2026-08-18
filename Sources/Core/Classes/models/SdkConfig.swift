@@ -29,8 +29,7 @@ public class SdkConfig {
     public let emailVerificationUri: URL
 
     /// The WebAuthn origin sent to the server for every passkey request that does not carry its own, as a
-    /// serialized origin (`https://host`): scheme, host and non-default port only, since neither a path nor
-    /// a trailing slash belongs in an origin.
+    /// serialized origin (`https://host`): scheme, host and non-default port only
     public let originWebAuthn: String
 
     /// Validates parameters and stops the program with a `preconditionFailure` at the first problem:
@@ -86,11 +85,7 @@ public class SdkConfig {
     }
 
     /// Validate the domain by constructing it in a URLComponents.
-    ///
     /// It returns the serialized origin alongside it for convenience.
-    ///
-    /// URLComponents still accepts hosts that are well-formed but resolve to nothing (`my_host.example`, `x..example`);
-    /// those fail at DNS with an error naming the host, and no parsing can tell a dead domain from a live one anyway.
     internal static func baseComponents(domain: String) -> (components: URLComponents, origin: String)? {
         var components = URLComponents()
         components.scheme = "https"

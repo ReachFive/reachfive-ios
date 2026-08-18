@@ -1,6 +1,6 @@
 import Foundation
 
-/// The two normalizations URL does not apply
+/// The two normalizations Foundation does not apply
 ///
 /// RFC 3986 §3.1 and §3.2.2 make the scheme and the host case-insensitive, and §6.2.2.1 asks for the
 /// lower-case form when comparing or serializing.
@@ -12,7 +12,7 @@ extension URL {
 
     /// The host in the form a comparison or an origin needs, or `nil` when the authority carries none.
     ///
-    /// Three things URL leaves to the caller:
+    /// Three things Foundation leaves to the caller:
     /// - the case, as above;
     /// - the brackets around an IPv6 literal, which `URL.host` strips (`https://[::1]` reads back as `::1`)
     ///   although both an origin and a URL require them;

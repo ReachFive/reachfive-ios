@@ -9,9 +9,7 @@ extension URL {
             .value
     }
 
-    /// `true` when this URL designates the same endpoint as `expected`: same scheme and same host
-    /// (both through `normalizedScheme`/`normalizedHost`, which apply the case folding RFC 3986 requires and
-    /// Foundation does not), and the same normalized path.
+    /// `true` when this URL designates the same endpoint as `expected`: same scheme, same host, same normalized path
     ///
     /// `""` and `"/"` are treated as the same path: a browser routinely appends the trailing slash to an
     /// authority-only URL, so a callback declared as `reachfive-<clientId>://callback` can be delivered
