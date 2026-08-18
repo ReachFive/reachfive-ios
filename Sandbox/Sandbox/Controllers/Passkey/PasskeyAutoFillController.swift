@@ -46,11 +46,12 @@ class PasskeyAutoFillController: UIViewController {
     ///
     /// What to watch: whether the system sheet dismisses itself when the task is canceled, and whether the
     /// alert reports "The calling task was canceled".
+    ///
+    /// `@available` rather than a `#if`: the annotation keeps the selector in the binary, so the storyboard
+    /// connection still resolves. `ActionController` already denies this screen below iOS 16, which is what
+    /// makes the annotation safe here.
+    @available(iOS 16.0, *)
     @IBAction func modalLoginThenCancel(_ sender: Any) {
-        guard #available(iOS 16.0, *) else {
-            presentAlert(title: "Modal login", message: "Passkey requires iOS 16")
-            return
-        }
         guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
 
         // The auto-fill request started on appear is left alone: submitting this one makes the SDK cancel it

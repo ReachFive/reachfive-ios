@@ -1598,16 +1598,29 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="username"/>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cN1-b7-Qz4" userLabel="Cancel Ongoing Request">
-                                <rect key="frame" x="100" y="261" width="202" height="40"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mX2-v5-Nt8" userLabel="DebugSeparator">
+                                <rect key="frame" x="16" y="289" width="370" height="1"/>
+                                <color key="backgroundColor" systemColor="separatorColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="1" id="pZ4-h7-Rg1"/>
+                                </constraints>
+                            </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="DEBUG — REQUEST CANCELLATION" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nY6-w1-Pk3" userLabel="DebugSectionLabel">
+                                <rect key="frame" x="16" y="298" width="228" height="16"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                <color key="textColor" systemColor="secondaryLabelColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cN1-b7-Qz4" userLabel="Cancel Ongoing Request">
+                                <rect key="frame" x="8" y="318" width="210" height="34"/>
                                 <state key="normal" title="Cancel ongoing request"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Cancel ongoing request"/>
                                 <connections>
                                     <action selector="cancelOngoingRequest:" destination="30k-52-vRo" eventType="touchUpInside" id="eP3-t9-Wv5"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dK8-r2-Ym6" userLabel="Modal Login Then Cancel">
-                                <rect key="frame" x="80" y="313" width="242" height="40"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dK8-r2-Ym6" userLabel="Modal Login Then Cancel">
+                                <rect key="frame" x="8" y="352" width="250" height="34"/>
                                 <state key="normal" title="Modal login, cancel after 3s"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Modal login, cancel after 3s"/>
                                 <connections>
@@ -1625,10 +1638,15 @@
                             <constraint firstItem="kiW-9E-9Lv" firstAttribute="top" secondItem="AsB-XR-cpt" secondAttribute="bottom" constant="8" id="x3D-sn-Nrw"/>
                             <constraint firstItem="d5I-G3-TDO" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="AsB-XR-cpt" secondAttribute="trailing" symbolic="YES" id="yEB-NP-RkZ"/>
                             <constraint firstItem="kiW-9E-9Lv" firstAttribute="leading" secondItem="AsB-XR-cpt" secondAttribute="leading" id="zAo-do-AO2"/>
-                            <constraint firstItem="cN1-b7-Qz4" firstAttribute="top" secondItem="kiW-9E-9Lv" secondAttribute="bottom" constant="20" id="gR5-n8-Zc9"/>
-                            <constraint firstItem="cN1-b7-Qz4" firstAttribute="centerX" secondItem="pYP-Ho-fVk" secondAttribute="centerX" id="hT2-p6-Ad4"/>
-                            <constraint firstItem="dK8-r2-Ym6" firstAttribute="top" secondItem="cN1-b7-Qz4" secondAttribute="bottom" constant="12" id="jV8-q3-Be7"/>
-                            <constraint firstItem="dK8-r2-Ym6" firstAttribute="centerX" secondItem="pYP-Ho-fVk" secondAttribute="centerX" id="kW4-s1-Cf6"/>
+                            <constraint firstItem="mX2-v5-Nt8" firstAttribute="top" secondItem="kiW-9E-9Lv" secondAttribute="bottom" constant="48" id="gR5-n8-Zc9"/>
+                            <constraint firstItem="mX2-v5-Nt8" firstAttribute="leading" secondItem="pYP-Ho-fVk" secondAttribute="leadingMargin" id="hT2-p6-Ad4"/>
+                            <constraint firstItem="mX2-v5-Nt8" firstAttribute="trailing" secondItem="pYP-Ho-fVk" secondAttribute="trailingMargin" id="qA9-j2-Sh5"/>
+                            <constraint firstItem="nY6-w1-Pk3" firstAttribute="top" secondItem="mX2-v5-Nt8" secondAttribute="bottom" constant="8" id="rB1-k4-Tj7"/>
+                            <constraint firstItem="nY6-w1-Pk3" firstAttribute="leading" secondItem="pYP-Ho-fVk" secondAttribute="leadingMargin" id="sC3-l6-Uk9"/>
+                            <constraint firstItem="cN1-b7-Qz4" firstAttribute="top" secondItem="nY6-w1-Pk3" secondAttribute="bottom" constant="4" id="tD5-m8-Vm2"/>
+                            <constraint firstItem="cN1-b7-Qz4" firstAttribute="leading" secondItem="nY6-w1-Pk3" secondAttribute="leading" constant="-12" id="jV8-q3-Be7"/>
+                            <constraint firstItem="dK8-r2-Ym6" firstAttribute="top" secondItem="cN1-b7-Qz4" secondAttribute="bottom" id="kW4-s1-Cf6"/>
+                            <constraint firstItem="dK8-r2-Ym6" firstAttribute="leading" secondItem="cN1-b7-Qz4" secondAttribute="leading" id="uE7-n1-Wn4"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="AutoFill Passkey" id="cvN-b0-Jy4"/>
