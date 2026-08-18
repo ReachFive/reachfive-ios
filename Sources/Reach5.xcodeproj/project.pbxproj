@@ -100,7 +100,6 @@
 		8496EB4325DEB141005098DD /* AuthenticationToken.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496EB3925DEB141005098DD /* AuthenticationToken.swift */; };
 		8496EB4425DEB141005098DD /* R5PublicKeyCredentialRpEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496EB3A25DEB141005098DD /* R5PublicKeyCredentialRpEntity.swift */; };
 		8496EB4525DEB141005098DD /* R5PublicKeyCredentialUserEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496EB3B25DEB141005098DD /* R5PublicKeyCredentialUserEntity.swift */; };
-		93EFD59B741E0376303462D9 /* Pods_Reach5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBD028BD86E6BB22BBAD012C /* Pods_Reach5.framework */; };
 		990AF3422DD2146800D31780 /* VerifyEmailRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990AF3412DD2145900D31780 /* VerifyEmailRequest.swift */; };
 		990AF3442DD2154B00D31780 /* VerifyEmailResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990AF3432DD2153200D31780 /* VerifyEmailResponse.swift */; };
 		991296BF2BDBBCAF00DCEDC1 /* MfaStepUpRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991296BE2BDBBCAF00DCEDC1 /* MfaStepUpRequest.swift */; };
@@ -189,7 +188,6 @@
 		34E508B122F19F7700BF9BAF /* DataRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRequest.swift; sourceTree = "<group>"; };
 		34F7D3E322A54AA2003A7BC0 /* ReachFiveApi.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveApi.swift; sourceTree = "<group>"; };
 		34F7D3E522A54ADE003A7BC0 /* ProvidersConfigsResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersConfigsResult.swift; sourceTree = "<group>"; };
-		4820021147382B7F35081385 /* Pods-Reach5.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Reach5.release.xcconfig"; path = "Target Support Files/Pods-Reach5/Pods-Reach5.release.xcconfig"; sourceTree = "<group>"; };
 		6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdkVersion.swift; sourceTree = "<group>"; };
 		72DDB78D22EF354300048262 /* ClientConfigResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientConfigResponse.swift; sourceTree = "<group>"; };
 		8433EA3925F1229F00329358 /* DeviceCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCredential.swift; sourceTree = "<group>"; };
@@ -219,8 +217,6 @@
 		9990002F2FC9D1950081A366 /* SessionDevicesResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDevicesResponse.swift; sourceTree = "<group>"; };
 		999000312FC9D38E0081A366 /* ReachFiveSessionDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFiveSessionDevice.swift; sourceTree = "<group>"; };
 		99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupTokenResponse.swift; sourceTree = "<group>"; };
-		DBD028BD86E6BB22BBAD012C /* Pods_Reach5.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Reach5.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F11E5406A766337B2CE86F9C /* Pods-Reach5.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Reach5.debug.xcconfig"; path = "Target Support Files/Pods-Reach5/Pods-Reach5.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,7 +224,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				93EFD59B741E0376303462D9 /* Pods_Reach5.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,9 +321,7 @@
 		347FDB38229BE84500660687 = {
 			isa = PBXGroup;
 			children = (
-				74FB8B4B94CB262BEC297380 /* Frameworks */,
 				347FDB44229BE84500660687 /* Core */,
-				927803C28AA84ED9FC3390CF /* Pods */,
 				347FDB43229BE84500660687 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -374,14 +367,6 @@
 				8496EB2F25DEB021005098DD /* responses */,
 			);
 			path = models;
-			sourceTree = "<group>";
-		};
-		74FB8B4B94CB262BEC297380 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				DBD028BD86E6BB22BBAD012C /* Pods_Reach5.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		8496EB0725DEAE10005098DD /* webAuthn */ = {
@@ -436,15 +421,6 @@
 			path = webAuthn;
 			sourceTree = "<group>";
 		};
-		927803C28AA84ED9FC3390CF /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				F11E5406A766337B2CE86F9C /* Pods-Reach5.debug.xcconfig */,
-				4820021147382B7F35081385 /* Pods-Reach5.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		9958690A2C32DDC0005CD5C4 /* trustedDevices */ = {
 			isa = PBXGroup;
 			children = (
@@ -471,7 +447,6 @@
 			buildConfigurationList = 347FDB4A229BE84500660687 /* Build configuration list for PBXNativeTarget "Reach5" */;
 			buildPhases = (
 				A64E74D75E964B173E363A57 /* SwiftLint */,
-				3E48ED07786CEAA846211855 /* [CP] Check Pods Manifest.lock */,
 				347FDB3D229BE84500660687 /* Headers */,
 				347FDB3E229BE84500660687 /* Sources */,
 				347FDB3F229BE84500660687 /* Frameworks */,
@@ -529,28 +504,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		3E48ED07786CEAA846211855 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Reach5-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		A64E74D75E964B173E363A57 /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -810,7 +763,6 @@
 		};
 		347FDB4B229BE84500660687 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F11E5406A766337B2CE86F9C /* Pods-Reach5.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
@@ -844,7 +796,6 @@
 		};
 		347FDB4C229BE84500660687 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4820021147382B7F35081385 /* Pods-Reach5.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";

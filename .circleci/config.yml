@@ -3,8 +3,6 @@
 #
 # For XCode build version available
 # https://circleci.com/docs/using-macos/
-#
-# Setup Cocoapod session/token on CircleCi: https://fuller.li/posts/automated-cocoapods-releases-with-ci/
 version: 2.1
 
 check_sdk_version: &check_sdk_version
@@ -25,16 +23,11 @@ jobs:
     steps:
       - checkout
       - run: *check_sdk_version
+      # Builds for the device architecture, which the simulator-bound `test`
+      # job below does not cover.
       - run:
-          name: Install CocoaPods
-          command: gem install cocoapods --user-install
-      - run:
-          name: Check Reach5
-          command: |
-            cd Sources
-            pod install
-            cd ../
-            pod lib lint Reach5.podspec
+          name: Build Reach5
+          command: xcodebuild build -scheme Reach5 -destination 'generic/platform=iOS'
   test:
     macos:
       xcode: "16.4.0"
@@ -47,31 +40,6 @@ jobs:
       - run:
           name: Run the Reach5Tests suite
           command: xcodebuild -scheme Reach5 -destination 'platform=iOS Simulator,name=iPhone 16 Pro' test
-  build-for-release:
-    macos:
-      xcode: "16.4.0"
-    steps:
-      - checkout
-      - run: *check_sdk_version
-      - run:
-          name: Install CocoaPods
-          command: gem install cocoapods --user-install
-      - run:
-          name: Check Reach5
-          command: |
-            cd Sources
-            pod install
-            cd ../
-            pod spec lint Reach5.podspec
-  publish:
-    macos:
-      xcode: "16.4.0"
-    steps:
-      - checkout
-      - run:
-          name: Install CocoaPods
-          command: gem install cocoapods --user-install
-      - run: pod trunk push Reach5.podspec
   check-doc-examples:
     macos:
       xcode: "16.4.0"
@@ -83,25 +51,6 @@ jobs:
       - store_artifacts:
           path: docs/verification/report.md
           destination: doc-examples-report.md
-  build-sandbox:
-    macos:
-      xcode: "16.4.0"
-    working_directory: ~/repo/Sandbox
-    steps:
-      - checkout:
-          path: ~/repo
-      - run:
-          name: Install CocoaPods
-          command: gem install cocoapods --user-install
-      - run: pod install
-      - run: fastlane scan
-
-default_workflows_filters: &default_workflows_filters
-  filters:
-    tags:
-      only: /.*/
-    branches:
-      ignore: /.*/
 
 default_workflows_tags: &default_workflows_tags
   filters:
@@ -127,10 +76,3 @@ workflows:
           <<: *default_workflows_tags
       - check-doc-examples:
           <<: *release_branches
-      - build-for-release:
-          <<: *default_workflows_filters
-      - publish:
-          requires:
-            - build-for-release
-            - test
-          <<: *default_workflows_filters
