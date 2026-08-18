@@ -1,6 +1,6 @@
 # Running the Demo Application
 
-Check out `reachfive-ios-google` and `reachfive-ios-facebook` next to this repository, then open `Sandbox/Sandbox.xcworkspace` (or `.xcodeproj`) in Xcode: Reach5, Reach5Google and Reach5Facebook are resolved automatically as local Swift packages (`../`, `../../reachfive-ios-google`, `../../reachfive-ios-facebook`).
+Check out `reachfive-ios-google` and `reachfive-ios-facebook` next to this repository, then open `Sandbox/Sandbox.xcodeproj` in Xcode: Reach5, Reach5Google and Reach5Facebook are resolved automatically as local Swift packages (`../`, `../../reachfive-ios-google`, `../../reachfive-ios-facebook`).
 
 The directory holding this repository has to be named `reachfive-ios`. SwiftPM derives the identity of a local package from its directory name, so under any other name (a git worktree, for instance) it sees two distinct packages both defining `Reach5` and refuses to resolve the graph:
 ```
@@ -90,9 +90,22 @@ swiftlint lint
 swiftformat .
 ```
 
+## Running the tests
+
+`Reach5Tests` belongs to the root package, and Xcode only exposes the test targets of the package it has open as the root — not those of a package consumed as a dependency. So the tests are invisible from the Sandbox project: open the repository folder itself in Xcode to get them.
+
+From the command line, Mac Catalyst is the quickest destination, as it runs UIKit on macOS without booting a simulator:
+```sh
+xcodebuild -scheme Reach5 -destination 'platform=macOS,variant=Mac Catalyst' test
+```
+CI runs the same suite on a simulator, because that is the destination our users build for:
+```sh
+xcodebuild -scheme Reach5 -destination 'platform=iOS Simulator,name=iPhone 16 Pro' test
+```
+
 ## Viewing the modules as libraries in XCode
 
-Open the project folder to view it as a package project, not the .xcodeproj or .xcworkspace.
+Open the project folder to view it as a package project, not the .xcodeproj.
 
 ## Adding or renaming files
 The module sources are declared by `Package.swift`, which picks them up from the directory, so adding or renaming a file there needs no project bookkeeping.<br>
