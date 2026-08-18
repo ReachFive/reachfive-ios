@@ -50,6 +50,7 @@ final class StubURLProtocol: URLProtocol {
             var redirectRequest = URLRequest(url: redirectURL)
             redirectRequest.httpMethod = request.httpMethod
             client?.urlProtocol(self, wasRedirectedTo: redirectRequest, redirectResponse: redirectResponse)
+            client?.urlProtocolDidFinishLoading(self)
             return
         }
 

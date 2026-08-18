@@ -3,14 +3,12 @@ import Foundation
 class DataRequest {
     private let request: URLRequest
     private let session: URLSession
-    private let redirectHandler: RedirectHandler
     private let decoder: JSONDecoder
     private let logger = Logger.shared
 
-    init(request: URLRequest, session: URLSession, redirectHandler: RedirectHandler, decoder: JSONDecoder) {
+    init(request: URLRequest, session: URLSession, decoder: JSONDecoder) {
         self.request = request
         self.session = session
-        self.redirectHandler = redirectHandler
         self.decoder = decoder
     }
 
@@ -78,25 +76,57 @@ class DataRequest {
 
     func redirect() async throws -> URL {
         logger.log(request: request)
-        let task = session.dataTask(with: request)
-        do {
-            return try await withCheckedThrowingContinuation { continuation in
-                Task {
-                    await redirectHandler.registerContinuation(continuation, for: task.taskIdentifier)
-                    task.resume()
+
+        // `URLSession.data(for:delegate:)` would give us a per-call delegate for free, but it needs iOS 15;
+        // a throwaway session (inheriting the shared session's configuration, so test stubs still apply)
+        // gets the same effect — exclusive to this one task, no shared state to correlate by task identifier.
+        let delegate = PrivateSchemeRedirectDelegate()
+        let redirectSession = URLSession(configuration: session.configuration, delegate: delegate, delegateQueue: nil)
+        defer { redirectSession.finishTasksAndInvalidate() }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            let task = redirectSession.dataTask(with: request) { data, response, error in
+                if let redirectedTo = delegate.redirectedTo {
+                    continuation.resume(returning: redirectedTo)
+                    return
                 }
+
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                guard let response else {
+                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request without response"))
+                    return
+                }
+
+                continuation.resume(with: Result {
+                    try self.processHttpResponse(data: data ?? Data(), response: response) { _ in
+                        let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected")
+                        self.logger.log(error: error)
+                        throw error
+                    }
+                })
             }
-        } catch let failure as RedirectHandler.RedirectCompletionFailure {
-            guard let response = failure.response else {
-                let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected")
-                logger.log(error: error)
-                throw error
-            }
-            return try processHttpResponse(data: failure.data, response: response) { _ in
-                let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected")
-                logger.log(error: error)
-                throw error
-            }
+            task.resume()
         }
+    }
+}
+
+/// Follows redirects as `URLSession` normally would, except a redirect to a private (non-http) scheme —
+/// the target of an `/oauth/authorize` callback — which it captures instead of following, since `URLSession`
+/// has no handler for it. Scoped to a single `redirect()` call (its own throwaway session), so a plain
+/// stored property is enough: no shared state, no locking.
+private final class PrivateSchemeRedirectDelegate: NSObject, URLSessionTaskDelegate {
+    private(set) var redirectedTo: URL?
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
+        guard let url = request.url, let scheme = url.scheme, !scheme.lowercased().starts(with: "http") else {
+            return request
+        }
+
+        redirectedTo = url
+        return nil
     }
 }
