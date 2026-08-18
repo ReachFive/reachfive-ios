@@ -79,10 +79,23 @@ class DataRequest {
     func redirect() async throws -> URL {
         logger.log(request: request)
         let task = session.dataTask(with: request)
-        return try await withCheckedThrowingContinuation { continuation in
-            Task {
-                await redirectHandler.registerContinuation(continuation, for: task.taskIdentifier)
-                task.resume()
+        do {
+            return try await withCheckedThrowingContinuation { continuation in
+                Task {
+                    await redirectHandler.registerContinuation(continuation, for: task.taskIdentifier)
+                    task.resume()
+                }
+            }
+        } catch let failure as RedirectHandler.RedirectCompletionFailure {
+            guard let response = failure.response else {
+                let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected")
+                logger.log(error: error)
+                throw error
+            }
+            return try processHttpResponse(data: failure.data, response: response) { _ in
+                let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected")
+                logger.log(error: error)
+                throw error
             }
         }
     }

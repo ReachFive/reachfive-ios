@@ -6,8 +6,8 @@ class NetworkClient {
     private let decoder: JSONDecoder
     private let correlationId: String
 
-    init(decoder: JSONDecoder) {
-        self.session = URLSession(configuration: .default, delegate: redirectHandler, delegateQueue: nil)
+    init(decoder: JSONDecoder, configuration: URLSessionConfiguration = .default) {
+        self.session = URLSession(configuration: configuration, delegate: redirectHandler, delegateQueue: nil)
         self.decoder = decoder
         self.correlationId = UUID().uuidString
     }
@@ -51,8 +51,40 @@ private actor RedirectContinuationManager {
     }
 }
 
-class RedirectHandler: NSObject, URLSessionTaskDelegate {
+/// Captures the terminal HTTP response and body of a redirect task synchronously. `URLSessionDataDelegate`
+/// callbacks run one at a time on the session's delegate queue, but `didReceive data:` has no async variant,
+/// so an actor-isolated store could be read by `didCompleteWithError` before an in-flight append finishes.
+/// A lock lets every callback write in place instead.
+private final class RedirectResponseCaptureStore: @unchecked Sendable {
+    private let lock = NSLock()
+    private var captures = [Int: (response: HTTPURLResponse?, data: Data)]()
+
+    func setResponse(_ response: HTTPURLResponse, for taskIdentifier: Int) {
+        lock.lock(); defer { lock.unlock() }
+        captures[taskIdentifier, default: (nil, Data())].response = response
+    }
+
+    func appendData(_ data: Data, for taskIdentifier: Int) {
+        lock.lock(); defer { lock.unlock() }
+        captures[taskIdentifier, default: (nil, Data())].data.append(data)
+    }
+
+    func pullCapture(for taskIdentifier: Int) -> (response: HTTPURLResponse?, data: Data)? {
+        lock.lock(); defer { lock.unlock() }
+        return captures.removeValue(forKey: taskIdentifier)
+    }
+}
+
+class RedirectHandler: NSObject, URLSessionDataDelegate {
+    /// Thrown when a redirect task completes without ever redirecting to a private scheme, carrying whatever
+    /// terminal HTTP response and body were captured so `DataRequest.redirect()` can decode an `ApiError` from it.
+    struct RedirectCompletionFailure: Error {
+        let response: HTTPURLResponse?
+        let data: Data
+    }
+
     private let continuationManager = RedirectContinuationManager()
+    private let captureStore = RedirectResponseCaptureStore()
 
     func registerContinuation(_ continuation: CheckedContinuation<URL, Error>, for taskIdentifier: Int) async {
         await continuationManager.registerContinuation(continuation, for: taskIdentifier)
@@ -62,13 +94,26 @@ class RedirectHandler: NSObject, URLSessionTaskDelegate {
         guard let url = request.url, let scheme = url.scheme, !scheme.lowercased().starts(with: "http") else {
             return request
         }
-        
+
+        _ = captureStore.pullCapture(for: task.taskIdentifier)
         let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
         continuation?.resume(returning: url)
         return nil
     }
 
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse) async -> URLSession.ResponseDisposition {
+        if let httpResponse = response as? HTTPURLResponse {
+            captureStore.setResponse(httpResponse, for: dataTask.taskIdentifier)
+        }
+        return .allow
+    }
+
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        captureStore.appendData(data, for: dataTask.taskIdentifier)
+    }
+
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        let capture = captureStore.pullCapture(for: task.taskIdentifier)
         Task {
             let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
 
@@ -76,7 +121,7 @@ class RedirectHandler: NSObject, URLSessionTaskDelegate {
             if let error {
                 continuation?.resume(throwing: error)
             } else {
-                continuation?.resume(throwing: ReachFiveError.TechnicalError(reason: "Request did not redirect as expected"))
+                continuation?.resume(throwing: RedirectCompletionFailure(response: capture?.response, data: capture?.data ?? Data()))
             }
         }
     }
