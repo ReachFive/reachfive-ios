@@ -6,14 +6,14 @@
     ```ruby
     $VERSION = 'x.x.x'
     ```
-3. Run [update.sh](update.sh) to install the new version of this library and update the dependencies in CocoaPods and SPM.
-   This also regenerates [SdkVersion.swift](Sources/Core/Classes/SdkVersion.swift) from `version.rb` (via [set_version.sh](set_version.sh)) — make sure the resulting change is committed, the CI checks that it stays in sync.
+3. Run [set_version.sh](set_version.sh) to regenerate [SdkVersion.swift](Sources/Core/Classes/SdkVersion.swift) from `version.rb`.
+   Make sure the resulting change is committed, the CI checks that it stays in sync.
     ```shell
-    ./update.sh
+    ./set_version.sh
     ```
 
 4. Update the [CHANGELOG.md](CHANGELOG.md) file
-5. Test the modifications on the SPM project DemoSharedCredentials. SPM tends to be stricter than Cocoapods when validating dependencies and code visibility
+5. Test the modifications on the SPM project DemoSharedCredentials
 6. Ask to create a new release version in JIRA and link the ticket to it
 
 7. Submit and merge the pull request
@@ -28,7 +28,7 @@
     git push origin x.x.x
     ```
 
-10. The [CI](https://app.circleci.com/pipelines/github/ReachFive/reachfive-ios) will automatically publish this new version
+10. The tag is the published version: SPM resolves it directly, there is nothing else to publish
 
 11. Release Reach5Future
 
