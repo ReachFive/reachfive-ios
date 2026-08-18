@@ -30,7 +30,7 @@
 - `startPasswordless` accepts a new `scope` parameter on `.Email`/`.PhoneNumber` (defaults to the SDK's configured scope).
 
 ### Bug fix
-- `startPasswordless` did not send any scope to `/passwordless/start`, so the access token obtained after a passwordless login carried none, which made `getProfile` unable to return the user's identifier.
+- `startPasswordless` did not send any scope to `/passwordless/start`, so the access token obtained after a passwordless login carried none.
 
 ## v10.0.1
 
