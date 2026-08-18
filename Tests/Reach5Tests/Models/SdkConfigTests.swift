@@ -7,8 +7,8 @@ final class SdkConfigTests: XCTestCase {
     // MARK: - Domain
 
     /// One representative per class of input, not an exhaustive sweep: each row teaches a distinct rule.
-    /// Shared with `testBothWebAuthnOriginPathsAgree` and `testOriginSerializationIsIdempotent`, which hold
-    /// these same values to the invariants `originWebAuthn` rests on.
+    /// Shared with `testBothWebAuthnOriginPathsAgree`, which holds these same values to the invariant
+    /// `originWebAuthn` rests on.
     private static let acceptableDomains = [
         "example.reach5.net",   // baseline
         "Example.Reach5.NET",   // mixed case: DNS is case-insensitive, and the value is kept as given
@@ -292,64 +292,16 @@ final class SdkConfigTests: XCTestCase {
         XCTAssertEqual(config.originWebAuthn, "https://localhost:8443")
     }
 
-    /// One representative per class of input, like `acceptableDomains`. Shared with
-    /// `testOriginSerializationIsIdempotent`.
-    private static let acceptableOrigins: [(input: String, expected: String)] = [
-        ("https://auth.example.com", "https://auth.example.com"), // baseline
-        ("https://auth.example.com/", "https://auth.example.com"), // trailing slash stripped
-        ("https://auth.example.com/webauthn/register", "https://auth.example.com"), // path stripped
-        ("https://auth.example.com?client=abc", "https://auth.example.com"), // query stripped
-        ("https://auth.example.com#fragment", "https://auth.example.com"), // fragment stripped
-        ("https://user:pass@auth.example.com", "https://auth.example.com"), // userinfo dropped
-        ("HTTPS://auth.example.com", "https://auth.example.com"), // scheme is lowercased
-        ("https://localhost:8443", "https://localhost:8443"), // non-default port is kept
-        ("https://auth.example.com:443", "https://auth.example.com"), // default https port is stripped
-        ("http://auth.example.com:80", "http://auth.example.com"), // default http port is stripped
-        ("https://127.0.0.1:9000", "https://127.0.0.1:9000"), // IPv4 host, kept as-is
-        ("https://[::1]:8443", "https://[::1]:8443"), // IPv6 literal: URL.host drops the brackets, put them back
-        ("https://AUTH.EXAMPLE.COM", "https://auth.example.com"), // host is lowercased, like the WHATWG domain parser does
-        ("https://[2001:DB8::1]", "https://[2001:db8::1]"), // IPv6 hex digits are lowercased too
-        ("https://café.example", "https://xn--caf-dma.example"), // IDNA: Foundation already punycode-encodes non-ASCII hosts
-    ]
-
-    /// Same style as `testAcceptableClientIds`/`testAcceptableCustomSchemes`: goes through
-    /// `URL.serializedOrigin` directly, the single construction point the init's precondition relies
-    /// on, so a malformed input can be checked without crashing the test process.
-    func testAcceptableWebAuthnOrigins() {
-        for (input, expected) in Self.acceptableOrigins {
-            let url = URL(string: input)!
-            XCTAssertEqual(url.serializedOrigin, expected, "'\(input)' should serialize to '\(expected)'")
-        }
-    }
-
-    func testUnacceptableWebAuthnOrigins() {
-        let unacceptable = [
-            "auth.example.com", // no scheme: parses as a relative reference
-            "//auth.example.com", // scheme-relative: no scheme
-            "https://", // scheme but no host
-            "https://:8443", // an authority with a port but no host: URL.host is "", not nil
-            "https://@:8443", // userinfo and port, still no host
-            "https:///webauthn", // scheme and a path, still no host
-            "mailto:test@example.com", // has a scheme, but no host
-            "file:///path/to/file", // has a scheme, but no host
-            // `URL.host` percent-*decodes*, so these read back as the hosts "a b.example" and "a/b.example".
-            // Interpolating those would emit an origin carrying a raw space, or one whose slash reads as a
-            // path; reassembling through URLComponents refuses them instead.
-            "https://a%20b.example",
-            "https://a%2Fb.example",
-        ]
-        for input in unacceptable {
-            let url = URL(string: input)!
-            XCTAssertNil(url.serializedOrigin, "'\(input)' should be rejected")
-        }
-    }
-
-    // MARK: - Invariants held over the tables above
+    // MARK: - Invariants held over the table above
 
     /// The two ways into `originWebAuthn` — the `domain` fallback and a configured `originWebAuthn` — must
     /// never disagree on the same host, since a request carries one or the other and the server sees no
     /// difference. `testWebAuthnOriginDefaultUsesTheAsciiFormOfAnInternationalizedDomain` checks the one
-    /// case where they nearly did; this holds the whole table to it.
+    /// case where they nearly did; this holds the whole table to it. The third way in, a per-request
+    /// override, is held to the same agreement by `OriginWebAuthnOverrideTests`.
+    ///
+    /// What each of them serializes, case by case, belongs to `URLNormalizationTests`: all three go through
+    /// the same `URL.serializedOrigin`, so restating its table here would only duplicate it.
     func testBothWebAuthnOriginPathsAgree() {
         for domain in Self.acceptableDomains {
             let fromDomain = SdkConfig(domain: domain, clientId: "abc")
@@ -361,26 +313,6 @@ final class SdkConfigTests: XCTestCase {
             XCTAssertEqual(
                 fromDomain.originWebAuthn, configured.originWebAuthn,
                 "the two paths disagree on domain '\(domain)'")
-        }
-    }
-
-    /// An origin the SDK produces must itself parse back to that same origin. WebURL's conformance harness
-    /// holds every case it runs to this invariant, over and above the expected values, and it catches a class
-    /// of regression a table of expectations cannot: a serializer that dropped the brackets of an IPv6 host,
-    /// or restored a default port, would still satisfy every row above while emitting an origin that no
-    /// longer round-trips — and what the server receives is the emitted string, not the row.
-    func testOriginSerializationIsIdempotent() {
-        let urls = Self.acceptableDomains.compactMap { SdkConfig.baseComponents(domain: $0)?.components.url }
-            + Self.acceptableOrigins.map { URL(string: $0.input)! }
-
-        for url in urls {
-            guard let origin = url.serializedOrigin else {
-                XCTFail("'\(url)' should serialize to an origin")
-                continue
-            }
-            XCTAssertEqual(
-                URL(string: origin)?.serializedOrigin, origin,
-                "origin '\(origin)' does not survive being parsed and serialized again")
         }
     }
 }
