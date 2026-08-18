@@ -35,7 +35,8 @@ public class SdkConfig {
     /// Validates parameters and stops the program with a `preconditionFailure` at the first problem:
     /// - `domain` must be a bare host: no scheme, port, path or trailing slash;
     /// - `customScheme` must be a valid URL scheme (RFC 3986 §3.1);
-    /// - `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` must have both a scheme and a host;
+    /// - `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` must carry a scheme plus a host
+    ///   or a path; an `http`/`https` one must have a host;
     /// - `originWebAuthn` must be a valid origin (RFC 6454 §6.2: ASCII Serialization of an Origin).
     ///
     /// `originWebAuthn` defaults to `https://<domain>`, which is right unless your passkeys are scoped to a
@@ -105,9 +106,31 @@ public class SdkConfig {
         return url.normalizedScheme == scheme.lowercased()
     }
 
-    /// Whether this URL could ever match an incoming callback: it must have both a scheme and a host
+    /// Whether this URL could ever match an incoming callback, i.e. whether `matchesEndpoint(of:)` can tell
+    /// it apart from the SDK's other callback URIs: it needs a scheme, plus a host or a non-empty
+    /// normalized path to discriminate on.
+    ///
+    /// An `http`/`https` URI needs a host: its grammar requires one (RFC 9110 §4.2.1), and the only channel
+    /// that can deliver it — an `ASWebAuthenticationSession` built with `callback: .https(host:path:)` — is
+    /// given that host explicitly. A host-less `https:///callback` would be accepted here only to fail
+    /// later, when `WebAuthenticationSession.prepareSession` throws for the very same reason.
+    ///
+    /// Any other scheme is a private-use one (RFC 7595 §3.8), so RFC 8252 §7.1 spells its redirect URI
+    /// *without* an authority: `com.example.app:/oauth2redirect/example-provider`, a single slash and a
+    /// path. Both channels that can deliver it — `ASWebAuthenticationSession`'s `callbackURLScheme:` and
+    /// `application(_:open:)` — discriminate on the scheme alone, so a path is enough.
+    ///
+    /// A URI with neither a host nor a path (`custom:opaque`, `reachfive-abc://`, `com.example.app:/`, whose
+    /// path normalizes to `""`) is rejected because it is indistinguishable, under `matchesEndpoint(of:)`,
+    /// from every other empty-endpoint URI of its scheme.
+    ///
+    /// This is a check on the *shape*, not on deliverability: no parsing can tell whether the scheme is
+    /// declared in `CFBundleURLSchemes`, whether the host is an Associated Domain, or whether the URI is
+    /// whitelisted in the ReachFive console.
     internal static func isValidCallbackUri(_ uri: URL) -> Bool {
-        uri.normalizedScheme != nil && uri.normalizedHost != nil
+        guard uri.normalizedScheme != nil else { return false }
+        if uri.isHttpBased { return uri.normalizedHost != nil }
+        return uri.normalizedHost != nil || !uri.normalizedPath.isEmpty
     }
 
     private static func checkedUri(_ uri: URL?, _ scheme: String, name: String) -> URL {
@@ -115,8 +138,12 @@ public class SdkConfig {
         guard let uri else { return URL(string: "\(scheme)://\(name)")! }
         guard Self.isValidCallbackUri(uri) else {
             preconditionFailure("""
-                '\(uri)' is not a valid \(name) URI: it must have both a scheme and a host, e.g. \
-                'reachfive-clientId://callback' or 'https://your-app.com/callback'. \
+                '\(uri)' is not a valid \(name) URI: it needs a scheme, plus a host or a path to tell it apart \
+                from the SDK's other callbacks — and an 'http'/'https' URI needs a host, which its grammar \
+                requires. Any of these shapes works: '\(scheme)://\(name)', \
+                'com.example.app:/oauth2redirect/\(name)' (the RFC 8252 §7.1 form, no authority) or \
+                'https://your-app.com/\(name)'. Note that one slash and two are *different* endpoints, so the \
+                value must match your ReachFive console entry exactly. \
                 Leave the '\(name)' parameter unset to use the default derived from customScheme.
                 """)
         }

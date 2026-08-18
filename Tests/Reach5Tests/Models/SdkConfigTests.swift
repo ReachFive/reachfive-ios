@@ -186,17 +186,24 @@ final class SdkConfigTests: XCTestCase {
         XCTAssertEqual(config.emailVerificationUri.absoluteString, "reachfive-abc://email-verification")
     }
 
-    /// An explicit URI may legitimately use a scheme and host that have nothing to do with `customScheme` —
-    /// a universal link redirect on the integrator's own domain, for instance — so only "has both a scheme
-    /// and a host" is checked, the two `matchesEndpoint(of:)` compares an incoming callback against.
+    /// An explicit URI may legitimately use a scheme, host and path that have nothing to do with
+    /// `customScheme` — a universal link on the integrator's own domain, for instance. What is checked is
+    /// only what `URL.matchesEndpoint(of:)` can discriminate on: a scheme, plus a host or a non-empty
+    /// normalized path. One representative per class of input, not an exhaustive sweep.
+    ///
+    /// Shared with `testEveryAcceptableUriIsRecognizedAsItsOwnCallback`, which holds these same values to
+    /// the invariant the pair (validation, matcher) rests on.
+    private static let acceptableExplicitUris = [
+        "https://example.com/callback",                     // universal link, unrelated to customScheme
+        "com.example.app://mfa",                            // a different custom scheme than the derived default
+        "reachfive-abc://callback",                         // the shape of the default itself
+        "https://example.com",                               // no path: matchesEndpoint folds "" and "/" together
+        "com.example.app:/oauth2redirect/example-provider", // RFC 8252 §7.1: a private-use scheme has no naming authority, so a single slash and a path
+        "reachfive-abc:///path",                            // an empty authority, but still a scheme and a path to match on
+    ]
+
     func testAcceptableExplicitUris() {
-        let acceptable = [
-            "https://example.com/callback",        // universal link, unrelated to customScheme
-            "com.example.app://mfa",                // a different custom scheme than the derived default
-            "reachfive-abc://callback",              // the shape of the default itself
-            "https://example.com",                  // no path: matchesEndpoint treats "" and "/" the same
-        ]
-        for uri in acceptable {
+        for uri in Self.acceptableExplicitUris {
             XCTAssertTrue(
                 SdkConfig.isValidCallbackUri(URL(string: uri)!),
                 "'\(uri)' should be acceptable")
@@ -205,11 +212,15 @@ final class SdkConfigTests: XCTestCase {
 
     func testUnacceptableExplicitUris() {
         let unacceptable = [
-            "not-a-url",              // no scheme, no host: parses as a relative reference
-            "//example.com/callback", // scheme-relative: a host, but no scheme
-            "reachfive-abc:///path",  // a scheme, but an empty authority: no host
-            "reachfive-abc://",       // a scheme, no authority at all: no host
-            "custom:opaque",         // a scheme with an opaque part, no authority: no host
+            "not-a-url",                       // no scheme, no host: parses as a relative reference
+            "//example.com/callback",          // scheme-relative: a host, but no scheme
+            "reachfive-abc://",                // a scheme, no authority at all and no path: nothing to match on
+            "custom:opaque",                   // Foundation gives an opaque, non-hierarchical part no path either
+            "mailto:test@example.com",         // same shape, and a registered scheme RFC 8252 §7.1 forbids anyway
+            "com.example.app:oauth2redirect",  // a path needs the leading slash RFC 8252 §7.1 asks for
+            "com.example.app:/",               // a root path normalizes to "", so it matches every URI of that scheme
+            "https:///webauthn",               // an http URI requires an authority (RFC 9110 §4.2.1), and no universal link can be delivered without a host
+            "https:/cb",                       // same, spelled with one slash: Foundation parses a path, there is still no host
         ]
         for uri in unacceptable {
             XCTAssertFalse(
@@ -290,6 +301,26 @@ final class SdkConfigTests: XCTestCase {
             originWebAuthn: URL(string: "https://localhost:8443")!)
 
         XCTAssertEqual(config.originWebAuthn, "https://localhost:8443")
+    }
+
+    /// The validation and the matcher must agree, row by row: every URI the init accepts has to be one the
+    /// SDK can then recognize coming back. A URI accepted at init but unrecognized afterwards would be the
+    /// worst outcome — no crash, no error, a flow that simply never completes.
+    ///
+    /// Reaching the assertions at all already proves the init accepted the URI, since a rejection is a
+    /// crash. `isOurCallback` also demands a `code` or an `error`, hence the appended query.
+    func testEveryAcceptableUriIsRecognizedAsItsOwnCallback() {
+        for uri in Self.acceptableExplicitUris {
+            let config = SdkConfig(domain: "example.reach5.net", clientId: "abc", redirectUri: URL(string: uri)!)
+            let incoming = URL(string: "\(uri)?code=abc&state=x")!
+
+            XCTAssertTrue(
+                incoming.matchesEndpoint(of: config.redirectUri),
+                "'\(uri)' is accepted at init but does not match its own callback")
+            XCTAssertTrue(
+                WebAuthenticationSession.isOurCallback(incoming, expectedCallback: config.redirectUri),
+                "'\(uri)' is accepted at init but is not recognized as our callback")
+        }
     }
 
     // MARK: - Invariants held over the table above
