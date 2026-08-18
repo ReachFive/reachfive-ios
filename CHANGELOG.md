@@ -27,6 +27,10 @@
 - New `WebProvider` to register a web provider with a `variant` and a completion `mode`. See the [ProviderCreator](https://developer.reachfive.com/sdk-ios/providerCreator.html) and [custom provider guide](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) documentation.
 - `webviewLogin` accepts a `webSessionMode` parameter picking the shape of the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
 - `webviewLogin` accepts a new `loginUrlFragment` parameter to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
+- `startPasswordless` accepts a new `scope` parameter on `.Email`/`.PhoneNumber` (defaults to the SDK's configured scope).
+
+### Bug fix
+- `startPasswordless` did not send any scope to `/passwordless/start`, so the access token obtained after a passwordless login carried none — in particular missing `profile`, which made `getProfile` unable to return the user's identifier.
 
 ## v10.0.1
 
