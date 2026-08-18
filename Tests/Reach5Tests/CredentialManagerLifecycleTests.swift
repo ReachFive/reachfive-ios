@@ -17,10 +17,20 @@ final class CredentialManagerLifecycleTests: XCTestCase {
 
     private struct UnexpectedSuccess: Error {}
 
+    /// Keeps every window built by ``makePresentation()`` alive for the duration of the test: `Presentation`
+    /// holds the view controller weakly, and the window is what retains it (as its `rootViewController`), so
+    /// a test that ignores the returned window would resolve to the fallback anchor instead of its own.
+    private var windows: [UIWindow] = []
+
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
+
     /// A view controller attached to its own window, so `Presentation` resolves to that very window.
     ///
-    /// The window is returned and must be kept alive by the caller: `Presentation` holds the view
-    /// controller weakly, and the window is what retains it (as its `rootViewController`).
+    /// The window is returned for the tests that assert on the anchor's identity; keeping it alive is
+    /// ``windows``' job.
     private func makePresentation() -> (presenting: Presentation, window: UIWindow) {
         let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
         let viewController = UIViewController()
@@ -29,6 +39,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         // until then.
         window.rootViewController = viewController
         window.makeKeyAndVisible()
+        windows.append(window)
         return (Presentation(from: viewController), window)
     }
 

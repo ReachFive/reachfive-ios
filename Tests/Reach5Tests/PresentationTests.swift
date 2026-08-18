@@ -3,8 +3,8 @@ import UIKit
 import AuthenticationServices
 @testable import Reach5
 
-/// VC conformant au protocole : `webAuthContextProvider()` doit le retourner tel quel
-/// pour préserver un anchor choisi par l'app.
+/// A view controller conforming to the protocol: `webAuthContextProvider()` must return it as-is, so an
+/// anchor chosen by the app keeps precedence.
 private final class ConformingViewController: UIViewController, ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         view.window!
@@ -21,9 +21,9 @@ final class PresentationTests: XCTestCase {
     private func assertThrowsTechnicalError<T>(_ expression: @autoclosure () throws -> T, reasonContains fragment: String, _ message: String) {
         XCTAssertThrowsError(try expression()) { error in
             guard case ReachFiveError.TechnicalError(let reason, _) = error else {
-                return XCTFail("\(message) : attendu TechnicalError, obtenu \(error)")
+                return XCTFail("\(message): expected a TechnicalError, got \(error)")
             }
-            XCTAssertTrue(reason.contains(fragment), "\(message) : raison inattendue « \(reason) »")
+            XCTAssertTrue(reason.contains(fragment), "\(message): unexpected reason \"\(reason)\"")
         }
     }
 
@@ -35,36 +35,51 @@ final class PresentationTests: XCTestCase {
         XCTAssertIdentical(try presentation.presentingViewController(), vc)
     }
 
-    func testResolversThrowWhenViewControllerIsDeallocated() {
+    /// Only the two throwing resolvers are listed here: `anchor()` cannot report a failure, see its own
+    /// tests below.
+    func testThrowingResolversThrowWhenViewControllerIsDeallocated() {
         var vc: UIViewController? = UIViewController()
         let presentation = Presentation(from: vc!)
         vc = nil
 
         assertThrowsTechnicalError(try presentation.presentingViewController(), reasonContains: "no longer exists",
-                                   "presentingViewController après désallocation")
-        assertThrowsTechnicalError(try presentation.anchor(), reasonContains: "no longer exists",
-                                   "anchor après désallocation")
+                                   "presentingViewController after deallocation")
         assertThrowsTechnicalError(try presentation.webAuthContextProvider(), reasonContains: "no longer exists",
-                                   "webAuthContextProvider après désallocation")
+                                   "webAuthContextProvider after deallocation")
     }
 
     // MARK: - anchor
 
-    func testAnchorThrowsWhenViewControllerIsNotAttachedToAWindow() {
-        // Référence forte locale : Presentation ne retient pas le VC (weak).
-        let vc = UIViewController()
-        let presentation = Presentation(from: vc)
-        assertThrowsTechnicalError(try presentation.anchor(), reasonContains: "not attached to a window",
-                                   "anchor sans fenêtre")
-    }
-
-    func testAnchorReturnsTheWindowWhenAttached() throws {
+    func testAnchorReturnsTheWindowWhenAttached() {
         let vc = UIViewController()
         let window = UIWindow()
         window.rootViewController = vc
         window.makeKeyAndVisible()
 
-        XCTAssertIdentical(try Presentation(from: vc).anchor(), window)
+        XCTAssertIdentical(Presentation(from: vc).anchor(), window)
+    }
+
+    /// The protocols that ask the SDK for an anchor cannot report a failure, so a view controller with no
+    /// window resolves to a fallback anchor instead of an error. There is no key window in the test process,
+    /// so the fallback here is a bare detached anchor.
+    func testAnchorFallsBackWhenViewControllerIsNotAttachedToAWindow() {
+        // Local strong reference: Presentation holds the view controller weakly.
+        let vc = UIViewController()
+        let presentation = Presentation(from: vc)
+
+        XCTAssertNotIdentical(presentation.anchor(), presentation.anchor(),
+                              "the fallback anchor must be rebuilt on each call, not cached")
+    }
+
+    func testAnchorFallsBackWhenViewControllerIsDeallocated() {
+        var vc: UIViewController? = UIViewController()
+        let presentation = Presentation(from: vc!)
+        weak var weakVC = vc
+        vc = nil
+        XCTAssertNil(weakVC, "precondition: the view controller must really be deallocated")
+
+        XCTAssertNotIdentical(presentation.anchor(), presentation.anchor(),
+                              "the fallback anchor must be rebuilt on each call, not cached")
     }
 
     // MARK: - webAuthContextProvider
@@ -80,8 +95,8 @@ final class PresentationTests: XCTestCase {
         let provider = try Presentation(from: vc).webAuthContextProvider()
         XCTAssertNotIdentical(provider, vc)
 
-        // La fenêtre est attachée APRÈS la création de l'adaptateur : elle doit
-        // quand même être résolue, preuve que la résolution est paresseuse.
+        // The window is attached AFTER the adapter was built: it must still be resolved, which is what
+        // makes the resolution late.
         let window = UIWindow()
         window.rootViewController = vc
         window.makeKeyAndVisible()
@@ -94,28 +109,27 @@ final class PresentationTests: XCTestCase {
         let provider = try Presentation(from: vc!).webAuthContextProvider()
         weak var weakVC = vc
         vc = nil
-        XCTAssertNil(weakVC, "l'adaptateur ne doit pas retenir le view controller")
+        XCTAssertNil(weakVC, "the adapter must not retain the view controller")
         _ = provider
     }
 
     func testWebAuthContextProviderAdapterFallsBackSilentlyWhenViewControllerIsDeallocated() throws {
-        // Documente le comportement actuel : si le view controller est désalloué entre la
-        // création de l'adaptateur et l'appel du callback par ASWebAuthenticationSession,
-        // aucune erreur n'est levée (le callback n'est pas throwing) — l'adaptateur retombe
-        // silencieusement sur une anchor de repli fraîchement créée plutôt que de signaler l'échec.
+        // The adapter delegates to `anchor()`: if the view controller is deallocated between building the
+        // adapter and the moment ASWebAuthenticationSession asks for the anchor, no error is raised — the
+        // callback is not throwing — and the session gets the same fallback anchor.
         var vc: UIViewController? = UIViewController()
         let provider = try Presentation(from: vc!).webAuthContextProvider()
         weak var weakVC = vc
         vc = nil
-        XCTAssertNil(weakVC, "précondition : le view controller doit être réellement désalloué")
+        XCTAssertNil(weakVC, "precondition: the view controller must really be deallocated")
 
         let firstAnchor = provider.presentationAnchor(for: makeSession())
         let secondAnchor = provider.presentationAnchor(for: makeSession())
         XCTAssertNotIdentical(firstAnchor, secondAnchor,
-                              "l'anchor de repli doit être reconstruite à chaque appel, pas mise en cache")
+                              "the fallback anchor must be rebuilt on each call, not cached")
     }
 
-    // MARK: - Inits de commodité des requêtes
+    // MARK: - Request convenience inits
 
     func testWebviewLoginRequestConvenienceInitDerivesTheContextProvider() throws {
         let vc = ConformingViewController()
