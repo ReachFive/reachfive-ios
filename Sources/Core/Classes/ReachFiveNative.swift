@@ -18,7 +18,7 @@ extension ReachFive {
     public func signup(withRequest request: PasskeySignupRequest) async throws -> AuthToken {
         let scopes = request.scopes ?? scope
         let signupOptions = SignupOptions(
-            origin: try sdkConfig.webAuthnOrigin(overriddenBy: request.originWebAuthn),
+            origin: try originWebAuthn(overriddenBy: request.originWebAuthn),
             friendlyName: request.friendlyName,
             profile: request.passkeyProfile,
             clientId: sdkConfig.clientId,
@@ -73,23 +73,34 @@ extension ReachFive {
     @available(iOS 16.0, *)
     public func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws {
         // TODO: delete the former key from the server
-        try await credentialManager.registerNewPasskey(withRequest: request, originWebAuthn: sdkConfig.webAuthnOrigin(overriddenBy: request.originWebAuthn), authToken: authToken, reachFive: self)
+        try await credentialManager.registerNewPasskey(withRequest: request, originWebAuthn: originWebAuthn(overriddenBy: request.originWebAuthn), authToken: authToken, reachFive: self)
     }
 
     @available(iOS 16.0, *)
     public func resetPasskeys(withRequest request: ResetPasskeyRequest) async throws {
-        try await credentialManager.resetPasskeys(withRequest: request, originWebAuthn: sdkConfig.webAuthnOrigin(overriddenBy: request.originWebAuthn), reachFive: self)
+        try await credentialManager.resetPasskeys(withRequest: request, originWebAuthn: originWebAuthn(overriddenBy: request.originWebAuthn), reachFive: self)
     }
 
-    /// Throws when the request carries an `originWebAuthn` that is not a valid origin, so a typo is caught
-    /// here rather than sent to the server and reported as an opaque rejection.
     private func resolve(_ request: NativeLoginRequest) throws -> ResolvedNativeLoginRequest {
         ResolvedNativeLoginRequest(
             anchor: request.anchor,
-            originWebAuthn: try sdkConfig.webAuthnOrigin(overriddenBy: request.originWebAuthn),
+            originWebAuthn: try originWebAuthn(overriddenBy: request.originWebAuthn),
             scopes: request.scopes ?? scope,
             origin: request.origin
         )
+    }
+    
+    /// The origin a passkey request must carry: the override, or `SdkConfig.originWebAuthn`.
+    /// An override is normalized like the `originWebAuthn` parameter of `SdkConfig.init`.
+    public func originWebAuthn(overriddenBy override: String? = nil) throws -> String {
+        guard let override else { return sdkConfig.originWebAuthn }
+        guard let origin = URL(string: override)?.serializedOrigin else {
+            throw ReachFiveError.TechnicalError(reason: """
+                '\(override)' is not a valid WebAuthn origin: it must be an absolute URL with a scheme and a host, e.g. https://auth.example.com. \
+                Leave the request's originWebAuthn unset to use the one configured on SdkConfig.
+                """)
+        }
+        return origin
     }
 }
 
@@ -98,8 +109,8 @@ public enum Username {
     case Email(_ email: String)
     case PhoneNumber(_ phoneNumber: String)
 
-    /// The two identifier fields the server expects. `.Unspecified` is split by the only heuristic the SDK
-    /// has: an identifier containing "@" is an email, anything else is a phone number.
+    /// The two identifier fields the server expects. `.Unspecified` is split by the only heuristic the SDK has:
+    /// an identifier containing "@" is an email, anything else is a phone number.
     var identifiers: (email: String?, phoneNumber: String?) {
         switch self {
         case let .Unspecified(username): username.contains("@") ? (username, nil) : (nil, username)
