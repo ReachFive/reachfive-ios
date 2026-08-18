@@ -22,6 +22,15 @@ class PasswordlessController: UIViewController {
                 }
             }
         }
+
+        // tap anywhere to dismiss the keyboard and access the buttons underneath
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedBackground))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func tappedBackground() {
+        view.endEditing(true)
     }
 
     @IBAction func loginWithEmail(_ sender: Any) {

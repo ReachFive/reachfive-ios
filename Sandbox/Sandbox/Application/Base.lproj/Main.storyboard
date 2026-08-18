@@ -1598,6 +1598,22 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="username"/>
                             </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cN1-b7-Qz4" userLabel="Cancel Ongoing Request">
+                                <rect key="frame" x="100" y="261" width="202" height="40"/>
+                                <state key="normal" title="Cancel ongoing request"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Cancel ongoing request"/>
+                                <connections>
+                                    <action selector="cancelOngoingRequest:" destination="30k-52-vRo" eventType="touchUpInside" id="eP3-t9-Wv5"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dK8-r2-Ym6" userLabel="Modal Login Then Cancel">
+                                <rect key="frame" x="80" y="313" width="242" height="40"/>
+                                <state key="normal" title="Modal login, cancel after 3s"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Modal login, cancel after 3s"/>
+                                <connections>
+                                    <action selector="modalLoginThenCancel:" destination="30k-52-vRo" eventType="touchUpInside" id="fQ7-m4-Xb2"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="d5I-G3-TDO"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -1609,6 +1625,10 @@
                             <constraint firstItem="kiW-9E-9Lv" firstAttribute="top" secondItem="AsB-XR-cpt" secondAttribute="bottom" constant="8" id="x3D-sn-Nrw"/>
                             <constraint firstItem="d5I-G3-TDO" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="AsB-XR-cpt" secondAttribute="trailing" symbolic="YES" id="yEB-NP-RkZ"/>
                             <constraint firstItem="kiW-9E-9Lv" firstAttribute="leading" secondItem="AsB-XR-cpt" secondAttribute="leading" id="zAo-do-AO2"/>
+                            <constraint firstItem="cN1-b7-Qz4" firstAttribute="top" secondItem="kiW-9E-9Lv" secondAttribute="bottom" constant="20" id="gR5-n8-Zc9"/>
+                            <constraint firstItem="cN1-b7-Qz4" firstAttribute="centerX" secondItem="pYP-Ho-fVk" secondAttribute="centerX" id="hT2-p6-Ad4"/>
+                            <constraint firstItem="dK8-r2-Ym6" firstAttribute="top" secondItem="cN1-b7-Qz4" secondAttribute="bottom" constant="12" id="jV8-q3-Be7"/>
+                            <constraint firstItem="dK8-r2-Ym6" firstAttribute="centerX" secondItem="pYP-Ho-fVk" secondAttribute="centerX" id="kW4-s1-Cf6"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="AutoFill Passkey" id="cvN-b0-Jy4"/>
