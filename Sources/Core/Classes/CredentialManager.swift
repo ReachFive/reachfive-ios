@@ -375,7 +375,7 @@ extension CredentialManager: ASAuthorizationControllerPresentationContextProvidi
         // Resolved here rather than when the request was built: the presenting view controller may have
         // moved to another window, or been dismissed, in between. ``Presentation/resolvedAnchor()`` cannot
         // fail — this protocol offers no way to report an error — and falls back to the app's key window.
-        return presenting.resolvedAnchor()
+        return presenting.anchor()
     }
 }
 
