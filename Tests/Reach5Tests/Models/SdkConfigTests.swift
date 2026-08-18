@@ -81,17 +81,19 @@ final class SdkConfigTests: XCTestCase {
 
     // MARK: - Acceptable clientIds
 
-    /// The clientId is deliberately mixed-case: the derived scheme must lowercase it, since a scheme is
-    /// case-insensitive (RFC 3986 §3.1) and every comparison against an incoming callback assumes the
-    /// lower-cased form
+    /// The clientId is deliberately mixed-case: the derived scheme keeps that case exactly, since the
+    /// ReachFive console whitelists the default callback URLs in the same case and compares `redirect_uri`
+    /// byte for byte rather than folding case per RFC 3986 §3.1. The SDK's own comparisons against this
+    /// value still work despite the unfolded case, since they go through `normalizedScheme`
+    /// (`URLNormalizationTests.testSchemeIsLowercased` covers exactly this mixed-case shape).
     func testDefaultUrisAreDerivedFromClientId() {
         let config = SdkConfig(domain: "example.reach5.net", clientId: "9DKRdQyDLpaJqQQQAR9K")
 
-        XCTAssertEqual(config.customScheme, "reachfive-9dkrdqydlpajqqqqar9k")
-        XCTAssertEqual(config.redirectUri.absoluteString, "reachfive-9dkrdqydlpajqqqqar9k://callback")
-        XCTAssertEqual(config.mfaUri.absoluteString, "reachfive-9dkrdqydlpajqqqqar9k://mfa")
-        XCTAssertEqual(config.emailVerificationUri.absoluteString, "reachfive-9dkrdqydlpajqqqqar9k://email-verification")
-        XCTAssertEqual(config.accountRecoveryUri.absoluteString, "reachfive-9dkrdqydlpajqqqqar9k://account-recovery")
+        XCTAssertEqual(config.customScheme, "reachfive-9DKRdQyDLpaJqQQQAR9K")
+        XCTAssertEqual(config.redirectUri.absoluteString, "reachfive-9DKRdQyDLpaJqQQQAR9K://callback")
+        XCTAssertEqual(config.mfaUri.absoluteString, "reachfive-9DKRdQyDLpaJqQQQAR9K://mfa")
+        XCTAssertEqual(config.emailVerificationUri.absoluteString, "reachfive-9DKRdQyDLpaJqQQQAR9K://email-verification")
+        XCTAssertEqual(config.accountRecoveryUri.absoluteString, "reachfive-9DKRdQyDLpaJqQQQAR9K://account-recovery")
     }
 
     func testAcceptableClientIds() {

@@ -17,7 +17,10 @@ public class SdkConfig {
     /// adds a path and query items — a `struct`, so each caller gets its own copy.
     internal let baseUrlComponents: URLComponents
 
-    /// The scheme. Defaults to `reachfive-clientId`, lower-cased — a scheme is case-insensitive (RFC 3986 §3.1)
+    /// The scheme. Defaults to `reachfive-clientId`, kept exactly as given — including the case of
+    /// `clientId`, which the ReachFive console preserves when it whitelists the default callback URLs.
+    /// A scheme is case-insensitive (RFC 3986 §3.1), so every comparison against it goes through
+    /// `normalizedScheme` rather than relying on this value already being folded.
     public let customScheme: String
     /// The redirect URI for passwordless. Defaults to `reachfive-clientId://callback`
     public let redirectUri: URL
@@ -58,9 +61,12 @@ public class SdkConfig {
         self.domain = domain
         self.clientId = clientId
 
-        // RFC 3986 §3.1 makes a scheme case-insensitive, but `Foundation.URL` is case sensitive
-        // so we lowercase it to avoid problems
-        let scheme = (customScheme ?? "reachfive-\(clientId)").lowercased()
+        // Kept exactly as given: the ReachFive console whitelists the default callback URLs derived from
+        // `clientId` in its original case, and compares `redirect_uri` byte for byte rather than folding
+        // case per RFC 3986 §3.1. Every actual *comparison* against this scheme still goes through
+        // `normalizedScheme`, so a mismatched case elsewhere in the SDK is caught there, not by lowering
+        // this value at construction.
+        let scheme = customScheme ?? "reachfive-\(clientId)"
         guard Self.isValidScheme(scheme) else {
             preconditionFailure("""
                 '\(scheme)' is not a valid URL scheme: it must start with a letter and contain only letters, digits, '+', '-' or '.'. \

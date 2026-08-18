@@ -7,7 +7,7 @@
 - `SdkConfig`:
   - As above, changed type of redirect URL fields to URL instead of String
   - Removed the field `scheme` which was an alias for `redirectUri`. `redirectUri` remains.
-  - Renamed the field `baseScheme` to `customScheme`. Its value is now lower-cased.
+  - Renamed the field `baseScheme` to `customScheme`.
   - The initializer now stops the program with a `preconditionFailure` when validations are not met: scheme, domain, redirect URLs and originWebAuthn are validated early instead of failing during a network call or silently never matching any incoming callback.
 - The `originWebAuthn` a passkey request carries is now validated and normalized like the `SdkConfig` configured one. This means the call can now throw a `ReachFiveError.TechnicalError` if the validation fails.
 
