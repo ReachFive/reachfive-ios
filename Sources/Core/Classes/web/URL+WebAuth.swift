@@ -9,23 +9,13 @@ extension URL {
             .value
     }
 
-    /// `true` when this URL designates the same endpoint as `expected`: same scheme, same host, same normalized path
-    ///
-    /// `""` and `"/"` are treated as the same path: a browser routinely appends the trailing slash to an
-    /// authority-only URL, so a callback declared as `reachfive-<clientId>://callback` can be delivered
-    /// back as `reachfive-<clientId>://callback/`.
-    ///
-    /// This is the SDK's single matcher for its own callback URIs, shared by
-    /// ``ReachFive/interceptUrl(_:)`` and `WebAuthenticationSession.isOurCallback`, so that the two entry
-    /// hooks can never disagree on what is or isn't ours.
+    /// `true` when this URL designates the same endpoint as `expected`: same scheme, same host, same
+    /// normalized path (the three `normalized…` accessors, which apply what RFC 3986 requires and
+    /// Foundation does not).
     func matchesEndpoint(of expected: URL) -> Bool {
         normalizedScheme == expected.normalizedScheme
             && normalizedHost == expected.normalizedHost
-            && Self.normalizedPath(path) == Self.normalizedPath(expected.path)
-    }
-
-    private static func normalizedPath(_ path: String) -> String {
-        path == "/" ? "" : path
+            && normalizedPath == expected.normalizedPath
     }
 
     /// The authorization `code` of this OAuth callback, or a `TechnicalError` carrying the `ApiError`

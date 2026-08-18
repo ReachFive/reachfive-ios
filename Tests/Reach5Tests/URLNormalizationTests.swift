@@ -2,12 +2,12 @@ import XCTest
 @testable import Reach5
 
 /// Covers `URL+Normalization`: what Foundation leaves undone on a parsed URL (`normalizedScheme`,
-/// `normalizedHost`) and the origin built on top of it (`serializedOrigin`).
+/// `normalizedHost`, `normalizedPath`, `isHttpBased`) and the origin built on top of it (`serializedOrigin`).
 ///
-/// The first two are depended on by `URL.serializedOrigin` below, on which `SdkConfig.baseComponents` in
-/// turn rests, as well as by `SdkConfig.isValidCallbackUri` and `URL.matchesEndpoint(of:)` — and each of
-/// their rules has already cost a bug when one of them got it wrong, so they are pinned here rather than
-/// only through their callers.
+/// `normalizedScheme` and `normalizedHost` are depended on by `URL.serializedOrigin` below, on which
+/// `SdkConfig.baseComponents` in turn rests, as well as by `SdkConfig.isValidCallbackUri` and
+/// `URL.matchesEndpoint(of:)` — and each of their rules has already cost a bug when one of them got it wrong,
+/// so they are pinned here rather than only through their callers.
 final class URLNormalizationTests: XCTestCase {
 
     // MARK: - Scheme
@@ -53,6 +53,43 @@ final class URLNormalizationTests: XCTestCase {
         for host in ["example.reach5.net", "localhost", "127.0.0.1", "xn--caf-dma.example"] {
             XCTAssertEqual(URL(string: "https://\(host)")!.normalizedHost, host)
         }
+    }
+
+    // MARK: - Path
+
+    /// `normalizedPath` folds `"/"` onto `""` and nothing else, because `URL.path` has already dropped the
+    /// trailing slash of a longer path. Both facts are load-bearing: the matcher and
+    /// `SdkConfig.isValidCallbackUri` are written against them.
+    func testNormalizedPath() {
+        let cases: [(input: String, expected: String)] = [
+            ("https://h/cb", "/cb"), // baseline
+            ("https://h/cb/", "/cb"), // URL.path drops the trailing slash itself
+            ("https://h/", ""), // the one case left to fold
+            ("https://h", ""), // already empty
+            ("com.example.app:/oauth2redirect", "/oauth2redirect"), // no authority: the path is all there is
+            ("com.example.app:/", ""), // which is why this URI discriminates nothing
+            ("com.example.app://callback", ""), // authority-only: the host carries the discrimination
+            ("custom:opaque", ""), // Foundation gives an opaque part no path
+        ]
+        for (input, expected) in cases {
+            XCTAssertEqual(URL(string: input)!.normalizedPath, expected, "'\(input)'")
+        }
+    }
+
+    // MARK: - Scheme family
+
+    /// The frontier the SDK's two callback channels are built on: an http(s) URI needs a naming authority and
+    /// is delivered through `ASWebAuthenticationSession`'s universal-link callback, which requires a host;
+    /// every other scheme is private-use and delivered through `callbackURLScheme:` or
+    /// `application(_:open:)`, which look only at the scheme.
+    func testIsHttpBased() {
+        for scheme in ["http", "https", "HTTPS"] {
+            XCTAssertTrue(URL(string: "\(scheme)://host/cb")!.isHttpBased, "'\(scheme)'")
+        }
+        for scheme in ["reachfive-abc", "com.example.app", "httpx-app", "mailto"] {
+            XCTAssertFalse(URL(string: "\(scheme)://host/cb")!.isHttpBased, "'\(scheme)'")
+        }
+        XCTAssertFalse(URL(string: "example.com")!.isHttpBased, "no scheme at all")
     }
 
     // MARK: - Origin
