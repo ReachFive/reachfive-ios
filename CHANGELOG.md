@@ -7,7 +7,7 @@
 - `SdkConfig`:
   - As above, changed type of redirect URL fields to URL instead of String
   - Removed the field `scheme` which was an alias for `redirectUri`. `redirectUri` remains.
-  - Renamed the field `baseScheme` to `customScheme` Its values is now lower-cased.
+  - Renamed the field `baseScheme` to `customScheme`. Its value is now lower-cased.
   - The initializer now stops the program with a `preconditionFailure` when validations are not met: scheme, domain, redirect URLs and originWebAuthn are validated early instead of failing during a network call or silently never matching any incoming callback.
 
 - `application(_:continue:restorationHandler:)` and `application(_:open:options:)` now returns `false` when neither an SDK flow nor any registered provider consumed the activity or URL, instead of always returning `true`. If your app also routes universal links or custom-scheme URLs itself, only do so when the call returns `false`.
@@ -16,7 +16,7 @@
 - `Provider.login` takes a `Presentation` instead of a `UIViewController?` to handle the different type of conformance itself (either conforming to `ASWebAuthenticationPresentationContextProviding` or needing a `ASPresentationAnchor`)
 
 ### New features
-- SdkConfig:
+- `SdkConfig`:
   - init takes a new optional parameter `originWebAuthn`, so the WebAuthn origin can be configured once instead of being repeated on every passkey request
   - new field `normalizedDomain`: the normalized domain according to RFC 6454 for comparing hosts
 - New `WebProvider` to register a web provider with a `variant` and a completion `mode`. See the [Universal-link web providers](https://developer.reachfive.com/sdk-ios/providerCreator.html#universal-link-web-providers).

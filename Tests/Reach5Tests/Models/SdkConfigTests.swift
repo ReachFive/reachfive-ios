@@ -2,19 +2,13 @@ import XCTest
 @testable import Reach5
 
 /// Documents what is acceptable as a domain/clientId/customScheme when initializing SdkConfig.
-///
-/// The default scheme is derived from the clientId as `reachfive-<clientId>`, so the clientId
-/// obeys the same rules as a scheme: it must contain only letters, digits, `+`, `-` or `.`.
-/// An invalid scheme stops the program with a `preconditionFailure` at init, which cannot be
-/// asserted directly in XCTest: the invalid cases below go through `SdkConfig.baseComponents(domain:)`
-/// and `SdkConfig.isValidScheme`, the single construction points on which the init's precondition relies.
 final class SdkConfigTests: XCTestCase {
 
     // MARK: - Domain
 
     /// One representative per class of input, not an exhaustive sweep: each row teaches a distinct rule.
     /// Shared with `testBothWebAuthnOriginPathsAgree` and `testOriginSerializationIsIdempotent`, which hold
-    /// these same values to the invariants `webAuthnOrigin` rests on.
+    /// these same values to the invariants `originWebAuthn` rests on.
     private static let acceptableDomains = [
         "example.reach5.net",   // baseline
         "Example.Reach5.NET",   // mixed case: DNS is case-insensitive, and the value is kept as given
@@ -58,15 +52,15 @@ final class SdkConfigTests: XCTestCase {
         }
     }
 
-    /// `normalizedDomain` must fold exactly like `webAuthnOrigin`'s default fallback, since both come from
+    /// `normalizedDomain` must fold exactly like `originWebAuthn`'s default fallback, since both come from
     /// the same validated components — a mismatch here would mean the two silently disagree on the same host.
     func testNormalizedDomainFoldsLikeTheDefaultWebAuthnOrigin() {
         for domain in Self.acceptableDomains {
             let config = SdkConfig(domain: domain, clientId: "abc")
 
             XCTAssertEqual(
-                "https://\(config.normalizedDomain)", config.webAuthnOrigin,
-                "normalizedDomain and webAuthnOrigin disagree on domain '\(domain)'")
+                "https://\(config.normalizedDomain)", config.originWebAuthn,
+                "normalizedDomain and originWebAuthn disagree on domain '\(domain)'")
         }
     }
 
@@ -224,64 +218,12 @@ final class SdkConfigTests: XCTestCase {
         }
     }
 
-    // MARK: - Per-request override
-
-    /// A request that sets no origin falls back on the configured one.
-    func testNoOverrideFallsBackOnTheConfiguredOrigin() throws {
-        let config = SdkConfig(domain: "example.reach5.net", clientId: "abc")
-
-        XCTAssertEqual(try config.webAuthnOrigin(overriddenBy: nil), "https://example.reach5.net")
-    }
-
-    /// An override is normalized exactly like the configured value — same serializer, so the two can never
-    /// send two spellings of the same host. Each row is a normalization the raw string would have skipped.
-    func testOverrideIsNormalizedLikeTheConfiguredOrigin() throws {
-        let config = SdkConfig(domain: "example.reach5.net", clientId: "abc")
-        let cases: [(input: String, expected: String)] = [
-            ("https://auth.example.com", "https://auth.example.com"),   // baseline
-            ("https://auth.example.com/", "https://auth.example.com"),  // trailing slash stripped
-            ("https://AUTH.Example.COM", "https://auth.example.com"),   // case folded
-            ("https://café.example", "https://xn--caf-dma.example"),    // A-label form
-            ("https://auth.example.com:443", "https://auth.example.com"), // default port dropped
-            ("https://localhost:8443", "https://localhost:8443"),       // non-default port kept
-        ]
-        for (input, expected) in cases {
-            XCTAssertEqual(try config.webAuthnOrigin(overriddenBy: input), expected, "'\(input)'")
-        }
-    }
-
-    /// An override that is not an origin throws instead of reaching the server, which would only reject it
-    /// with an opaque error. It throws rather than crashing: unlike the config, this is runtime data.
-    func testInvalidOverrideThrows() {
-        let config = SdkConfig(domain: "example.reach5.net", clientId: "abc")
-        let invalid = [
-            "auth.example.com",     // no scheme
-            "https://",             // scheme but no host
-            "https://:8443",        // a port but no host
-            "mailto:a@b.example",   // a scheme, but no host
-            "",                     // empty
-            "pas une url",          // whitespace: does not even parse
-        ]
-        for override in invalid {
-            XCTAssertThrowsError(try config.webAuthnOrigin(overriddenBy: override), "'\(override)' should be rejected") { error in
-                guard case let ReachFiveError.TechnicalError(reason, _) = error else {
-                    return XCTFail("attendu : TechnicalError, obtenu \(error)")
-                }
-                XCTAssertTrue(reason.contains("is not a valid WebAuthn origin"), "le message doit énoncer la règle")
-                // `contains("")` is false, so the empty case can only be checked on the rule above
-                if !override.isEmpty {
-                    XCTAssertTrue(reason.contains(override), "le message doit citer la valeur fautive")
-                }
-            }
-        }
-    }
-
     // MARK: - WebAuthn origin
 
     func testWebAuthnOriginDefaultsToTheDomain() {
         let config = SdkConfig(domain: "example.reach5.net", clientId: "abc")
 
-        XCTAssertEqual(config.webAuthnOrigin, "https://example.reach5.net")
+        XCTAssertEqual(config.originWebAuthn, "https://example.reach5.net")
     }
 
     /// `domain` is validated at init but kept as given, so it can still carry mixed case. RFC 6454 origins
@@ -289,7 +231,7 @@ final class SdkConfigTests: XCTestCase {
     func testWebAuthnOriginDefaultLowercasesTheDomain() {
         let config = SdkConfig(domain: "Example.Reach5.NET", clientId: "abc")
 
-        XCTAssertEqual(config.webAuthnOrigin, "https://example.reach5.net")
+        XCTAssertEqual(config.originWebAuthn, "https://example.reach5.net")
     }
 
     /// The `domain` fallback and a configured origin go through the same serializer, so they cannot disagree
@@ -304,8 +246,8 @@ final class SdkConfigTests: XCTestCase {
             clientId: "abc",
             originWebAuthn: URL(string: "https://café.example")!)
 
-        XCTAssertEqual(fromDomain.webAuthnOrigin, "https://xn--caf-dma.example")
-        XCTAssertEqual(fromDomain.webAuthnOrigin, configured.webAuthnOrigin)
+        XCTAssertEqual(fromDomain.originWebAuthn, "https://xn--caf-dma.example")
+        XCTAssertEqual(fromDomain.originWebAuthn, configured.originWebAuthn)
         // The very host the API requests go to, so the server sees a consistent pair
         XCTAssertEqual(fromDomain.baseUrlComponents.url?.host, "xn--caf-dma.example")
     }
@@ -313,7 +255,7 @@ final class SdkConfigTests: XCTestCase {
     /// An IPv6 domain is valid (`testAcceptableDomains` covers it) and needs the brackets an origin requires,
     /// which a bare `"https://\(domain)"` interpolation would not add back.
     func testWebAuthnOriginDefaultBracketsAnIPv6Domain() {
-        XCTAssertEqual(SdkConfig(domain: "[::1]", clientId: "abc").webAuthnOrigin, "https://[::1]")
+        XCTAssertEqual(SdkConfig(domain: "[::1]", clientId: "abc").originWebAuthn, "https://[::1]")
     }
 
     func testConfiguredOriginWins() {
@@ -322,7 +264,7 @@ final class SdkConfigTests: XCTestCase {
             clientId: "abc",
             originWebAuthn: URL(string: "https://auth.example.com")!)
 
-        XCTAssertEqual(config.webAuthnOrigin, "https://auth.example.com")
+        XCTAssertEqual(config.originWebAuthn, "https://auth.example.com")
     }
 
     /// An origin is a scheme, a host and a non-default port — nothing else. `absoluteString` would keep the
@@ -337,8 +279,8 @@ final class SdkConfigTests: XCTestCase {
             clientId: "abc",
             originWebAuthn: URL(string: "https://auth.example.com/webauthn")!)
 
-        XCTAssertEqual(withTrailingSlash.webAuthnOrigin, "https://auth.example.com")
-        XCTAssertEqual(withPath.webAuthnOrigin, "https://auth.example.com")
+        XCTAssertEqual(withTrailingSlash.originWebAuthn, "https://auth.example.com")
+        XCTAssertEqual(withPath.originWebAuthn, "https://auth.example.com")
     }
 
     func testNonDefaultPortIsKept() {
@@ -347,7 +289,7 @@ final class SdkConfigTests: XCTestCase {
             clientId: "abc",
             originWebAuthn: URL(string: "https://localhost:8443")!)
 
-        XCTAssertEqual(config.webAuthnOrigin, "https://localhost:8443")
+        XCTAssertEqual(config.originWebAuthn, "https://localhost:8443")
     }
 
     /// One representative per class of input, like `acceptableDomains`. Shared with
@@ -404,7 +346,7 @@ final class SdkConfigTests: XCTestCase {
 
     // MARK: - Invariants held over the tables above
 
-    /// The two ways into `webAuthnOrigin` — the `domain` fallback and a configured `originWebAuthn` — must
+    /// The two ways into `originWebAuthn` — the `domain` fallback and a configured `originWebAuthn` — must
     /// never disagree on the same host, since a request carries one or the other and the server sees no
     /// difference. `testWebAuthnOriginDefaultUsesTheAsciiFormOfAnInternationalizedDomain` checks the one
     /// case where they nearly did; this holds the whole table to it.
@@ -417,7 +359,7 @@ final class SdkConfigTests: XCTestCase {
                 originWebAuthn: URL(string: "https://\(domain)")!)
 
             XCTAssertEqual(
-                fromDomain.webAuthnOrigin, configured.webAuthnOrigin,
+                fromDomain.originWebAuthn, configured.originWebAuthn,
                 "the two paths disagree on domain '\(domain)'")
         }
     }

@@ -1,9 +1,10 @@
 import Foundation
 
 public class SdkConfig {
+    /// Your ReachFive domain, not normalized.
     public let domain: String
 
-    /// Like `domain`, but normalized the way RFC 6454 §4.5 requires for comparing hosts: lower-cased, with an IPv6
+    /// Like `domain`, but normalized the way RFC 6454 §4, step 5 requires for comparing hosts: lower-cased, with an IPv6
     /// literal's brackets restored (`URL.host` strips them). `domain` itself is kept exactly as given, so
     /// prefer this whenever you compare it against another host
     public var normalizedDomain: String {
@@ -30,10 +31,6 @@ public class SdkConfig {
     /// The WebAuthn origin sent to the server for every passkey request that does not carry its own, as a
     /// serialized origin (`https://host`): scheme, host and non-default port only, since neither a path nor
     /// a trailing slash belongs in an origin.
-    ///
-    /// It is the `originWebAuthn` passed at init, or `https://<domain>` when none was — the latter being
-    /// right unless your passkeys are scoped to a different relying party, such as a custom domain or one
-    /// shared across several of your apps.
     public let originWebAuthn: String
 
     /// Validates parameters and stops the program with a `preconditionFailure` at the first problem:
@@ -41,6 +38,9 @@ public class SdkConfig {
     /// - `customScheme` must be a valid URL scheme (RFC 3986 §3.1);
     /// - `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` must have both a scheme and a host;
     /// - `originWebAuthn` must be a valid origin (RFC 6454 §6.2: ASCII Serialization of an Origin).
+    ///
+    /// `originWebAuthn` defaults to `https://<domain>`, which is right unless your passkeys are scoped to a
+    /// different relying party, such as a custom domain or one shared across several of your apps.
     public init(
         domain: String,
         clientId: String,
@@ -100,8 +100,8 @@ public class SdkConfig {
     }
 
     /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing.
-    /// Checked against a throwaway host
     internal static func isValidScheme(_ scheme: String) -> Bool {
+        // Checked against a throwaway host, just to activate the scheme validation.
         guard !scheme.isEmpty, // "://y" parses, with an empty scheme
               let url = URL(string: "\(scheme)://y")
         else {
@@ -116,6 +116,7 @@ public class SdkConfig {
     }
 
     private static func checkedUri(_ uri: URL?, _ scheme: String, name: String) -> URL {
+        // The scheme is already validated, and the names are literal, so the force-unwrap cannot fail
         guard let uri else { return URL(string: "\(scheme)://\(name)")! }
         guard Self.isValidCallbackUri(uri) else {
             preconditionFailure("""
