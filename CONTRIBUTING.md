@@ -78,7 +78,7 @@ The project uses [SwiftLint](https://github.com/realm/SwiftLint) (linter) and [S
 brew install swiftlint swiftformat
 ```
 
-- **SwiftLint** runs automatically as a build phase in both `Reach5.xcodeproj` and `Sandbox.xcodeproj`; violations show up as warnings/errors directly in Xcode.
+- **SwiftLint** runs automatically as a build phase in `Sandbox.xcodeproj`, over the Sandbox sources only; violations show up as warnings/errors directly in Xcode. The SDK sources are no longer linted by a build phase, since they have no Xcode project any more — run the command below over `Sources` when you touch them.
 - **SwiftFormat** runs on staged files via a git hook before each commit. Enable it once per clone with:
   ```sh
   git config core.hooksPath .githooks
@@ -103,9 +103,9 @@ CI runs the same suite on a simulator, because that is the destination our users
 xcodebuild -scheme Reach5 -destination 'platform=iOS Simulator,name=iPhone 16 Pro' test
 ```
 
-## Viewing the modules as libraries in XCode
+## Viewing the SDK as a library in XCode
 
-Open the project folder to view it as a package project, not the .xcodeproj.
+Open the repository folder itself: Xcode reads `Package.swift` and shows the SDK as a Swift package. There is no longer an Xcode project for the SDK — `Sources/Reach5.xcodeproj` duplicated `Package.swift` with a hand-maintained file list and only existed for CocoaPods. The Sandbox keeps its own project, since an app target cannot be described by `Package.swift`.
 
 ## Adding or renaming files
 The module sources are declared by `Package.swift`, which picks them up from the directory, so adding or renaming a file there needs no project bookkeeping.<br>
