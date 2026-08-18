@@ -1,8 +1,7 @@
 import Foundation
 
 /// A minimal `URLProtocol` stub used to script HTTP responses — including a redirect to a private
-/// scheme — without touching the network, so `NetworkClient`/`DataRequest`/`RedirectHandler` can be
-/// exercised end to end.
+/// scheme — without touching the network, so `NetworkClient`/`DataRequest` can be exercised end to end.
 final class StubURLProtocol: URLProtocol {
     struct Stub {
         let statusCode: Int
