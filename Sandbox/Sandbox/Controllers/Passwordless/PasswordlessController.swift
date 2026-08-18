@@ -32,7 +32,8 @@ class PasswordlessController: UIViewController {
                         .Email(
                             email: emailInput.text ?? "",
                             redirectUri: URL(string: redirectUriInput.text ?? ""),
-                            origin: "PasswordlessController.loginWithEmail"
+                            origin: "PasswordlessController.loginWithEmail",
+                            scope: SettingsViewController.selectedScopes
                         )
                     )
                 self.presentAlert(title: "Login with email", message: "Success")
@@ -50,7 +51,8 @@ class PasswordlessController: UIViewController {
                         .PhoneNumber(
                             phoneNumber: phoneNumberInput.text ?? "",
                             redirectUri: URL(string: redirectUriInput.text ?? ""),
-                            origin: "PasswordlessController.loginWithPhoneNumber"
+                            origin: "PasswordlessController.loginWithPhoneNumber",
+                            scope: SettingsViewController.selectedScopes
                         )
                     )
                 self.presentAlert(title: "Login with phone number", message: "Success")
