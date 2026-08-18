@@ -11,4 +11,4 @@ asciidoc:
     sdk-type: iOS
     min-ios-version: 13
     sdk-ios-latest-version: 10.0.0@
-    sdk-ios-version-badge: image:https://img.shields.io/cocoapods/v/Reach5.svg?style=flat&color=darkslategrey[]
+    sdk-ios-version-badge: image:https://img.shields.io/github/v/tag/ReachFive/reachfive-ios?style=flat&color=darkslategrey[]
