@@ -29,9 +29,6 @@
 - `webviewLogin` accepts a new `loginUrlFragment` parameter to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
 - `startPasswordless` accepts a new `scope` parameter on `.Email`/`.PhoneNumber` (defaults to the SDK's configured scope).
 
-### Bug fix
-- `startPasswordless` did not send any scope to `/passwordless/start`, so the access token obtained after a passwordless login carried none.
-
 ## v10.0.1
 
 - Fix compilation issue in XCode 26
