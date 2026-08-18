@@ -15,19 +15,30 @@ final class OriginWebAuthnOverrideTests: XCTestCase {
         XCTAssertEqual(try reachFive.originWebAuthn(overriddenBy: nil), "https://example.reach5.net")
     }
 
-    /// An override is normalized exactly like the configured value — same serializer, so the two can never
-    /// send two spellings of the same host. Each row is a normalization the raw string would have skipped.
-    func testOverrideIsNormalizedLikeTheConfiguredOrigin() throws {
+    /// An override goes through the very same `URL.serializedOrigin` as a configured origin, so the two can
+    /// never send two spellings of the same host. Each row is checked twice: against the value it must
+    /// serialize to, and against what the configured path makes of the same input — the way
+    /// `SdkConfigTests.testBothWebAuthnOriginPathsAgree` does for the `domain` fallback. The agreement alone
+    /// would still hold if both paths broke identically; the expected value is what pins them down.
+    func testOverrideAgreesWithTheConfiguredOrigin() throws {
         let cases: [(input: String, expected: String)] = [
-            ("https://auth.example.com", "https://auth.example.com"),   // baseline
-            ("https://auth.example.com/", "https://auth.example.com"),  // trailing slash stripped
-            ("https://AUTH.Example.COM", "https://auth.example.com"),   // case folded
-            ("https://café.example", "https://xn--caf-dma.example"),    // A-label form
+            ("https://auth.example.com", "https://auth.example.com"),     // baseline
+            ("https://auth.example.com/", "https://auth.example.com"),    // trailing slash stripped
+            ("https://AUTH.Example.COM", "https://auth.example.com"),     // case folded
+            ("https://café.example", "https://xn--caf-dma.example"),      // A-label form
             ("https://auth.example.com:443", "https://auth.example.com"), // default port dropped
-            ("https://localhost:8443", "https://localhost:8443"),       // non-default port kept
+            ("https://localhost:8443", "https://localhost:8443"),         // non-default port kept
         ]
         for (input, expected) in cases {
+            let configured = SdkConfig(
+                domain: "example.reach5.net",
+                clientId: "abc",
+                originWebAuthn: URL(string: input)!)
+
             XCTAssertEqual(try reachFive.originWebAuthn(overriddenBy: input), expected, "'\(input)'")
+            XCTAssertEqual(
+                try reachFive.originWebAuthn(overriddenBy: input), configured.originWebAuthn,
+                "the override and the configured value disagree on '\(input)'")
         }
     }
 
