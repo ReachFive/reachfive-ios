@@ -29,17 +29,24 @@ jobs:
           name: Build Reach5
           command: xcodebuild build -scheme Reach5 -destination 'generic/platform=iOS'
   test:
+    parameters:
+      xcode:
+        type: string
+      simulators:
+        # The `-destination` flags for the two iOS runtimes this image ships, from its manifest.
+        # `OS=` is required: a `name=` alone only ever resolves against the newest runtime.
+        type: string
     macos:
-      xcode: "16.4.0"
+      xcode: << parameters.xcode >>
     steps:
       - checkout
-      # The destination has to name a concrete simulator: xcodebuild refuses
-      # "generic/platform=iOS Simulator" for the test action ("Tests must be run
-      # on a concrete device"). The name below is the one shipped by the Xcode
-      # image pinned just above, so update both together.
       - run:
-          name: Run the Reach5Tests suite
-          command: xcodebuild -scheme Reach5 -destination 'platform=iOS Simulator,name=iPhone 16 Pro' test
+          name: Run the Reach5Tests suite on both iOS simulators
+          command: xcodebuild -scheme Reach5 << parameters.simulators >> test
+      - run:
+          name: Run the same suite on Mac Catalyst
+          # The destination the team uses locally, so CI covers what they see.
+          command: xcodebuild -scheme Reach5 -destination 'platform=macOS,variant=Mac Catalyst' test
   check-doc-examples:
     macos:
       xcode: "16.4.0"
@@ -66,9 +73,8 @@ default_workflows_tags: &default_workflows_tags
       only: /.*/
 
 # check-doc-examples only needs to run when preparing a release (branch named
-# after the version, per RELEASE.md) — not on every PR (counter-productive,
-# see #146), and not on the tag: under SPM the tag itself is the publication,
-# resolved by consumers before any CircleCI pipeline on it even starts.
+# after the version, per RELEASE.md) — not on every PR,
+# and not on the tag: under SPM the tag itself is the publication
 release_branches: &release_branches
   filters:
     branches:
@@ -80,12 +86,43 @@ workflows:
     jobs:
       - build:
           <<: *default_workflows_tags
+      # One job per Xcode image, each running the suite on the two iOS runtimes that image
+      # ships — a runtime is free, an image costs a VM, so the images are boundaries rather
+      # than an exhaustive list: oldest able to build this package, last before Xcode 26,
+      # newest stable. The 27.0 image stays out while its build number says beta.
+      #
+      # The floor is Xcode 16.0, not what `swift-tools-version: 5.10` alone would suggest
+      # (Xcode 15.3+): `Async.swift` uses typed throws (`throws(E)`), a Swift 6.0 feature, and
+      # Xcode 15.4 (Swift 5.10) fails to parse it. CircleCI's catalog has no 16.0–16.3 image,
+      # so 16.4.0 is already the oldest one this package builds on.
+      #
+      # Simulator names and OS versions are read from the image manifests, linked per image
+      # from https://circleci.com/docs/using-macos/ :
       - test:
+          name: test-xcode-16.4
+          xcode: "16.4.0"
+          # https://circle-macos-docs.s3.amazonaws.com/image-manifest/v15338/manifest.txt
+          simulators: "-destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5'"
+          <<: *default_workflows_tags
+      - test:
+          name: test-xcode-26.6
+          xcode: "26.6"
+          # https://circle-macos-docs.s3.amazonaws.com/image-manifest/v18807/manifest.txt
+          simulators: "-destination 'platform=iOS Simulator,name=iPhone 16,OS=18.6' -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5'"
           <<: *default_workflows_tags
       - check-doc-examples:
           <<: *release_branches
+      - build-for-release:
+          <<: *default_workflows_filters
+      - publish:
+          requires:
+            - build-for-release
+            - test-xcode-16.4
+            - test-xcode-26.6
+          <<: *default_workflows_filters
       - ci-passed:
           <<: *default_workflows_tags
           requires:
             - build
-            - test
+            - test-xcode-16.4
+            - test-xcode-26.6
