@@ -3,26 +3,11 @@
 </p>
 
 [![CircleCI](https://circleci.com/gh/ReachFive/reachfive-ios/tree/master.svg?style=svg)](https://circleci.com/gh/ReachFive/reachfive-ios/tree/master)
-[![Download](https://img.shields.io/cocoapods/v/Reach5.svg?style=flat) ](https://cocoapods.org/pods/Reach5)
+[![Download](https://img.shields.io/github/v/tag/ReachFive/reachfive-ios?style=flat)](https://github.com/ReachFive/reachfive-ios/releases)
 
 # ReachFive Identity iOS SDK
 
 ## Installation
-
-### Cocoapods
-
-Add the following line to your **Podfile**:
-
-```
-pod 'Reach5'
-```
-
-and other dependencies, for Social Login, as needed:
-```
-pod 'Reach5Facebook'
-pod 'Reach5Google'
-```
-
 
 ### Swift Package Manager
 Open the following menu item in Xcode:

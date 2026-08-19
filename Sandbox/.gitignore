@@ -34,6 +34,17 @@ DerivedData/
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
 
+## The Sandbox resolves GoogleSignIn and the Facebook SDK through SPM: its
+## Package.resolved is what Podfile.lock used to be, so it has to be committed.
+## Re-including it means re-including each of its parent directories first.
+!*.xcodeproj/project.xcworkspace/
+*.xcodeproj/project.xcworkspace/*
+!*.xcodeproj/project.xcworkspace/xcshareddata/
+*.xcodeproj/project.xcworkspace/xcshareddata/*
+!*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
+!*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
 # End of https://www.gitignore.io/api/xcode
 
 Pods

@@ -1,16 +1,10 @@
 # Running the Demo Application
 
-Install [Cocoapods](https://cocoapods.org).
+Check out `reachfive-ios-google` and `reachfive-ios-facebook` next to this repository, then open `Sandbox/Sandbox.xcodeproj` in Xcode: Reach5, Reach5Google and Reach5Facebook are resolved automatically as local Swift packages (`../`, `../../reachfive-ios-google`, `../../reachfive-ios-facebook`).
 
-```sh
-sudo gem install cocoapods
-
-cd Sandbox
-pod install
-
-open Sandbox.xcworkspace
-
-pod update
+The directory holding this repository has to be named `reachfive-ios`. SwiftPM derives the identity of a local package from its directory name, so under any other name (a git worktree, for instance) it sees two distinct packages both defining `Reach5` and refuses to resolve the graph:
+```
+multiple similar targets 'Reach5' appear in package 'reachfive-ios' and '<the other name>'
 ```
 
 ### Configure the Sandbox
@@ -84,7 +78,7 @@ The project uses [SwiftLint](https://github.com/realm/SwiftLint) (linter) and [S
 brew install swiftlint swiftformat
 ```
 
-- **SwiftLint** runs automatically as a build phase in both `Reach5.xcodeproj` and `Sandbox.xcodeproj`; violations show up as warnings/errors directly in Xcode.
+- **SwiftLint** runs automatically as a build phase in `Sandbox.xcodeproj`, over the Sandbox sources only; violations show up as warnings/errors directly in Xcode. The SDK sources are no longer linted by a build phase, since they have no Xcode project any more — run the command below over `Sources` when you touch them.
 - **SwiftFormat** runs on staged files via a git hook before each commit. Enable it once per clone with:
   ```sh
   git config core.hooksPath .githooks
@@ -96,22 +90,37 @@ swiftlint lint
 swiftformat .
 ```
 
-## Viewing the modules as libraries in XCode
+## Running the tests
 
-Open the project folder to view it as a package project, not the .xcodeproj or .xcworkspace which makes them seen as a Pod project
+`Reach5Tests` belongs to the root package, and Xcode only exposes the test targets of the package it has open as the root — not those of a package consumed as a dependency. So the tests are invisible from the Sandbox project: open the repository folder itself in Xcode to get them.
 
+From the command line, Mac Catalyst is the quickest destination, as it runs UIKit on macOS without booting a simulator:
+```sh
+xcodebuild -scheme Reach5 -destination 'platform=macOS,variant=Mac Catalyst' test
+```
+CI runs the same suite on a simulator, because that is the destination our users build for:
+```sh
+xcodebuild -scheme Reach5 -destination 'platform=iOS Simulator,name=iPhone 16 Pro' test
+```
+
+## Viewing the SDK as a library in XCode
+
+Open the repository folder itself: Xcode reads `Package.swift` and shows the SDK as a Swift package. There is no longer an Xcode project for the SDK — `Sources/Reach5.xcodeproj` duplicated `Package.swift` with a hand-maintained file list and only existed for CocoaPods. The Sandbox keeps its own project, since an app target cannot be described by `Package.swift`.
 
 ## Adding or renaming files
-While you can develop across all modules while being in the `Sandbox.xcworkspace`, 
-when you need to add a new file or rename one, you have to be in the specific module workspace and add it from within XCode so that the `project.pbxproj` is properly updated.
+The module sources are declared by `Package.swift`, which picks them up from the directory, so adding or renaming a file there needs no project bookkeeping.<br>
+The Sandbox is a regular Xcode project: add or rename its files from within XCode so that `Sandbox.xcodeproj/project.pbxproj` is properly updated.
 
 ## Modules
-A podspec cannot reference, without resorting to dirty tricks, other locally changed pods.<br>
-Instead, they reference the latest version available on Cocoapods.<br>
-This means that the non-core pods will not have access to the core changes on CI until the core changes are deployed.<br>
-This problem does not impact local development.
+Reach5Google and Reach5Facebook declare Reach5 as a *remote* dependency, on the published GitHub tags, so that their own CI can build them on their own.
 
-So, first, release Reach5 Core. Then you can use the new APIs from this release in the Facebook/Google/WeChat pods.
+The Sandbox is what makes local Core changes visible to them: it declares all three as local Swift packages, and a local package in the root manifest takes precedence over a remote dependency of the same identity. So the modules opened *through the Sandbox* compile against your working copy of Core, with no release needed. SwiftPM reports the override as a warning, which is expected:
+```
+Conflicting identity for reachfive-ios: dependency 'github.com/reachfive/reachfive-ios' and
+dependency '<local path>' both point to the same package identity 'reachfive-ios'.
+```
+
+Opened on its own, outside the Sandbox, a module resolves Reach5 from GitHub and your local Core changes are silently ignored. The same goes for each module's CI: it builds against whatever Reach5 version its `Package.swift` declares, so a Core change only reaches it once a new Reach5 version is released.
 
 ### When to add a new module for a provider
 
@@ -124,10 +133,7 @@ Or one that would use `SFSafariViewController` instead of `ASWebAuthenticationSe
 ### How to add a new module (e.g. for a new provider)
 XCode > File > New > Project... > Framework.
 
-Create the Podfile and podspec (with pod commands or by copying from other modules).
+Create the `Package.swift` (by copying from other modules).
 
-Be aware, as per the point above, that the podspec does not reference the local version but the remote version.
-
-Add at least one file for now, push and tag.<br/>
-Push the new pod `pod trunk push` so that XCode can show the proper icon in the Products view
+Add at least one file for now, push and tag.
 
