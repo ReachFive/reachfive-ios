@@ -17,10 +17,8 @@ public class SdkConfig {
     /// adds a path and query items — a `struct`, so each caller gets its own copy.
     internal let baseUrlComponents: URLComponents
 
-    /// The scheme. Defaults to `reachfive-clientId`, kept exactly as given — including the case of
-    /// `clientId`, which the ReachFive console preserves when it whitelists the default callback URLs.
-    /// A scheme is case-insensitive (RFC 3986 §3.1), so every comparison against it goes through
-    /// `normalizedScheme` rather than relying on this value already being folded.
+    /// The scheme. Defaults to `reachfive-clientId`, kept in the case given — the one the console whitelists.
+    /// A scheme is case-insensitive (RFC 3986 §3.1), so comparisons against it go through `normalizedScheme`.
     public let customScheme: String
     /// The redirect URI for passwordless. Defaults to `reachfive-clientId://callback`
     public let redirectUri: URL
@@ -61,11 +59,8 @@ public class SdkConfig {
         self.domain = domain
         self.clientId = clientId
 
-        // Kept exactly as given: the ReachFive console whitelists the default callback URLs derived from
-        // `clientId` in its original case, and compares `redirect_uri` byte for byte rather than folding
-        // case per RFC 3986 §3.1. Every actual *comparison* against this scheme still goes through
-        // `normalizedScheme`, so a mismatched case elsewhere in the SDK is caught there, not by lowering
-        // this value at construction.
+        // Not lower-cased: the console whitelists the derived callback URLs in the clientId's own case and
+        // compares `redirect_uri` byte for byte, RFC 3986 §3.1 notwithstanding.
         let scheme = customScheme ?? "reachfive-\(clientId)"
         guard Self.isValidScheme(scheme) else {
             preconditionFailure("""
@@ -112,45 +107,16 @@ public class SdkConfig {
         return url.normalizedScheme == scheme.lowercased()
     }
 
-    /// Whether this URL could ever match an incoming callback, i.e. whether `matchesEndpoint(of:)` can tell
-    /// it apart from the SDK's other callback URIs: it needs a scheme, plus a host or a non-empty
-    /// normalized path to discriminate on.
-    ///
-    /// An `http`/`https` URI needs a host: its grammar requires one (RFC 9110 §4.2.1), and the only channel
-    /// that can deliver it — an `ASWebAuthenticationSession` built with `callback: .https(host:path:)` — is
-    /// given that host explicitly. A host-less `https:///callback` would be accepted here only to fail
-    /// later, when `WebAuthenticationSession.prepareSession` throws for the very same reason.
-    ///
-    /// Any other scheme is a private-use one (RFC 7595 §3.8), so RFC 8252 §7.1 spells its redirect URI
-    /// *without* an authority: `com.example.app:/oauth2redirect/example-provider`, a single slash and a
-    /// path. Both channels that can deliver it — `ASWebAuthenticationSession`'s `callbackURLScheme:` and
-    /// `application(_:open:)` — discriminate on the scheme alone, so a path is enough.
-    ///
-    /// A URI with neither a host nor a path (`custom:opaque`, `reachfive-abc://`, `com.example.app:/`, whose
-    /// path normalizes to `""`) is rejected because it is indistinguishable, under `matchesEndpoint(of:)`,
-    /// from every other empty-endpoint URI of its scheme.
-    ///
-    /// This is a check on the *shape*, not on deliverability: no parsing can tell whether the scheme is
-    /// declared in `CFBundleURLSchemes`, whether the host is an Associated Domain, or whether the URI is
-    /// whitelisted in the ReachFive console.
-    internal static func isValidCallbackUri(_ uri: URL) -> Bool {
-        guard uri.normalizedScheme != nil else { return false }
-        if uri.isHttpBased { return uri.normalizedHost != nil }
-        return uri.normalizedHost != nil || !uri.normalizedPath.isEmpty
-    }
-
     private static func checkedUri(_ uri: URL?, _ scheme: String, name: String) -> URL {
         // The scheme is already validated, and the names are literal, so the force-unwrap cannot fail
         guard let uri else { return URL(string: "\(scheme)://\(name)")! }
-        guard Self.isValidCallbackUri(uri) else {
+        guard uri.isValidCallbackUri else {
             preconditionFailure("""
-                '\(uri)' is not a valid \(name) URI: it needs a scheme, plus a host or a path to tell it apart \
-                from the SDK's other callbacks — and an 'http'/'https' URI needs a host, which its grammar \
-                requires. Any of these shapes works: '\(scheme)://\(name)', \
-                'com.example.app:/oauth2redirect/\(name)' (the RFC 8252 §7.1 form, no authority) or \
-                'https://your-app.com/\(name)'. Note that one slash and two are *different* endpoints, so the \
-                value must match your ReachFive console entry exactly. \
-                Leave the '\(name)' parameter unset to use the default derived from customScheme.
+                '\(uri)' is not a valid \(name) URI: it needs a scheme, plus a host (required for 'http'/'https') \
+                or a path starting with '/'. Any of '\(scheme)://\(name)', \
+                'com.example.app:/oauth2redirect/\(name)' or 'https://your-app.com/\(name)' works. \
+                One slash and two are different endpoints, so match your ReachFive console entry exactly. \
+                Leave '\(name)' unset for the default derived from customScheme.
                 """)
         }
         return uri

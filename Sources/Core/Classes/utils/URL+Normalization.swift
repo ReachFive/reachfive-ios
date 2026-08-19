@@ -40,14 +40,18 @@ extension URL {
         path == "/" ? "" : path
     }
 
-    /// `true` when this URL uses `http` or `https`, as opposed to a private-use scheme (RFC 7595 §3.8) — the
-    /// distinction `SdkConfig.isValidCallbackUri` needs to decide whether a host is required.
+    /// Whether this URL could match an incoming callback: a scheme, plus a host (required for `http`/`https`,
+    /// per RFC 9110 §4.2.1) or a `/`-rooted path (RFC 8252 §7.1, e.g. `com.example.app:/oauth2redirect`).
     ///
-    /// An exact match on the normalized scheme, never a prefix: `httpx-app://callback` is a perfectly valid
-    /// private-use scheme.
-    var isHttpBased: Bool {
+    /// The leading slash rather than a non-empty path, because Foundation reads a scheme-only URI's path
+    /// differently per platform — see `URLNormalizationTests`.
+    ///
+    /// A check on shape, not on deliverability: nothing here about `CFBundleURLSchemes`, Associated Domains
+    /// or the console's whitelist.
+    var isValidCallbackUri: Bool {
         guard let normalizedScheme else { return false }
-        return Self.defaultPorts.keys.contains(normalizedScheme)
+        if Self.schemesRequiringAHost.contains(normalizedScheme) { return normalizedHost != nil }
+        return normalizedHost != nil || normalizedPath.hasPrefix("/")
     }
 
     /// This URL reduced to its origin, serialized as RFC 6454 §6.2 (ASCII Serialization of an Origin)
@@ -61,18 +65,20 @@ extension URL {
         var components = URLComponents()
         components.scheme = scheme
         components.host = host
-        if let port, port != Self.defaultPort(forScheme: scheme) {
+        if let port, port != Self.defaultPorts[scheme] {
             components.port = port
         }
         return components.url?.absoluteString
     }
 
-    /// The default port of each scheme whose authority is part of its grammar. Only the two schemes WebAuthn
-    /// allows are listed (RFC 6454 §6.2 step 5 lets an origin leave a default port out); anything else keeps
-    /// whatever port it carries.
-    private static let defaultPorts = ["http": 80, "https": 443]
+    /// The schemes whose grammar makes the authority mandatory (RFC 9110 §4.2.1), so one of them without a
+    /// host is malformed rather than unusual.
+    ///
+    /// Holding the same two schemes as `defaultPorts` below is an accident of what this SDK needs, not a
+    /// rule — for example, `ws`/`wss` would require an authority too (RFC 6455 §3). Either list can grow without the other.
+    private static let schemesRequiringAHost: Set<String> = ["http", "https"]
 
-    private static func defaultPort(forScheme scheme: String) -> Int? {
-        defaultPorts[scheme]
-    }
+    /// The port each scheme leaves implicit, which a serialized origin must therefore leave out (RFC 6454
+    /// §6.2 step 5). Only the schemes WebAuthn allows; any other keeps whatever port it carries.
+    private static let defaultPorts = ["http": 80, "https": 443]
 }

@@ -2,10 +2,10 @@ import XCTest
 @testable import Reach5
 
 /// Covers `URL+Normalization`: what Foundation leaves undone on a parsed URL (`normalizedScheme`,
-/// `normalizedHost`, `normalizedPath`, `isHttpBased`) and the origin built on top of it (`serializedOrigin`).
+/// `normalizedHost`, `normalizedPath`) and the origin built on top of it (`serializedOrigin`).
 ///
 /// `normalizedScheme` and `normalizedHost` are depended on by `URL.serializedOrigin` below, on which
-/// `SdkConfig.baseComponents` in turn rests, as well as by `SdkConfig.isValidCallbackUri` and
+/// `SdkConfig.baseComponents` in turn rests, as well as by `URL.isValidCallbackUri` and
 /// `URL.matchesEndpoint(of:)` — and each of their rules has already cost a bug when one of them got it wrong,
 /// so they are pinned here rather than only through their callers.
 final class URLNormalizationTests: XCTestCase {
@@ -59,7 +59,10 @@ final class URLNormalizationTests: XCTestCase {
 
     /// `normalizedPath` folds `"/"` onto `""` and nothing else, because `URL.path` has already dropped the
     /// trailing slash of a longer path. Both facts are load-bearing: the matcher and
-    /// `SdkConfig.isValidCallbackUri` are written against them.
+    /// `URL.isValidCallbackUri` are written against them.
+    ///
+    /// The one input Foundation reads differently per platform is held by
+    /// `testAnOpaquePathIsReadDifferentlyBeforeAndAfterIOS26` below
     func testNormalizedPath() {
         let cases: [(input: String, expected: String)] = [
             ("https://h/cb", "/cb"), // baseline
@@ -69,27 +72,27 @@ final class URLNormalizationTests: XCTestCase {
             ("com.example.app:/oauth2redirect", "/oauth2redirect"), // no authority: the path is all there is
             ("com.example.app:/", ""), // which is why this URI discriminates nothing
             ("com.example.app://callback", ""), // authority-only: the host carries the discrimination
-            ("custom:opaque", ""), // Foundation gives an opaque part no path
         ]
         for (input, expected) in cases {
             XCTAssertEqual(URL(string: input)!.normalizedPath, expected, "'\(input)'")
         }
     }
 
-    // MARK: - Scheme family
+    /// Why `isValidCallbackUri` tests the leading slash and not "has a path": on a scheme-only URI,
+    /// Foundation gives no path up to iOS 18 and the opaque part itself from iOS 26 on. Pinned per platform
+    /// so a third reading, or a boundary elsewhere than iOS 26, fails here rather than as a callback that
+    /// never matches.
+    func testAnOpaquePathIsReadDifferentlyBeforeAndAfterIOS26() {
+        let opaque = URL(string: "custom:opaque")!
 
-    /// The frontier the SDK's two callback channels are built on: an http(s) URI needs a naming authority and
-    /// is delivered through `ASWebAuthenticationSession`'s universal-link callback, which requires a host;
-    /// every other scheme is private-use and delivered through `callbackURLScheme:` or
-    /// `application(_:open:)`, which look only at the scheme.
-    func testIsHttpBased() {
-        for scheme in ["http", "https", "HTTPS"] {
-            XCTAssertTrue(URL(string: "\(scheme)://host/cb")!.isHttpBased, "'\(scheme)'")
+        if #available(iOS 26.0, *) {
+            XCTAssertEqual(opaque.path, "opaque")
+        } else {
+            XCTAssertEqual(opaque.path, "")
         }
-        for scheme in ["reachfive-abc", "com.example.app", "httpx-app", "mailto"] {
-            XCTAssertFalse(URL(string: "\(scheme)://host/cb")!.isHttpBased, "'\(scheme)'")
-        }
-        XCTAssertFalse(URL(string: "example.com")!.isHttpBased, "no scheme at all")
+
+        // Either way, neither reading is `/`-rooted, which is all the SDK leans on
+        XCTAssertFalse(opaque.isValidCallbackUri)
     }
 
     // MARK: - Origin

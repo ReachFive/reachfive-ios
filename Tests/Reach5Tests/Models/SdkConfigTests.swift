@@ -81,11 +81,9 @@ final class SdkConfigTests: XCTestCase {
 
     // MARK: - Acceptable clientIds
 
-    /// The clientId is deliberately mixed-case: the derived scheme keeps that case exactly, since the
-    /// ReachFive console whitelists the default callback URLs in the same case and compares `redirect_uri`
-    /// byte for byte rather than folding case per RFC 3986 §3.1. The SDK's own comparisons against this
-    /// value still work despite the unfolded case, since they go through `normalizedScheme`
-    /// (`URLNormalizationTests.testSchemeIsLowercased` covers exactly this mixed-case shape).
+    /// The clientId is deliberately mixed-case: the derived scheme keeps that case, since the console
+    /// whitelists the default callback URLs in it and compares `redirect_uri` byte for byte. The SDK's own
+    /// comparisons still hold, going through `normalizedScheme`.
     func testDefaultUrisAreDerivedFromClientId() {
         let config = SdkConfig(domain: "example.reach5.net", clientId: "9DKRdQyDLpaJqQQQAR9K")
 
@@ -188,13 +186,11 @@ final class SdkConfigTests: XCTestCase {
         XCTAssertEqual(config.emailVerificationUri.absoluteString, "reachfive-abc://email-verification")
     }
 
-    /// An explicit URI may legitimately use a scheme, host and path that have nothing to do with
-    /// `customScheme` — a universal link on the integrator's own domain, for instance. What is checked is
-    /// only what `URL.matchesEndpoint(of:)` can discriminate on: a scheme, plus a host or a non-empty
-    /// normalized path. One representative per class of input, not an exhaustive sweep.
+    /// An explicit URI may legitimately share nothing with `customScheme` — a universal link on the
+    /// integrator's own domain, for instance — so only what `matchesEndpoint(of:)` discriminates on is
+    /// checked. One representative per class of input, not an exhaustive sweep.
     ///
-    /// Shared with `testEveryAcceptableUriIsRecognizedAsItsOwnCallback`, which holds these same values to
-    /// the invariant the pair (validation, matcher) rests on.
+    /// Shared with `testEveryAcceptableUriIsRecognizedAsItsOwnCallback`.
     private static let acceptableExplicitUris = [
         "https://example.com/callback",                     // universal link, unrelated to customScheme
         "com.example.app://mfa",                            // a different custom scheme than the derived default
@@ -202,12 +198,13 @@ final class SdkConfigTests: XCTestCase {
         "https://example.com",                               // no path: matchesEndpoint folds "" and "/" together
         "com.example.app:/oauth2redirect/example-provider", // RFC 8252 §7.1: a private-use scheme has no naming authority, so a single slash and a path
         "reachfive-abc:///path",                            // an empty authority, but still a scheme and a path to match on
+        "httpx-app:/callback",                              // a private-use scheme that merely starts with "http": the host requirement is matched exactly, never by prefix
     ]
 
     func testAcceptableExplicitUris() {
         for uri in Self.acceptableExplicitUris {
             XCTAssertTrue(
-                SdkConfig.isValidCallbackUri(URL(string: uri)!),
+                URL(string: uri)!.isValidCallbackUri,
                 "'\(uri)' should be acceptable")
         }
     }
@@ -217,16 +214,16 @@ final class SdkConfigTests: XCTestCase {
             "not-a-url",                       // no scheme, no host: parses as a relative reference
             "//example.com/callback",          // scheme-relative: a host, but no scheme
             "reachfive-abc://",                // a scheme, no authority at all and no path: nothing to match on
-            "custom:opaque",                   // Foundation gives an opaque, non-hierarchical part no path either
-            "mailto:test@example.com",         // same shape, and a registered scheme RFC 8252 §7.1 forbids anyway
-            "com.example.app:oauth2redirect",  // a path needs the leading slash RFC 8252 §7.1 asks for
+            "custom:opaque",                   // no leading slash — Foundation reads this opaque part as "" on macOS but as "opaque" on iOS; neither starts with "/"
+            "mailto:test@example.com",         // same opaque shape, no leading slash on any platform
+            "com.example.app:oauth2redirect",  // missing exactly the leading slash RFC 8252 §7.1 requires
             "com.example.app:/",               // a root path normalizes to "", so it matches every URI of that scheme
             "https:///webauthn",               // an http URI requires an authority (RFC 9110 §4.2.1), and no universal link can be delivered without a host
             "https:/cb",                       // same, spelled with one slash: Foundation parses a path, there is still no host
         ]
         for uri in unacceptable {
             XCTAssertFalse(
-                SdkConfig.isValidCallbackUri(URL(string: uri)!),
+                URL(string: uri)!.isValidCallbackUri,
                 "'\(uri)' should be rejected")
         }
     }
@@ -305,12 +302,9 @@ final class SdkConfigTests: XCTestCase {
         XCTAssertEqual(config.originWebAuthn, "https://localhost:8443")
     }
 
-    /// The validation and the matcher must agree, row by row: every URI the init accepts has to be one the
-    /// SDK can then recognize coming back. A URI accepted at init but unrecognized afterwards would be the
-    /// worst outcome — no crash, no error, a flow that simply never completes.
-    ///
-    /// Reaching the assertions at all already proves the init accepted the URI, since a rejection is a
-    /// crash. `isOurCallback` also demands a `code` or an `error`, hence the appended query.
+    /// Validation and matcher must agree row by row: a URI accepted at init but unrecognized on the way
+    /// back is the worst outcome — no crash, no error, a flow that never completes. Reaching the assertions
+    /// proves the init accepted it, a rejection being a crash; `isOurCallback` wants a `code`, hence the query.
     func testEveryAcceptableUriIsRecognizedAsItsOwnCallback() {
         for uri in Self.acceptableExplicitUris {
             let config = SdkConfig(domain: "example.reach5.net", clientId: "abc", redirectUri: URL(string: uri)!)
