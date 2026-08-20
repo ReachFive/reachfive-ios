@@ -73,7 +73,7 @@ final class ProviderConfigTests: XCTestCase {
 
     // MARK: - The other fields still decode as before
 
-    func testTheOtherFieldsAreUnaffectedByTheHandWrittenDecoder() throws {
+    func testTheOtherFieldsDecodeAsBefore() throws {
         let config = try bconnect(universalLink: #""https://example.com/callback""#)
         XCTAssertEqual(config.provider, "bconnect")
         XCTAssertEqual(config.variant, "")
