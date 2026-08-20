@@ -112,14 +112,6 @@ workflows:
           <<: *default_workflows_tags
       - check-doc-examples:
           <<: *release_branches
-      - build-for-release:
-          <<: *default_workflows_filters
-      - publish:
-          requires:
-            - build-for-release
-            - test-xcode-16.4
-            - test-xcode-26.6
-          <<: *default_workflows_filters
       - ci-passed:
           <<: *default_workflows_tags
           requires:
