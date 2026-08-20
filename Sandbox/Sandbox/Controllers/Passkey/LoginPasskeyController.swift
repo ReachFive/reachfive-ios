@@ -22,10 +22,9 @@ class LoginPasskeyController: UIViewController {
         super.viewDidAppear(animated)
         print("viewDidAppear")
 
-        guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
         Task { @MainActor in
             do {
-                let request = NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear")
+                let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "LoginPasskeyController.viewDidAppear")
                 let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
                 flowTheLogin(flow)
             } catch {
@@ -41,7 +40,7 @@ class LoginPasskeyController: UIViewController {
                     return
                 #else
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.viewDidAppear.AuthCanceled"))
+                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "LoginPasskeyController.viewDidAppear.AuthCanceled"))
                     }
                 #endif
                 default:
@@ -52,8 +51,7 @@ class LoginPasskeyController: UIViewController {
     }
 
     @IBAction func nonDiscoverableLogin(_ sender: Any) {
-        guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
-        let request = NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.nonDiscoverableLogin")
+        let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "LoginPasskeyController.nonDiscoverableLogin")
 
         Task {
             do {
@@ -72,7 +70,7 @@ class LoginPasskeyController: UIViewController {
                     return
                 #else
                     await handleAuthToken {
-                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(anchor: window, origin: "LoginPasskeyController.nonDiscoverableLogin.AuthCanceled"))
+                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "LoginPasskeyController.nonDiscoverableLogin.AuthCanceled"))
                     }
                 #endif
             } catch {
@@ -101,10 +99,9 @@ class LoginPasskeyController: UIViewController {
             profile = ProfilePasskeySignupRequest(phoneNumber: username)
         }
 
-        let window: UIWindow = view.window!
         Task {
             await handleAuthToken(errorMessage: "Signup") {
-                try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, anchor: window, origin: "LoginPasskeyController.createAccount"))
+                try await AppDelegate.reachfive().signup(withRequest: PasskeySignupRequest(passkeyProfile: profile, friendlyName: username, presenting: Presentation(from: self), origin: "LoginPasskeyController.createAccount"))
             }
         }
     }

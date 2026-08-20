@@ -6,12 +6,12 @@ public class NewPasskeyRequest {
     public let origin: String?
     /// The name that will be displayed by the system when presenting the passkey for login
     public let friendlyName: String
-    public let anchor: ASPresentationAnchor
+    public let presenting: Presentation
     
-    public init(anchor: ASPresentationAnchor, friendlyName: String, originWebAuthn: String? = nil, origin: String? = nil) {
+    public init(presenting: Presentation, friendlyName: String, originWebAuthn: String? = nil, origin: String? = nil) {
         self.originWebAuthn = originWebAuthn
         self.origin = origin
         self.friendlyName = friendlyName
-        self.anchor = anchor
+        self.presenting = presenting
     }
 }

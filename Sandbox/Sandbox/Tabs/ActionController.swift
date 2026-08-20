@@ -10,13 +10,12 @@ class ActionController: UITableViewController {
         Task { @MainActor in
             tableView.deselectRow(at: indexPath, animated: true)
 
-            guard let window = view.window else { fatalError("The view was not in the app's view hierarchy!") }
 
             // Section Native
             if indexPath.section == 1 {
                 // Sign in with Apple
                 if indexPath.row == 1 {
-                    let request = NativeLoginRequest(anchor: window, origin: "ActionController: Section Native")
+                    let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "ActionController: Section Native")
                     await handleLoginFlow {
                         try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always)
                     }
@@ -25,7 +24,7 @@ class ActionController: UITableViewController {
 
             // Section Passkey
             if #available(iOS 16.0, *), indexPath.section == 2 {
-                let loginRequest = NativeLoginRequest(anchor: window, origin: "ActionController: Section Passkey")
+                let loginRequest = NativeLoginRequest(presenting: Presentation(from: self), origin: "ActionController: Section Passkey")
 
                 do {
                     // Login with passkey: modal persistent

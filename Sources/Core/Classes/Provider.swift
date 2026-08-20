@@ -22,10 +22,10 @@ public protocol Provider {
     ///   - scope: The scopes to request; `nil` falls back to the client configuration's scope.
     ///   - origin: Free-form origin string recorded in user events.
     ///   - presenting: Where the provider presents its UI, built from the initiating view
-    ///     controller: `Presentation(from: self)`. The view controller must be attached to a
-    ///     window at call time (call from `viewDidAppear` or a user interaction, not
-    ///     `viewDidLoad`), otherwise the login fails with a `TechnicalError`. Providers that
-    ///     present no UI of their own ignore it.
+    ///     controller: `Presentation(from: self)`. Call the login from `viewDidAppear` or a user
+    ///     interaction rather than from `viewDidLoad`, so the view controller is attached to a
+    ///     window by the time the system asks for the anchor; otherwise the SDK anchors on the
+    ///     app's key window and logs it. Providers that present no UI of their own ignore it.
     func login(scope: [String]?, origin: String, presenting: Presentation) async throws -> AuthToken
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool

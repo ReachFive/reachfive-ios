@@ -14,7 +14,7 @@
 - `application(_:continue:restorationHandler:)` and `application(_:open:options:)` now returns `false` when neither an SDK flow nor any registered provider consumed the activity or URL, instead of always returning `true`. If your app also routes universal links or custom-scheme URLs itself, only do so when the call returns `false`.
 - `ProviderCreator`: the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode`, `webviewLogin` or the new `login(withProvider:…)`.
   See the [Implement a custom provider](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) guide.
-- `Provider.login` takes a `Presentation` instead of a `UIViewController?` to handle the different type of conformance itself (either conforming to `ASWebAuthenticationPresentationContextProviding` or needing a `ASPresentationAnchor`)
+- `Provider.login` and the native passkey requests takes a `Presentation` instead of a `UIViewController?` or an `anchor: ASPresentationAnchor` to handle the different type of conformance itself (either conforming to `ASWebAuthenticationPresentationContextProviding` or needing a `ASPresentationAnchor`)
 
 ### New features
 - `SdkConfig`:

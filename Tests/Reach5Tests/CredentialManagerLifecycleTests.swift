@@ -17,17 +17,43 @@ final class CredentialManagerLifecycleTests: XCTestCase {
 
     private struct UnexpectedSuccess: Error {}
 
+    /// Keeps every window built by ``makePresentation()`` alive for the duration of the test: `Presentation`
+    /// holds the view controller weakly, and the window is what retains it (as its `rootViewController`), so
+    /// a test that ignores the returned window would resolve to the fallback anchor instead of its own.
+    private var windows: [UIWindow] = []
+
+    override func tearDown() {
+        windows.removeAll()
+        super.tearDown()
+    }
+
+    /// A view controller attached to its own window, so `Presentation` resolves to that very window.
+    ///
+    /// The window is returned for the tests that assert on the anchor's identity; keeping it alive is
+    /// ``windows``' job.
+    private func makePresentation() -> (presenting: Presentation, window: UIWindow) {
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        let viewController = UIViewController()
+        // `rootViewController` retains the view controller, and making the window visible is what actually
+        // attaches its view: `Presentation` resolves through `viewController.view.window`, which stays nil
+        // until then.
+        window.rootViewController = viewController
+        window.makeKeyAndVisible()
+        windows.append(window)
+        return (Presentation(from: viewController), window)
+    }
+
     /// Starts an inert request and returns once its context is registered and the request submitted.
     ///
     /// Typed `Task<Void, Error>` rather than `Task<ASAuthorization, Error>`: the authorization is never
     /// inspected, and its `Sendable` conformance — required by a task's `Success` — only exists from
     /// iOS 16.4.
-    private func startRequest(on manager: CredentialManager, anchor: ASPresentationAnchor) async throws -> (controller: ASAuthorizationController, result: Task<Void, Error>) {
+    private func startRequest(on manager: CredentialManager, presenting: Presentation) async throws -> (controller: ASAuthorizationController, result: Task<Void, Error>) {
         let box = ControllerBox()
         let submitted = expectation(description: "request submitted")
 
         let task = Task { @MainActor in
-            _ = try await manager.perform(requests: [ASAuthorizationPasswordProvider().createRequest()], anchor: anchor) {
+            _ = try await manager.perform(requests: [ASAuthorizationPasswordProvider().createRequest()], presenting: presenting) {
                 box.controller = $0
                 submitted.fulfill()
             }
@@ -51,7 +77,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
 
     func testCanceledRequestThrowsAuthCanceledThenSecondCallbackIsIgnored() async throws {
         let manager = CredentialManager()
-        let (controller, result) = try await startRequest(on: manager, anchor: ASPresentationAnchor())
+        let (controller, result) = try await startRequest(on: manager, presenting: makePresentation().presenting)
 
         manager.authorizationController(controller: controller, didCompleteWithError: ASAuthorizationError(.canceled))
 
@@ -71,9 +97,9 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         // No ongoing request: nothing to resolve, and above all no crash
         manager.authorizationController(controller: stranger, didCompleteWithError: ASAuthorizationError(.canceled))
 
-        let anchor = ASPresentationAnchor()
-        let (controller, result) = try await startRequest(on: manager, anchor: anchor)
-        XCTAssertTrue(manager.presentationAnchor(for: controller) === anchor)
+        let (presenting, window) = makePresentation()
+        let (controller, result) = try await startRequest(on: manager, presenting: presenting)
+        XCTAssertTrue(manager.presentationAnchor(for: controller) === window)
 
         manager.authorizationController(controller: controller, didCompleteWithError: ASAuthorizationError(.failed))
         let thrown = try await failure(of: result)
@@ -86,22 +112,22 @@ final class CredentialManagerLifecycleTests: XCTestCase {
     /// request's state disappears without ever touching the new one's.
     func testNewRequestCancelsTheOngoingOneWithoutDisturbingItsOwnState() async throws {
         let manager = CredentialManager()
-        let autoFillAnchor = ASPresentationAnchor()
-        let modalAnchor = ASPresentationAnchor()
+        let (autoFillPresenting, autoFillWindow) = makePresentation()
+        let (modalPresenting, modalWindow) = makePresentation()
 
-        let autoFill = try await startRequest(on: manager, anchor: autoFillAnchor)
-        XCTAssertTrue(manager.presentationAnchor(for: autoFill.controller) === autoFillAnchor)
+        let autoFill = try await startRequest(on: manager, presenting: autoFillPresenting)
+        XCTAssertTrue(manager.presentationAnchor(for: autoFill.controller) === autoFillWindow)
 
         // The modal request cancels the ongoing auto-fill, without waiting for a system callback
-        let modal = try await startRequest(on: manager, anchor: modalAnchor)
+        let modal = try await startRequest(on: manager, presenting: modalPresenting)
 
         let thrown = try await failure(of: autoFill.result)
         guard case ReachFiveError.AuthCanceled = thrown else {
             return XCTFail("expected .AuthCanceled, got \(thrown)")
         }
 
-        XCTAssertFalse(manager.presentationAnchor(for: autoFill.controller) === autoFillAnchor)
-        XCTAssertTrue(manager.presentationAnchor(for: modal.controller) === modalAnchor)
+        XCTAssertFalse(manager.presentationAnchor(for: autoFill.controller) === autoFillWindow)
+        XCTAssertTrue(manager.presentationAnchor(for: modal.controller) === modalWindow)
 
         // The canceled request's late system callback has no effect: the modal stays in the race
         manager.authorizationController(controller: autoFill.controller, didCompleteWithError: ASAuthorizationError(.canceled))
@@ -117,8 +143,8 @@ final class CredentialManagerLifecycleTests: XCTestCase {
     /// `didCompleteWithError(.canceled)` the system only promises if a flow was really running.
     func testCancelOngoingRequestsResolvesTheRequestWithoutSystemCallback() async throws {
         let manager = CredentialManager()
-        let anchor = ASPresentationAnchor()
-        let (controller, result) = try await startRequest(on: manager, anchor: anchor)
+        let (presenting, window) = makePresentation()
+        let (controller, result) = try await startRequest(on: manager, presenting: presenting)
 
         manager.cancelOngoingRequests()
 
@@ -126,15 +152,15 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         guard case ReachFiveError.AuthCanceled = thrown else {
             return XCTFail("expected .AuthCanceled, got \(thrown)")
         }
-        XCTAssertFalse(manager.presentationAnchor(for: controller) === anchor, "the context should have been released")
+        XCTAssertFalse(manager.presentationAnchor(for: controller) === window, "the context should have been released")
     }
 
     /// A caller that cancels its task (screen dismissed, `async let` abandoned) gets a technical error and
     /// not `.AuthCanceled`, which pushes apps to restart an auto-fill request.
     func testCallerCancellationResumesWithTechnicalErrorAndFreesTheContext() async throws {
         let manager = CredentialManager()
-        let anchor = ASPresentationAnchor()
-        let (controller, result) = try await startRequest(on: manager, anchor: anchor)
+        let (presenting, window) = makePresentation()
+        let (controller, result) = try await startRequest(on: manager, presenting: presenting)
 
         result.cancel()
 
@@ -143,7 +169,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
             return XCTFail("expected .TechnicalError, got \(thrown)")
         }
         XCTAssertTrue(reason.contains("calling task was canceled"))
-        XCTAssertFalse(manager.presentationAnchor(for: controller) === anchor, "the context should have been released")
+        XCTAssertFalse(manager.presentationAnchor(for: controller) === window, "the context should have been released")
 
         // The late system callback finds no context left: no double resumption
         manager.authorizationController(controller: controller, didCompleteWithError: ASAuthorizationError(.canceled))
@@ -155,7 +181,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
         notSubmitted.isInverted = true
 
         let task = Task { @MainActor in
-            _ = try await manager.perform(requests: [ASAuthorizationPasswordProvider().createRequest()], anchor: ASPresentationAnchor()) { _ in
+            _ = try await manager.perform(requests: [ASAuthorizationPasswordProvider().createRequest()], presenting: makePresentation().presenting) { _ in
                 notSubmitted.fulfill()
             }
         }
@@ -174,7 +200,7 @@ final class CredentialManagerLifecycleTests: XCTestCase {
     func testEmptyRequestsThrowsInsteadOfHanging() async {
         let manager = CredentialManager()
         do {
-            _ = try await manager.perform(requests: [], anchor: ASPresentationAnchor()) { _ in
+            _ = try await manager.perform(requests: [], presenting: makePresentation().presenting) { _ in
                 XCTFail("no request should be submitted")
             }
             XCTFail("expected a .TechnicalError")

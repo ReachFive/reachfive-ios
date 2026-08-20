@@ -31,16 +31,21 @@ public struct Presentation {
         return viewController
     }
 
-    /// The window the view controller is attached to (Sign In with Apple, passkeys).
+    /// The window to anchor system UI on, resolved as late as possible and never failing.
     ///
-    /// - Throws: `ReachFiveError.TechnicalError` if the view controller has been deallocated
-    ///   or is not attached to a window. Call `login()` after the view appeared
-    ///   (e.g. from `viewDidAppear`), not from `viewDidLoad`.
-    public func anchor() throws -> ASPresentationAnchor {
-        guard let window = try presentingViewController().view.window else {
-            throw ReachFiveError.TechnicalError(reason: "The presenting view controller is not attached to a window. Call login() after the view appeared (e.g. from viewDidAppear), not from viewDidLoad.")
+    /// A bare `ASPresentationAnchor()` belongs to no scene, so the system answers `presentationContextInvalid`
+    /// for it every time; falling back to the app's own key window lets the flow go through, anchored
+    /// elsewhere, which is always better than failing.
+    public func anchor() -> ASPresentationAnchor {
+        if let window = viewController?.view.window {
+            return window
         }
-        return window
+        if let window = Self.activeSceneKeyWindow() {
+            Logger.shared.log("The presenting view controller is no longer attached to a window; anchoring on the app's key window instead. Call login() after the view appeared (e.g. from viewDidAppear), not from viewDidLoad.")
+            return window
+        }
+        Logger.shared.log("No window available to anchor on: the request will fail with presentationContextInvalid. Call login() after the view appeared (e.g. from viewDidAppear), not from viewDidLoad.")
+        return ASPresentationAnchor()
     }
 
     /// A context provider for `ASWebAuthenticationSession` (web providers).
@@ -55,36 +60,7 @@ public struct Presentation {
         if let contextProvider = viewController as? ASWebAuthenticationPresentationContextProviding {
             return contextProvider
         }
-        return ViewControllerContextProvider(viewController)
-    }
-}
-
-// `ASWebAuthenticationSession.presentationContextProvider` is `weak`, so the adapter has to be retained
-// elsewhere for the duration of the session. It is, through
-// `WebviewLoginRequest.presentationContextProvider` (a strong `let`), which stays alive for the whole
-// `webviewLogin` → `webAuthSession.start(...)` call.
-private final class ViewControllerContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
-    private weak var viewController: UIViewController?
-
-    init(_ viewController: UIViewController) {
-        self.viewController = viewController
-    }
-
-    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        if let window = viewController?.view.window {
-            return window
-        }
-        // The presenting view controller is gone — deallocated, or dismissed since the request was built
-        // (`WebviewLoginRequest.init(presenting:)` resolves this provider at construction time, the session
-        // asks for the anchor later). The protocol offers no way to fail, and a bare `ASPresentationAnchor()`
-        // belongs to no scene, so the system would always answer `presentationContextInvalid`. Falling back
-        // to the app's own key window lets the login go through, anchored elsewhere.
-        if let window = Self.activeSceneKeyWindow() {
-            Logger.shared.log("The presenting view controller is no longer attached to a window; anchoring the web session on the app's key window instead. Call login() after the view appeared (e.g. from viewDidAppear), not from viewDidLoad.")
-            return window
-        }
-        Logger.shared.log("No window available to anchor the web session: it will fail with presentationContextInvalid. Call login() after the view appeared (e.g. from viewDidAppear), not from viewDidLoad.")
-        return ASPresentationAnchor()
+        return ViewControllerContextProvider(self)
     }
 
     /// The key window of a foreground scene, if there is one.
@@ -102,5 +78,21 @@ private final class ViewControllerContextProvider: NSObject, ASWebAuthentication
         let candidates = scenes.filter { $0.activationState == .foregroundActive }
             + scenes.filter { $0.activationState == .foregroundInactive }
         return candidates.flatMap(\.windows).first(where: \.isKeyWindow)
+    }
+}
+
+// `ASWebAuthenticationSession.presentationContextProvider` is `weak`, so the adapter has to be retained
+// elsewhere for the duration of the session. It is, through
+// `WebviewLoginRequest.presentationContextProvider` (a strong `let`), which stays alive for the whole
+// `webviewLogin` → `webAuthSession.start(...)` call.
+private final class ViewControllerContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
+    private let presentation: Presentation
+
+    init(_ presentation: Presentation) {
+        self.presentation = presentation
+    }
+
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        presentation.anchor()
     }
 }

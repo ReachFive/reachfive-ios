@@ -19,8 +19,9 @@ class CredentialManager: NSObject {
         let id: Int
         /// kept to be able to `cancel()` the system request
         let controller: ASAuthorizationController
-        /// anchor for the presentationContextProvider
-        let anchor: ASPresentationAnchor
+        /// where the system UI is presented from; the anchor is resolved only when the system asks for
+        /// it, so a window change between submitting and presenting is taken into account
+        let presenting: Presentation
         /// the caller's continuation, resumed exactly once: every resumption goes through removing the
         /// context from the dictionary, and only the removal that succeeds resumes the continuation
         let continuation: CheckedContinuation<ASAuthorization, Error>
@@ -63,7 +64,7 @@ class CredentialManager: NSObject {
     /// submitted to the system) then simulates the delegate callbacks.
     func perform(
         requests: [ASAuthorizationRequest],
-        anchor: ASPresentationAnchor,
+        presenting: Presentation,
         using submit: (ASAuthorizationController) -> Void
     ) async throws -> ASAuthorization {
         guard !requests.isEmpty else { throw Self.noRequest }
@@ -82,7 +83,7 @@ class CredentialManager: NSObject {
                 // Canceling the ongoing requests and submitting the new one in the same synchronous block:
                 // no other task can run on the main actor in between.
                 cancelOngoingRequests()
-                contexts[ObjectIdentifier(controller)] = RequestContext(id: id, controller: controller, anchor: anchor, continuation: continuation)
+                contexts[ObjectIdentifier(controller)] = RequestContext(id: id, controller: controller, presenting: presenting, continuation: continuation)
                 submit(controller)
             }
         } onCancel: {
@@ -104,8 +105,8 @@ class CredentialManager: NSObject {
     /// back on would leave its caller hanging and its context in memory forever. Any late callback then
     /// finds no context left and is ignored.
     ///
-    /// Called by ``perform(requests:anchor:using:)`` in the same synchronous block as submitting the new
-    /// request: the app therefore cannot restart an auto-fill request — its usual reaction to
+    /// Called by ``perform(requests:presenting:using:)`` in the same synchronous block as submitting the
+    /// new request: the app therefore cannot restart an auto-fill request — its usual reaction to
     /// `.AuthCanceled` — before the new request has been submitted.
     ///
     /// Internal for testability.
@@ -139,11 +140,11 @@ class CredentialManager: NSObject {
     // MARK: - Signup
 
     @available(iOS 16.0, *)
-    func signUp(withRequest request: SignupOptions, scopes: [String], anchor: ASPresentationAnchor, originR5: String? = nil, reachFive: ReachFive) async throws -> AuthToken {
+    func signUp(withRequest request: SignupOptions, scopes: [String], presenting: Presentation, originR5: String? = nil, reachFive: ReachFive) async throws -> AuthToken {
         let options = try await reachFive.reachFiveApi.createWebAuthnSignupOptions(webAuthnSignupOptions: request)
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
-        let authorization = try await perform(requests: [registrationRequest], anchor: anchor) {
+        let authorization = try await perform(requests: [registrationRequest], presenting: presenting) {
             $0.performRequests()
         }
 
@@ -160,7 +161,7 @@ class CredentialManager: NSObject {
         let options = try await reachFive.reachFiveApi.createWebAuthnRegistrationOptions(authToken: authToken, registrationRequest: RegistrationRequest(origin: originWebAuthn, friendlyName: request.friendlyName))
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
-        let authorization = try await perform(requests: [registrationRequest], anchor: request.anchor) {
+        let authorization = try await perform(requests: [registrationRequest], presenting: request.presenting) {
             $0.performRequests()
         }
 
@@ -176,7 +177,7 @@ class CredentialManager: NSObject {
         let options = try await reachFive.reachFiveApi.createWebAuthnResetOptions(resetOptions: resetOptions)
         let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName)
 
-        let authorization = try await perform(requests: [registrationRequest], anchor: request.anchor) {
+        let authorization = try await perform(requests: [registrationRequest], presenting: request.presenting) {
             $0.performRequests()
         }
 
@@ -198,7 +199,7 @@ class CredentialManager: NSObject {
         }
 
         // AutoFill-assisted requests only support ASAuthorizationPlatformPublicKeyCredentialAssertionRequest.
-        let authorization = try await perform(requests: [authorizationRequest], anchor: request.anchor) {
+        let authorization = try await perform(requests: [authorizationRequest], presenting: request.presenting) {
             $0.performAutoFillAssistedRequests()
         }
 
@@ -237,7 +238,7 @@ class CredentialManager: NSObject {
             }
         }
 
-        let authorization = try await perform(requests: requests, anchor: request.anchor) {
+        let authorization = try await perform(requests: requests, presenting: request.presenting) {
             performRequests(on: $0, mode: mode)
         }
         return try await authenticate(with: authorization, scopes: request.scopes, reachFive: reachFive, originR5: request.origin)
@@ -253,7 +254,7 @@ class CredentialManager: NSObject {
             appleProvider: appleProvider
         )
 
-        let authorization = try await perform(requests: built.requests, anchor: request.anchor) {
+        let authorization = try await perform(requests: built.requests, presenting: request.presenting) {
             performRequests(on: $0, mode: mode)
         }
 
@@ -364,14 +365,17 @@ class CredentialManager: NSObject {
 
 extension CredentialManager: ASAuthorizationControllerPresentationContextProviding {
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        guard let anchor = contexts[ObjectIdentifier(controller)]?.anchor else {
+        guard let presenting = contexts[ObjectIdentifier(controller)]?.presenting else {
             // Should not happen: the context is registered before the request is submitted and removed
             // only once it completes. A detached window is better than a crash, but it would be invisible
             // on screen: log it.
             Logger.shared.log("presentationAnchor: no ongoing request for this controller, falling back to a detached window")
             return ASPresentationAnchor()
         }
-        return anchor
+        // Resolved here rather than when the request was built: the presenting view controller may have
+        // moved to another window, or been dismissed, in between. ``Presentation/anchor()`` cannot
+        // fail — this protocol offers no way to report an error — and falls back to the app's key window.
+        return presenting.anchor()
     }
 }
 
