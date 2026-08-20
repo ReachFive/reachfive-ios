@@ -46,7 +46,10 @@ extension ReachFive {
     ///   - request: the anchor for the modal sheet, plus scope and origin configuration
     ///   - requestTypes: choose between Password and/or Passkey
     ///   - mode: choose the behavior when there are no credentials available
-    /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
+    /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError.
+    ///   `.OngoingStepUp` can only occur when `.Password` is among `requestTypes`: only a password grant
+    ///   ever requires a step-up. Requesting only `.Passkey` and/or `.SignInWithApple` always yields
+    ///   `.AchievedLogin`.
     public func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) async throws -> LoginFlow {
         let appleProvider = providers.first { $0.name == AppleProvider.NAME } as? ConfiguredAppleProvider
         return try await credentialManager.login(withRequest: resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider, reachFive: self)

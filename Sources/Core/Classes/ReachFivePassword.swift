@@ -47,14 +47,15 @@ extension ReachFive {
         )
         let resp = try await reachFiveApi.loginWithPassword(loginRequest: loginRequest)
 
-        if resp.mfaRequired != true {
-            let token = try await self.loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
+        guard resp.mfaRequired == true else {
+            let token = try await loginCallback(tkn: resp.tkn, scopes: scope, origin: origin)
             return .AchievedLogin(authToken: token)
         }
 
+        // The step-up PKCE must outlive this call: the app comes back through the MFA redirect URI.
         let pkce = Pkce.generate()
-        self.storage.save(key: self.pkceKey, value: pkce)
-        let stepUpResponse = try await self.reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: self.sdkConfig.clientId, redirectUri: self.sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
+        storage.save(key: pkceKey, value: pkce)
+        let stepUpResponse = try await reachFiveApi.startMfaStepUp(StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: sdkConfig.redirectUri, pkce: pkce, scope: strScope, tkn: resp.tkn))
         return LoginFlow.OngoingStepUp(token: stepUpResponse.token, availableMfaCredentialItemTypes: stepUpResponse.amr)
     }
 }
