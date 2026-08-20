@@ -45,9 +45,15 @@ final class URLNormalizationTests: XCTestCase {
     /// not as a specific value, and not tied to an iOS 18/26 boundary the way `normalizedPath` is.
     /// `normalizedHost` treats every non-`""`, non-populated case as absent, so this asserts only that,
     /// not which value `URL.host` itself returns.
-    func testHostlessAuthorityIsNilNotEmpty() {
+    // TEMPORARY: split into one input per test so a crash on one input doesn't hide the other two's
+    // result — to remove once the iOS 17.5 crash is understood, back into a single test.
+    func testHostlessAuthorityIsNilNotEmpty_port() {
         XCTAssertNil(URL(string: "https://:8443")!.normalizedHost)
+    }
+    func testHostlessAuthorityIsNilNotEmpty_emptyIPv6() {
         XCTAssertNil(URL(string: "https://[]")!.normalizedHost)
+    }
+    func testHostlessAuthorityIsNilNotEmpty_bareAuthority() {
         XCTAssertNil(URL(string: "https://")!.normalizedHost)
     }
 
