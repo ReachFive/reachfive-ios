@@ -40,10 +40,12 @@ final class URLNormalizationTests: XCTestCase {
         XCTAssertEqual(URL(string: "https://[2001:DB8::1]")!.normalizedHost, "[2001:db8::1]")
     }
 
-    /// The distinction `URL.host` does not make: an authority with no host reads back as `""`, not `nil`.
-    /// Both spellings build a URL that only fails later, on the network.
+    /// An authority with a port but no host reads back as `""` on macOS/Mac Catalyst and on every iOS
+    /// runtime checked except 17.5, where `URL.host` returns something else — confirmed only as "not `""`",
+    /// not as a specific value, and not tied to an iOS 18/26 boundary the way `normalizedPath` is.
+    /// `normalizedHost` treats every non-`""`, non-populated case as absent, so this asserts only that,
+    /// not which value `URL.host` itself returns.
     func testHostlessAuthorityIsNilNotEmpty() {
-        XCTAssertEqual(URL(string: "https://:8443")!.host, "", "précondition : Foundation renvoie bien \"\"")
         XCTAssertNil(URL(string: "https://:8443")!.normalizedHost)
         XCTAssertNil(URL(string: "https://[]")!.normalizedHost)
         XCTAssertNil(URL(string: "https://")!.normalizedHost)

@@ -13,12 +13,15 @@ extension URL {
 
     /// The host in the form a comparison or an origin needs, or `nil` when the authority carries none.
     ///
-    /// Three things Foundation leaves to the caller:
+    /// Two things Foundation leaves to the caller:
     /// - the case, as above;
     /// - the brackets around an IPv6 literal, which `URL.host` strips (`https://[::1]` reads back as `::1`)
-    ///   although both an origin and a URL require them;
-    /// - the difference between "no host" and an empty one — `URL.host` is `""`, not `nil`, when the
-    ///   authority has a port but no host (`https://:8443`) or an empty IPv6 literal (`https://[]`).
+    ///   although both an origin and a URL require them.
+    ///
+    /// A third is folded in without relying on a specific answer: for an authority with a port but no host
+    /// (`https://:8443`) or an empty IPv6 literal (`https://[]`), `URL.host` reads `""` almost everywhere
+    /// but not on every OS version tested — see `URLNormalizationTests`. The guard below treats an empty
+    /// host and a missing one the same way, so it doesn't matter which this particular runtime returns.
     var normalizedHost: String? {
         guard let host, !host.isEmpty else { return nil }
         let lowercased = host.lowercased()
