@@ -59,7 +59,7 @@ public class AuthToken: Codable {
         do {
             return try decoder.decode(OpenIdUser.CodingData.self, from: data).openIdUser
         } catch {
-            throw ReachFiveError.TechnicalError(reason: DataRequest.reason(decoding: OpenIdUser.CodingData.self, failedWith: error))
+            throw ReachFiveError.TechnicalError(reason: error.localizedDescription)
         }
     }
 }

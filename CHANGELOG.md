@@ -27,8 +27,7 @@
 - New method `login(withProvider:…)`, intended for integrators writing their own `Provider`: exchanges the ID token issued by a native provider SDK for a ReachFive `AuthToken`.
 
 ### Bug fixes
-- A provider whose backend configuration carries a `universal_link` that cannot serve as one no longer costs the whole configuration. An empty, malformed, or wrongly-typed value used to abort the decoding of the entire `/identity/v1/providers` payload, so `initialize()` failed permanently and *every* provider was lost, not only that one. Such a value is now logged (when `SdkInternalConfig.loggingEnabled` is set) and treated as "not configured": a login in universal-link mode on that provider still fails, with the reason `DefaultProvider` already reports, and the other providers keep working.
-- A response the SDK cannot decode now reports which field is at fault and why, instead of Foundation's generic `DecodingError.localizedDescription` ("The data couldn't be read because it isn't in the correct format."), which named neither and came translated in the device's language.
+- A provider whose backend configuration carries a `universal_link` that cannot serve as one no longer costs the whole configuration. An empty value used to abort the decoding of the entire `/identity/v1/providers` payload, so `initialize()` failed permanently and *every* provider was lost, not only that one. Such a value, and one carrying no host, are now treated as "not configured" and logged (when `SdkInternalConfig.loggingEnabled` is set): a login in universal-link mode on that provider still fails, with the reason `DefaultProvider` already reports, and every provider keeps working otherwise.
 
 ## v10.0.1
 
