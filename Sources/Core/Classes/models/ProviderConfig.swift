@@ -6,28 +6,21 @@ public class ProviderConfig: Codable {
     public let clientId: String?
     public let scope: [String]?
 
-    /// The universal link as the backend sends it.
-    ///
-    /// Held as a string rather than decoded straight into a `URL`, because `URL(string:)` rejects `""` — what
-    /// an unset text field in the console yields — and a `Decodable` array is all-or-nothing: one such value
-    /// aborted the decoding of the whole `/identity/v1/providers` payload, so `initialize()` failed
-    /// permanently and *every* provider was lost, not only the one whose link was wrong.
+    /// Held as a string, not a `URL`: `URL(string:)` rejects `""`, which an unset field in the console yields,
+    /// and a `Decodable` array is all-or-nothing — one such value aborted the whole
+    /// `/identity/v1/providers` payload, losing every provider and leaving `initialize()` in failure.
     private let rawUniversalLink: String?
 
     private enum CodingKeys: String, CodingKey {
         case provider, variant, clientId, scope
-        // The decoder's `.convertFromSnakeCase` turns the payload's `universal_link` into `universalLink`.
+        // `.convertFromSnakeCase` turns the payload's `universal_link` into `universalLink`.
         case rawUniversalLink = "universalLink"
     }
 
-    /// The provider's universal link, or `nil` when the configuration carries none that could serve as one: a
-    /// host is what an `.https` callback of `ASWebAuthenticationSession` needs, and `URL(string:)` accepts a
-    /// value such as `"toto"` as a relative reference that has none.
-    ///
-    /// The provider itself keeps working — a custom-scheme login needs no universal link — and one in
-    /// universal-link mode reports the missing configuration on its own (`DefaultProvider.init` logs it and
-    /// defers the failure to `login()`). With `SdkInternalConfig.loggingEnabled`, the rejected value is in the
-    /// logged response body.
+    /// `nil` when the configuration carries no link that could serve as one — a host is what an `.https`
+    /// callback of `ASWebAuthenticationSession` needs, and `URL(string:)` reads a value such as `"toto"` as a
+    /// relative reference that has none. The provider still works: only its universal-link mode needs this,
+    /// and `DefaultProvider.init` reports its absence.
     public var universalLink: URL? {
         guard let rawUniversalLink, let url = URL(string: rawUniversalLink), url.normalizedHost != nil else {
             return nil

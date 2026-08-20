@@ -1,11 +1,9 @@
 import XCTest
 @testable import Reach5
 
-/// What the `/identity/v1/providers` payload may carry in `universal_link` without costing the configuration.
-///
-/// The regression guarded against: an unusable value used to be a *decoding* failure, and a `Decodable` array
-/// is all-or-nothing, so it aborted the whole payload — `initialize()` failed permanently and every provider
-/// was lost, not only the one whose link was wrong.
+/// What `universal_link` may carry without costing the payload. It used to be decoded straight into a `URL`,
+/// so an unusable value was a decoding failure — and a `Decodable` array being all-or-nothing, it took every
+/// provider down with it.
 final class ProviderConfigTests: XCTestCase {
 
     /// The very decoder `ReachFiveApi.init` hands to the network client.
@@ -15,7 +13,7 @@ final class ProviderConfigTests: XCTestCase {
         return decoder
     }()
 
-    /// Google first, so a test tells "this one link is ignored" from "the payload is lost".
+    /// Google first, so a test tells "this link is ignored" from "the payload is lost".
     private func bconnect(universalLink: String) throws -> ProviderConfig {
         let json = Data("""
         {"status": "ok", "items": [
@@ -40,8 +38,8 @@ final class ProviderConfigTests: XCTestCase {
         XCTAssertEqual(config.universalLink?.absoluteString, "https://example.com")
     }
 
-    /// The host check folds the case (RFC 3986 §3.2.2), but the value itself is kept verbatim: it is the
-    /// `redirect_uri` the console whitelisted, and the backend compares it byte for byte.
+    /// The host check folds the case (RFC 3986 §3.2.2); the value itself is the `redirect_uri` the console
+    /// whitelisted, which the backend compares byte for byte, so it is kept verbatim.
     func testTheCheckFoldsTheCaseButKeepsTheValueVerbatim() throws {
         let config = try bconnect(universalLink: #""https://Example.COM/CallBack""#)
         XCTAssertEqual(config.universalLink?.absoluteString, "https://Example.COM/CallBack")
@@ -49,14 +47,13 @@ final class ProviderConfigTests: XCTestCase {
 
     // MARK: - Links it cannot, none of which may cost the payload
 
-    /// The regression itself: `URL(string: "")` is nil, and `""` is what an unset text field in the console
-    /// yields.
+    /// The regression itself: `URL(string: "")` is nil, and `""` is what an unset field in the console yields.
     func testAnEmptyLinkIsIgnoredWithoutLosingTheOtherProviders() throws {
         XCTAssertNil(try bconnect(universalLink: #""""#).universalLink)
     }
 
-    /// `URL(string:)` accepts these as relative references, so they used to decode into a `URL` with no host
-    /// and only failed much later, when the session was built.
+    /// `URL(string:)` reads these as relative references, so they used to decode into a hostless `URL` and
+    /// only failed later, when the session was built.
     func testALinkWithoutAHostIsIgnored() throws {
         for raw in [#""toto""#, #""toto ""#, #""example.com/callback""#, #""/callback""#] {
             XCTAssertNil(try bconnect(universalLink: raw).universalLink, "\(raw) has no host")
