@@ -4,34 +4,27 @@
 
 ### Breaking changes
 - Changed type of redirect URL fields to URL instead of String
-- SdkConfig:
+- `SdkConfig`:
   - As above, changed type of redirect URL fields to URL instead of String
-  - Removed `scheme` field alias for `redirectUri`
-  - Renamed `baseScheme` field to `customScheme`
-  - The initializer now stops the program with a `preconditionFailure` when the scheme is not a valid URL scheme (either because of the `customScheme` parameter, or indirectly because the default scheme is derived from an ill-formatted `clientId`, e.g. one containing `_`). In that case, pass an explicit valid `customScheme` and declare it in your Info.plist and your ReachFive console.
+  - Removed the field `scheme` which was an alias for `redirectUri`. `redirectUri` remains.
+  - Renamed the field `baseScheme` to `customScheme`.
+  - The initializer now stops the program with a `preconditionFailure` when validations are not met: scheme, domain, redirect URLs and originWebAuthn are validated early instead of failing during a network call or silently never matching any incoming callback.
+- The `originWebAuthn` a passkey request carries is now validated and normalized like the `SdkConfig` configured one. This means the call can now throw a `ReachFiveError.TechnicalError` if the validation fails.
 
 - `application(_:continue:restorationHandler:)` and `application(_:open:options:)` now returns `false` when neither an SDK flow nor any registered provider consumed the activity or URL, instead of always returning `true`. If your app also routes universal links or custom-scheme URLs itself, only do so when the call returns `false`.
-
-- ProviderCreator : the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode` or `webviewLogin`.
-
-- `Provider.login` takes a `Presentation` instead of a `UIViewController?` to handle the different type of conformance itself (either conforming to `ASWebAuthenticationPresentationContextProviding` or needing a `ASPresentationAnchor` ) 
-
-  ```swift
-  // Before
-  try await provider.login(scope: scope, origin: origin, viewController: self)
-  // After
-  try await provider.login(scope: scope, origin: origin, presenting: Presentation(from: self))
-  ```
+- `ProviderCreator`: the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode`, `webviewLogin` or the new `login(withProvider:…)`.
+  See the [Implement a custom provider](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) guide.
+- `Provider.login` takes a `Presentation` instead of a `UIViewController?` to handle the different type of conformance itself (either conforming to `ASWebAuthenticationPresentationContextProviding` or needing a `ASPresentationAnchor`)
 
 ### New features
-- New `WebProvider` to register a web provider with a `variant` and a completion `mode`. See the [ProviderCreator](https://developer.reachfive.com/sdk-ios/providerCreator.html) and [custom provider guide](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) documentation.
-- `webviewLogin` accepts a `webSessionMode` parameter picking the shape of the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
-- `webviewLogin` accepts a new `loginUrlFragment` parameter to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
-- `ReachFive.login(withProvider:idToken:nonce:scope:origin:givenName:familyName:)`, the provider
-  counterpart of `loginCallback`: it exchanges the ID token issued by a native provider SDK for a ReachFive
-  `AuthToken`. Used internally by Sign In With Apple, and intended for integrators writing their own
-  `Provider`.
-
+- `SdkConfig`:
+  - init takes a new optional parameter `originWebAuthn`, so the WebAuthn origin can be configured once instead of being repeated on every passkey request
+  - new field `normalizedDomain`: the normalized domain according to RFC 6454 for comparing hosts
+- New `WebProvider` to register a web provider with a `variant` and a completion `mode`. See the [Universal-link web providers](https://developer.reachfive.com/sdk-ios/providerCreator.html#universal-link-web-providers).
+- `webviewLogin` has two new parameters: 
+  - `webSessionMode` to shape the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
+  - `loginUrlFragment` to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
+- New method `login(withProvider:…)`, intended for integrators writing their own `Provider`: exchanges the ID token issued by a native provider SDK for a ReachFive `AuthToken`.
 
 ## v10.0.1
 

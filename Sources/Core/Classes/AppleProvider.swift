@@ -52,7 +52,7 @@ class ConfiguredAppleProvider: NSObject, Provider {
         let window = try await presenting.anchor()
 
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
-        let request = ResolvedNativeLoginRequest(anchor: window, originWebAuthn: "https://\(reachfive.sdkConfig.domain)", scopes: scope, origin: origin)
+        let request = ResolvedNativeLoginRequest(anchor: window, originWebAuthn: reachfive.sdkConfig.originWebAuthn, scopes: scope, origin: origin)
 
         let flow = try await reachfive.credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self, reachFive: reachfive)
 

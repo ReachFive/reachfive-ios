@@ -20,9 +20,9 @@ class LoginCustomWebviewController: UIViewController {
 extension LoginCustomWebviewController: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
         let app: UIApplication = UIApplication.shared
-        // not sure why the callback has a scheme in lowercase
         let reachfive = AppDelegate.reachfive()
-        guard let url = navigationAction.request.url, url.scheme == reachfive.sdkConfig.customScheme.lowercased(), app.canOpenURL(url) else {
+        // A scheme is case-insensitive (RFC 3986 §3.1)
+        guard let url = navigationAction.request.url, url.scheme?.lowercased() == reachfive.sdkConfig.customScheme.lowercased(), app.canOpenURL(url) else {
             return .allow
         }
 

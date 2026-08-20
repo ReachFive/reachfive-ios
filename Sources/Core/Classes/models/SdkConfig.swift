@@ -1,10 +1,24 @@
 import Foundation
 
 public class SdkConfig {
+    /// Your ReachFive domain, not normalized.
     public let domain: String
+
+    /// Like `domain`, but normalized the way RFC 6454 §4, step 5 requires for comparing hosts: lower-cased, with an IPv6
+    /// literal's brackets restored (`URL.host` strips them). `domain` itself is kept exactly as given, so
+    /// prefer this whenever you compare it against another host
+    public var normalizedDomain: String {
+        baseUrlComponents.url?.normalizedHost ?? domain.lowercased()
+    }
+
     public let clientId: String
 
-    ///The scheme. Defaults to `reachfive-clientId`
+    /// The base of every API URL: scheme and host, validated at init. `ReachFiveApi.createUrl` copies it and
+    /// adds a path and query items — a `struct`, so each caller gets its own copy.
+    internal let baseUrlComponents: URLComponents
+
+    /// The scheme. Defaults to `reachfive-clientId`, kept in the case given — the one the console whitelists.
+    /// A scheme is case-insensitive (RFC 3986 §3.1), so comparisons against it go through `normalizedScheme`.
     public let customScheme: String
     /// The redirect URI for passwordless. Defaults to `reachfive-clientId://callback`
     public let redirectUri: URL
@@ -15,6 +29,19 @@ public class SdkConfig {
     /// The redirect URI for email verification. Defaults to `reachfive-clientId://email-verification`
     public let emailVerificationUri: URL
 
+    /// The WebAuthn origin sent to the server for every passkey request that does not carry its own, as a
+    /// serialized origin (`https://host`): scheme, host and non-default port only
+    public let originWebAuthn: String
+
+    /// Validates parameters and stops the program with a `preconditionFailure` at the first problem:
+    /// - `domain` must be a bare host: no scheme, port, path or trailing slash;
+    /// - `customScheme` must be a valid URL scheme (RFC 3986 §3.1);
+    /// - `redirectUri`/`mfaUri`/`accountRecoveryUri`/`emailVerificationUri` must carry a scheme plus a host
+    ///   or a path; an `http`/`https` one must have a host;
+    /// - `originWebAuthn` must be a valid origin (RFC 6454 §6.2: ASCII Serialization of an Origin).
+    ///
+    /// `originWebAuthn` defaults to `https://<domain>`, which is right unless your passkeys are scoped to a
+    /// different relying party, such as a custom domain or one shared across several of your apps.
     public init(
         domain: String,
         clientId: String,
@@ -22,45 +49,76 @@ public class SdkConfig {
         redirectUri: URL? = nil,
         mfaUri: URL? = nil,
         accountRecoveryUri: URL? = nil,
-        emailVerificationUri: URL? = nil
+        emailVerificationUri: URL? = nil,
+        originWebAuthn: URL? = nil
     ) {
+        guard let base = Self.baseComponents(domain: domain) else {
+            preconditionFailure("'\(domain)' is not a valid domain: it must be a bare host, with no scheme, port, path or trailing slash, e.g. 'example.reach5.net'.")
+        }
+        self.baseUrlComponents = base.components
         self.domain = domain
         self.clientId = clientId
 
+        // Not lower-cased: the console whitelists the derived callback URLs in the clientId's own case and
+        // compares `redirect_uri` byte for byte, RFC 3986 §3.1 notwithstanding.
         let scheme = customScheme ?? "reachfive-\(clientId)"
-        self.customScheme = scheme
-
-        // Built unconditionally so that an invalid scheme is caught at init even when every URI is provided explicitly
-        let defaultRedirectUri = Self.defaultUri(scheme: scheme, path: "callback")
-        self.redirectUri = redirectUri ?? defaultRedirectUri
-        self.mfaUri = mfaUri ?? Self.defaultUri(scheme: scheme, path: "mfa")
-        self.emailVerificationUri = emailVerificationUri ?? Self.defaultUri(scheme: scheme, path: "email-verification")
-        self.accountRecoveryUri = accountRecoveryUri ?? Self.defaultUri(scheme: scheme, path: "account-recovery")
-    }
-
-    /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing,
-    /// the same rules the rest of the system will enforce on every redirect.
-    /// Checking the parsed scheme is required because a malformed input can still parse,
-    /// just not as intended: with "my:app", "my" becomes the scheme and "app://callback" the path;
-    /// with "my/app" the whole string parses as a scheme-less relative reference.
-    internal static func makeUri(scheme: String, path: String) -> URL? {
-        guard !scheme.isEmpty, // "://callback" parses, with an empty scheme
-              let url = URL(string: "\(scheme)://\(path)"),
-              url.scheme?.lowercased() == scheme.lowercased()
-        else {
-            return nil
-        }
-        return url
-    }
-
-    private static func defaultUri(scheme: String, path: String) -> URL {
-        guard let url = makeUri(scheme: scheme, path: path) else {
+        guard Self.isValidScheme(scheme) else {
             preconditionFailure("""
                 '\(scheme)' is not a valid URL scheme: it must start with a letter and contain only letters, digits, '+', '-' or '.'. \
                 If no customScheme is passed, the scheme is derived from the clientId as 'reachfive-<clientId>'. \
                 Pass an explicit valid customScheme, and declare it in your app's Info.plist (CFBundleURLSchemes) and in your ReachFive console.
                 """)
         }
-        return url
+        self.customScheme = scheme
+
+        self.redirectUri = Self.checkedUri(redirectUri, scheme, name: "callback")
+        self.mfaUri = Self.checkedUri(mfaUri, scheme, name: "mfa")
+        self.emailVerificationUri = Self.checkedUri(emailVerificationUri, scheme, name: "email-verification")
+        self.accountRecoveryUri = Self.checkedUri(accountRecoveryUri, scheme, name: "account-recovery")
+
+        if let originWebAuthn {
+            guard let origin = originWebAuthn.serializedOrigin else {
+                preconditionFailure("'\(originWebAuthn)' is not a valid WebAuthn origin: it must be an absolute URL with a scheme and a host, e.g. https://auth.example.com.")
+            }
+            self.originWebAuthn = origin
+        } else {
+            self.originWebAuthn = base.origin
+        }
+    }
+
+    /// Validate the domain by constructing it in a URLComponents.
+    /// It returns the serialized origin alongside it for convenience.
+    internal static func baseComponents(domain: String) -> (components: URLComponents, origin: String)? {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = domain
+        guard let origin = components.url?.serializedOrigin else { return nil }
+        return (components, origin)
+    }
+
+    /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing.
+    internal static func isValidScheme(_ scheme: String) -> Bool {
+        // Checked against a throwaway host, just to activate the scheme validation.
+        guard !scheme.isEmpty, // "://y" parses, with an empty scheme
+              let url = URL(string: "\(scheme)://y")
+        else {
+            return false
+        }
+        return url.normalizedScheme == scheme.lowercased()
+    }
+
+    private static func checkedUri(_ uri: URL?, _ scheme: String, name: String) -> URL {
+        // The scheme is already validated, and the names are literal, so the force-unwrap cannot fail
+        guard let uri else { return URL(string: "\(scheme)://\(name)")! }
+        guard uri.isValidCallbackUri else {
+            preconditionFailure("""
+                '\(uri)' is not a valid \(name) URI: it needs a scheme, plus a host (required for 'http'/'https') \
+                or a path starting with '/'. Any of '\(scheme)://\(name)', \
+                'com.example.app:/oauth2redirect/\(name)' or 'https://your-app.com/\(name)' works. \
+                One slash and two are different endpoints, so match your ReachFive console entry exactly. \
+                Leave '\(name)' unset for the default derived from customScheme.
+                """)
+        }
+        return uri
     }
 }
