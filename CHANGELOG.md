@@ -15,6 +15,8 @@
 - `ProviderCreator`: the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode`, `webviewLogin` or the new `login(withProvider:…)`.
   See the [Implement a custom provider](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) guide.
 - `Provider.login` and the native passkey requests takes a `Presentation` instead of a `UIViewController?` or an `anchor: ASPresentationAnchor` to handle the different type of conformance itself (either conforming to `ASWebAuthenticationPresentationContextProviding` or needing a `ASPresentationAnchor`)
+- CocoaPods support is dropped, the SDKs are distributed with Swift Package Manager only.
+  If you were integrating with CocoaPods, note that the pod re-exported `UIKit` and `Foundation` through its generated umbrella header, so `import Reach5` brought them into scope implicitly. It no longer does: add the explicit `import UIKit` / `import Foundation` your files need.
 
 ### New features
 - `SdkConfig`:
