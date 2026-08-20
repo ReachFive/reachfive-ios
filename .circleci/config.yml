@@ -42,7 +42,15 @@ jobs:
       - checkout
       - run:
           name: Run the Reach5Tests suite on both iOS simulators
-          command: xcodebuild -scheme Reach5 << parameters.simulators >> test
+          command: xcodebuild -scheme Reach5 << parameters.simulators >> -resultBundlePath /tmp/reach5-test-results.xcresult test
+      # Temporary: TmpHostProbe (print-based) produced no output in this step's own log on either
+      # device, passing or failing — CircleCI does not capture the test process's stdout here. The
+      # crash detail for testHostlessAuthorityIsNilNotEmpty on iOS 17.5 should be in the .xcresult
+      # instead. Drop this and the bundle path above once explained.
+      - store_artifacts:
+          path: /tmp/reach5-test-results.xcresult
+          destination: reach5-test-results.xcresult
+          when: always
       - run:
           name: Run the same suite on Mac Catalyst
           # The destination the team uses locally, so CI covers what they see.
