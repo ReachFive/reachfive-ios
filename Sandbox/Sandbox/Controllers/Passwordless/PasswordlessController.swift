@@ -31,7 +31,7 @@ class PasswordlessController: UIViewController {
                     .startPasswordless(
                         .Email(
                             email: emailInput.text ?? "",
-                            redirectUri: URL(string: redirectUriInput.text ?? ""),
+                            redirectUri: try typedRedirectUri(),
                             origin: "PasswordlessController.loginWithEmail"
                         )
                     )
@@ -49,7 +49,7 @@ class PasswordlessController: UIViewController {
                     .startPasswordless(
                         .PhoneNumber(
                             phoneNumber: phoneNumberInput.text ?? "",
-                            redirectUri: URL(string: redirectUriInput.text ?? ""),
+                            redirectUri: try typedRedirectUri(),
                             origin: "PasswordlessController.loginWithPhoneNumber"
                         )
                     )
@@ -58,6 +58,20 @@ class PasswordlessController: UIViewController {
                 self.presentErrorAlert(title: "Login with phone number failed", error)
             }
         }
+    }
+
+    /// The redirect URI typed in the field, or `nil` when it is left empty so the SDK falls back to the
+    /// `SdkConfig` default. A non-empty entry that does not parse is reported rather than silently dropped:
+    /// the field exists precisely to try out one given value.
+    private func typedRedirectUri() throws -> URL? {
+        guard let text = redirectUriInput.text, !text.isEmpty else { return nil }
+        guard let uri = URL(string: text) else { throw InvalidRedirectUri(text: text) }
+        return uri
+    }
+
+    private struct InvalidRedirectUri: LocalizedError {
+        let text: String
+        var errorDescription: String? { "'\(text)' is not a valid URL." }
     }
 
     @IBAction func verifyCode(_ sender: Any) {

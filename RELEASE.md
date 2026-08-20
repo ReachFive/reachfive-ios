@@ -13,24 +13,25 @@
     ```
 
 4. Update the [CHANGELOG.md](CHANGELOG.md) file
-5. Test the modifications on the SPM project DemoSharedCredentials
-6. Ask to create a new release version in JIRA and link the ticket to it
+5. Ask to create a new release version in JIRA and link the ticket to it
 
-7. Submit and merge the pull request
+6. Submit and merge the pull request
 
-8. Add git tag `x.x.x` to the merge commit
+7. Add git tag `x.x.x` to the merge commit
     ```sh
     git tag x.x.x
     ```
 
-9. Push the tag
+8. Push the tag
     ```sh
     git push origin x.x.x
     ```
 
-10. The tag is the published version: SPM resolves it directly, there is nothing else to publish
+9. The tag is the published version: SPM resolves it directly, there is nothing else to publish
 
-11. Release Reach5Future
+10. Release Reach5Future
+
+11. Bump the pinned versions in the SPM project DemoSharedCredentials to the new tags (Reach5 and, if released, Reach5Future) and test it. This is the first point where the actually-published versions can be resolved and built together.
 
 12. Finally, draft a new release in the [Github releases tab](https://github.com/ReachFive/reachfive-ios/releases) (copy & paste the changelog in the release's description)
 

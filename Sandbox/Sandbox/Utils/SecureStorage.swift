@@ -1,3 +1,4 @@
+import Foundation
 import Reach5
 
 public class SecureStorage: Storage {
