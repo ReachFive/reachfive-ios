@@ -25,8 +25,40 @@ class DataRequest {
             return parsed
         } catch {
             logger.log(error: error)
-            throw ReachFiveError.TechnicalError(reason: error.localizedDescription)
+            throw ReachFiveError.TechnicalError(reason: Self.reason(decoding: type, failedWith: error))
         }
+    }
+
+    /// A `DecodingError`'s `localizedDescription` is Foundation's generic sentence ("The data couldn't be
+    /// read because it isn't in the correct format."), translated into the device's language and naming
+    /// neither the field nor the problem — nothing an integrator, or a crash reporter, can act on. The error
+    /// carries both, so report them.
+    internal static func reason(decoding type: Any.Type, failedWith error: Error) -> String {
+        guard let error = error as? DecodingError else { return error.localizedDescription }
+
+        let context: DecodingError.Context
+        let problem: String
+        switch error {
+        case let .dataCorrupted(errorContext):
+            context = errorContext
+            problem = "unusable value"
+        case let .keyNotFound(key, errorContext):
+            context = errorContext
+            problem = "missing key '\(key.stringValue)'"
+        case let .typeMismatch(expected, errorContext):
+            context = errorContext
+            problem = "expected \(expected)"
+        case let .valueNotFound(expected, errorContext):
+            context = errorContext
+            problem = "no value for \(expected)"
+        @unknown default:
+            return error.localizedDescription
+        }
+
+        // Array elements appear in the path as "Index n", which is what locates the offending item.
+        let path = context.codingPath.map(\.stringValue).joined(separator: " → ")
+        let at = path.isEmpty ? "" : " at '\(path)'"
+        return "Could not decode \(type)\(at): \(problem). \(context.debugDescription)"
     }
 
     private func handleResponseStatus(status: Int, apiError: ApiError) -> ReachFiveError {
