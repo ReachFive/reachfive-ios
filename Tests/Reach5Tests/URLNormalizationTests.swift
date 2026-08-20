@@ -40,20 +40,17 @@ final class URLNormalizationTests: XCTestCase {
         XCTAssertEqual(URL(string: "https://[2001:DB8::1]")!.normalizedHost, "[2001:db8::1]")
     }
 
-    /// An authority with a port but no host reads back as `""` on macOS/Mac Catalyst and on every iOS
-    /// runtime checked except 17.5, where `URL.host` returns something else — confirmed only as "not `""`",
-    /// not as a specific value, and not tied to an iOS 18/26 boundary the way `normalizedPath` is.
-    /// `normalizedHost` treats every non-`""`, non-populated case as absent, so this asserts only that,
-    /// not which value `URL.host` itself returns.
-    // TEMPORARY: split into one input per test so a crash on one input doesn't hide the other two's
-    // result — to remove once the iOS 17.5 crash is understood, back into a single test.
-    func testHostlessAuthorityIsNilNotEmpty_port() {
+    /// An authority with a port but no host (`https://:8443`) or none at all (`https://`) reads back with
+    /// `normalizedHost == nil` everywhere tested, including iOS 17.5.
+    ///
+    /// The empty IPv6 literal (`https://[]`) is the one input Foundation itself disagrees on: `URL(string:)`
+    /// parses it everywhere tested except iOS 17.5, where it returns `nil` — confirmed by crashing on the
+    /// force-unwrap (`Test crashed with signal trap.`) when this row lived in its own test. `nil` is as
+    /// valid an answer as a parsed URL with no host: either way, there is no host to find. Hence `?.`
+    /// instead of `!.` for this one input, unlike the other two, which always parse.
+    func testHostlessAuthorityIsNilNotEmpty() {
         XCTAssertNil(URL(string: "https://:8443")!.normalizedHost)
-    }
-    func testHostlessAuthorityIsNilNotEmpty_emptyIPv6() {
-        XCTAssertNil(URL(string: "https://[]")!.normalizedHost)
-    }
-    func testHostlessAuthorityIsNilNotEmpty_bareAuthority() {
+        XCTAssertNil(URL(string: "https://[]")?.normalizedHost)
         XCTAssertNil(URL(string: "https://")!.normalizedHost)
     }
 
