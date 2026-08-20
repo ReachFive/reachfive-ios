@@ -57,13 +57,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         AppleProvider(variant: "natif"),
         WebProvider(name: .bconnect, variant: "natif", mode: .customScheme)
     ]
+    static let internalConfig = SdkInternalConfig(loggingEnabled: true)
     #if targetEnvironment(macCatalyst)
-    static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: true))
-    static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: true))
+    static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
+    static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
     let reachfive = macLocal
     #else
-    static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage)
-    static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: SdkInternalConfig(loggingEnabled: false))
+    static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
+    static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
     #if targetEnvironment(simulator)
     let reachfive = local
     #else
