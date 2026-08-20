@@ -73,6 +73,11 @@ class ActionController: UITableViewController {
                 }
             }
 
+            // Section Redirect URI
+            if indexPath.section == 6 {
+                navigationController?.pushViewController(RedirectUriMismatchController(), animated: true)
+            }
+
             // Section Others
             if indexPath.section == 4 {
                 // Login with refresh
