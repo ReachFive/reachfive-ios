@@ -1,31 +1,32 @@
-import Foundation
 import AuthenticationServices
+import Foundation
 
-public extension ReachFive {
-// On naming and signature for methods:
-// first argument indicates modality to distinguish the two primary way UI is shown to user: Modal and AutoFill
-// first argument label contains "with" instead of the method name in conformance to https://www.swift.org/documentation/api-design-guidelines/#give-prepositional-phrase-argument-label
-// non-discoverable methods also take a requestType parameter even though there is only one such type:
-//      1. to make it very clear that we are using passkeys
-//      2. to be future proof. For non-discoverable, there is already Security Keys that exist and that we could support.
-// AutoFill is @available(iOS 16.0, *) because ASAuthorizationController.performAutoFillAssistedRequests() itself is.
-// The other methods control version availability with their respective Authorization enum to increase flexibility.
-// For example the non-discoverable cannot be declared @available(iOS 16.0, *)
-// because in the future we could support Security Keys, which are available since iOS 15
+extension ReachFive {
+    // On naming and signature for methods:
+    // first argument indicates modality to distinguish the two primary way UI is shown to user: Modal and AutoFill
+    // first argument label contains "with" instead of the method name in conformance to https://www.swift.org/documentation/api-design-guidelines/#give-prepositional-phrase-argument-label
+    // non-discoverable methods also take a requestType parameter even though there is only one such type:
+    //      1. to make it very clear that we are using passkeys
+    //      2. to be future proof. For non-discoverable, there is already Security Keys that exist and that we could support.
+    // AutoFill is @available(iOS 16.0, *) because ASAuthorizationController.performAutoFillAssistedRequests() itself is.
+    // The other methods control version availability with their respective Authorization enum to increase flexibility.
+    // For example the non-discoverable cannot be declared @available(iOS 16.0, *)
+    // because in the future we could support Security Keys, which are available since iOS 15
 
     /// Signup with a passkey
     @available(iOS 16.0, *)
-    func signup(withRequest request: PasskeySignupRequest) async throws -> AuthToken {
+    public func signup(withRequest request: PasskeySignupRequest) async throws -> AuthToken {
         let domain = sdkConfig.domain
+        let scopes = request.scopes ?? scope
         let signupOptions = SignupOptions(
             origin: request.originWebAuthn ?? "https://\(domain)",
             friendlyName: request.friendlyName,
             profile: request.passkeyProfile,
             clientId: sdkConfig.clientId,
-            scope: request.scopes ?? scope
+            scope: scopes
         )
 
-        return try await credentialManager.signUp(withRequest: signupOptions, anchor: request.anchor, originR5: request.origin)
+        return try await credentialManager.signUp(withRequest: signupOptions, scopes: scopes, anchor: request.anchor, originR5: request.origin, reachFive: self)
     }
 
     /// Starts an auto-fill assisted passkey login request.
@@ -36,8 +37,8 @@ public extension ReachFive {
     /// - Returns: an AuthToken when the user was successfully logged in, or a ReachFiveError
     @available(macCatalyst, unavailable)
     @available(iOS 16.0, *)
-    func beginAutoFillAssistedPasskeyLogin(withRequest request: NativeLoginRequest) async throws -> AuthToken {
-        try await credentialManager.beginAutoFillAssistedPasskeySignIn(request: adapt(request))
+    public func beginAutoFillAssistedPasskeyLogin(withRequest request: NativeLoginRequest) async throws -> AuthToken {
+        try await credentialManager.beginAutoFillAssistedPasskeySignIn(request: resolve(request), reachFive: self)
     }
 
     /// Signs in the user using credentials stored in the keychain, letting the system display all credentials available to choose from in a modal sheet.
@@ -46,9 +47,9 @@ public extension ReachFive {
     ///   - requestTypes: choose between Password and/or Passkey
     ///   - mode: choose the behavior when there are no credentials available
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
-    func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) async throws -> LoginFlow {
+    public func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) async throws -> LoginFlow {
         let appleProvider = providers.first { $0.name == AppleProvider.NAME } as? ConfiguredAppleProvider
-        return try await credentialManager.login(withRequest: adapt(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider)
+        return try await credentialManager.login(withRequest: resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider, reachFive: self)
     }
 
     /// Signs in the user using credentials stored in the keychain, letting the system display the credentials corresponding to the given username in a modal sheet.
@@ -58,8 +59,8 @@ public extension ReachFive {
     ///   - requestTypes: only passkey are supported for now
     ///   - mode: choose the behavior when there are no credentials available
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
-    func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) async throws -> AuthToken {
-        try await credentialManager.login(withNonDiscoverableUsername: username, forRequest: adapt(request), usingModalAuthorizationFor: requestTypes, display: mode)
+    public func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) async throws -> AuthToken {
+        try await credentialManager.login(withNonDiscoverableUsername: username, forRequest: resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, reachFive: self)
     }
 
     /// Registers a new passkey for an existing user which currently has none in the keychain, or replace the existing passkey by a new one
@@ -68,26 +69,23 @@ public extension ReachFive {
     ///   - authToken: the token for the currently logged-in user
     /// - Returns: A ReachFiveError, or nothing when the Registration was successfull.
     @available(iOS 16.0, *)
-    func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws {
-        let domain = sdkConfig.domain
-        let originWebAuthn = request.originWebAuthn ?? "https://\(domain)"
-        //TODO supprimer l'ancienne clé du server
-        return try await credentialManager.registerNewPasskey(withRequest: NewPasskeyRequest(anchor: request.anchor, friendlyName: request.friendlyName, originWebAuthn: originWebAuthn, origin: request.origin), authToken: authToken)
+    public func registerNewPasskey(withRequest request: NewPasskeyRequest, authToken: AuthToken) async throws {
+        // TODO: delete the former key from the server
+        try await credentialManager.registerNewPasskey(withRequest: request, originWebAuthn: request.originWebAuthn ?? "https://\(sdkConfig.domain)", authToken: authToken, reachFive: self)
     }
 
     @available(iOS 16.0, *)
-    func resetPasskeys(withRequest request: ResetPasskeyRequest) async throws {
-        let domain = sdkConfig.domain
-        let originWebAuthn = request.originWebAuthn ?? "https://\(domain)"
-        return try await credentialManager.resetPasskeys(withRequest: ResetPasskeyRequest(verificationCode: request.verificationCode, friendlyName: request.friendlyName, anchor: request.anchor, email: request.email, phoneNumber: request.phoneNumber, originWebAuthn: originWebAuthn, origin: request.origin))
+    public func resetPasskeys(withRequest request: ResetPasskeyRequest) async throws {
+        try await credentialManager.resetPasskeys(withRequest: request, originWebAuthn: request.originWebAuthn ?? "https://\(sdkConfig.domain)", reachFive: self)
     }
 
-    private func adapt(_ request: NativeLoginRequest) -> NativeLoginRequest {
-        let domain = sdkConfig.domain
-        let originWebAuthn = request.originWebAuthn ?? "https://\(domain)"
-        let scopes = request.scopes ?? scope
-
-        return NativeLoginRequest(anchor: request.anchor, originWebAuthn: originWebAuthn, scopes: scopes, origin: request.origin)
+    private func resolve(_ request: NativeLoginRequest) -> ResolvedNativeLoginRequest {
+        ResolvedNativeLoginRequest(
+            anchor: request.anchor,
+            originWebAuthn: request.originWebAuthn ?? "https://\(sdkConfig.domain)",
+            scopes: request.scopes ?? scope,
+            origin: request.origin
+        )
     }
 }
 
@@ -95,6 +93,16 @@ public enum Username {
     case Unspecified(_ username: String)
     case Email(_ email: String)
     case PhoneNumber(_ phoneNumber: String)
+
+    /// The two identifier fields the server expects. `.Unspecified` is split by the only heuristic the SDK
+    /// has: an identifier containing "@" is an email, anything else is a phone number.
+    var identifiers: (email: String?, phoneNumber: String?) {
+        switch self {
+        case let .Unspecified(username): username.contains("@") ? (username, nil) : (nil, username)
+        case let .Email(email): (email, nil)
+        case let .PhoneNumber(phoneNumber): (nil, phoneNumber)
+        }
+    }
 }
 
 public enum ModalAuthorization: Equatable {

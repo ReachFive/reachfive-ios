@@ -16,51 +16,53 @@ public class AppleProvider: ProviderCreator {
         providerConfig: ProviderConfig,
         clientConfigResponse: ClientConfigResponse
     ) -> Provider {
-        ConfiguredAppleProvider(reachFive: reachFive,
-                                providerConfig: providerConfig,
-                                clientConfigResponse: clientConfigResponse)
+        ConfiguredAppleProvider(
+            reachFive: reachFive,
+            providerConfig: providerConfig,
+            clientConfigResponse: clientConfigResponse
+        )
     }
 }
 
 class ConfiguredAppleProvider: NSObject, Provider {
     let name: String = AppleProvider.NAME
 
-    let sdkConfig: SdkConfig
     let providerConfig: ProviderConfig
     let clientConfigResponse: ClientConfigResponse
-    let credentialManager: CredentialManager
+    /// `weak`: ReachFive retains its providers, a strong reference here would create a
+    /// ReachFive ↔ ConfiguredAppleProvider cycle and the SDK graph would never be deallocated.
+    private weak var reachfive: ReachFive?
 
-    public init(
+    init(
         reachFive: ReachFive,
         providerConfig: ProviderConfig,
         clientConfigResponse: ClientConfigResponse
     ) {
-        self.sdkConfig = reachFive.sdkConfig
+        reachfive = reachFive
         self.providerConfig = providerConfig
         self.clientConfigResponse = clientConfigResponse
-        self.credentialManager = reachFive.credentialManager
     }
 
-    public func login(
+    func login(
         scope: [String]?,
         origin: String,
         presenting: Presentation
     ) async throws -> AuthToken {
+        guard let reachfive else { throw ReachFiveError.TechnicalError(reason: "ReachFive instance was deallocated") }
         let window = try await presenting.anchor()
 
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
-        let request = NativeLoginRequest(anchor: window, originWebAuthn: "https://\(sdkConfig.domain)", scopes: scope, origin: origin)
+        let request = ResolvedNativeLoginRequest(anchor: window, originWebAuthn: "https://\(reachfive.sdkConfig.domain)", scopes: scope, origin: origin)
 
-        let flow = try await credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self)
+        let flow = try await reachfive.credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self, reachFive: reachfive)
 
         switch flow {
-        case .AchievedLogin(let authToken): return authToken
-        case .OngoingStepUp:                throw ReachFiveError.TechnicalError(reason: "Should not happen: MFA Step Up in a Sign In with Apple flow")
+        case let .AchievedLogin(authToken): return authToken
+        case .OngoingStepUp: throw ReachFiveError.TechnicalError(reason: "Should not happen: MFA Step Up in a Sign In with Apple flow")
         }
     }
 
-    public func logout() {
-    }
+    func logout() {}
 
     override var description: String {
         "Provider: \(name)"
