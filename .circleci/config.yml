@@ -51,6 +51,14 @@ jobs:
       - store_artifacts:
           path: docs/verification/report.md
           destination: doc-examples-report.md
+  ci-passed:
+    # Single fan-in job so the GitHub required status check has one stable name
+    # regardless of how many CircleCI jobs run — add new jobs to `requires`
+    # below instead of touching branch protection settings again.
+    docker:
+      - image: cimg/base:current
+    steps:
+      - run: echo "build and test passed"
 
 default_workflows_tags: &default_workflows_tags
   filters:
@@ -76,3 +84,8 @@ workflows:
           <<: *default_workflows_tags
       - check-doc-examples:
           <<: *release_branches
+      - ci-passed:
+          <<: *default_workflows_tags
+          requires:
+            - build
+            - test
