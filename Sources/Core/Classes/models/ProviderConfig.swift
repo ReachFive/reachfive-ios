@@ -6,9 +6,8 @@ public class ProviderConfig: Codable {
     public let clientId: String?
     public let scope: [String]?
 
-    /// Held as a string, not a `URL`: `URL(string:)` rejects `""`, which an unset field in the console yields,
-    /// and a `Decodable` array is all-or-nothing — one such value aborted the whole
-    /// `/identity/v1/providers` payload, losing every provider and leaving `initialize()` in failure.
+    /// Held as a string, not a `URL`: `URL(string:)` rejects `""` and a `Decodable` array is all-or-nothing
+    ///  one such value aborted the whole `/identity/v1/providers` payload, losing every provider and leaving `initialize()` in failure.
     private let rawUniversalLink: String?
 
     private enum CodingKeys: String, CodingKey {
@@ -18,9 +17,8 @@ public class ProviderConfig: Codable {
     }
 
     /// `nil` when the configuration carries no link that could serve as one — a host is what an `.https`
-    /// callback of `ASWebAuthenticationSession` needs, and `URL(string:)` reads a value such as `"toto"` as a
-    /// relative reference that has none. The provider still works: only its universal-link mode needs this,
-    /// and `DefaultProvider.init` reports its absence.
+    /// callback of `ASWebAuthenticationSession` needs, and `URL(string:)` reads a value such as `"empty"` as a
+    /// relative reference that has none.
     public var universalLink: URL? {
         guard let rawUniversalLink, let url = URL(string: rawUniversalLink), url.normalizedHost != nil else {
             return nil
