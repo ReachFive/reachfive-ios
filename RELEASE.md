@@ -12,7 +12,7 @@
     ./set_version.sh
     ```
 
-4. Update the [CHANGELOG.md](CHANGELOG.md) file (don't forget to move the unreleased changes to their own version section)
+4. Update the [CHANGELOG.md](CHANGELOG.md) file (don't forget to move the unreleased changes to their own section)
 5. Ask to create a new release version in JIRA and link the ticket to it
 
 6. Submit and merge the pull request
