@@ -14,8 +14,9 @@ class SignupController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         emailInput.text = initialEmail
-        emailVerificationNotification = NotificationCenter.default.addObserver(forName: .DidReceiveEmailVerificationCallback, object: nil, queue: nil) { note in
+        emailVerificationNotification = NotificationCenter.default.addObserver(forName: .DidReceiveEmailVerificationCallback, object: nil, queue: nil) { [weak self] note in
             Task { @MainActor in
+                guard let self else { return }
                 if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
                     self.dismiss(animated: true)
                     switch result {
@@ -26,6 +27,12 @@ class SignupController: UIViewController {
                     }
                 }
             }
+        }
+    }
+
+    deinit {
+        if let emailVerificationNotification {
+            NotificationCenter.default.removeObserver(emailVerificationNotification)
         }
     }
     

@@ -13,14 +13,21 @@ class PasswordlessController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { (note) in
+        tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { [weak self] (note) in
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
                 Task {
+                    guard let self else { return }
                     await self.handleAuthToken(errorMessage: "Passwordless failed") {
                         try result.get()
                     }
                 }
             }
+        }
+    }
+
+    deinit {
+        if let tokenNotification {
+            NotificationCenter.default.removeObserver(tokenNotification)
         }
     }
 
