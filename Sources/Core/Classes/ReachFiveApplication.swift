@@ -23,7 +23,9 @@ public extension ReachFive {
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        Task {
+        // On the main actor: the hook we forward is a UIKit app-lifecycle callback, and the native
+        // SDKs behind the providers expect it on the main thread — as UIKit called us here.
+        Task { @MainActor in
             do {
                 for provider in try await initialize() {
                     let _ = provider.application(application, didFinishLaunchingWithOptions: launchOptions)
