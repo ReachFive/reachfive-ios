@@ -49,10 +49,7 @@ public class AuthToken: Codable {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
         let parts = idToken.components(separatedBy: ".")
-        guard
-            parts.count == 3,
-            let data = parts[1].decodeBase64Url() else
-        {
+        guard parts.count == 3, let data = parts[1].decodeBase64Url() else {
             throw ReachFiveError.TechnicalError(reason: "idToken invalid")
         }
 

@@ -26,7 +26,7 @@ extension ReachFive {
         Task {
             do {
                 for provider in try await initialize() {
-                    let _ = provider.application(application, didFinishLaunchingWithOptions: launchOptions)
+                    _ = provider.application(application, didFinishLaunchingWithOptions: launchOptions)
                 }
             } catch {
                 // TODO: faire une passe de cohérence sur l'utilisation de #if DEBUG et du Logger

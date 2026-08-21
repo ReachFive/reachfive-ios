@@ -286,8 +286,8 @@ class CredentialManager: NSObject {
         fetchAuthenticationOptions: (ReachFive, WebAuthnLoginRequest) async throws -> AuthenticationOptions = { try await $0.reachFiveApi.createWebAuthnAuthenticationOptions(webAuthnLoginRequest: $1) }
     ) async throws -> BuiltRequests {
         var requests: [ASAuthorizationRequest] = []
-        var siwa: SignInWithApple? = nil
-        var firstDropped: Error? = nil
+        var siwa: SignInWithApple?
+        var firstDropped: Error?
 
         for type in requestTypes {
             do {
