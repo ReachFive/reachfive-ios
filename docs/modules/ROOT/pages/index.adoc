@@ -218,7 +218,7 @@ See <<Info.plist reference>> for a comprehensive look at the file.
 [#wechat-connect]
 === WeChat Connect
 
-As of {localdate}, WeChat is not yet available for our iOS SDK version {page-component-version}.
+As of {localdate}, WeChat is not yet available for our iOS SDK version {sdk-ios-latest-version}.
 We will update this page accordingly when it is available.
 
 This module uses the WeChat native SDK to be able to interact with the WeChat app.
