@@ -8,11 +8,11 @@ public func mkString(start: String, sep: String, end: String, fields: [(field: A
     let nonNilFields = fields.compactMap { field, name in
         if let field {
             switch field {
-            case is String: return "\(name): \"\(field)\""
-            default: return "\(name): \(field)"
+            case is String: "\(name): \"\(field)\""
+            default: "\(name): \(field)"
             }
         } else {
-            return nil
+            nil
         }
     }
     return mkString(start: start, sep: sep, end: end, fields: nonNilFields)

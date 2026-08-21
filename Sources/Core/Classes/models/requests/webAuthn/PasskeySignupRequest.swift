@@ -1,5 +1,5 @@
-import Foundation
 import AuthenticationServices
+import Foundation
 
 public class PasskeySignupRequest {
     public let passkeyProfile: ProfilePasskeySignupRequest
@@ -9,7 +9,7 @@ public class PasskeySignupRequest {
     public let scopes: [String]?
     public let presenting: Presentation
     public let origin: String?
-    
+
     public init(passkeyProfile: ProfilePasskeySignupRequest, friendlyName: String, presenting: Presentation, originWebAuthn: String? = nil, scopes: [String]? = nil, origin: String? = nil) {
         self.passkeyProfile = passkeyProfile
         self.friendlyName = friendlyName

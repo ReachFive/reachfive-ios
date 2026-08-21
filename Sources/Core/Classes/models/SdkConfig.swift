@@ -15,7 +15,7 @@ public class SdkConfig {
 
     /// The base of every API URL: scheme and host, validated at init. `ReachFiveApi.createUrl` copies it and
     /// adds a path and query items — a `struct`, so each caller gets its own copy.
-    internal let baseUrlComponents: URLComponents
+    let baseUrlComponents: URLComponents
 
     /// The scheme. Defaults to `reachfive-clientId`, kept in the case given — the one the console whitelists.
     /// A scheme is case-insensitive (RFC 3986 §3.1), so comparisons against it go through `normalizedScheme`.
@@ -55,7 +55,7 @@ public class SdkConfig {
         guard let base = Self.baseComponents(domain: domain) else {
             preconditionFailure("'\(domain)' is not a valid domain: it must be a bare host, with no scheme, port, path or trailing slash, e.g. 'example.reach5.net'.")
         }
-        self.baseUrlComponents = base.components
+        baseUrlComponents = base.components
         self.domain = domain
         self.clientId = clientId
 
@@ -64,10 +64,10 @@ public class SdkConfig {
         let scheme = customScheme ?? "reachfive-\(clientId)"
         guard Self.isValidScheme(scheme) else {
             preconditionFailure("""
-                '\(scheme)' is not a valid URL scheme: it must start with a letter and contain only letters, digits, '+', '-' or '.'. \
-                If no customScheme is passed, the scheme is derived from the clientId as 'reachfive-<clientId>'. \
-                Pass an explicit valid customScheme, and declare it in your app's Info.plist (CFBundleURLSchemes) and in your ReachFive console.
-                """)
+            '\(scheme)' is not a valid URL scheme: it must start with a letter and contain only letters, digits, '+', '-' or '.'. \
+            If no customScheme is passed, the scheme is derived from the clientId as 'reachfive-<clientId>'. \
+            Pass an explicit valid customScheme, and declare it in your app's Info.plist (CFBundleURLSchemes) and in your ReachFive console.
+            """)
         }
         self.customScheme = scheme
 
@@ -88,7 +88,7 @@ public class SdkConfig {
 
     /// Validate the domain by constructing it in a URLComponents.
     /// It returns the serialized origin alongside it for convenience.
-    internal static func baseComponents(domain: String) -> (components: URLComponents, origin: String)? {
+    static func baseComponents(domain: String) -> (components: URLComponents, origin: String)? {
         var components = URLComponents()
         components.scheme = "https"
         components.host = domain
@@ -97,11 +97,11 @@ public class SdkConfig {
     }
 
     /// Validation by construction: `URL(string:)` applies Foundation's RFC 3986 parsing.
-    internal static func isValidScheme(_ scheme: String) -> Bool {
+    static func isValidScheme(_ scheme: String) -> Bool {
         // Checked against a throwaway host, just to activate the scheme validation.
         guard !scheme.isEmpty, // "://y" parses, with an empty scheme
-              let url = URL(string: "\(scheme)://y")
-        else {
+              let url = URL(string: "\(scheme)://y") else
+        {
             return false
         }
         return url.normalizedScheme == scheme.lowercased()
@@ -112,12 +112,12 @@ public class SdkConfig {
         guard let uri else { return URL(string: "\(scheme)://\(name)")! }
         guard uri.isValidCallbackUri else {
             preconditionFailure("""
-                '\(uri)' is not a valid \(name) URI: it needs a scheme, plus a host (required for 'http'/'https') \
-                or a path starting with '/'. Any of '\(scheme)://\(name)', \
-                'com.example.app:/oauth2redirect/\(name)' or 'https://your-app.com/\(name)' works. \
-                One slash and two are different endpoints, so match your ReachFive console entry exactly. \
-                Leave '\(name)' unset for the default derived from customScheme.
-                """)
+            '\(uri)' is not a valid \(name) URI: it needs a scheme, plus a host (required for 'http'/'https') \
+            or a path starting with '/'. Any of '\(scheme)://\(name)', \
+            'com.example.app:/oauth2redirect/\(name)' or 'https://your-app.com/\(name)' works. \
+            One slash and two are different endpoints, so match your ReachFive console entry exactly. \
+            Leave '\(name)' unset for the default derived from customScheme.
+            """)
         }
         return uri
     }

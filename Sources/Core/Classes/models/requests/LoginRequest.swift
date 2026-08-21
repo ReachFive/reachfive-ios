@@ -9,7 +9,7 @@ public class LoginRequest: Codable, DictionaryEncodable {
     public let clientId: String
     public let scope: String
     public let origin: String?
-    
+
     public init(email: String?, phoneNumber: String?, customIdentifier: String?, password: String, grantType: String, clientId: String, scope: String, origin: String? = nil) {
         self.email = email
         self.phoneNumber = phoneNumber

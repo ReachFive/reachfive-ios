@@ -1,20 +1,18 @@
-import Foundation
 import AuthenticationServices
+import Foundation
 
-public extension ReachFive {
-
+extension ReachFive {
     /// Orchestrates the whole web login: PKCE, authorize URL, web session (via the centralized carrier),
     /// then code exchange. The session is carried by `ReachFive` so that a callback arriving *outside* the
     /// sheet — through `application(_:open:)`, when a third-party app detour sends the user back —
     /// can complete it, even for a direct call to this public API.
-    func webviewLogin(_ request: WebviewLoginRequest) async throws -> AuthToken {
-
+    public func webviewLogin(_ request: WebviewLoginRequest) async throws -> AuthToken {
         // Dropped here rather than by `webAuthSession.start(...)`, because the PKCE write below has to happen
         // before the sheet opens, and lands in a slot shared by every authorize-style flow (see the FIXME): a
         // call that is going to be dropped must not leave its PKCE where the login under way expects its own.
         // Not airtight: reading the session suspends, so two calls in the same turn both get past this and
         // are only told apart by `start(...)`.
-        guard !(await webAuthSession.isLoginInProgress) else {
+        guard await !(webAuthSession.isLoginInProgress) else {
             Logger.shared.log("A web login is already in progress; this call is dropped before preparing anything.")
             throw ReachFiveError.AuthCanceled
         }
@@ -46,9 +44,10 @@ public extension ReachFive {
             url: authURL,
             mode: mode,
             presentationContextProvider: request.presentationContextProvider,
-            prefersEphemeralWebBrowserSession: request.prefersEphemeralWebBrowserSession)
+            prefersEphemeralWebBrowserSession: request.prefersEphemeralWebBrowserSession
+        )
 
         let code = try callbackURL.authorizationCode()
-        return try await self.authWithCode(code: code, pkce: pkce, redirectUri: mode.redirectUri)
+        return try await authWithCode(code: code, pkce: pkce, redirectUri: mode.redirectUri)
     }
 }

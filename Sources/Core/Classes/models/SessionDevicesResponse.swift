@@ -1,9 +1,8 @@
 import Foundation
 
-
 public class ListSessionDevices: Codable {
     public let sessionDevices: [SessionDevice]
-    
+
     public required init(sessionDevices: [SessionDevice]) {
         self.sessionDevices = sessionDevices
     }
@@ -27,7 +26,7 @@ public class SessionDevice: Codable {
     public let createdAt: String
     public let lastConnection: String
     public let expiresAt: String
-    
+
     public required init(
         id: String,
         tokenType: SessionDeviceTokenType,

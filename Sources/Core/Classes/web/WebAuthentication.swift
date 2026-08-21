@@ -30,7 +30,6 @@ import AuthenticationServices
 /// `@MainActor`: the whole `ASWebAuthenticationSession` domain is already main-thread.
 @MainActor
 final class WebAuthenticationSession {
-
     /// Whether a login is in progress, and everything its resolution needs between a session, a continuation, an expected callback and a boolean.
     private enum State {
         case idle
@@ -61,7 +60,11 @@ final class WebAuthenticationSession {
     /// Whether the slot is taken: a caller must not apply side effects *before* calling a `start(...)` that would  be knwon to be refused (see ``ReachFive/webviewLogin(_:)``).
     /// Internal onpurpose: an integrator has nothing to check, a dropped call already ends with `.AuthCanceled`.
     var isLoginInProgress: Bool {
-        if case .idle = state { false } else { true }
+        if case .idle = state {
+            false
+        } else {
+            true
+        }
     }
 
     private var state = State.idle
@@ -87,12 +90,13 @@ final class WebAuthenticationSession {
     /// - Throws: `.AuthCanceled` when a web login is already in progress — the call is dropped, the login
     ///   under way is untouched, and the caller has nothing to single out — or when the calling `Task` was
     ///   already cancelled, in which case nothing is presented at all.
-    func start(url: URL,
-               mode: WebSessionMode,
-               expectsAuthorizationCode: Bool = true,
-               presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
-               prefersEphemeralWebBrowserSession: Bool = false) async throws -> URL {
-
+    func start(
+        url: URL,
+        mode: WebSessionMode,
+        expectsAuthorizationCode: Bool = true,
+        presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
+        prefersEphemeralWebBrowserSession: Bool = false
+    ) async throws -> URL {
         // An already-cancelled Task must not present a sheet (its `onCancel` below would already have run,
         // to no effect, before the continuation was installed).
         guard !Task.isCancelled else { throw ReachFiveError.AuthCanceled }
@@ -106,21 +110,25 @@ final class WebAuthenticationSession {
         // Built before the slot is claimed, so its only failure path — a universal-link callback this OS or
         // this URL cannot support — throws without leaving a slot to release or a continuation to resume.
         let id = lastLoginId + 1
-        let prepared = try prepareSession(id: id,
-                                         url: url,
-                                         mode: mode,
-                                         expectsAuthorizationCode: expectsAuthorizationCode,
-                                         presentationContextProvider: presentationContextProvider,
-                                         prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession)
+        let prepared = try prepareSession(
+            id: id,
+            url: url,
+            mode: mode,
+            expectsAuthorizationCode: expectsAuthorizationCode,
+            presentationContextProvider: presentationContextProvider,
+            prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
+        )
         lastLoginId = id
         state = .claimed(id: id)
 
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
-                self.state = .running(Login(id: id,
-                                            continuation: continuation,
-                                            expectedCallback: prepared.expectedCallback,
-                                            session: prepared.session))
+                self.state = .running(Login(
+                    id: id,
+                    continuation: continuation,
+                    expectedCallback: prepared.expectedCallback,
+                    session: prepared.session
+                ))
 
                 if !prepared.session.start() {
                     // When start() returns false the completion handler may never be called, so the
@@ -139,14 +147,16 @@ final class WebAuthenticationSession {
 
     /// Builds the session for `mode` and says which `redirect_uri`, if any, the out-of-band channel should
     /// watch for. Deliberately free of any state mutation: `start(...)` calls it before claiming the slot.
-    private func prepareSession(id: Int,
-                                url: URL,
-                                mode: WebSessionMode,
-                                expectsAuthorizationCode: Bool,
-                                presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
-                                prefersEphemeralWebBrowserSession: Bool)
-    throws -> (session: ASWebAuthenticationSession, expectedCallback: URL?) {
-
+    private func prepareSession(
+        id: Int,
+        url: URL,
+        mode: WebSessionMode,
+        expectsAuthorizationCode: Bool,
+        presentationContextProvider: ASWebAuthenticationPresentationContextProviding,
+        prefersEphemeralWebBrowserSession: Bool
+    )
+        throws -> (session: ASWebAuthenticationSession, expectedCallback: URL?)
+    {
         let completionHandler: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
             // Everything hops to the main thread to avoid races.
             Task { @MainActor in
@@ -164,7 +174,8 @@ final class WebAuthenticationSession {
             session = ASWebAuthenticationSession(
                 url: url,
                 callbackURLScheme: baseScheme,
-                completionHandler: completionHandler)
+                completionHandler: completionHandler
+            )
 
         case let .universalLink(callback):
             guard #available(iOS 17.4, *), let host = callback.host else {
@@ -177,7 +188,8 @@ final class WebAuthenticationSession {
             session = ASWebAuthenticationSession(
                 url: url,
                 callback: .https(host: host, path: callback.path),
-                completionHandler: completionHandler)
+                completionHandler: completionHandler
+            )
         }
 
         // The window that acts as the session's presentation anchor.
@@ -192,7 +204,8 @@ final class WebAuthenticationSession {
     func tryComplete(externalCallbackURL url: URL) -> Bool {
         guard case let .running(login) = state,
               let expectedCallback = login.expectedCallback,
-              Self.isOurCallback(url, expectedCallback: expectedCallback) else {
+              Self.isOurCallback(url, expectedCallback: expectedCallback) else
+        {
             return false
         }
         complete(id: login.id, .success(url))
@@ -245,7 +258,7 @@ final class WebAuthenticationSession {
     /// is enough to tell our callback apart from the app's other links.
     nonisolated static func isOurCallback(_ url: URL, expectedCallback expected: URL) -> Bool {
         url.matchesEndpoint(of: expected)
-        && (url.queryValue("code") != nil || url.queryValue("error") != nil)
+            && (url.queryValue("code") != nil || url.queryValue("error") != nil)
     }
 
     /// Maps an `ASWebAuthenticationSession` error onto a `ReachFiveError`. Pure: the raw error is logged by

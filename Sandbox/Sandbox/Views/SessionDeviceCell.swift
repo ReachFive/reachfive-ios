@@ -1,19 +1,19 @@
-import UIKit
 import Reach5
+import UIKit
 
 class SessionDeviceCell: UITableViewCell {
     static let reuseIdentifier = "SessionDeviceCell"
 
-    @IBOutlet weak var deviceNameLabel: UILabel!
-    @IBOutlet weak var createdAtLabel: UILabel!
-    @IBOutlet weak var ipLabel: UILabel!
-    @IBOutlet weak var osLabel: UILabel!
-    @IBOutlet weak var userAgentLabel: UILabel!
-    @IBOutlet weak var deviceClassLabel: UILabel!
-    @IBOutlet weak var idLabel: UILabel!
-    @IBOutlet weak var locationLabel: UILabel!
-    @IBOutlet weak var tokenTypeLabel: UILabel!
-    @IBOutlet weak var lastConnectionLabel: UILabel!
+    @IBOutlet var deviceNameLabel: UILabel!
+    @IBOutlet var createdAtLabel: UILabel!
+    @IBOutlet var ipLabel: UILabel!
+    @IBOutlet var osLabel: UILabel!
+    @IBOutlet var userAgentLabel: UILabel!
+    @IBOutlet var deviceClassLabel: UILabel!
+    @IBOutlet var idLabel: UILabel!
+    @IBOutlet var locationLabel: UILabel!
+    @IBOutlet var tokenTypeLabel: UILabel!
+    @IBOutlet var lastConnectionLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -21,10 +21,10 @@ class SessionDeviceCell: UITableViewCell {
 
     func configure(with device: SessionDevice) {
         deviceNameLabel.text = device.deviceName ?? "Anonymous device"
-        
+
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        
+
         func formatDate(_ dateString: String) -> String {
             if let date = dateFormatter.date(from: dateString) {
                 let displayFormatter = DateFormatter()
@@ -43,10 +43,10 @@ class SessionDeviceCell: UITableViewCell {
         userAgentLabel.text = "UA: \(device.userAgentName ?? "N/A")"
         deviceClassLabel.text = "Class: \(device.deviceClass ?? "N/A")"
         idLabel.text = "ID: \(device.id)"
-        
+
         let location = [device.city, device.country].compactMap { $0 }.joined(separator: ", ")
         locationLabel.text = location.isEmpty ? "Location: N/A" : "Location: \(location)"
-        
+
         tokenTypeLabel.text = "Token: \(device.tokenType.rawValue)"
     }
 }

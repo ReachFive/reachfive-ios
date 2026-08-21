@@ -39,7 +39,6 @@ class NativePasswordController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         Task {
-
             let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "NativePasswordController.viewDidAppear")
             await handleLoginFlow {
                 try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Password], display: .Always)

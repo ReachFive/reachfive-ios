@@ -1,18 +1,18 @@
-import UIKit
 import Reach5
+import UIKit
 
-//TODO:
-//      - déplacer le bouton login with refresh ici pour que, même logué, on puisse afficher les passkey (qui sont expirées), ou alors juste faire du withFreshToken lors du clic sur le bouton Manage Passkeys
-//      - faire du pull-to-refresh soit sur la table des clés soit carrément sur tout le profil (déclencher le refresh token)
-//      - ajouter une option conversion vers un mdp fort automatique et vers SIWA
-//      - voir les SLO liés et bouton pour les délier
-//      - marquer spécialement l'identifiant principal dans l'UI
-//      - Ajouter des infos sur le jeton dans une nouvelle page
-//      - Choisir via les settings les infos des champs qu'on veut afficher
-//      - Ajouter un bouton pour supprimer le compte
+/// TODO:
+///      - déplacer le bouton login with refresh ici pour que, même logué, on puisse afficher les passkey (qui sont expirées), ou alors juste faire du withFreshToken lors du clic sur le bouton Manage Passkeys
+///      - faire du pull-to-refresh soit sur la table des clés soit carrément sur tout le profil (déclencher le refresh token)
+///      - ajouter une option conversion vers un mdp fort automatique et vers SIWA
+///      - voir les SLO liés et bouton pour les délier
+///      - marquer spécialement l'identifiant principal dans l'UI
+///      - Ajouter des infos sur le jeton dans une nouvelle page
+///      - Choisir via les settings les infos des champs qu'on veut afficher
+///      - Ajouter un bouton pour supprimer le compte
 class ProfileController: UIViewController {
     var authToken: AuthToken?
-    var profile: Profile = Profile()
+    var profile: Profile = .init()
     var updatedProfile: ProfileUpdate?
     var trustedDevicesState: DataState<[TrustedDevice]> = .loading
     var sessionDevicesState: DataState<[SessionDevice]> = .loading
@@ -30,7 +30,7 @@ class ProfileController: UIViewController {
         ("Gender", \.gender),
         ("Company", \.company),
         ("Locale", \.locale),
-        ("Picture", \.picture)
+        ("Picture", \.picture),
     ]
 
     var metadataFields: [(name: String, valuef: (Profile) -> String?)] = [
@@ -38,7 +38,7 @@ class ProfileController: UIViewController {
         ("Created At", { $0.createdAt }),
         ("Updated At", { $0.updatedAt }),
         ("Last Login", { $0.loginSummary?.lastLogin.map { date in format(date: date) } }),
-        ("Method", { $0.loginSummary?.lastProvider })
+        ("Method", { $0.loginSummary?.lastProvider }),
     ]
 
     var clearTokenObserver: NSObjectProtocol?
@@ -51,44 +51,44 @@ class ProfileController: UIViewController {
     let mfaRegistrationAvailable = ["Email", "Phone Number"]
     var isEditMode = false
 
-    @IBOutlet weak var profileTabBarItem: UITabBarItem!
+    @IBOutlet var profileTabBarItem: UITabBarItem!
     @IBOutlet var profileData: UITableView!
 
     override func viewDidLoad() {
         print("ProfileController.viewDidLoad")
         super.viewDidLoad()
         emailMfaVerifyNotification = NotificationCenter.default.addObserver(forName: .DidReceiveMfaVerifyEmail, object: nil, queue: nil) {
-            (note) in
+            note in
             Task { @MainActor in
-                if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
+                if let result = note.userInfo?["result"], let result = result as? Result<Void, ReachFiveError> {
                     self.dismiss(animated: true)
                     switch result {
                     case .success():
                         self.presentAlert(title: "Email mfa registering", message: "Email mfa registering success")
-                        self.fetchData() //TODO: recharger seulement la section
-                    case .failure(let error):
+                        self.fetchData() // TODO: recharger seulement la section
+                    case let .failure(error):
                         self.presentErrorAlert(title: "Email mfa registering failed", error)
                     }
                 }
             }
         }
         emailVerificationNotification = NotificationCenter.default.addObserver(forName: .DidReceiveEmailVerificationCallback, object: nil, queue: nil) {
-            (note) in
+            note in
             Task { @MainActor in
-                if let result = note.userInfo?["result"], let result = result as? Result<(), ReachFiveError> {
+                if let result = note.userInfo?["result"], let result = result as? Result<Void, ReachFiveError> {
                     self.dismiss(animated: true)
                     switch result {
                     case .success():
                         self.presentAlert(title: "Email validation", message: "Email validation success")
-                        self.fetchData() //TODO: recharger seulement la section
-                    case .failure(let error):
+                        self.fetchData() // TODO: recharger seulement la section
+                    case let .failure(error):
                         self.presentErrorAlert(title: "Email validation failed", error)
                     }
                 }
             }
         }
 
-        //TODO: mieux gérer les notifications pour ne pas en avoir plusieurs qui se déclenche pour le même évènement
+        // TODO: mieux gérer les notifications pour ne pas en avoir plusieurs qui se déclenche pour le même évènement
         clearTokenObserver = NotificationCenter.default.addObserver(forName: .DidClearAuthToken, object: nil, queue: nil) { _ in
             self.didLogout()
         }
@@ -103,19 +103,18 @@ class ProfileController: UIViewController {
             profileTabBarItem.selectedImage = profileTabBarItem.image
         }
 
-        self.profileData.delegate = self
-        self.profileData.dataSource = self
+        profileData.delegate = self
+        profileData.dataSource = self
 
         profileData.register(UINib(nibName: "ProfileContactInfoCell", bundle: nil), forCellReuseIdentifier: "ProfileContactInfoCell")
         profileData.register(UINib(nibName: "EditableProfileFieldCell", bundle: nil), forCellReuseIdentifier: "EditableProfileFieldCell")
         profileData.register(UINib(nibName: "LogoutCell", bundle: nil), forCellReuseIdentifier: "LogoutCell")
 
-        //TODO: supprimer le logout qui n'a jamais marché
+        // TODO: supprimer le logout qui n'a jamais marché
         //        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(toggleEditMode))
-
     }
 
-    //TODO:
+    // TODO:
     //    @objc func toggleEditMode() {
     //        isEditMode.toggle()
     //        self.navigationItem.rightBarButtonItem?.title = isEditMode ? "Save" : "Edit"
@@ -126,12 +125,10 @@ class ProfileController: UIViewController {
     //        }
     //    }
 
-
     override func viewWillAppear(_ animated: Bool) {
         print("ProfileController.viewWillAppear")
         fetchData()
     }
-
 
     func fetchData() {
         authToken = AppDelegate.storage.getToken()
@@ -141,7 +138,6 @@ class ProfileController: UIViewController {
         }
 
         Task {
-
             do {
                 let profile = try await AppDelegate.reachfive().getProfile(authToken: authToken)
                 let passkeys = await getPasskeysAndSetStatusImage(authToken: authToken)
@@ -176,12 +172,12 @@ class ProfileController: UIViewController {
     func fetchMfaCredentials(token: AuthToken) async {
         do {
             let mfaCredentialsResponse = try await AppDelegate.reachfive().mfaListCredentials(authToken: token)
-            self.mfaCredentials = mfaCredentialsResponse.credentials
+            mfaCredentials = mfaCredentialsResponse.credentials
             await MainActor.run {
                 self.profileData.reloadSections(IndexSet(integer: Section.ContactInformation.rawValue), with: .automatic)
             }
         } catch {
-            //TODO: peut-être? self.mfaCredentials = .error("Failed to load")
+            // TODO: peut-être? self.mfaCredentials = .error("Failed to load")
             print("Error fetching MFA credentials: \(error.localizedDescription)")
         }
     }
@@ -192,15 +188,15 @@ class ProfileController: UIViewController {
             print("fetch trusted devices")
             let devices = try await AppDelegate.reachfive().mfaListTrustedDevices(authToken: token)
             print("fetched trusted devices: \(devices)")
-            self.trustedDevicesState = .loaded(devices)
+            trustedDevicesState = .loaded(devices)
         } catch let ReachFiveError.TechnicalError(_, apiError) where apiError?.errorMessageKey == "error.feature.notAvailable" {
             print("error.feature.notAvailable")
-            self.trustedDevicesState = .unavailable
+            trustedDevicesState = .unavailable
         } catch let ReachFiveError.AuthFailure(_, apiError) where apiError?.errorMessageKey == "error.authn.mfa.stepup.required" {
             print("error.authn.mfa.stepup.required")
-            self.trustedDevicesState = .stepUpRequired
+            trustedDevicesState = .stepUpRequired
         } catch {
-            self.trustedDevicesState = .error("Failed to load")
+            trustedDevicesState = .error("Failed to load")
             print("Error fetching trusted devices: \(error.localizedDescription)")
         }
 
@@ -233,8 +229,7 @@ class ProfileController: UIViewController {
         }
     }
 
-
-//TODO: mettre un DataSate pour les passkeys (et le mfa?) qui peuvent ne pas être frais, ou alors faire un withFreshToken dans le fetchData
+    // TODO: mettre un DataSate pour les passkeys (et le mfa?) qui peuvent ne pas être frais, ou alors faire un withFreshToken dans le fetchData
     private func getPasskeysAndSetStatusImage(authToken: AuthToken) async -> [DeviceCredential] {
         // Use listWebAuthnCredentials to test if token is fresh
         // A fresh token is also needed for updating the profile and registering MFA credentials
@@ -268,32 +263,33 @@ class ProfileController: UIViewController {
         }
     }
 
-    internal static func username(profile: Profile) -> String {
-        let username: String
-        // here the priority for phone number over email follows the backend rule
+    static func username(profile: Profile) -> String {
         if let phone = profile.phoneNumber {
-            username = phone
+            phone
         } else if let email = profile.email {
-            username = email
+            email
         } else {
-            username = "Should have had an identifier"
+            "Should have had an identifier"
         }
-        return username
     }
 }
 
 // MARK: - Actions
+
 extension ProfileController {
     func logoutAction(revoke: Bool, webLogout: Bool) {
         Task {
-
             let request: WebSessionLogoutRequest? = if webLogout {
                 try? WebSessionLogoutRequest(presenting: Presentation(from: self), origin: "ProfileController.logoutAction")
-            } else { nil }
+            } else {
+                nil
+            }
 
             let token: AuthToken? = if revoke {
                 authToken
-            } else { nil }
+            } else {
+                nil
+            }
             try? await AppDelegate.reachfive().logout(webSessionLogout: request, revoke: token)
             AppDelegate.storage.removeToken()
             self.navigationController?.popViewController(animated: true)
@@ -306,16 +302,16 @@ extension ProfileController {
             return actions
         }
         guard let email = profile.email else {
-            actions.append(UIAction(title: "Add Email", handler: { _ in /*self.addEmail()*/ }))
+            actions.append(UIAction(title: "Add Email", handler: { _ in /* self.addEmail() */ }))
             return actions
         }
 
-        actions.append(UIAction(title: "Update", handler: { _ in /*self.updateEmail()*/ }))
-        actions.append(UIAction(title: "Delete", handler: { _ in /*self.deleteEmail()*/ }))
+        actions.append(UIAction(title: "Update", handler: { _ in /* self.updateEmail() */ }))
+        actions.append(UIAction(title: "Delete", handler: { _ in /* self.deleteEmail() */ }))
         actions.append(UIAction(title: "Copy", handler: { _ in UIPasteboard.general.string = email }))
 
         if profile.emailVerified != true {
-            actions.append(UIAction(title: "Verify", handler: { _ in /*self.verifyEmail()*/ }))
+            actions.append(UIAction(title: "Verify", handler: { _ in /* self.verifyEmail() */ }))
         }
 
         let isEnrolled = mfaCredentials.contains { $0.type == .email }
@@ -335,17 +331,17 @@ extension ProfileController {
             return actions
         }
         guard let phoneNumber = profile.phoneNumber else {
-            actions.append(UIAction(title: "Add Phone Number", handler: { _ in /*self.addPhoneNumber()*/ }))
+            actions.append(UIAction(title: "Add Phone Number", handler: { _ in /* self.addPhoneNumber() */ }))
             actions.append(UIAction(title: "Enroll a phone number as MFA", handler: { _ in self.enrollAnotherMfaPhoneNumber(token: authToken) }))
             return actions
         }
 
-        actions.append(UIAction(title: "Update Phone Number", handler: { _ in /*self.updatePhoneNumber()*/ }))
-        actions.append(UIAction(title: "Delete Phone Number", handler: { _ in /*self.deletePhoneNumber()*/ }))
+        actions.append(UIAction(title: "Update Phone Number", handler: { _ in /* self.updatePhoneNumber() */ }))
+        actions.append(UIAction(title: "Delete Phone Number", handler: { _ in /* self.deletePhoneNumber() */ }))
         actions.append(UIAction(title: "Copy Phone Number", handler: { _ in UIPasteboard.general.string = phoneNumber }))
 
         if profile.phoneNumberVerified != true {
-            actions.append(UIAction(title: "Verify Phone Number", handler: { _ in /*self.verifyPhoneNumber()*/ }))
+            actions.append(UIAction(title: "Verify Phone Number", handler: { _ in /* self.verifyPhoneNumber() */ }))
         }
 
         let isEnrolled = mfaCredentials.contains { $0.phoneNumber == phoneNumber }
@@ -372,7 +368,6 @@ extension ProfileController {
         return actions
     }
 
-
     func startStepUp(type: MfaCredentialItemType) {
         guard let authToken else {
             print("not logged in")
@@ -382,7 +377,7 @@ extension ProfileController {
         let mfaAction = MfaAction(presentationAnchor: self)
 
         let stepUpFlow = StartStepUp.AuthTokenFlow(authType: type, authToken: authToken, scope: SettingsViewController.selectedScopes, action: "start_stepup_tab")
-        
+
         Task {
             do {
                 let freshToken = try await mfaAction.mfaStart(stepUp: stepUpFlow)
@@ -426,12 +421,12 @@ extension ProfileController {
         Task {
             do {
                 let cred: String? =
-                switch credential {
-                case let .PhoneNumber(phoneNumber):
-                    phoneNumber
-                default:
-                    nil
-                }
+                    switch credential {
+                    case let .PhoneNumber(phoneNumber):
+                        phoneNumber
+                    default:
+                        nil
+                    }
                 try await AppDelegate.reachfive().mfaDeleteCredential(cred, authToken: token)
                 await fetchMfaCredentials(token: token)
             } catch {

@@ -7,7 +7,7 @@ public class LoginSummary: Codable, DictionaryEncodable {
     public let origins: [String]?
     public let devices: [String]?
     public let lastProvider: String?
-    
+
     public init(
         firstLogin: Int?,
         lastLogin: Int?,

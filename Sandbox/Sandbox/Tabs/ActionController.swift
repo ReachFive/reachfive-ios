@@ -1,7 +1,7 @@
-import Foundation
-import UIKit
-import Reach5
 import AuthenticationServices
+import Foundation
+import Reach5
+import UIKit
 
 class ActionController: UITableViewController {
     var tokenNotification: NSObjectProtocol?
@@ -9,7 +9,6 @@ class ActionController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         Task { @MainActor in
             tableView.deselectRow(at: indexPath, animated: true)
-
 
             // Section Native
             if indexPath.section == 1 {
@@ -95,16 +94,16 @@ class ActionController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
         // passkey section restricted to iOS >= 16
-        //TODO voir si on peut à la place carrément ne pas afficher la section
+        // TODO: voir si on peut à la place carrément ne pas afficher la section
         if indexPath.section == 2, #unavailable(iOS 16.0) {
             presentAlert(title: "Login", message: "Passkey requires iOS 16")
             return nil
         }
         #if targetEnvironment(macCatalyst)
-        if indexPath.section == 2, indexPath.row == 3 {
-            presentAlert(title: "Login", message: "AutoFill not available on macOS")
-            return nil
-        }
+            if indexPath.section == 2, indexPath.row == 3 {
+                presentAlert(title: "Login", message: "AutoFill not available on macOS")
+                return nil
+            }
         #endif
         return indexPath
     }

@@ -1,12 +1,13 @@
-import UIKit
 import Reach5
-//TODO: import Reach5Facebook
+import UIKit
+
+// TODO: import Reach5Facebook
 import AppTrackingTransparency
 
 class LoginWithProvidersController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     var providers: [Provider] = []
 
-    @IBOutlet weak var providersTableView: UITableView!
+    @IBOutlet var providersTableView: UITableView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +32,7 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
         //        }
     }
 
-    public func reloadProvidersData(providers: [Provider]) {
+    func reloadProvidersData(providers: [Provider]) {
         self.providers = providers
         providersTableView.reloadData()
     }
@@ -59,7 +60,6 @@ class LoginWithProvidersController: UIViewController, UITableViewDataSource, UIT
             }
         }
     }
-
 
     func numberOfSections(in tableView: UITableView) -> Int {
         1

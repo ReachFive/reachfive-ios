@@ -1,5 +1,5 @@
-import Foundation
 import AuthenticationServices
+import Foundation
 
 public class WebviewLoginRequest {
     public let state: String
@@ -59,11 +59,11 @@ public class WebviewLoginRequest {
         webSessionMode: WebSessionMode = .customScheme,
         loginUrlFragment: [String: String]? = nil
     ) throws {
-        self.init(
+        try self.init(
             state: state,
             nonce: nonce,
             scope: scope,
-            presentationContextProvider: try presenting.webAuthContextProvider(),
+            presentationContextProvider: presenting.webAuthContextProvider(),
             origin: origin,
             provider: provider,
             prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,

@@ -9,7 +9,7 @@ public class AccessTokenResponse: Codable {
     public let expiresIn: Int?
     public let error: String?
     public let errorDescription: String?
-    
+
     public init(idToken: String?, accessToken: String, refreshToken: String?, code: String?, tokenType: String?, expiresIn: Int?, error: String?, errorDescription: String?) {
         self.idToken = idToken
         self.accessToken = accessToken

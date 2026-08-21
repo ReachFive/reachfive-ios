@@ -6,13 +6,13 @@ public class ContinueEmailVerification {
 
     fileprivate init(reachFive: ReachFive, authToken: AuthToken) {
         self.authToken = authToken
-        self.reachfive = reachFive
+        reachfive = reachFive
     }
 
     public func verify(code: String, email: String, freshAuthToken: AuthToken? = nil) async throws {
-        let userAuthToken = freshAuthToken ?? self.authToken
+        let userAuthToken = freshAuthToken ?? authToken
         let verifyEmailRequest = VerifyEmailRequest(email: email, verificationCode: code)
-        return try await self.reachfive.reachFiveApi.verifyEmail(authToken: userAuthToken, verifyEmailRequest: verifyEmailRequest)
+        return try await reachfive.reachFiveApi.verifyEmail(authToken: userAuthToken, verifyEmailRequest: verifyEmailRequest)
     }
 }
 
@@ -21,28 +21,28 @@ public enum EmailVerificationResponse {
     case VerificationNeeded(_ continueEmailVerification: ContinueEmailVerification)
 }
 
-public extension ReachFive {
-    func getProfile(authToken: AuthToken) async throws -> Profile {
+extension ReachFive {
+    public func getProfile(authToken: AuthToken) async throws -> Profile {
         try await reachFiveApi.getProfile(authToken: authToken)
     }
 
-    func sendEmailVerification(authToken: AuthToken, redirectUrl: URL? = nil) async throws -> EmailVerificationResponse {
+    public func sendEmailVerification(authToken: AuthToken, redirectUrl: URL? = nil) async throws -> EmailVerificationResponse {
         let sendEmailVerificationRequest = SendEmailVerificationRequest(redirectUrl: redirectUrl ?? sdkConfig.emailVerificationUri)
 
         let resp = try await reachFiveApi.sendEmailVerification(authToken: authToken, sendEmailVerificationRequest: sendEmailVerificationRequest)
         return switch resp.verificationEmailSent {
         case false: EmailVerificationResponse.Success
-        case true : EmailVerificationResponse.VerificationNeeded(ContinueEmailVerification(reachFive: self, authToken: authToken))
+        case true: EmailVerificationResponse.VerificationNeeded(ContinueEmailVerification(reachFive: self, authToken: authToken))
         }
     }
 
-    func verifyEmail(authToken: AuthToken, code: String, email: String) async throws {
+    public func verifyEmail(authToken: AuthToken, code: String, email: String) async throws {
         let verifyEmailRequest = VerifyEmailRequest(email: email, verificationCode: code)
 
         return try await reachFiveApi.verifyEmail(authToken: authToken, verifyEmailRequest: verifyEmailRequest)
     }
 
-    func verifyPhoneNumber(
+    public func verifyPhoneNumber(
         authToken: AuthToken,
         phoneNumber: String,
         verificationCode: String
@@ -55,7 +55,7 @@ public extension ReachFive {
             .verifyPhoneNumber(authToken: authToken, verifyPhoneNumberRequest: verifyPhoneNumberRequest)
     }
 
-    func updateEmail(
+    public func updateEmail(
         authToken: AuthToken,
         email: String,
         redirectUrl: URL? = nil
@@ -67,7 +67,7 @@ public extension ReachFive {
         )
     }
 
-    func updatePhoneNumber(
+    public func updatePhoneNumber(
         authToken: AuthToken,
         phoneNumber: String
     ) async throws -> Profile {
@@ -78,21 +78,21 @@ public extension ReachFive {
         )
     }
 
-    func updateProfile(
+    public func updateProfile(
         authToken: AuthToken,
         profile: Profile
     ) async throws -> Profile {
         try await reachFiveApi.updateProfile(authToken: authToken, profile: profile)
     }
 
-    func updateProfile(
+    public func updateProfile(
         authToken: AuthToken,
         profileUpdate: ProfileUpdate
     ) async throws -> Profile {
         try await reachFiveApi.updateProfile(authToken: authToken, profileUpdate: profileUpdate)
     }
 
-    func updatePassword(_ updatePasswordParams: UpdatePasswordParams) async throws {
+    public func updatePassword(_ updatePasswordParams: UpdatePasswordParams) async throws {
         let authToken = updatePasswordParams.getAuthToken()
         return try await reachFiveApi.updatePassword(
             authToken: authToken,
@@ -103,7 +103,7 @@ public extension ReachFive {
         )
     }
 
-    func requestPasswordReset(
+    public func requestPasswordReset(
         email: String? = nil,
         phoneNumber: String? = nil,
         redirectUrl: URL? = nil,
@@ -121,7 +121,7 @@ public extension ReachFive {
         )
     }
 
-    func requestAccountRecovery(
+    public func requestAccountRecovery(
         email: String? = nil,
         phoneNumber: String? = nil,
         redirectUrl: URL? = nil,
@@ -138,24 +138,24 @@ public extension ReachFive {
     }
 
     /// Lists all passkeys the user has registered
-    func listWebAuthnCredentials(authToken: AuthToken) async throws -> [DeviceCredential] {
+    public func listWebAuthnCredentials(authToken: AuthToken) async throws -> [DeviceCredential] {
         try await reachFiveApi.getWebAuthnRegistrations(authToken: authToken)
     }
 
     /// Deletes a passkey the user has registered
-    func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async throws {
+    public func deleteWebAuthnRegistration(id: String, authToken: AuthToken) async throws {
         try await reachFiveApi.deleteWebAuthnRegistration(id: id, authToken: authToken)
     }
 
-    func addAccountRecoveryCallback(accountRecoveryCallback: @escaping AccountRecoveryCallback) {
+    public func addAccountRecoveryCallback(accountRecoveryCallback: @escaping AccountRecoveryCallback) {
         self.accountRecoveryCallback = accountRecoveryCallback
     }
 
-    func addEmailVerificationCallback(emailVerificationCallback: @escaping EmailVerificationCallback) {
+    public func addEmailVerificationCallback(emailVerificationCallback: @escaping EmailVerificationCallback) {
         self.emailVerificationCallback = emailVerificationCallback
     }
 
-    func interceptEmailVerification(_ url: URL) {
+    public func interceptEmailVerification(_ url: URL) {
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
         if let error = params?.first(where: { $0.name == "error" })?.value {
             emailVerificationCallback?(.failure(.TechnicalError(reason: error, apiError: ApiError(fromQueryParams: params))))
@@ -164,7 +164,7 @@ public extension ReachFive {
         emailVerificationCallback?(.success(()))
     }
 
-    func interceptAccountRecovery(_ url: URL) {
+    public func interceptAccountRecovery(_ url: URL) {
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
         if let error = params?.first(where: { $0.name == "error" })?.value {
             accountRecoveryCallback?(.failure(.TechnicalError(reason: error, apiError: ApiError(fromQueryParams: params))))

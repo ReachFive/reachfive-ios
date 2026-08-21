@@ -1,6 +1,6 @@
 import Foundation
-import UIKit
 import Reach5
+import UIKit
 
 struct Field {
     let name: String
@@ -17,7 +17,7 @@ enum Section: Int, CaseIterable {
 }
 
 enum SecurityRows: Int, CaseIterable {
-    //TODO: case Password // show if there is one, and able to add/edit
+    // TODO: case Password // show if there is one, and able to add/edit
     case Passkeys
     case TrustedDevices
     case SessionDevices
@@ -27,7 +27,6 @@ enum SecurityRows: Int, CaseIterable {
 }
 
 extension ProfileController {
-
     static func format(date: Int) -> String {
         let lastLogin = Date(timeIntervalSince1970: TimeInterval(date / 1000))
         let dateFormatter = DateFormatter()
@@ -38,16 +37,15 @@ extension ProfileController {
         return dateFormatter.string(from: lastLogin)
     }
 
-    //TODO: avec les actions
+    // TODO: avec les actions
     func emailVerificationCode(authToken: AuthToken, email: String) async {
         do {
             let emailVerificationResponse = try await AppDelegate.reachfive().sendEmailVerification(authToken: authToken)
 
             switch emailVerificationResponse {
-
             case EmailVerificationResponse.Success:
-                self.presentAlert(title: "Email verification", message: "Success")
-                self.fetchData() //TODO: recharger seulement la section
+                presentAlert(title: "Email verification", message: "Success")
+                fetchData() // TODO: recharger seulement la section
 
             case let EmailVerificationResponse.VerificationNeeded(continueEmailVerification):
                 let alert = UIAlertController(title: "Email verification", message: "Please enter the code you received by Email", preferredStyle: .alert)
@@ -66,7 +64,7 @@ extension ProfileController {
                         do {
                             let _ = try await continueEmailVerification.verify(code: verificationCode, email: email)
                             self.presentAlert(title: "Email verification", message: "Success")
-                            self.fetchData() //TODO: recharger seulement la section
+                            self.fetchData() // TODO: recharger seulement la section
                         } catch {
                             self.presentErrorAlert(title: "Email verification failed", error)
                         }
@@ -75,16 +73,20 @@ extension ProfileController {
                 alert.addAction(cancelAction)
                 alert.addAction(submitVerificationCode)
                 alert.preferredAction = submitVerificationCode
-                self.present(alert, animated: true)
+                present(alert, animated: true)
             }
 
         } catch {
-            self.presentErrorAlert(title: "Email verification failed", error)
+            presentErrorAlert(title: "Email verification failed", error)
         }
     }
 
     func addPhoneNumber(shouldReplaceExisting: Bool, authToken: AuthToken) {
-        let titre = if shouldReplaceExisting { "Updated phone number" } else { "New Phone Number" }
+        let titre = if shouldReplaceExisting {
+            "Updated phone number"
+        } else {
+            "New Phone Number"
+        }
         let alert = UIAlertController(title: titre, message: "Please enter a phone number", preferredStyle: .alert)
         alert.addTextField { textField in
             textField.placeholder = titre
@@ -134,51 +136,51 @@ extension ProfileController {
             let profile = try await AppDelegate.reachfive().updateProfile(authToken: authToken, profileUpdate: update)
             reaload(updated: profile)
         } catch {
-            self.presentErrorAlert(title: "\(titre) failed", error)
+            presentErrorAlert(title: "\(titre) failed", error)
         }
     }
 
     @MainActor
     func reaload(updated profile: Profile) {
         self.profile = profile
-        self.profileData.reloadData()
+        profileData.reloadData()
     }
 }
 
 extension ProfileController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        guard let authToken = self.authToken else { return }
+        guard let authToken else { return }
 
         guard let section = Section(rawValue: indexPath.section) else { return }
 
         switch section {
         case .Security:
             guard let row = SecurityRows(rawValue: indexPath.row) else { return }
-            
+
             switch row {
             case .Passkeys:
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 if let passkeyVC = storyboard.instantiateViewController(withIdentifier: "PasskeyCredentialController") as? PasskeyCredentialController {
                     passkeyVC.authToken = authToken
-                    passkeyVC.devices = self.passkeys
-                    self.navigationController?.pushViewController(passkeyVC, animated: true)
+                    passkeyVC.devices = passkeys
+                    navigationController?.pushViewController(passkeyVC, animated: true)
                 }
             case .TrustedDevices:
                 // When the trusted devices row is tapped, we navigate to the TrustedDevicesViewController
-                if case .loaded(let devices) = self.trustedDevicesState {
+                if case let .loaded(devices) = trustedDevicesState {
                     let storyboard = UIStoryboard(name: "Main", bundle: nil)
                     if let trustedDevicesVC = storyboard.instantiateViewController(withIdentifier: "TrustedDevicesViewController") as? TrustedDevicesViewController {
                         trustedDevicesVC.trustedDevices = devices
-                        self.navigationController?.pushViewController(trustedDevicesVC, animated: true)
+                        navigationController?.pushViewController(trustedDevicesVC, animated: true)
                     }
                 }
             case .SessionDevices:
-                if case .loaded(let devices) = self.sessionDevicesState {
+                if case let .loaded(devices) = sessionDevicesState {
                     let storyboard = UIStoryboard(name: "Main", bundle: nil)
                     if let sessionDevicesVC = storyboard.instantiateViewController(withIdentifier: "SessionDevicesViewController") as? SessionDevicesViewController {
                         sessionDevicesVC.sessionDevices = devices
-                        self.navigationController?.pushViewController(sessionDevicesVC, animated: true)
+                        navigationController?.pushViewController(sessionDevicesVC, animated: true)
                     }
                 }
             default:
@@ -188,7 +190,7 @@ extension ProfileController: UITableViewDelegate {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             if let tokenDetailsVC = storyboard.instantiateViewController(withIdentifier: "TokenDetailsViewController") as? TokenDetailsViewController {
                 tokenDetailsVC.authToken = authToken
-                self.navigationController?.pushViewController(tokenDetailsVC, animated: true)
+                navigationController?.pushViewController(tokenDetailsVC, animated: true)
             }
         default:
             break
@@ -204,7 +206,8 @@ extension ProfileController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let section = Section(rawValue: section) else {
             print("section not found")
-            return 0 }
+            return 0
+        }
         switch section {
         case .ContactInformation:
             let hasMfaPhoneNumber = mfaCredentials.contains { $0.type == .sms && $0.phoneNumber != profile.phoneNumber }
@@ -218,10 +221,10 @@ extension ProfileController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
         guard let section = Section(rawValue: indexPath.section) else {
             print("section not found")
-return UITableViewCell() }
+            return UITableViewCell()
+        }
         switch section {
         case .ContactInformation: return contactInfoCell(for: indexPath)
         case .ProfileInformation: return editableProfileCell(for: indexPath)
@@ -233,10 +236,10 @@ return UITableViewCell() }
     }
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        
         guard let section = Section(rawValue: section) else {
             print("section not found")
-            return "" }
+            return ""
+        }
         switch section {
         case .ContactInformation: return "Contact Information"
         case .ProfileInformation: return "Profile Information"
@@ -280,8 +283,8 @@ return UITableViewCell() }
     }
 
     private func navigableCell(for indexPath: IndexPath) -> UITableViewCell {
-        let cell = /*profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ??*/ UITableViewCell(style: .value1, reuseIdentifier: "DisclosureCell")
-        
+        let cell = /* profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ?? */ UITableViewCell(style: .value1, reuseIdentifier: "DisclosureCell")
+
         guard let row = SecurityRows(rawValue: indexPath.row) else {
             return cell
         }
@@ -297,10 +300,10 @@ return UITableViewCell() }
             switch trustedDevicesState {
             case .loading:
                 cell.detailTextLabel?.text = "Loading..."
-            case .loaded(let devices):
+            case let .loaded(devices):
                 cell.detailTextLabel?.text = "\(devices.count)"
                 cell.accessoryType = .disclosureIndicator
-            case .error(let message):
+            case let .error(message):
                 cell.detailTextLabel?.text = message
             case .unavailable:
                 cell.detailTextLabel?.text = "Not available"
@@ -313,16 +316,16 @@ return UITableViewCell() }
             switch sessionDevicesState {
             case .loading:
                 cell.detailTextLabel?.text = "Loading..."
-            case .loaded(let devices):
+            case let .loaded(devices):
                 cell.detailTextLabel?.text = "\(devices.count)"
                 cell.accessoryType = .disclosureIndicator
-            case .error(let message):
+            case let .error(message):
                 cell.detailTextLabel?.text = message
             case .unavailable:
                 cell.detailTextLabel?.text = "Not available"
             case .stepUpRequired:
                 cell.detailTextLabel?.text = "Step-up required"
-                }
+            }
         case .Addresses:
             cell.textLabel?.text = "Addresses"
             cell.detailTextLabel?.text = "\(profile.addresses?.count ?? 0)"
@@ -337,7 +340,7 @@ return UITableViewCell() }
     }
 
     private func tokenManagementCell(for indexPath: IndexPath) -> UITableViewCell {
-        let cell = /*profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ??*/ UITableViewCell(style: .default, reuseIdentifier: "DisclosureCell")
+        let cell = /* profileData.dequeueReusableCell(withIdentifier: "DisclosureCell") ?? */ UITableViewCell(style: .default, reuseIdentifier: "DisclosureCell")
         cell.textLabel?.text = "View & Manage Token"
         cell.detailTextLabel?.text = ""
         cell.accessoryType = .disclosureIndicator

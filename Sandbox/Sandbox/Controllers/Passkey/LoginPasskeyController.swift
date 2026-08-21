@@ -1,13 +1,12 @@
-import UIKit
 import Reach5
+import UIKit
 
 @available(iOS 16.0, *)
 class LoginPasskeyController: UIViewController {
-
-    @IBOutlet weak var usernameField: UITextField!
-    @IBOutlet weak var usernameLabel: UILabel!
-    @IBOutlet weak var loginButton: UIButton!
-    @IBOutlet weak var createAccountButton: UIButton!
+    @IBOutlet var usernameField: UITextField!
+    @IBOutlet var usernameLabel: UILabel!
+    @IBOutlet var loginButton: UIButton!
+    @IBOutlet var createAccountButton: UIButton!
 
     override func viewWillAppear(_ animated: Bool) {
         usernameField.isHidden = true
@@ -28,7 +27,6 @@ class LoginPasskeyController: UIViewController {
                 let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .IfImmediatelyAvailableCredentials)
                 flowTheLogin(flow)
             } catch {
-
                 self.usernameField.isHidden = false
                 self.usernameLabel.isHidden = false
                 self.loginButton.isHidden = false
@@ -36,13 +34,13 @@ class LoginPasskeyController: UIViewController {
 
                 switch error {
                 case ReachFiveError.AuthCanceled:
-                #if targetEnvironment(macCatalyst)
-                    return
-                #else
-                    await handleAuthToken {
-                        try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "LoginPasskeyController.viewDidAppear.AuthCanceled"))
-                    }
-                #endif
+                    #if targetEnvironment(macCatalyst)
+                        return
+                    #else
+                        await handleAuthToken {
+                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "LoginPasskeyController.viewDidAppear.AuthCanceled"))
+                        }
+                    #endif
                 default:
                     self.presentErrorAlert(title: "Login failed", error)
                 }
@@ -55,13 +53,13 @@ class LoginPasskeyController: UIViewController {
 
         Task {
             do {
-                switch (usernameField.text) {
+                switch usernameField.text {
                 case .none, .some(""):
                     // this is optional, but a good way to present a modal with a fallback to QR code for loging using a nearby device
                     let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                     flowTheLogin(flow)
 
-                case .some(let username):
+                case let .some(username):
                     let authToken = try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                     goToProfile(authToken)
                 }
@@ -92,11 +90,10 @@ class LoginPasskeyController: UIViewController {
             usernameField.placeholder = "enter username"
             return
         }
-        let profile: ProfilePasskeySignupRequest
-        if (username.contains("@")) {
-            profile = ProfilePasskeySignupRequest(email: username)
+        let profile = if username.contains("@") {
+            ProfilePasskeySignupRequest(email: username)
         } else {
-            profile = ProfilePasskeySignupRequest(phoneNumber: username)
+            ProfilePasskeySignupRequest(phoneNumber: username)
         }
 
         Task {

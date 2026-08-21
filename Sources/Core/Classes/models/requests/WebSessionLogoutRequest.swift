@@ -1,5 +1,5 @@
-import Foundation
 import AuthenticationServices
+import Foundation
 
 public class WebSessionLogoutRequest {
     public let presentationContextProvider: ASWebAuthenticationPresentationContextProviding
@@ -17,6 +17,6 @@ public class WebSessionLogoutRequest {
     /// - Throws: `ReachFiveError.TechnicalError` if the view controller has been deallocated.
     @MainActor
     public convenience init(presenting: Presentation, origin: String? = nil) throws {
-        self.init(presentationContextProvider: try presenting.webAuthContextProvider(), origin: origin)
+        try self.init(presentationContextProvider: presenting.webAuthContextProvider(), origin: origin)
     }
 }

@@ -21,7 +21,7 @@ public class ProfilePasskeySignupRequest: Codable, DictionaryEncodable {
     public let consents: [String: Consent]?
     public let company: String?
     public let liteOnly: Bool?
-    
+
     public init(
         email: String? = nil,
         phoneNumber: String? = nil,

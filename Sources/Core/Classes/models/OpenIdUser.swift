@@ -87,7 +87,7 @@ extension OpenIdUser {
 
 extension OpenIdUser.CodingData {
     var openIdUser: OpenIdUser {
-        OpenIdUser.init(
+        OpenIdUser(
             id: sub,
             name: name,
             preferredUsername: preferredUsername,

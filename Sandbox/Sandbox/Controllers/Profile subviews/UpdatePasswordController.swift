@@ -1,11 +1,11 @@
-import UIKit
 import Foundation
 import Reach5
+import UIKit
 
 class UpdatePasswordController: UIViewController {
     var authToken: AuthToken?
-    @IBOutlet weak var newPassword: UITextField!
-    @IBOutlet weak var username: UITextField!
+    @IBOutlet var newPassword: UITextField!
+    @IBOutlet var username: UITextField!
 
     override func viewWillAppear(_ animated: Bool) {
         Task {

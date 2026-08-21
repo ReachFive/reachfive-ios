@@ -1,9 +1,8 @@
-import UIKit
 import Foundation
 import Reach5
+import UIKit
 
 class LoginWKWebviewController: UIViewController {
-
     @IBOutlet var loginWebview: LoginWKWebview!
 
     override func viewWillAppear(_ animated: Bool) {

@@ -22,7 +22,7 @@ public class ProfileSignupRequest: Codable, DictionaryEncodable {
     public let consents: [String: Consent]?
     public let company: String?
     public let liteOnly: Bool?
-    
+
     public required init(
         password: String,
         email: String? = nil,

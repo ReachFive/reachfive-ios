@@ -3,7 +3,6 @@ import Reach5
 import UIKit
 
 class PasskeyAutoFillController: UIViewController {
-
     #if !targetEnvironment(macCatalyst)
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)

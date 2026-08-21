@@ -5,13 +5,12 @@ public enum PasswordLessRequest {
     case PhoneNumber(phoneNumber: String, redirectUri: URL?, origin: String? = nil)
 }
 
-public extension ReachFive {
-
-    func addPasswordlessCallback(passwordlessCallback: @escaping PasswordlessCallback) {
+extension ReachFive {
+    public func addPasswordlessCallback(passwordlessCallback: @escaping PasswordlessCallback) {
         self.passwordlessCallback = passwordlessCallback
     }
 
-    func startPasswordless(_ request: PasswordLessRequest) async throws {
+    public func startPasswordless(_ request: PasswordLessRequest) async throws {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
         let startPasswordlessRequest = switch request {
@@ -39,7 +38,7 @@ public extension ReachFive {
         return try await reachFiveApi.startPasswordless(startPasswordlessRequest)
     }
 
-    func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> AuthToken {
+    public func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> AuthToken {
         let pkce: Pkce? = storage.take(key: pkceKey)
         guard let pkce else {
             throw ReachFiveError.TechnicalError(reason: "Pkce not found")
@@ -51,19 +50,19 @@ public extension ReachFive {
             phoneNumber: verifyAuthCodeRequest.phoneNumber,
             verificationCode: verifyAuthCodeRequest.verificationCode,
             state: "passwordless",
-            clientId: self.sdkConfig.clientId,
+            clientId: sdkConfig.clientId,
             responseType: "code",
             origin: verifyAuthCodeRequest.origin
         )
-        let response = try await self.reachFiveApi.verifyPasswordless(verifyPasswordlessRequest: verifyPasswordlessRequest)
+        let response = try await reachFiveApi.verifyPasswordless(verifyPasswordlessRequest: verifyPasswordlessRequest)
         guard let code = response.code else {
             throw ReachFiveError.TechnicalError(reason: "No authorization code")
         }
 
-        return try await self.authWithCode(code: code, pkce: pkce)
+        return try await authWithCode(code: code, pkce: pkce)
     }
 
-    internal func interceptPasswordless(_ url: URL) {
+    func interceptPasswordless(_ url: URL) {
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
 
         let pkce: Pkce? = storage.take(key: pkceKey)
@@ -78,7 +77,7 @@ public extension ReachFive {
 
         Task {
             do {
-                self.passwordlessCallback?(.success(try await authWithCode(code: code, pkce: pkce)))
+                try await self.passwordlessCallback?(.success(authWithCode(code: code, pkce: pkce)))
             } catch {
                 self.passwordlessCallback?(.failure(error as! ReachFiveError))
             }

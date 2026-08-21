@@ -1,23 +1,22 @@
-import UIKit
 import Reach5
+import UIKit
 
 class SignupPasskeyController: UIViewController {
-    @IBOutlet weak var usernameInput: UITextField!
-    @IBOutlet weak var nameInput: UITextField!
+    @IBOutlet var usernameInput: UITextField!
+    @IBOutlet var nameInput: UITextField!
 
     @IBAction func signup(_ sender: Any) {
         guard let username = usernameInput.text, !username.isEmpty else {
             presentAlert(title: "Signup with Passkey", message: "Please provide a username")
             return
         }
-        let profile: ProfilePasskeySignupRequest
-        if (username.contains("@")) {
-            profile = ProfilePasskeySignupRequest(
+        let profile = if username.contains("@") {
+            ProfilePasskeySignupRequest(
                 email: username,
                 name: nameInput.text
             )
         } else {
-            profile = ProfilePasskeySignupRequest(
+            ProfilePasskeySignupRequest(
                 phoneNumber: username,
                 name: nameInput.text
             )

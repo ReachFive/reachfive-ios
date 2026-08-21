@@ -12,10 +12,10 @@ public class StartMfaStepUpRequest: Codable, DictionaryEncodable {
 
     public init(clientId: String, redirectUri: URL, pkce: Pkce, scope: String? = nil, tkn: String? = nil, action: String? = nil) {
         self.clientId = clientId
-        self.responseType = "code"
+        responseType = "code"
         self.redirectUri = redirectUri
-        self.codeChallenge = pkce.codeChallenge
-        self.codeChallengeMethod = pkce.codeChallengeMethod
+        codeChallenge = pkce.codeChallenge
+        codeChallengeMethod = pkce.codeChallengeMethod
         self.scope = scope
         self.tkn = tkn
         self.action = action
@@ -42,7 +42,7 @@ public class StartMfaPasswordlessRequest: Codable, DictionaryEncodable {
 
     public init(redirectUri: URL, clientId: String, stepUp: String, authType: MfaCredentialItemType, origin: String?) {
         self.redirectUri = redirectUri
-        self.responseType = "code"
+        responseType = "code"
         self.clientId = clientId
         self.stepUp = stepUp
         self.authType = authType

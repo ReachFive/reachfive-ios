@@ -6,7 +6,7 @@ public class SignupOptions: Codable, DictionaryEncodable {
     public let profile: ProfilePasskeySignupRequest
     public let clientId: String?
     public let scope: String
-    
+
     public init(origin: String, friendlyName: String, profile: ProfilePasskeySignupRequest, clientId: String?, scope: [String]) {
         self.origin = origin
         self.friendlyName = friendlyName

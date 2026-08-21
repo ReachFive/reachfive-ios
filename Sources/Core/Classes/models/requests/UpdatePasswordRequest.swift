@@ -5,15 +5,15 @@ public enum UpdatePasswordParams {
     case AccessTokenParams(authToken: AuthToken, password: String, oldPassword: String)
     case EmailParams(email: String, verificationCode: String, password: String)
     case SmsParams(phoneNumber: String, verificationCode: String, password: String)
-    
+
     public func getAuthToken() -> AuthToken? {
         switch self {
-        case .FreshAccessTokenParams(let authToken, _):
-            return authToken
-        case .AccessTokenParams(let authToken, _, _):
-            return authToken
+        case let .FreshAccessTokenParams(authToken, _):
+            authToken
+        case let .AccessTokenParams(authToken, _, _):
+            authToken
         default:
-            return nil
+            nil
         }
     }
 }
@@ -25,7 +25,7 @@ public class UpdatePasswordRequest: Codable, DictionaryEncodable {
     let email: String?
     let phoneNumber: String?
     let verificationCode: String?
-    
+
     public init(
         clientId: String? = nil,
         password: String? = nil,
@@ -41,16 +41,16 @@ public class UpdatePasswordRequest: Codable, DictionaryEncodable {
         self.phoneNumber = phoneNumber
         self.verificationCode = verificationCode
     }
-    
+
     public convenience init(updatePasswordParams: UpdatePasswordParams, sdkConfig: SdkConfig) {
         switch updatePasswordParams {
-        case .FreshAccessTokenParams(_, let password):
+        case let .FreshAccessTokenParams(_, password):
             self.init(password: password)
-        case .AccessTokenParams(_, let password, let oldPassword):
+        case let .AccessTokenParams(_, password, oldPassword):
             self.init(password: password, oldPassword: oldPassword)
-        case .EmailParams(let email, let verificationCode, let password):
+        case let .EmailParams(email, verificationCode, password):
             self.init(clientId: sdkConfig.clientId, password: password, email: email, verificationCode: verificationCode)
-        case .SmsParams(let phoneNumber, let verificationCode, let password):
+        case let .SmsParams(phoneNumber, verificationCode, password):
             self.init(clientId: sdkConfig.clientId, password: password, phoneNumber: phoneNumber, verificationCode: verificationCode)
         }
     }

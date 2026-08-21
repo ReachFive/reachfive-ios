@@ -41,18 +41,18 @@ public protocol Provider {
 /// usually implement it synchronously (`func logout()`). An `async throws` default would be an
 /// *overload* rather than an override, and in an async context Swift would prefer that empty default
 /// over a provider's own synchronous `self.logout()` — silently doing nothing.
-public extension Provider {
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
+extension Provider {
+    public func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
         false
     }
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         true
     }
 
-    func applicationDidBecomeActive(_ application: UIApplication) {}
+    public func applicationDidBecomeActive(_ application: UIApplication) {}
 
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    public func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         false
     }
 }

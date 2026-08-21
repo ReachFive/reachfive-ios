@@ -8,7 +8,7 @@ public class LoginProviderRequest: Codable, DictionaryEncodable {
     public let clientId: String
     public let responseType: String
     public let scope: String
-    
+
     public init(provider: String, providerToken: String?, code: String?, origin: String?, clientId: String, responseType: String, scope: String) {
         self.provider = provider
         self.providerToken = providerToken

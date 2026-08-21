@@ -1,11 +1,11 @@
 import Foundation
 
-public extension ReachFive {
-    func deleteSessionDevice(id: String, authToken: AuthToken) async throws {
-        return try await reachFiveApi.deleteSessionDevice(id: id, authToken: authToken)
+extension ReachFive {
+    public func deleteSessionDevice(id: String, authToken: AuthToken) async throws {
+        try await reachFiveApi.deleteSessionDevice(id: id, authToken: authToken)
     }
-    
-    func listSessionDevices(authToken: AuthToken) async throws -> [SessionDevice] {
-        return try await reachFiveApi.listSessionDevices(authToken: authToken).sessionDevices
+
+    public func listSessionDevices(authToken: AuthToken) async throws -> [SessionDevice] {
+        try await reachFiveApi.listSessionDevices(authToken: authToken).sessionDevices
     }
 }
