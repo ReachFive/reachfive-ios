@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v11.0.0
+
 ### Breaking changes
 - Changed type of redirect URL fields to URL instead of String
 - `SdkConfig`:
