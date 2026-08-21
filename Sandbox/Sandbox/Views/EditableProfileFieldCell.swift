@@ -2,10 +2,9 @@
 import UIKit
 
 class EditableProfileFieldCell: UITableViewCell {
-
-    @IBOutlet weak var fieldNameLabel: UILabel!
-    @IBOutlet weak var valueLabel: UILabel!
-    @IBOutlet weak var valueTextField: UITextField!
+    @IBOutlet var fieldNameLabel: UILabel!
+    @IBOutlet var valueLabel: UILabel!
+    @IBOutlet var valueTextField: UITextField!
 
     var onTextChanged: ((String?) -> Void)?
 
@@ -18,11 +17,11 @@ class EditableProfileFieldCell: UITableViewCell {
         fieldNameLabel.text = fieldName
         valueLabel.text = value
         valueTextField.text = value
-        
+
         valueLabel.isHidden = isEditing
         valueTextField.isHidden = !isEditing
     }
-    
+
     @objc private func textFieldDidChange(_ textField: UITextField) {
         onTextChanged?(textField.text)
     }

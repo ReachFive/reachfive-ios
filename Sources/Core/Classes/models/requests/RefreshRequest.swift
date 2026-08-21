@@ -14,6 +14,6 @@ public class RefreshRequest: Codable, DictionaryEncodable {
         self.clientId = clientId
         self.refreshToken = refreshToken
         self.redirectUri = redirectUri
-        self.grantType = "refresh_token"
+        grantType = "refresh_token"
     }
 }

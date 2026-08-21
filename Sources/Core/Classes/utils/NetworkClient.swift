@@ -7,25 +7,25 @@ class NetworkClient {
     private let correlationId: String
 
     init(decoder: JSONDecoder) {
-        self.session = URLSession(configuration: .default, delegate: redirectHandler, delegateQueue: nil)
+        session = URLSession(configuration: .default, delegate: redirectHandler, delegateQueue: nil)
         self.decoder = decoder
-        self.correlationId = UUID().uuidString
+        correlationId = UUID().uuidString
     }
 
     deinit {
         session.finishTasksAndInvalidate()
     }
-    
+
     func request(_ url: URL, method: HttpMethod = .get, headers: [String: String]? = nil, body: Data? = nil) -> DataRequest {
         var urlRequest = URLRequest(url: url)
-        
+
         urlRequest.httpMethod = method.rawValue
-        
+
         var headersWithCorrelation = headers ?? [:]
         headersWithCorrelation["X-R5-Correlation-Id"] = correlationId
         urlRequest.allHTTPHeaderFields = headersWithCorrelation
         urlRequest.httpBody = body
-        
+
         if body != nil {
             urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
@@ -62,7 +62,7 @@ class RedirectHandler: NSObject, URLSessionTaskDelegate {
         guard let url = request.url, let scheme = url.scheme, !scheme.lowercased().starts(with: "http") else {
             return request
         }
-        
+
         let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
         continuation?.resume(returning: url)
         return nil

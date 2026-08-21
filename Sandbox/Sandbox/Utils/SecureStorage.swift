@@ -20,7 +20,7 @@ public class SecureStorage: Storage {
         print("SecureStorage.init(group: \(group ?? "")) serviceName:\(serviceName) accessGroup: \(self.group)")
     }
 
-    //TODO: mettre tous les accès à la keychain dans une queue à part et renvoyer des Futures?
+    // TODO: mettre tous les accès à la keychain dans une queue à part et renvoyer des Futures?
     public func getToken() -> AuthToken? {
         let refs: Set<String>? = get(key: SecureStorage.refKey)
 //        print("getToken.refs \(refs)")
@@ -28,35 +28,35 @@ public class SecureStorage: Storage {
         return get(key: SecureStorage.authKey)
     }
 
-    //TODO: utiliser un couple appareil/app au lieu de juste app pour gérer correctement les cas où la même app est utilisées sur plusieurs appareils connectés au même compte iCloud
-    public func setToken(_ token: AuthToken) -> ()? {
+    // TODO: utiliser un couple appareil/app au lieu de juste app pour gérer correctement les cas où la même app est utilisées sur plusieurs appareils connectés au même compte iCloud
+    public func setToken(_ token: AuthToken) -> Void? {
         set(token, forKey: SecureStorage.authKey).flatMap { _ in
-                let refs: Set<String>? = get(key: SecureStorage.refKey)
+            let refs: Set<String>? = get(key: SecureStorage.refKey)
 //                print("setToken.refs \(refs)")
-                if var refs {
-                    if refs.insert(bundleId).inserted {
+            if var refs {
+                if refs.insert(bundleId).inserted {
 //                        print("setToken.refs.inserted \(refs)")
-                        return set(refs, forKey: SecureStorage.refKey)
-                    } else {
-//                        print("setToken.refs.notInserted \(refs)")
-                        return ()
-                    }
+                    return set(refs, forKey: SecureStorage.refKey)
                 } else {
-                    let ref: Set = [bundleId]
+//                        print("setToken.refs.notInserted \(refs)")
+                    return ()
+                }
+            } else {
+                let ref: Set = [bundleId]
 //                    print("setToken.refs.added \(ref)")
-                    return set(ref, forKey: SecureStorage.refKey)
-                }
+                return set(ref, forKey: SecureStorage.refKey)
             }
-            .flatMap { r in
-                if sendNotif {
+        }
+        .flatMap { r in
+            if sendNotif {
 //                    print("setToken.send .DidSetAuthToken")
-                    NotificationCenter.default.post(name: .DidSetAuthToken, object: nil, userInfo: ["token": token])
-                }
-                return r
+                NotificationCenter.default.post(name: .DidSetAuthToken, object: nil, userInfo: ["token": token])
             }
+            return r
+        }
     }
 
-    public func removeToken(onLastClear: (() -> Void)? = nil) -> ()? {
+    public func removeToken(onLastClear: (() -> Void)? = nil) -> Void? {
         guard var refs: Set<String> = get(key: SecureStorage.refKey) else {
             print("trying to clear a token without references")
             return nil
@@ -81,25 +81,27 @@ public class SecureStorage: Storage {
         }
     }
 
-    public func removeAllTokens() -> ()? {
+    public func removeAllTokens() -> Void? {
         remove(key: SecureStorage.authKey).flatMap { _ in
             remove(key: SecureStorage.refKey).flatMap { _ in
             }
         }
     }
 
-    public func set<D: Codable>(_ value: D, forKey key: String) -> ()? {
+    public func set(_ value: some Codable, forKey key: String) -> Void? {
         guard let data = try? JSONEncoder().encode(value) else {
             print(KeychainError.jsonSerializationError)
             return nil
         }
 
-        let attributes = [kSecClass: kSecClassGenericPassword,
-                          kSecAttrAccount: key,
-                          kSecAttrService: serviceName,
-                          kSecAttrAccessGroup: group,
-                          kSecAttrSynchronizable: true,
-                          kSecValueData: data] as [String: Any]
+        let attributes = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrAccount: key,
+            kSecAttrService: serviceName,
+            kSecAttrAccessGroup: group,
+            kSecAttrSynchronizable: true,
+            kSecValueData: data,
+        ] as [String: Any]
 
         let status = SecItemAdd(attributes as CFDictionary, nil)
         guard status == errSecSuccess else {
@@ -113,9 +115,9 @@ public class SecureStorage: Storage {
         return ()
     }
 
-    public func save<D: Codable>(key: String, value: D) {
+    public func save(key: String, value: some Codable) {
         if let _ = set(value, forKey: key) {
-            //TODO: supprimer une fois que tous les usages sont migrés aux fonctions spécifique des jetons
+            // TODO: supprimer une fois que tous les usages sont migrés aux fonctions spécifique des jetons
             if key == SecureStorage.authKey {
                 print("send SecureStorage.save.DidSetAuthToken")
                 NotificationCenter.default.post(name: .DidSetAuthToken, object: nil)
@@ -124,23 +126,27 @@ public class SecureStorage: Storage {
         }
     }
 
-    private func update<D: Codable>(_ value: D, forKey key: String) -> ()? {
-        let query = [kSecClass: kSecClassGenericPassword,
-                     kSecAttrService: serviceName,
-                     kSecAttrAccessGroup: group,
-                     kSecAttrSynchronizable: true,
-                     kSecAttrAccount: key] as [String: Any]
+    private func update(_ value: some Codable, forKey key: String) -> Void? {
+        let query = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: serviceName,
+            kSecAttrAccessGroup: group,
+            kSecAttrSynchronizable: true,
+            kSecAttrAccount: key,
+        ] as [String: Any]
 
         guard let data = try? JSONEncoder().encode(value) else {
             print(KeychainError.jsonSerializationError)
             return nil
         }
 
-        let attributes = [kSecAttrAccount: key,
-                          kSecAttrService: serviceName,
-                          kSecAttrAccessGroup: group,
-                          kSecAttrSynchronizable: true,
-                          kSecValueData: data] as [String: Any]
+        let attributes = [
+            kSecAttrAccount: key,
+            kSecAttrService: serviceName,
+            kSecAttrAccessGroup: group,
+            kSecAttrSynchronizable: true,
+            kSecValueData: data,
+        ] as [String: Any]
 
         let status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
         guard status != errSecItemNotFound else {
@@ -157,14 +163,16 @@ public class SecureStorage: Storage {
     }
 
     public func get<D: Codable>(key: String) -> D? {
-        let attributes = [kSecClass: kSecClassGenericPassword,
-                          kSecAttrAccount: key,
-                          kSecAttrService: serviceName,
-                          kSecAttrAccessGroup: group,
-                          kSecAttrSynchronizable: true,
-                          kSecMatchLimit: kSecMatchLimitOne,
-                          kSecReturnAttributes: false,
-                          kSecReturnData: true] as [String: Any]
+        let attributes = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrAccount: key,
+            kSecAttrService: serviceName,
+            kSecAttrAccessGroup: group,
+            kSecAttrSynchronizable: true,
+            kSecMatchLimit: kSecMatchLimitOne,
+            kSecReturnAttributes: false,
+            kSecReturnData: true,
+        ] as [String: Any]
 
         var item: CFTypeRef?
         let status = SecItemCopyMatching(attributes as CFDictionary, &item)
@@ -191,18 +199,20 @@ public class SecureStorage: Storage {
     }
 
     public func take<D: Codable>(key: String) -> D? {
-        let value: D? = self.get(key: key)
+        let value: D? = get(key: key)
         clear(key: key)
         print("SecureStorage.take success")
         return value
     }
 
-    public func remove(key: String) -> ()? {
-        let attributes: [String: Any] = [kSecClass: kSecClassGenericPassword,
-                                         kSecAttrService: serviceName,
-                                         kSecAttrAccessGroup: group,
-                                         kSecAttrSynchronizable: true,
-                                         kSecAttrAccount: key] as [String: Any]
+    public func remove(key: String) -> Void? {
+        let attributes: [String: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: serviceName,
+            kSecAttrAccessGroup: group,
+            kSecAttrSynchronizable: true,
+            kSecAttrAccount: key,
+        ] as [String: Any]
 
         let status = SecItemDelete(attributes as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
@@ -214,7 +224,7 @@ public class SecureStorage: Storage {
 
     public func clear(key: String) {
         remove(key: key).map {
-            //TODO: supprimer une fois que tous les usages sont migrés aux fonctions spécifique des jetons
+            // TODO: supprimer une fois que tous les usages sont migrés aux fonctions spécifique des jetons
             if key == SecureStorage.authKey {
                 NotificationCenter.default.post(name: .DidClearAuthToken, object: nil)
             }

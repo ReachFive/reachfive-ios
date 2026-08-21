@@ -1,11 +1,10 @@
-import UIKit
 import Reach5
+import UIKit
 import WebKit
 
 class SettingsViewController: UIViewController {
-
-    @IBOutlet weak var environmentDomain: UILabel!
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var environmentDomain: UILabel!
+    @IBOutlet var tableView: UITableView!
 
     private enum Section: Int, CaseIterable {
         case scopes
@@ -14,11 +13,11 @@ class SettingsViewController: UIViewController {
     }
 
     private var availableScopes: [String] = []
-    public static var selectedScopes: [String] = []  //TODO: utiliser partout ces scopes là
+    static var selectedScopes: [String] = [] // TODO: utiliser partout ces scopes là
 
     private let startupActions = [
         "Use refreshAccessToken at startup",
-        "Use login with request at startup"
+        "Use login with request at startup",
     ]
     private var selectedStartupAction: String?
 
@@ -31,7 +30,6 @@ class SettingsViewController: UIViewController {
             }
         }
     }
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,9 +61,9 @@ class SettingsViewController: UIViewController {
     private func loadSettings() {
         let defaults = UserDefaults.standard
         SettingsViewController.selectedScopes = defaults.stringArray(forKey: "selectedScopes") ?? availableScopes
-        //TODO: ces actions seront faite dans applicationDidBecomeActive ou applicationWillEnterForeground, pas dans didFinishLaunchingWithOptions
-        //TODO: sur iOS, ajouter ces actions en tant que "Home screen quick action", sur Mac Catalyst, remplacer cette section par un popup button
-        //TODO: sur Mac Catalyst, remplacer cette section par un popup button
+        // TODO: ces actions seront faite dans applicationDidBecomeActive ou applicationWillEnterForeground, pas dans didFinishLaunchingWithOptions
+        // TODO: sur iOS, ajouter ces actions en tant que "Home screen quick action", sur Mac Catalyst, remplacer cette section par un popup button
+        // TODO: sur Mac Catalyst, remplacer cette section par un popup button
         selectedStartupAction = defaults.string(forKey: "selectedStartupAction")
     }
 
@@ -111,9 +109,8 @@ class SettingsViewController: UIViewController {
 }
 
 extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
-
     func numberOfSections(in tableView: UITableView) -> Int {
-        return Section.allCases.count
+        Section.allCases.count
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -136,7 +133,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         case .startupActions:
             return "Startup Actions"
         case .cookies:
-            return "" //Title set in viewForHeaderInSection
+            return "" // Title set in viewForHeaderInSection
         }
     }
 
@@ -219,11 +216,11 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         return nil
     }
 
-    // The commit editing style function enables the swipe-to-delete functionality and responds to the delete action.
+    /// The commit editing style function enables the swipe-to-delete functionality and responds to the delete action.
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         guard editingStyle == .delete,
-                let section = Section(rawValue: indexPath.section),
-                section == .cookies else { return }
+              let section = Section(rawValue: indexPath.section),
+              section == .cookies else { return }
 
         Task { @MainActor in
             HTTPCookieStorage.shared.deleteCookie(cookies[indexPath.row])

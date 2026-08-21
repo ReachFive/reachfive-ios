@@ -1,12 +1,11 @@
 import Foundation
 
-public extension CheckedContinuation {
-
+extension CheckedContinuation {
     @inlinable
-    func resume(catching body: @escaping () async throws(E) -> T) {
+    public func resume(catching body: @escaping () async throws(E) -> T) {
         Task {
             do {
-                self.resume(returning: try await body())
+                try await self.resume(returning: body())
             } catch {
                 self.resume(throwing: error as! E)
             }

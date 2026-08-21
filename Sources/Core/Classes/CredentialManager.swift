@@ -127,7 +127,8 @@ class CredentialManager: NSObject {
     /// callbacks, and only ever holds the one or two requests that overlap.
     private func cancelBecauseCallerWasCancelled(_ id: Int) {
         guard let key = contexts.first(where: { $0.value.id == id })?.key,
-              let context = contexts.removeValue(forKey: key) else {
+              let context = contexts.removeValue(forKey: key) else
+        {
             // request already completed, or never registered: nothing to do
             return
         }

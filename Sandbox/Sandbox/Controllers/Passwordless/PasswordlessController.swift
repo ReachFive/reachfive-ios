@@ -1,19 +1,18 @@
 import Foundation
-import UIKit
 import Reach5
+import UIKit
 
 class PasswordlessController: UIViewController {
-
-    @IBOutlet weak var redirectUriInput: UITextField!
-    @IBOutlet weak var emailInput: UITextField!
-    @IBOutlet weak var phoneNumberInput: UITextField!
-    @IBOutlet weak var verificationCodeInput: UITextField!
+    @IBOutlet var redirectUriInput: UITextField!
+    @IBOutlet var emailInput: UITextField!
+    @IBOutlet var phoneNumberInput: UITextField!
+    @IBOutlet var verificationCodeInput: UITextField!
 
     var tokenNotification: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { (note) in
+        tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
                 Task {
                     await self.handleAuthToken(errorMessage: "Passwordless failed") {
@@ -31,7 +30,7 @@ class PasswordlessController: UIViewController {
                     .startPasswordless(
                         .Email(
                             email: emailInput.text ?? "",
-                            redirectUri: try typedRedirectUri(),
+                            redirectUri: typedRedirectUri(),
                             origin: "PasswordlessController.loginWithEmail"
                         )
                     )
@@ -49,7 +48,7 @@ class PasswordlessController: UIViewController {
                     .startPasswordless(
                         .PhoneNumber(
                             phoneNumber: phoneNumberInput.text ?? "",
-                            redirectUri: try typedRedirectUri(),
+                            redirectUri: typedRedirectUri(),
                             origin: "PasswordlessController.loginWithPhoneNumber"
                         )
                     )
@@ -71,7 +70,9 @@ class PasswordlessController: UIViewController {
 
     private struct InvalidRedirectUri: LocalizedError {
         let text: String
-        var errorDescription: String? { "'\(text)' is not a valid URL." }
+        var errorDescription: String? {
+            "'\(text)' is not a valid URL."
+        }
     }
 
     @IBAction func verifyCode(_ sender: Any) {

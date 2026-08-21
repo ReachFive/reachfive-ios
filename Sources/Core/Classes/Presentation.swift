@@ -1,5 +1,5 @@
-import UIKit
 import AuthenticationServices
+import UIKit
 
 /// Where provider UI (authentication sheets, sign-in dialogs) is presented from.
 ///
@@ -81,10 +81,10 @@ public struct Presentation {
     }
 }
 
-// `ASWebAuthenticationSession.presentationContextProvider` is `weak`, so the adapter has to be retained
-// elsewhere for the duration of the session. It is, through
-// `WebviewLoginRequest.presentationContextProvider` (a strong `let`), which stays alive for the whole
-// `webviewLogin` → `webAuthSession.start(...)` call.
+/// `ASWebAuthenticationSession.presentationContextProvider` is `weak`, so the adapter has to be retained
+/// elsewhere for the duration of the session. It is, through
+/// `WebviewLoginRequest.presentationContextProvider` (a strong `let`), which stays alive for the whole
+/// `webviewLogin` → `webAuthSession.start(...)` call.
 private final class ViewControllerContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
     private let presentation: Presentation
 

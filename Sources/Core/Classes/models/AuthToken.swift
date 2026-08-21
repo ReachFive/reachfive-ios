@@ -28,7 +28,7 @@ public class AuthToken: Codable {
         guard let token = openIdTokenResponse.idToken else {
             return withUser(openIdTokenResponse, nil)
         }
-        
+
         let user = try fromIdToken(token)
         return withUser(openIdTokenResponse, user)
     }
@@ -47,15 +47,15 @@ public class AuthToken: Codable {
     static func fromIdToken(_ idToken: String) throws -> OpenIdUser {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        
+
         let parts = idToken.components(separatedBy: ".")
         guard
             parts.count == 3,
-            let data = parts[1].decodeBase64Url()
-        else {
+            let data = parts[1].decodeBase64Url() else
+        {
             throw ReachFiveError.TechnicalError(reason: "idToken invalid")
         }
-        
+
         do {
             return try decoder.decode(OpenIdUser.CodingData.self, from: data).openIdUser
         } catch {

@@ -1,5 +1,5 @@
-import Foundation
 import AuthenticationServices
+import Foundation
 
 /// Registers a **web** provider (one without a native SDK component, served by `DefaultProvider`) so the app
 /// can pick its **variant** and its **completion mode**
@@ -31,12 +31,15 @@ public final class WebProvider: ProviderCreator {
     }
 
     private let providerName: Name
-    public var name: String { providerName.rawValue }
+    public var name: String {
+        providerName.rawValue
+    }
+
     public let variant: String?
     public let mode: WebProviderMode
 
     public init(name: Name, variant: String? = nil, mode: WebProviderMode = .customScheme) {
-        self.providerName = name
+        providerName = name
         self.variant = variant
         self.mode = mode
     }
@@ -54,20 +57,20 @@ class DefaultProvider: NSObject, Provider {
     // LoginWKWebview).
     private weak var reachfive: ReachFive?
     let providerConfig: ProviderConfig
-    public let webSessionMode: WebSessionMode?
+    let webSessionMode: WebSessionMode?
     /// Why `webSessionMode` is `nil`, reported verbatim by `login()`. `init` has two distinct causes of
     /// failure — no `universalLink` in the backend configuration, or an OS that is too old — and naming only
     /// one of them sends the integrator off to fix a configuration that is already correct.
     private let unavailableModeReason: String?
 
-    public init(
+    init(
         reachfive: ReachFive,
         providerConfig: ProviderConfig,
         mode: WebProvider.WebProviderMode = .customScheme
     ) {
         self.reachfive = reachfive
         self.providerConfig = providerConfig
-        self.name = providerConfig.provider
+        name = providerConfig.provider
 
         switch mode {
         case .customScheme:
@@ -98,12 +101,11 @@ class DefaultProvider: NSObject, Provider {
         }
     }
 
-    public func login(
+    func login(
         scope: [String]?,
         origin: String,
         presenting: Presentation
     ) async throws -> AuthToken {
-
         let presentationContextProvider = try await presenting.webAuthContextProvider()
 
         guard let webSessionMode else {
@@ -120,7 +122,8 @@ class DefaultProvider: NSObject, Provider {
                 presentationContextProvider: presentationContextProvider,
                 origin: origin,
                 provider: providerConfig.providerWithVariant,
-                webSessionMode: webSessionMode)
+                webSessionMode: webSessionMode
+            )
         )
     }
 
@@ -128,6 +131,5 @@ class DefaultProvider: NSObject, Provider {
         "Provider: \(providerConfig.provider)"
     }
 
-    public func logout() {
-    }
+    func logout() {}
 }

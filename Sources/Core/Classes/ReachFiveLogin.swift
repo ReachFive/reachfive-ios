@@ -89,7 +89,8 @@ extension ReachFive {
         // (whose Location carries no fragment). The Login URL thus receives it as `#key=value&...` and can
         // read it via window.location.hash to theme the page per calling channel.
         guard let loginUrlFragment, !loginUrlFragment.isEmpty,
-              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+              var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else
+        {
             return url
         }
         // Reuse URLComponents' query-encoding (rather than hand-rolling "key=value" pairs) so keys/values

@@ -7,7 +7,7 @@ class RecoveryEndController: UIViewController {
     var email: String?
     var phoneNumber: String?
 
-    @IBOutlet weak var newPassword: UITextField!
+    @IBOutlet var newPassword: UITextField!
 
     @IBAction func newPasskey(_ sender: Any) {
         guard let verificationCode else {
@@ -42,7 +42,7 @@ class RecoveryEndController: UIViewController {
             print("no verif code")
             return
         }
-        if ((phoneNumber ?? email) == nil) {
+        if (phoneNumber ?? email) == nil {
             print("no username")
             return
         }

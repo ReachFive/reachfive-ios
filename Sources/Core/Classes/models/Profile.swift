@@ -95,20 +95,20 @@ public class Profile: Codable, DictionaryEncodable {
 
     public func asUpdate() -> ProfileUpdate {
         ProfileUpdate(
-            givenName: Diff(self.givenName),
-            middleName: Diff(self.middleName),
-            familyName: Diff(self.familyName),
-            name: Diff(self.name),
-            nickname: Diff(self.nickname),
-            birthdate: Diff(self.birthdate),
-            picture: Diff(self.picture),
-            username: Diff(self.username),
-            gender: Diff(self.gender),
-            email: Diff(self.email),
-            phoneNumber: Diff(self.phoneNumber),
-            customIdentifier: Diff(self.customIdentifier),
-            locale: Diff(self.locale),
-            company: Diff(self.company)
+            givenName: Diff(givenName),
+            middleName: Diff(middleName),
+            familyName: Diff(familyName),
+            name: Diff(name),
+            nickname: Diff(nickname),
+            birthdate: Diff(birthdate),
+            picture: Diff(picture),
+            username: Diff(username),
+            gender: Diff(gender),
+            email: Diff(email),
+            phoneNumber: Diff(phoneNumber),
+            customIdentifier: Diff(customIdentifier),
+            locale: Diff(locale),
+            company: Diff(company)
         )
     }
 }

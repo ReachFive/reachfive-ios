@@ -17,8 +17,8 @@ extension ReachFive {
     @available(iOS 16.0, *)
     public func signup(withRequest request: PasskeySignupRequest) async throws -> AuthToken {
         let scopes = request.scopes ?? scope
-        let signupOptions = SignupOptions(
-            origin: try originWebAuthn(overriddenBy: request.originWebAuthn),
+        let signupOptions = try SignupOptions(
+            origin: originWebAuthn(overriddenBy: request.originWebAuthn),
             friendlyName: request.friendlyName,
             profile: request.passkeyProfile,
             clientId: sdkConfig.clientId,
@@ -37,7 +37,7 @@ extension ReachFive {
     @available(macCatalyst, unavailable)
     @available(iOS 16.0, *)
     public func beginAutoFillAssistedPasskeyLogin(withRequest request: NativeLoginRequest) async throws -> AuthToken {
-        try await credentialManager.beginAutoFillAssistedPasskeySignIn(request: try resolve(request), reachFive: self)
+        try await credentialManager.beginAutoFillAssistedPasskeySignIn(request: resolve(request), reachFive: self)
     }
 
     /// Signs in the user using credentials stored in the keychain, letting the system display all credentials available to choose from in a modal sheet.
@@ -51,7 +51,7 @@ extension ReachFive {
     ///   `.AchievedLogin`.
     public func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) async throws -> LoginFlow {
         let appleProvider = providers.first { $0.name == AppleProvider.NAME } as? ConfiguredAppleProvider
-        return try await credentialManager.login(withRequest: try resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider, reachFive: self)
+        return try await credentialManager.login(withRequest: resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider, reachFive: self)
     }
 
     /// Signs in the user using credentials stored in the keychain, letting the system display the credentials corresponding to the given username in a modal sheet.
@@ -62,7 +62,7 @@ extension ReachFive {
     ///   - mode: choose the behavior when there are no credentials available
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError
     public func login(withNonDiscoverableUsername username: Username, forRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [NonDiscoverableAuthorization], display mode: Mode) async throws -> AuthToken {
-        try await credentialManager.login(withNonDiscoverableUsername: username, forRequest: try resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, reachFive: self)
+        try await credentialManager.login(withNonDiscoverableUsername: username, forRequest: resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, reachFive: self)
     }
 
     /// Registers a new passkey for an existing user which currently has none in the keychain, or replace the existing passkey by a new one
@@ -82,9 +82,9 @@ extension ReachFive {
     }
 
     private func resolve(_ request: NativeLoginRequest) throws -> ResolvedNativeLoginRequest {
-        ResolvedNativeLoginRequest(
+        try ResolvedNativeLoginRequest(
             presenting: request.presenting,
-            originWebAuthn: try originWebAuthn(overriddenBy: request.originWebAuthn),
+            originWebAuthn: originWebAuthn(overriddenBy: request.originWebAuthn),
             scopes: request.scopes ?? scope,
             origin: request.origin
         )
@@ -96,9 +96,9 @@ extension ReachFive {
         guard let override else { return sdkConfig.originWebAuthn }
         guard let origin = URL(string: override)?.serializedOrigin else {
             throw ReachFiveError.TechnicalError(reason: """
-                '\(override)' is not a valid WebAuthn origin: it must be an absolute URL with a scheme and a host, e.g. https://auth.example.com. \
-                Leave the request's originWebAuthn unset to use the one configured on SdkConfig.
-                """)
+            '\(override)' is not a valid WebAuthn origin: it must be an absolute URL with a scheme and a host, e.g. https://auth.example.com. \
+            Leave the request's originWebAuthn unset to use the one configured on SdkConfig.
+            """)
         }
         return origin
     }

@@ -16,7 +16,7 @@ public class ProfileAddress: Codable, DictionaryEncodable {
     public let company: String?
     public let phoneNumber: String?
     public let customFields: [String: CustomField]?
-    
+
     private enum CodingKeys: String, CodingKey {
         case title
         case isDefault = "default"
@@ -34,7 +34,7 @@ public class ProfileAddress: Codable, DictionaryEncodable {
         case phoneNumber
         case customFields
     }
-    
+
     public init(
         title: String?,
         isDefault: Bool?,

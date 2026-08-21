@@ -1,6 +1,6 @@
 import Foundation
 
-// Declare a protocol to make possible the use of the type constraint below in KeyedEncodingContainer, because one cannot do a type constraint with enum
+/// Declare a protocol to make possible the use of the type constraint below in KeyedEncodingContainer, because one cannot do a type constraint with enum
 public protocol Diffable {
     func isEmpty() -> Bool
 }
@@ -12,7 +12,7 @@ public enum Diff<Wrapped>: Diffable {
 
     public func isEmpty() -> Bool {
         switch self {
-        case .Update(_):
+        case .Update:
             false
         case .Delete:
             false
@@ -23,16 +23,16 @@ public enum Diff<Wrapped>: Diffable {
 
     public var value: Wrapped? {
         switch self {
-        case .Update(let value):
-            return value
+        case let .Update(value):
+            value
         default:
-            return nil
+            nil
         }
     }
 
     public init(_ optional: Wrapped?) {
         switch optional {
-        case .some(let value): self = .Update(value)
+        case let .some(value): self = .Update(value)
         case .none: self = .NoOp
         }
     }
@@ -53,14 +53,13 @@ extension Diff: Encodable where Wrapped: Encodable {
 }
 
 extension KeyedEncodingContainer {
-    public mutating func encode<T: Diffable>(_ value: T, forKey key: KeyedEncodingContainer<K>.Key) throws where T : Encodable {
-
+    public mutating func encode(_ value: some Diffable & Encodable, forKey key: KeyedEncodingContainer<K>.Key) throws {
         // Encode a NoOp field the same way a nil would be encoded, that is not be encoded at all.
         guard !value.isEmpty() else {
             return
         }
         // Don't know how to get access to the encoder for Diff, so just use another encode method from KeyedEncodingContainer that I haven't overridden
-        try self.encodeIfPresent(value, forKey: key)
+        try encodeIfPresent(value, forKey: key)
     }
 }
 

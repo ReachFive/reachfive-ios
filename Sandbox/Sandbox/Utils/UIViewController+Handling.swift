@@ -1,5 +1,5 @@
-import UIKit
 import Reach5
+import UIKit
 
 extension UIViewController {
     func handleAuthToken(errorMessage: String = "Login failed", _ body: () async throws -> AuthToken) async {
@@ -32,9 +32,9 @@ extension UIViewController {
 
     func flowTheLogin(_ flow: LoginFlow) {
         switch flow {
-        case .AchievedLogin(let authToken):
+        case let .AchievedLogin(authToken):
             goToProfile(authToken)
-        case .OngoingStepUp(let token, let availableMfaCredentialItemTypes):
+        case let .OngoingStepUp(token, availableMfaCredentialItemTypes):
             let selectMfaAuthTypeAlert = UIAlertController(title: "Select MFA", message: "Select MFA auth type", preferredStyle: UIAlertController.Style.alert)
             var lastAction: UIAlertAction? = nil
             for type in availableMfaCredentialItemTypes {
@@ -44,9 +44,9 @@ extension UIViewController {
             }
             selectMfaAuthTypeAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             selectMfaAuthTypeAlert.preferredAction = lastAction
-           Task { @MainActor in
+            Task { @MainActor in
                 present(selectMfaAuthTypeAlert, animated: true)
-           }
+            }
         }
     }
 
@@ -60,7 +60,7 @@ extension UIViewController {
     }
 
     private func createSelectMfaAuthTypeAction(type: MfaCredentialItemType, stepUpToken: String) -> UIAlertAction {
-        return UIAlertAction(title: type.rawValue, style: .default) { _ in
+        UIAlertAction(title: type.rawValue, style: .default) { _ in
             Task {
                 await self.handleAuthToken {
                     let resp = try await AppDelegate.reachfive().mfaStart(stepUp: .LoginFlow(authType: type, stepUpToken: stepUpToken))
@@ -71,8 +71,7 @@ extension UIViewController {
     }
 
     private func handleStartVerificationCode(_ resp: ContinueStepUp, authType: MfaCredentialItemType) async throws -> AuthToken {
-        return try await withCheckedThrowingContinuation { continuation in
-
+        try await withCheckedThrowingContinuation { continuation in
             let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
             alert.addTextField { textField in
                 textField.placeholder = "Verification code"
@@ -119,14 +118,14 @@ extension UIViewController {
             preferredStyle: UIAlertController.Style.alert
         )
         alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default))
-        self.present(alert, animated: true)
+        present(alert, animated: true)
     }
 
     func presentErrorAlert(title: String, _ error: Error) {
         switch error {
         case ReachFiveError.AuthCanceled: return
         default:
-            self.presentAlert(title: title, message: "Error: \(error.localizedDescription)")
+            presentAlert(title: title, message: "Error: \(error.localizedDescription)")
         }
     }
 }

@@ -1,17 +1,17 @@
 import Foundation
-import UIKit
 import Reach5
+import UIKit
 
-//TODO: faire que la complétion soit sur email et pas custom identifier par défaut
-//TODO: changer la présentation pour n'avoir qu'un champ identifiant, et un segment control qui gère la signification: email/phone d'un côté, custom identifier de l'autre (voir trois segments pour email/phone/custom identifier)
-//TODO: Dynamic Scope Request and Consent: Allow the user to select which scopes to request during the login process
+// TODO: faire que la complétion soit sur email et pas custom identifier par défaut
+// TODO: changer la présentation pour n'avoir qu'un champ identifiant, et un segment control qui gère la signification: email/phone d'un côté, custom identifier de l'autre (voir trois segments pour email/phone/custom identifier)
+// TODO: Dynamic Scope Request and Consent: Allow the user to select which scopes to request during the login process
 class LoginWithPasswordController: UIViewController {
-    @IBOutlet weak var emailInput: UITextField!
-    @IBOutlet weak var phoneNumberInput: UITextField!
-    @IBOutlet weak var customIdentifierInput: UITextField!
-    @IBOutlet weak var passwordInput: UITextField!
-    @IBOutlet weak var error: UILabel!
-    @IBOutlet weak var scopesTableView: UITableView!
+    @IBOutlet var emailInput: UITextField!
+    @IBOutlet var phoneNumberInput: UITextField!
+    @IBOutlet var customIdentifierInput: UITextField!
+    @IBOutlet var passwordInput: UITextField!
+    @IBOutlet var error: UILabel!
+    @IBOutlet var scopesTableView: UITableView!
 
     var tokenNotification: NSObjectProtocol?
 
@@ -41,9 +41,9 @@ class LoginWithPasswordController: UIViewController {
     }
 
     private func loadScopes() {
-        self.availableScopes = AppDelegate.reachfive().scope
-        self.selectedScopes = SettingsViewController.selectedScopes
-        self.scopesTableView.reloadData()
+        availableScopes = AppDelegate.reachfive().scope
+        selectedScopes = SettingsViewController.selectedScopes
+        scopesTableView.reloadData()
     }
 
     @IBAction func login(_ sender: Any) {
@@ -66,7 +66,7 @@ class LoginWithPasswordController: UIViewController {
             }
         }
     }
-    
+
     @objc func switchChanged(_ sender: UISwitch) {
         let scope = availableScopes[sender.tag]
         if sender.isOn {
@@ -81,7 +81,7 @@ class LoginWithPasswordController: UIViewController {
 
 extension LoginWithPasswordController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return availableScopes.count
+        availableScopes.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -89,14 +89,14 @@ extension LoginWithPasswordController: UITableViewDataSource {
         let scope = availableScopes[indexPath.row]
         cell.textLabel?.text = scope
         cell.selectionStyle = .none
-        
+
         let switchView = UISwitch(frame: .zero)
         switchView.setOn(selectedScopes.contains(scope), animated: false)
         switchView.tag = indexPath.row
         switchView.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
-        
+
         cell.accessoryView = switchView
-        
+
         return cell
     }
 
@@ -106,8 +106,7 @@ extension LoginWithPasswordController: UITableViewDataSource {
 }
 
 extension LoginWithPasswordController: UITableViewDelegate {
-
-    //TODO: select all/none
+    // TODO: select all/none
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }

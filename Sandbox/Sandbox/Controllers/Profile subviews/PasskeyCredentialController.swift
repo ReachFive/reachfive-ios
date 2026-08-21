@@ -2,8 +2,7 @@ import Reach5
 import UIKit
 
 class PasskeyCredentialController: UIViewController {
-
-    var authToken: AuthToken = AuthToken(accessToken: "") // Just to appease the compiler, this fake value is overwritten when instantiating this from the profile controller
+    var authToken: AuthToken = .init(accessToken: "") // Just to appease the compiler, this fake value is overwritten when instantiating this from the profile controller
     var devices: [DeviceCredential] = [] {
         didSet {
             Task { @MainActor in
@@ -14,7 +13,7 @@ class PasskeyCredentialController: UIViewController {
         }
     }
 
-    @IBOutlet weak var credentialTableview: UITableView!
+    @IBOutlet var credentialTableview: UITableView!
 
     override func viewDidLoad() {
         print("PasskeyCredentialController.viewDidLoad")
@@ -59,7 +58,7 @@ class PasskeyCredentialController: UIViewController {
                 field.text = friendlyName
             }
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-            let registerAction = UIAlertAction(title: "Add", style: .default) { [unowned alert] (_) in
+            let registerAction = UIAlertAction(title: "Add", style: .default) { [unowned alert] _ in
                 let textField = alert.textFields?[0]
                 Task {
                     let request = NewPasskeyRequest(presenting: Presentation(from: self), friendlyName: textField?.text ?? friendlyName, origin: "ProfileController.registerNewPasskey")
@@ -73,15 +72,15 @@ class PasskeyCredentialController: UIViewController {
             }
             alert.addAction(registerAction)
             alert.preferredAction = registerAction
-            self.present(alert, animated: true)
+            present(alert, animated: true)
         } catch {
-            self.presentErrorAlert(title: "New passkey registration failed", error)
+            presentErrorAlert(title: "New passkey registration failed", error)
         }
     }
 }
 
 extension PasskeyCredentialController: UITableViewDelegate {
-    // method to run when table view cell is tapped
+    /// method to run when table view cell is tapped
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -105,8 +104,8 @@ extension PasskeyCredentialController: UITableViewDelegate {
             title: "",
             onEdit: { [weak self] button in
                 guard let self else { return }
-                let isEditing = !self.credentialTableview.isEditing
-                self.credentialTableview.setEditing(isEditing, animated: true)
+                let isEditing = !credentialTableview.isEditing
+                credentialTableview.setEditing(isEditing, animated: true)
                 button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
             },
             onAdd: onAdd

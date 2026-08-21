@@ -54,11 +54,10 @@ class DemoController: UIViewController {
         if #available(iOS 16.0, *) {
             types.append(.Passkey)
         }
-        let mode: Mode
-        if #available(iOS 16.0, *) {
-            mode = .IfImmediatelyAvailableCredentials
+        let mode: Mode = if #available(iOS 16.0, *) {
+            .IfImmediatelyAvailableCredentials
         } else {
-            mode = .Always
+            .Always
         }
         Task { @MainActor in
             do {
@@ -75,15 +74,15 @@ class DemoController: UIViewController {
 
                 switch error {
                 case ReachFiveError.AuthCanceled:
-                #if targetEnvironment(macCatalyst)
-                    return
-                #else
-                    if #available(iOS 16.0, *) {
-                        await handleAuthToken {
-                            try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.viewDidAppear.AuthCanceled"))
+                    #if targetEnvironment(macCatalyst)
+                        return
+                    #else
+                        if #available(iOS 16.0, *) {
+                            await handleAuthToken {
+                                try await AppDelegate.reachfive().beginAutoFillAssistedPasskeyLogin(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.viewDidAppear.AuthCanceled"))
+                            }
                         }
-                    }
-                #endif
+                    #endif
                 default: return
                 }
             }
@@ -103,11 +102,10 @@ class DemoController: UIViewController {
         }
 
         if !username.isEmpty, #available(iOS 16.0, *) {
-            let profile: ProfilePasskeySignupRequest
-            if username.contains("@") {
-                profile = ProfilePasskeySignupRequest(email: username)
+            let profile = if username.contains("@") {
+                ProfilePasskeySignupRequest(email: username)
             } else {
-                profile = ProfilePasskeySignupRequest(phoneNumber: username)
+                ProfilePasskeySignupRequest(phoneNumber: username)
             }
 
             Task {
@@ -180,7 +178,6 @@ class DemoController: UIViewController {
         }
     }
 
-
     func setupProviderLoginView() {
         let authorizationButton = ASAuthorizationAppleIDButton()
         authorizationButton.addTarget(self, action: #selector(handleAuthorizationAppleIDButtonPress), for: .touchDown)
@@ -197,10 +194,9 @@ class DemoController: UIViewController {
     }
 }
 
-
 extension DemoController: UITextFieldDelegate {
-    // this is called when the Return/Done key is tapped on the keyboard
-    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    /// this is called when the Return/Done key is tapped on the keyboard
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // usernameField has tag 0 and passwordField has tag 1
         let nextTag = textField.tag + 1
         let nextTF = textField.superview?.viewWithTag(nextTag) as? UIResponder

@@ -3,7 +3,7 @@ import UIKit
 
 @available(iOS 16.0, *)
 class PasskeyNonDiscoverableController: UIViewController {
-    @IBOutlet weak var username: UITextField!
+    @IBOutlet var username: UITextField!
 
     @IBAction func loginWithImmediatelyAvailableCredentials(_ sender: Any) {
         Task {

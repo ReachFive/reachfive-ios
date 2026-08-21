@@ -1,5 +1,5 @@
-import Foundation
 import CryptoKit
+import Foundation
 
 public class Pkce: NSObject, Codable {
     public let codeVerifier: String
@@ -28,8 +28,8 @@ public class Pkce: NSObject, Codable {
 
         var randomString = ""
 
-        (1...length).forEach { _ in
-            let randomIndex: Int = .random(in: 0..<string.count)
+        for _ in 1 ... length {
+            let randomIndex: Int = .random(in: 0 ..< string.count)
             let c = string.index(string.startIndex, offsetBy: randomIndex)
             randomString += String(string[c])
         }
@@ -37,7 +37,7 @@ public class Pkce: NSObject, Codable {
         return randomString
     }
 
-    public override var description: String {
+    override public var description: String {
         "PKCE codeVerifier=\(codeVerifier) codeChallenge=\(codeChallenge) codeChallengeMethod=\(codeChallengeMethod)"
     }
 }

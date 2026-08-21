@@ -2,8 +2,7 @@ import Foundation
 
 extension String {
     func decodeBase64Url() -> Data? {
-        var base64 = self
-            .replacingOccurrences(of: "-", with: "+")
+        var base64 = replacingOccurrences(of: "-", with: "+")
             .replacingOccurrences(of: "_", with: "/")
         let rem = base64.count % 4
         if rem != 0 {

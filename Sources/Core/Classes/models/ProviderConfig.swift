@@ -12,7 +12,7 @@ public class ProviderConfig: Codable {
 
     private enum CodingKeys: String, CodingKey {
         case provider, variant, clientId, scope
-        // `.convertFromSnakeCase` turns the payload's `universal_link` into `universalLink`.
+        /// `.convertFromSnakeCase` turns the payload's `universal_link` into `universalLink`.
         case rawUniversalLink = "universalLink"
     }
 
@@ -26,5 +26,7 @@ public class ProviderConfig: Codable {
         return url
     }
 
-    public var providerWithVariant: String { provider + ":" + variant }
+    public var providerWithVariant: String {
+        provider + ":" + variant
+    }
 }

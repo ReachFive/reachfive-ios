@@ -35,7 +35,7 @@ public struct WebSessionMode {
     var redirectUri: URL? {
         switch callback {
         case .customScheme: nil
-        case .universalLink(let url): url
+        case let .universalLink(url): url
         }
     }
 }

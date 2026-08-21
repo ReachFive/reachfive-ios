@@ -1,11 +1,11 @@
 import UIKit
 
 class LogoutCell: UITableViewCell {
-    @IBOutlet weak var revokeSwitch: UISwitch!
-    @IBOutlet weak var webLogoutSwitch: UISwitch!
-    @IBOutlet weak var logoutButton: UIButton!
-    @IBOutlet weak var revokeInfoButton: UIButton!
-    @IBOutlet weak var webLogoutInfoButton: UIButton!
+    @IBOutlet var revokeSwitch: UISwitch!
+    @IBOutlet var webLogoutSwitch: UISwitch!
+    @IBOutlet var logoutButton: UIButton!
+    @IBOutlet var revokeInfoButton: UIButton!
+    @IBOutlet var webLogoutInfoButton: UIButton!
 
     var onLogoutTapped: ((_ revoke: Bool, _ webLogout: Bool) -> Void)?
     var onRevokeInfoTapped: (() -> Void)?

@@ -6,19 +6,20 @@ class MfaController: UIViewController {
     @IBOutlet var selectedStepUpType: UISegmentedControl!
     @IBOutlet var startStepUp: UIButton!
 
-    @IBOutlet weak var credentialsTableView: UITableView!
-    @IBOutlet weak var trustedDevicesTableView: UITableView!
+    @IBOutlet var credentialsTableView: UITableView!
+    @IBOutlet var trustedDevicesTableView: UITableView!
 
     static let mfaCell = "MfaCredentialCell"
 
-    // The data sources for the table views.
-    // A `didSet` observer is used to automatically update the header's edit button visibility
-    // whenever the data source changes. This is safe because it does not call `reloadData()`.
+    /// The data sources for the table views.
+    /// A `didSet` observer is used to automatically update the header's edit button visibility
+    /// whenever the data source changes. This is safe because it does not call `reloadData()`.
     var mfaCredentials: [MfaCredential] = [] {
         didSet {
             updateHeaderVisibility(for: credentialsTableView, isEmpty: mfaCredentials.isEmpty)
         }
     }
+
     var trustedDevices: [TrustedDevice] = [] {
         didSet {
             updateHeaderVisibility(for: trustedDevicesTableView, isEmpty: trustedDevices.isEmpty)
@@ -41,10 +42,9 @@ class MfaController: UIViewController {
         // Register the custom header view's .xib file for the trusted devices table.
         let trustedDevicesNib = UINib(nibName: "EditableSectionHeaderView", bundle: nil)
         trustedDevicesTableView.register(trustedDevicesNib, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
-        
+
         let trustedDeviceCellNib = UINib(nibName: "TrustedDeviceCell", bundle: nil)
         trustedDevicesTableView.register(trustedDeviceCellNib, forCellReuseIdentifier: TrustedDeviceCell.reuseIdentifier)
-
 
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
             Task { @MainActor in
@@ -67,7 +67,7 @@ class MfaController: UIViewController {
         }
     }
 
-    // Safely updates the visibility of the header's edit button on the main thread.
+    /// Safely updates the visibility of the header's edit button on the main thread.
     private func updateHeaderVisibility(for tableView: UITableView, isEmpty: Bool) {
         DispatchQueue.main.async {
             if let header = tableView.headerView(forSection: 0) as? EditableSectionHeaderView {
@@ -76,7 +76,7 @@ class MfaController: UIViewController {
         }
     }
 
-    // Fetches the user's MFA credentials and reloads the table view on the main thread.
+    /// Fetches the user's MFA credentials and reloads the table view on the main thread.
     private func fetchMfaCredentials() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
@@ -90,7 +90,7 @@ class MfaController: UIViewController {
         }
     }
 
-    // Fetches the user's trusted devices and reloads the table view on the main thread.
+    /// Fetches the user's trusted devices and reloads the table view on the main thread.
     private func fetchTrustedDevices() async throws {
         guard let authToken = AppDelegate.storage.getToken() else {
             print("not logged in")
@@ -138,7 +138,7 @@ class MfaController: UIViewController {
         }
         let addAction = UIAlertAction(title: "Add", style: .default) { [weak self] _ in
             guard let self, let phoneNumber = alert.textFields?.first?.text, !phoneNumber.isEmpty else { return }
-            self.startMfaPhoneRegistration(phoneNumber: phoneNumber)
+            startMfaPhoneRegistration(phoneNumber: phoneNumber)
         }
         alert.addAction(addAction)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
@@ -165,12 +165,12 @@ class MfaController: UIViewController {
 }
 
 extension MfaController: UITableViewDelegate {
-    // method to run when table view cell is tapped
+    /// method to run when table view cell is tapped
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
-    // Use a custom header view for each section.
+    /// Use a custom header view for each section.
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: EditableSectionHeaderView.reuseIdentifier) as? EditableSectionHeaderView else {
             return nil
@@ -181,8 +181,8 @@ extension MfaController: UITableViewDelegate {
                 title: "Enrolled MFA Credentials",
                 onEdit: { [weak self] button in
                     guard let self else { return }
-                    let isEditing = !self.credentialsTableView.isEditing
-                    self.credentialsTableView.setEditing(isEditing, animated: true)
+                    let isEditing = !credentialsTableView.isEditing
+                    credentialsTableView.setEditing(isEditing, animated: true)
                     button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
                 },
                 onAdd: { [weak self] in
@@ -195,8 +195,8 @@ extension MfaController: UITableViewDelegate {
                 title: "Trusted Devices",
                 onEdit: { [weak self] button in
                     guard let self else { return }
-                    let isEditing = !self.trustedDevicesTableView.isEditing
-                    self.trustedDevicesTableView.setEditing(isEditing, animated: true)
+                    let isEditing = !trustedDevicesTableView.isEditing
+                    trustedDevicesTableView.setEditing(isEditing, animated: true)
                     button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
                 }
             )
@@ -210,9 +210,8 @@ extension MfaController: UITableViewDelegate {
 }
 
 extension MfaController: UITableViewDataSource {
-
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        1
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -239,12 +238,11 @@ extension MfaController: UITableViewDataSource {
         return UITableViewCell()
     }
 
-    // The commit editing style function enables the swipe-to-delete functionality and responds to the delete action.
+    /// The commit editing style function enables the swipe-to-delete functionality and responds to the delete action.
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             guard let authToken = AppDelegate.storage.getToken() else { return }
             Task { @MainActor in
-
                 if tableView == credentialsTableView {
                     let element = mfaCredentials[indexPath.row]
                     do {
@@ -272,7 +270,7 @@ extension MfaController: UITableViewDataSource {
 class MfaAction {
     let presentationAnchor: UIViewController
 
-    public init(presentationAnchor: UIViewController) {
+    init(presentationAnchor: UIViewController) {
         self.presentationAnchor = presentationAnchor
     }
 
@@ -281,7 +279,7 @@ class MfaAction {
             Task { @MainActor in
                 try await AppDelegate.withFreshToken(potentiallyStale: authToken) { refreshableToken in
                     let alert = UIAlertController(title: "Start registration mfa", message: "Start registration mfa", preferredStyle: .alert)
-                    
+
                     func submitStartRegistrationTrustDevice(withTrustDevice trustDevice: Bool) {
                         Task {
                             continuation.resume {
@@ -306,11 +304,11 @@ class MfaAction {
 
     func mfaStart(stepUp startStepUp: StartStepUp) async throws -> AuthToken {
         let resp = try await AppDelegate.reachfive().mfaStart(stepUp: startStepUp)
-        return try await self.handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
+        return try await handleStartVerificationCode(resp, stepUpType: startStepUp.authType)
     }
 
     private func handleStartVerificationCode(_ resp: ContinueStepUp, stepUpType authType: MfaCredentialItemType) async throws -> AuthToken {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             Task { @MainActor in
                 let alert = UIAlertController(title: "Verification code", message: "Please enter the verification code you got by \(authType)", preferredStyle: .alert)
                 alert.addTextField { textField in
@@ -340,7 +338,7 @@ class MfaAction {
     }
 
     private func handleStartVerificationCode(_ resp: MfaStartRegistrationResponse) async throws -> MfaCredentialItem {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             Task { @MainActor in
                 switch resp {
                 case let .Success(registeredCredential):
@@ -348,10 +346,10 @@ class MfaAction {
 
                 case let .VerificationNeeded(continueRegistration):
                     let canal =
-                    switch continueRegistration.credentialType {
-                    case .Email: "Email"
-                    case .PhoneNumber: "SMS"
-                    }
+                        switch continueRegistration.credentialType {
+                        case .Email: "Email"
+                        case .PhoneNumber: "SMS"
+                        }
 
                     let alert = UIAlertController(title: "Verification Code", message: "Please enter the verification Code you got by \(canal)", preferredStyle: .alert)
                     alert.addTextField { textField in

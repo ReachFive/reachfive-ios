@@ -1,9 +1,9 @@
 import Foundation
 import UIKit
 
-public extension ReachFive {
+extension ReachFive {
     @MainActor
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
+    public func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
         // Out-of-band "custom scheme" channel: a third-party app reopens the host app through the SDK's
         // scheme. The web-auth session is tried first — its matching is exact (scheme + host + path +
         // code/error of the expected redirect_uri) — otherwise `routeUrl` would swallow the link as a passwordless callback.
@@ -22,16 +22,16 @@ public extension ReachFive {
         return handled
     }
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         Task {
             do {
                 for provider in try await initialize() {
                     let _ = provider.application(application, didFinishLaunchingWithOptions: launchOptions)
                 }
             } catch {
-                //TODO: faire une passe de cohérence sur l'utilisation de #if DEBUG et du Logger
+                // TODO: faire une passe de cohérence sur l'utilisation de #if DEBUG et du Logger
                 #if DEBUG
-                print(Logger.shared.message(for: error))
+                    print(Logger.shared.message(for: error))
                 #endif
             }
         }
@@ -39,13 +39,13 @@ public extension ReachFive {
         return true
     }
 
-    func applicationDidBecomeActive(_ application: UIApplication) {
+    public func applicationDidBecomeActive(_ application: UIApplication) {
         for provider in providers {
             provider.applicationDidBecomeActive(application)
         }
     }
 
-    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    public func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         // Returns true only if a provider consumed the activity (false otherwise, so the host app — which
         // forwards all of its links to us — routes the ones ReachFive does not handle).
         var handled = false

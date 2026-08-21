@@ -1,25 +1,25 @@
-import UIKit
-import Reach5
 import os.log
+import Reach5
+import UIKit
 
 class TokenDetailsViewController: UIViewController {
-    var authToken: AuthToken = AuthToken(accessToken: "") // Just to appease the compiler, this fake value is overwritten when instantiating this from the profile controller
+    var authToken: AuthToken = .init(accessToken: "") // Just to appease the compiler, this fake value is overwritten when instantiating this from the profile controller
 
     // MARK: - IBOutlets for Raw Token Values
 
-    @IBOutlet weak var idTokenLabel: UILabel!
-    @IBOutlet weak var accessTokenLabel: UILabel!
-    @IBOutlet weak var refreshTokenLabel: UILabel!
-    @IBOutlet weak var tokenTypeLabel: UILabel!
-    @IBOutlet weak var expiresInLabel: UILabel!
+    @IBOutlet var idTokenLabel: UILabel!
+    @IBOutlet var accessTokenLabel: UILabel!
+    @IBOutlet var refreshTokenLabel: UILabel!
+    @IBOutlet var tokenTypeLabel: UILabel!
+    @IBOutlet var expiresInLabel: UILabel!
 
     // MARK: - IBOutlets for Decoded Token Views
 
     // These container views will hold the dynamically created DecodedTokenView instances.
     // Please add these UIStackViews in your storyboard.
-    @IBOutlet weak var idTokenDecodedContainer: UIStackView!
-    @IBOutlet weak var accessTokenDecodedContainer: UIStackView!
-    @IBOutlet weak var refreshTokenDecodedContainer: UIStackView!
+    @IBOutlet var idTokenDecodedContainer: UIStackView!
+    @IBOutlet var accessTokenDecodedContainer: UIStackView!
+    @IBOutlet var refreshTokenDecodedContainer: UIStackView!
 
     // MARK: - UIViewController Lifecycle
 
@@ -34,7 +34,6 @@ class TokenDetailsViewController: UIViewController {
 
     /// Configures the view with both raw and decoded token details.
     private func configureWithAuthToken() {
-
         // Display the raw token strings.
         idTokenLabel.text = authToken.idToken ?? "N/A"
         accessTokenLabel.text = authToken.accessToken
@@ -47,19 +46,22 @@ class TokenDetailsViewController: UIViewController {
 
         // Decode and display the ID token payload.
         if let idTokenPayload = decodeTokenPayload(authToken.idToken),
-           let decodedView = DecodedTokenView.create(with: idTokenPayload) {
+           let decodedView = DecodedTokenView.create(with: idTokenPayload)
+        {
             idTokenDecodedContainer.addArrangedSubview(decodedView)
         }
 
         // Decode and display the access token payload.
         if let accessTokenPayload = decodeTokenPayload(authToken.accessToken),
-           let decodedView = DecodedTokenView.create(with: accessTokenPayload) {
+           let decodedView = DecodedTokenView.create(with: accessTokenPayload)
+        {
             accessTokenDecodedContainer.addArrangedSubview(decodedView)
         }
 
         // Decode and display the refresh token payload, if it exists.
         if let refreshTokenPayload = decodeTokenPayload(authToken.refreshToken),
-           let decodedView = DecodedTokenView.create(with: refreshTokenPayload) {
+           let decodedView = DecodedTokenView.create(with: refreshTokenPayload)
+        {
             refreshTokenDecodedContainer.addArrangedSubview(decodedView)
         }
     }
@@ -75,7 +77,7 @@ class TokenDetailsViewController: UIViewController {
     /// - Parameter token: The JWT string.
     /// - Returns: A dictionary representing the token's payload, or `nil` on failure.
     private func decodeTokenPayload(_ token: String?) -> [String: Any]? {
-        guard let token = token else { return nil }
+        guard let token else { return nil }
 
         let segments = token.components(separatedBy: ".")
         guard segments.count == 3 else {
@@ -103,8 +105,8 @@ class TokenDetailsViewController: UIViewController {
 
     /// Sets up tap gestures to allow copying of the raw token values.
     private func setupCopyableLabels() {
-        [idTokenLabel, accessTokenLabel, refreshTokenLabel].forEach { label in
-            guard let label = label else { return }
+        for label in [idTokenLabel, accessTokenLabel, refreshTokenLabel] {
+            guard let label else { continue }
             let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped(_:)))
             label.isUserInteractionEnabled = true
             label.addGestureRecognizer(tapGesture)

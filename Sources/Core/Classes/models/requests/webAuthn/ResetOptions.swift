@@ -7,7 +7,7 @@ public class ResetOptions: Codable, DictionaryEncodable {
     public let friendlyName: String
     public let origin: String
     public let clientId: String
-    
+
     public init(email: String?, phoneNumber: String?, verificationCode: String, friendlyName: String, origin: String, clientId: String) {
         self.email = email
         self.phoneNumber = phoneNumber

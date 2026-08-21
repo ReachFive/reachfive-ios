@@ -1,8 +1,8 @@
 // swift-tools-version: 5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
-import PackageDescription
 import Foundation
+import PackageDescription
 
 let package = Package(
     name: "Reach5",
@@ -20,7 +20,7 @@ let package = Package(
             name: "Reach5Tests",
             dependencies: ["Reach5"],
             path: "Tests/Reach5Tests"
-        )
+        ),
     ]
 )
 

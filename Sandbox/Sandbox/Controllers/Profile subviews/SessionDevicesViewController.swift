@@ -1,5 +1,5 @@
-import UIKit
 import Reach5
+import UIKit
 
 class SessionDevicesViewController: UIViewController {
     var sessionDevices: [SessionDevice] = [] {
@@ -12,7 +12,8 @@ class SessionDevicesViewController: UIViewController {
             }
         }
     }
-    @IBOutlet weak var sessionDevicesTableView: UITableView!
+
+    @IBOutlet var sessionDevicesTableView: UITableView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,7 +31,7 @@ class SessionDevicesViewController: UIViewController {
 
 extension SessionDevicesViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return sessionDevices.count
+        sessionDevices.count
     }
 
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -71,8 +72,8 @@ extension SessionDevicesViewController: UITableViewDelegate {
             title: "",
             onEdit: { [weak self] button in
                 guard let self else { return }
-                let isEditing = !self.sessionDevicesTableView.isEditing
-                self.sessionDevicesTableView.setEditing(isEditing, animated: true)
+                let isEditing = !sessionDevicesTableView.isEditing
+                sessionDevicesTableView.setEditing(isEditing, animated: true)
                 button.setTitle(isEditing ? "Done" : "Modify", for: .normal)
             }
         )

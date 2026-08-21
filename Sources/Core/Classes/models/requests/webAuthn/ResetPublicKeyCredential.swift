@@ -6,7 +6,7 @@ public class ResetPublicKeyCredential: Codable, DictionaryEncodable {
     public let verificationCode: String
     public let clientId: String
     public var publicKeyCredential: RegistrationPublicKeyCredential
-    
+
     public init(email: String?, phoneNumber: String?, verificationCode: String, clientId: String, publicKeyCredential: RegistrationPublicKeyCredential) {
         self.email = email
         self.phoneNumber = phoneNumber
@@ -14,13 +14,12 @@ public class ResetPublicKeyCredential: Codable, DictionaryEncodable {
         self.clientId = clientId
         self.publicKeyCredential = publicKeyCredential
     }
-    
+
     public init(resetOptions: ResetOptions, publicKeyCredential: RegistrationPublicKeyCredential) {
-        self.email = resetOptions.email
-        self.phoneNumber = resetOptions.phoneNumber
-        self.verificationCode = resetOptions.verificationCode
-        self.clientId = resetOptions.clientId
+        email = resetOptions.email
+        phoneNumber = resetOptions.phoneNumber
+        verificationCode = resetOptions.verificationCode
+        clientId = resetOptions.clientId
         self.publicKeyCredential = publicKeyCredential
     }
-    
 }

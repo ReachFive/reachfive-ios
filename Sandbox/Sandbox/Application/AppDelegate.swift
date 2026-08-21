@@ -1,8 +1,8 @@
 import AuthenticationServices
 import Foundation
 import Reach5
-import Reach5Google
 import Reach5Facebook
+import Reach5Google
 import UIKit
 
 #if targetEnvironment(macCatalyst)
@@ -10,13 +10,13 @@ import UIKit
 // Facebook itself provided a fix on the latest version apparently
 // WeChat appears to just not be able to run on Catalyst at all
 #else
-// Peut-être qu'un jour je serai capable de modifier les dépendance cocoapods par plateforme
-// https://betterprogramming.pub/why-dont-my-pods-compile-with-mac-catalyst-and-how-can-i-solve-it-ffc3fbec824e
-// Ce lien suggère une solution mais je ne vois pas les même choses dans Build Phases, je ne vois pas les dépendances Facebook et WeChat
-// import Reach5WeChat
+    // Peut-être qu'un jour je serai capable de modifier les dépendance cocoapods par plateforme
+    // https://betterprogramming.pub/why-dont-my-pods-compile-with-mac-catalyst-and-how-can-i-solve-it-ffc3fbec824e
+    // Ce lien suggère une solution mais je ne vois pas les même choses dans Build Phases, je ne vois pas les dépendances Facebook et WeChat
+    // import Reach5WeChat
 #endif
 
-//TODO:
+// TODO:
 // cf. wireframe de JC pour d'autres idées : https://miro.com/app/board/uXjVOMB0pG4=/
 //   - notamment : affichage des jetons quand on est connecté et demande d'introspection
 // Pouvoir sélectionner entre plusieurs confs ReachFive
@@ -28,11 +28,11 @@ import UIKit
 // synchroniser les règles de mdp de la console avec les password rules, à mettre dans la conf de l'app (https://developer.apple.com/videos/play/wwdc2020/10666?time=658)
 // voir si les SMS 2FA sont auto-complétés
 
-@UIApplicationMain
+@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
-    public static let storage = SecureStorage()
+    static let storage = SecureStorage()
 
     /// La reco pour la redirectURI de [https://datatracker.ietf.org/doc/html/rfc8252#section-7.1](RFC 8252) est:
     /// - apps MUST use a URI scheme based on a domain name under their control, expressed in reverse order, as recommended by Section 3.8 of [RFC7595] for private-use URI schemes
@@ -55,21 +55,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         GoogleProvider(variant: "one_tap"),
         FacebookProvider(),
         AppleProvider(variant: "natif"),
-        WebProvider(name: .bconnect, variant: "natif", mode: .customScheme)
+        WebProvider(name: .bconnect, variant: "natif", mode: .customScheme),
     ]
     static let internalConfig = SdkInternalConfig(loggingEnabled: true)
     #if targetEnvironment(macCatalyst)
-    static let macLocal: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
-    static let macRemote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
-    let reachfive = macLocal
+        static let macLocal: ReachFive = .init(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
+        static let macRemote: ReachFive = .init(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
+        let reachfive = macLocal
     #else
-    static let local: ReachFive = ReachFive(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
-    static let remote: ReachFive = ReachFive(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
-    #if targetEnvironment(simulator)
-    let reachfive = local
-    #else
-    let reachfive = remote
-    #endif
+        static let local: ReachFive = .init(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
+        static let remote: ReachFive = .init(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
+        #if targetEnvironment(simulator)
+            let reachfive = local
+        #else
+            let reachfive = remote
+        #endif
     #endif
 
     @MainActor
@@ -127,7 +127,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let appleIDProvider = ASAuthorizationAppleIDProvider()
         // Ceci est l'id tel que renvoyé par Apple dans idToken.sub ou AppleIDCredential.user
-        appleIDProvider.getCredentialState(forUserID: "000707.3cc381460bce4bcc96e6fd5abdc1f121.1742") { (credentialState, error) in
+        appleIDProvider.getCredentialState(forUserID: "000707.3cc381460bce4bcc96e6fd5abdc1f121.1742") { credentialState, _ in
             switch credentialState {
             case .authorized: print("Apple Id state: authorized")
             case .revoked: print("Apple Id state: revoked")
@@ -194,7 +194,7 @@ extension AppDelegate {
     static func withFreshToken<T>(potentiallyStale token: AuthToken, _ body: (_ refreshableToken: AuthToken) async throws -> T) async throws -> T {
         do {
             return try await body(token)
-        } catch ReachFiveError.AuthFailure(_, let apiError) where apiError?.errorMessageKey == "error.accessToken.freshness" {
+        } catch let ReachFiveError.AuthFailure(_, apiError) where apiError?.errorMessageKey == "error.accessToken.freshness" {
             // Automatically refresh the token if it is stale
             let freshToken = try await reachfive().refreshAccessToken(authToken: token)
             AppDelegate.storage.setToken(freshToken)
@@ -211,7 +211,7 @@ extension NSNotification.Name {
 
 extension UITableView {
     func dequeueDefaultReusableCell(withIdentifier identifier: String, for indexPath: IndexPath, text: String, secondaryText: String? = nil) -> UITableViewCell {
-        let cell = self.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
+        let cell = dequeueReusableCell(withIdentifier: identifier, for: indexPath)
 
         var content = cell.defaultContentConfiguration()
 

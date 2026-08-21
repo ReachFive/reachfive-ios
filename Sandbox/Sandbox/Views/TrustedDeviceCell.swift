@@ -1,17 +1,17 @@
-import UIKit
 import Reach5
+import UIKit
 
 class TrustedDeviceCell: UITableViewCell {
     static let reuseIdentifier = "TrustedDeviceCell"
 
-    @IBOutlet weak var deviceNameLabel: UILabel!
-    @IBOutlet weak var createdAtLabel: UILabel!
-    @IBOutlet weak var ipLabel: UILabel!
-    @IBOutlet weak var osLabel: UILabel!
-    @IBOutlet weak var userAgentLabel: UILabel!
-    @IBOutlet weak var deviceClassLabel: UILabel!
-    @IBOutlet weak var idLabel: UILabel!
-    @IBOutlet weak var userIdLabel: UILabel!
+    @IBOutlet var deviceNameLabel: UILabel!
+    @IBOutlet var createdAtLabel: UILabel!
+    @IBOutlet var ipLabel: UILabel!
+    @IBOutlet var osLabel: UILabel!
+    @IBOutlet var userAgentLabel: UILabel!
+    @IBOutlet var deviceClassLabel: UILabel!
+    @IBOutlet var idLabel: UILabel!
+    @IBOutlet var userIdLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -20,7 +20,7 @@ class TrustedDeviceCell: UITableViewCell {
 
     func configure(with device: TrustedDevice) {
         deviceNameLabel.text = device.metadata.deviceName ?? "Anonymous device"
-        
+
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         if let date = dateFormatter.date(from: device.createdAt) {

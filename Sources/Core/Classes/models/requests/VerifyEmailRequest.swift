@@ -16,5 +16,4 @@ public class VerifyEmailRequest: Codable, DictionaryEncodable {
         self.email = email
         self.verificationCode = verificationCode
     }
-
 }

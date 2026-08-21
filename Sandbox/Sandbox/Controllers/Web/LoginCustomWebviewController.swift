@@ -4,7 +4,6 @@ import UIKit
 import WebKit
 
 class LoginCustomWebviewController: UIViewController {
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let pkce = Pkce.generate()
@@ -18,8 +17,8 @@ class LoginCustomWebviewController: UIViewController {
 }
 
 extension LoginCustomWebviewController: WKNavigationDelegate {
-    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
-        let app: UIApplication = UIApplication.shared
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+        let app = UIApplication.shared
         let reachfive = AppDelegate.reachfive()
         // A scheme is case-insensitive (RFC 3986 §3.1)
         guard let url = navigationAction.request.url, url.scheme?.lowercased() == reachfive.sdkConfig.customScheme.lowercased(), app.canOpenURL(url) else {
@@ -29,13 +28,13 @@ extension LoginCustomWebviewController: WKNavigationDelegate {
         let useScheme = true
         // two choices
         // 1. Let the SDK read the callback URL by opening the app with the URL Scheme and listening to the passwordless callback
-        if (useScheme) {
+        if useScheme {
             await app.open(url)
 
             // create a one-time notification by removing the observer from within the observation block
             let center = NotificationCenter.default
             var token: NSObjectProtocol?
-            token = center.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { (note) in
+            token = center.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
                 center.removeObserver(token!)
                 if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
                     Task {
@@ -62,4 +61,3 @@ extension LoginCustomWebviewController: WKNavigationDelegate {
         return .cancel
     }
 }
-

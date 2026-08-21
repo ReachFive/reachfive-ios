@@ -2,20 +2,19 @@ import Foundation
 import UIKit
 
 class RecoveryStartController: UIViewController {
-
-    @IBOutlet weak var username: UITextField!
+    @IBOutlet var username: UITextField!
 
     @IBAction func sendLink(_ sender: Any) {
         guard let username = username.text, !username.isEmpty else { return }
         var email: String?
         var phoneNumber: String?
-        if (username.contains("@")) {
+        if username.contains("@") {
             email = username
         } else {
             phoneNumber = username
         }
 
-        //TODO: Ajouter aussi la gestion de "j'ai oublié mon mot de passe"
+        // TODO: Ajouter aussi la gestion de "j'ai oublié mon mot de passe"
         Task { @MainActor in
             do {
                 try await AppDelegate.reachfive().requestAccountRecovery(email: email, phoneNumber: phoneNumber, origin: "RecoveryStartController:sendLink")

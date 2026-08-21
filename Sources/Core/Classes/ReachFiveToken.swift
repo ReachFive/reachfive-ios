@@ -1,7 +1,7 @@
 import Foundation
 
-public extension ReachFive {
-    func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken {
+extension ReachFive {
+    public func refreshAccessToken(authToken: AuthToken) async throws -> AuthToken {
         let refreshRequest = RefreshRequest(
             clientId: sdkConfig.clientId,
             refreshToken: authToken.refreshToken,
@@ -14,7 +14,7 @@ public extension ReachFive {
     /// Revokes the tokens.
     ///
     /// This method allows you to invalidate the access and refresh tokens.
-    func revokeToken(authToken: AuthToken) async throws {
+    public func revokeToken(authToken: AuthToken) async throws {
         let revokeAccessToken = RevokeTokenRequest(
             token: authToken.accessToken,
             tokenTypeHint: TokenType.accessToken.rawValue,

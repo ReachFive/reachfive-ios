@@ -6,23 +6,23 @@ public enum CustomField: Codable {
     case double(Double)
     case bool(Bool)
     case array([CustomField])
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
-        case .string(let value):
+        case let .string(value):
             try container.encode(value)
-        case .int(let value):
+        case let .int(value):
             try container.encode(value)
-        case .double(let value):
+        case let .double(value):
             try container.encode(value)
-        case .bool(let value):
+        case let .bool(value):
             try container.encode(value)
-        case .array(let value):
+        case let .array(value):
             try container.encode(value)
         }
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let value = try? container.decode(String.self) {

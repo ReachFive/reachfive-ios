@@ -5,33 +5,33 @@ public enum ReachFiveError: Error, CustomStringConvertible, LocalizedError {
     public var description: String {
         switch self {
         case let .RequestError(apiError):
-            return mkString(start: "RequestError", fields: (apiError, "apiError"))
+            mkString(start: "RequestError", fields: (apiError, "apiError"))
         case let .AuthFailure(reason, apiError):
-            return mkString(start: "AuthFailure", fields: (reason, "reason"), (apiError, "apiError"))
+            mkString(start: "AuthFailure", fields: (reason, "reason"), (apiError, "apiError"))
         case .AuthCanceled:
-            return "AuthCanceled"
+            "AuthCanceled"
         case let .TechnicalError(reason, apiError):
-            return mkString(start: "TechnicalError", fields: (reason, "reason"), (apiError, "apiError"))
+            mkString(start: "TechnicalError", fields: (reason, "reason"), (apiError, "apiError"))
         }
     }
 
     /// user friendly message
     public func message() -> String {
         switch self {
-        case .RequestError(apiError: let apiError):
-            return createMessage(reason: "", apiError: apiError)
-        case .AuthFailure(reason: let reason, apiError: let apiError):
-            return createMessage(reason: reason, apiError: apiError)
+        case let .RequestError(apiError: apiError):
+            createMessage(reason: "", apiError: apiError)
+        case let .AuthFailure(reason: reason, apiError: apiError):
+            createMessage(reason: reason, apiError: apiError)
         case .AuthCanceled:
-            return "Auth Canceled"
-        case .TechnicalError(reason: let reason, apiError: let apiError):
-            return createMessage(reason: reason, apiError: apiError)
+            "Auth Canceled"
+        case let .TechnicalError(reason: reason, apiError: apiError):
+            createMessage(reason: reason, apiError: apiError)
         }
     }
 
     /// Used by localizedDescription
     public var errorDescription: String? {
-        return message()
+        message()
     }
 
     private func createMessage(reason: String, apiError: ApiError? = nil) -> String {
@@ -39,9 +39,10 @@ public enum ReachFiveError: Error, CustomStringConvertible, LocalizedError {
             let topLevelMessage = error.errorUserMsg ?? error.errorDescription
             var fieldMessages = error.errorDetails.flatMap { fieldErrors -> [String] in fieldErrors.compactMap { fieldError in
                 guard let field = fieldError.field, let message = fieldError.message else {
-                    return  nil
+                    return nil
                 }
-                return .some("\(field): \(message)") } } ?? []
+                return .some("\(field): \(message)")
+            } } ?? []
 
             if let topLevelMessage {
                 fieldMessages.insert(topLevelMessage, at: 0)
@@ -78,12 +79,15 @@ public enum ReachFiveError: Error, CustomStringConvertible, LocalizedError {
 
 public class ApiError: Codable, CustomStringConvertible {
     public var description: String {
-        mkString(start: "ApiError", fields: (error, "error"),
+        mkString(
+            start: "ApiError",
+            fields: (error, "error"),
             (errorId, "errorId"),
             (errorMessageKey, "errorMessageKey"),
             (errorUserMsg, "errorUserMsg"),
             (errorDescription, "errorDescription"),
-            (errorDetails, "errorDetails"))
+            (errorDetails, "errorDetails")
+        )
     }
 
     public let error: String?
@@ -93,12 +97,14 @@ public class ApiError: Codable, CustomStringConvertible {
     public let errorDescription: String?
     public let errorDetails: [FieldError]?
 
-    public init(error: String? = nil,
-                errorId: String? = nil,
-                errorUserMsg: String? = nil,
-                errorMessageKey: String? = nil,
-                errorDescription: String? = nil,
-                errorDetails: [FieldError]? = nil) {
+    public init(
+        error: String? = nil,
+        errorId: String? = nil,
+        errorUserMsg: String? = nil,
+        errorMessageKey: String? = nil,
+        errorDescription: String? = nil,
+        errorDetails: [FieldError]? = nil
+    ) {
         self.error = error
         self.errorId = errorId
         self.errorUserMsg = errorUserMsg
@@ -118,7 +124,7 @@ public class ApiError: Codable, CustomStringConvertible {
         let key = params.first(where: { $0.name == "error_message_key" })?.value
         let desc = params.first(where: { $0.name == "error_description" })?.value
 
-        if (error == nil && errorId == nil && userMsg == nil && key == nil && desc == nil) {
+        if error == nil, errorId == nil, userMsg == nil, key == nil, desc == nil {
             return nil
         }
 
@@ -134,9 +140,12 @@ public class ApiError: Codable, CustomStringConvertible {
 
 public class FieldError: Codable, CustomStringConvertible {
     public var description: String {
-        mkString(start: "FieldError", fields: (field, "field"),
+        mkString(
+            start: "FieldError",
+            fields: (field, "field"),
             (message, "message"),
-            (code, "code"))
+            (code, "code")
+        )
     }
 
     public let field: String?
