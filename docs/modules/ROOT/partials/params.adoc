@@ -165,6 +165,20 @@ Defaults to the `originWebAuthn` of your `SdkConfig`, or to `https://$\{domain}`
 * `origin`: The origin of the call.
 This helps categorize inbound traffic.
 // end::NewPasskeyRequest[]
+// tag::upgradingToPasskeyRequest[]
+|[[upgradingToPasskeyRequest,upgradingToPasskey]] upgradingToPasskey `NewPasskeyRequest?`
+|Optional.
+When set and the sign-in succeeds, creates a passkey for the user in the background — see xref:upgradeToPasskey.adoc[].
+Ignored below iOS 18, and on a step-up: the upgrade only runs once the user is actually logged in.
+Nothing is shown to the user, and a failed upgrade never fails the sign-in.
+// end::upgradingToPasskeyRequest[]
+// tag::upgradingToPasskeyName[]
+|[[upgradingToPasskeyName,upgradingToPasskey]] upgradingToPasskey `String?`
+|Optional.
+When set and the user signs in with a password, creates a passkey for them in the background under that name — see xref:upgradeToPasskey.adoc[].
+Only the name is needed here: the presentation and both origins come from `withRequest`.
+Ignored below iOS 18, and for the other credential types, which have no password to upgrade from.
+// end::upgradingToPasskeyName[]
 
 // tag::ResetPasskeyRequest[]
 |[[ResetPasskeyRequest,ResetPasskeyRequest]] withRequest `ResetPasskeyRequest`
