@@ -62,9 +62,15 @@ class CredentialManager: NSObject {
     ///
     /// Internal for testability: a test drives the method with an inert `submit` (the request is never
     /// submitted to the system) then simulates the delegate callbacks.
+    ///
+    /// - Parameter cancelsOngoing: whether submitting this request cancels the ongoing ones.
+    ///   True for every request the user sees, which owns the screen from that point on. False for a
+    ///   conditional request, which runs in the background and must leave alone the auto-fill request the
+    ///   user can see.
     func perform(
         requests: [ASAuthorizationRequest],
         presenting: Presentation,
+        cancelsOngoing: Bool = true,
         using submit: (ASAuthorizationController) -> Void
     ) async throws -> ASAuthorization {
         guard !requests.isEmpty else { throw Self.noRequest }
@@ -82,7 +88,9 @@ class CredentialManager: NSObject {
             return try await withCheckedThrowingContinuation { continuation in
                 // Canceling the ongoing requests and submitting the new one in the same synchronous block:
                 // no other task can run on the main actor in between.
-                cancelOngoingRequests()
+                if cancelsOngoing {
+                    cancelOngoingRequests()
+                }
                 contexts[ObjectIdentifier(controller)] = RequestContext(id: id, controller: controller, presenting: presenting, continuation: continuation)
                 submit(controller)
             }
@@ -105,9 +113,9 @@ class CredentialManager: NSObject {
     /// back on would leave its caller hanging and its context in memory forever. Any late callback then
     /// finds no context left and is ignored.
     ///
-    /// Called by ``perform(requests:presenting:using:)`` in the same synchronous block as submitting the
-    /// new request: the app therefore cannot restart an auto-fill request — its usual reaction to
-    /// `.AuthCanceled` — before the new request has been submitted.
+    /// Called by ``perform(requests:presenting:cancelsOngoing:using:)`` in the same synchronous block
+    /// as submitting the new request: the app therefore cannot restart an auto-fill request — its usual
+    /// reaction to `.AuthCanceled` — before the new request has been submitted.
     ///
     /// Internal for testability.
     func cancelOngoingRequests() {
@@ -167,6 +175,45 @@ class CredentialManager: NSObject {
 
         let credential = try registrationCredential(from: authorization)
         try await reachFive.reachFiveApi.registerWithWebAuthn(authToken: authToken, publicKeyCredential: credential, originR5: request.origin)
+    }
+
+    // MARK: - Upgrade
+
+    /// Twin of ``registerNewPasskey(withRequest:originWebAuthn:authToken:reachFive:)``, with a conditional
+    /// system request: same server exchange, but the system creates the passkey without any UI, or refuses
+    /// without one either.
+    ///
+    /// - Returns: whether a passkey was created. `false` means the system declined, which is a normal
+    ///   outcome and not an error.
+    @available(iOS 18.0, *)
+    func upgradeToPasskey(withRequest request: NewPasskeyRequest, originWebAuthn: String, authToken: AuthToken, reachFive: ReachFive) async throws -> Bool {
+        let options = try await reachFive.reachFiveApi.createWebAuthnRegistrationOptions(authToken: authToken, registrationRequest: RegistrationRequest(origin: originWebAuthn, friendlyName: request.friendlyName))
+        let registrationRequest = try makeCredentialRegistrationRequest(from: options, friendlyName: request.friendlyName, conditional: true)
+
+        let authorization: ASAuthorization
+        do {
+            // Deliberately does not cancel the ongoing requests: this one is invisible, whereas the
+            // auto-fill request it would cancel is the one the user is looking at.
+            authorization = try await perform(requests: [registrationRequest], presenting: request.presenting, cancelsOngoing: false) {
+                $0.performRequests()
+            }
+        } catch is CancellationError {
+            // The calling screen went away. Not a decline, and swallowing it would break the caller's
+            // cancellation.
+            throw CancellationError()
+        } catch {
+            // One of the system's preconditions was not met: no credential manager available, the password
+            // was not just used, or the device is not set up for passkeys. Every system-level failure is
+            // treated as a decline, not just `.canceled`: Apple documents the conditional request as
+            // failing silently without promising which code comes back. Logged rather than dropped, so a
+            // silent upgrade that never happens can still be diagnosed.
+            Logger.shared.log("Automatic passkey upgrade declined by the system: \(error)")
+            return false
+        }
+
+        let credential = try registrationCredential(from: authorization)
+        try await reachFive.reachFiveApi.registerWithWebAuthn(authToken: authToken, publicKeyCredential: credential, originR5: request.origin)
+        return true
     }
 
     // MARK: - Reset
@@ -246,7 +293,7 @@ class CredentialManager: NSObject {
 
     // MARK: - Modal
 
-    func login(withRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, reachFive: ReachFive) async throws -> LoginFlow {
+    func login(withRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, upgradingToPasskey passkeyFriendlyName: String? = nil, reachFive: ReachFive) async throws -> LoginFlow {
         let built = try await buildAuthorizationRequests(
             makeWebAuthnLoginRequest(for: request, reachFive: reachFive),
             reachFive: reachFive,
@@ -258,7 +305,13 @@ class CredentialManager: NSObject {
             performRequests(on: $0, mode: mode)
         }
 
-        return try await completeModalLogin(authorization, scopes: request.scopes, siwa: built.siwa, reachFive: reachFive, originR5: request.origin)
+        // Only the name is missing to describe the upgrade: the request already carries the anchor and
+        // both origins.
+        let passkeyRequest = passkeyFriendlyName.map {
+            NewPasskeyRequest(presenting: request.presenting, friendlyName: $0, originWebAuthn: request.originWebAuthn, origin: request.origin)
+        }
+
+        return try await completeModalLogin(authorization, scopes: request.scopes, siwa: built.siwa, upgradingToPasskey: passkeyRequest, reachFive: reachFive, originR5: request.origin)
     }
 
     /// Internal for testability
@@ -455,12 +508,14 @@ extension CredentialManager {
 
     /// Completes a modal sign-in, the only flow that can receive several kinds of credential (password,
     /// Sign In With Apple, or passkey).
-    private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
+    private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, upgradingToPasskey passkeyRequest: NewPasskeyRequest?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
             // a password was selected to sign in. No custom identifier: none can be used at signup either.
             let (email, phoneNumber) = Username.Unspecified(passwordCredential.user).identifiers
 
-            return try await reachFive.loginWithPassword(email: email, phoneNumber: phoneNumber, password: passwordCredential.password, scope: scopes, origin: originR5)
+            // The credential manager just filled in the password, so the system's "the password was just
+            // used" precondition holds: this is the flow automatic upgrades were designed for.
+            return try await reachFive.loginWithPassword(email: email, phoneNumber: phoneNumber, password: passwordCredential.password, scope: scopes, origin: originR5, upgradingToPasskey: passkeyRequest)
         } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard let siwa else {
                 // Guaranteed by buildAuthorizationRequests: a Sign In With Apple request only ever makes
@@ -509,9 +564,13 @@ extension CredentialManager {
     /// server echoes back the value it was given, and it is the app's intent that should name the passkey
     /// in the keychain.
     ///
+    /// - Parameter conditional: creates the passkey in the background, for an automatic upgrade. Ignored
+    ///   below iOS 18, which only knows the standard style — the caller then gets a request that would
+    ///   show UI, hence the `@available(iOS 18.0, *)` on the only flow that asks for it.
+    ///
     /// Internal for testability.
     @available(iOS 16.0, *)
-    func makeCredentialRegistrationRequest(from options: RegistrationOptions, friendlyName: String) throws -> ASAuthorizationRequest {
+    func makeCredentialRegistrationRequest(from options: RegistrationOptions, friendlyName: String, conditional: Bool = false) throws -> ASAuthorizationRequest {
         guard let challenge = options.options.publicKey.challenge.decodeBase64Url() else {
             throw ReachFiveError.TechnicalError(reason: "unreadable challenge: \(options.options.publicKey.challenge)")
         }
@@ -521,7 +580,15 @@ extension CredentialManager {
         }
 
         let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: options.options.publicKey.rp.id)
-        return publicKeyCredentialProvider.createCredentialRegistrationRequest(challenge: challenge, name: friendlyName, userID: userID)
+        let registrationRequest = publicKeyCredentialProvider.createCredentialRegistrationRequest(challenge: challenge, name: friendlyName, userID: userID)
+
+        // The style is set on the request rather than picked through the iOS 18 factory overload: one
+        // construction path, and the standard style stays the default everywhere else.
+        if conditional, #available(iOS 18.0, *) {
+            registrationRequest.requestStyle = .conditional
+        }
+
+        return registrationRequest
     }
 
     /// Builds a passkey assertion request from the options returned by the server.

@@ -27,6 +27,13 @@
   - `webSessionMode` to shape the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+). `WebProvider` takes the same choices.
   - `loginUrlFragment` to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
 - New method `login(withProvider:…)`, intended for integrators writing their own `Provider`: exchanges the ID token issued by a native provider SDK for a ReachFive `AuthToken`.
+- `ReachFive.upgradeToPasskey(withRequest:authToken:)` (iOS 18+): creates a passkey in the background for
+  an account that signs in with a password, with no UI at all. The system checks its own preconditions and
+  declines silently when one is not met — reported as `false`, not as an error — and the SDK skips accounts
+  that already have a passkey. Both password sign-ins can run it for you through a new optional
+  `upgradingToPasskey` parameter: `loginWithPassword(...)` takes a `NewPasskeyRequest`, and
+  `login(withRequest:usingModalAuthorizationFor:display:)` takes just the passkey name, since it already
+  carries the anchor and the origins.
 
 ## v10.0.1
 
