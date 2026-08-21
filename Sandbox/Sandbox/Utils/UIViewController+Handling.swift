@@ -15,10 +15,11 @@ extension UIViewController {
     func goToProfile(_ authToken: AuthToken) {
         AppDelegate.storage.setToken(authToken)
 
-        if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "Tabs") as? UITabBarController {
-            tabBarController.selectedIndex = 2 // profile is third from left
-            navigationController?.pushViewController(tabBarController, animated: true)
-        }
+        // Sélectionne l'onglet Profil existant plutôt que d'empiler une nouvelle instance de "Tabs"
+        guard let tabs = tabBarController else { return }
+        // Revient à la racine de l'onglet courant pour ne pas y laisser un parcours de login entamé
+        navigationController?.popToRootViewController(animated: false)
+        tabs.selectedIndex = 2 // profile is third from left
     }
 
     func handleLoginFlow(errorMessage: String = "Login failed", _ body: () async throws -> LoginFlow) async {
