@@ -66,18 +66,17 @@ WeChat() <1>
 
 Takes a `name` (one of `.facebook`, `.google`, `.line`, `.bconnect`), an optional `variant`, and a `mode` controlling how the session's redirection reaches the app:
 
-* `.sdkScheme` (default): custom scheme, works on all supported iOS versions.
-* `.externalApp`: *out-of-band* — the flow ends in an external app (e.g. a banking app) that reopens yours via a universal link, forwarded to {company} through xref:application/applicationContinueUserActivity.adoc[]. Requires the `applinks:` Associated Domain.
-* `.universalLink` (iOS 17.4+): *in-band* — the universal-link redirect is intercepted directly inside the authentication sheet. Requires the `webcredentials:` Associated Domain.
+* `.customScheme` (default): the SDK's custom scheme, on all supported iOS versions. Covers a redirect intercepted inside the sheet *and* one delivered by the default browser to xref:application/applicationOpenUrl.adoc[] — including providers that detour through a third-party app, such as B.connect sending the user to their bank app.
+* `.universalLink` (iOS 17.4+): the universal-link redirect is intercepted directly inside the authentication sheet. Requires the `webcredentials:` Associated Domain and a `universalLink` on the provider's backend configuration.
 
 See the "Associated Domains" section of xref:index.adoc[] for the entitlement setup.
 
 [source,swift]
 ----
-WebProvider(name: .bconnect, variant: "natif", mode: .externalApp)
+WebProvider(name: .bconnect, variant: "natif", mode: .customScheme)
 ----
 
-NOTE: A provider configured on your client with no matching entry in `providersCreators` still logs in, falling back to `.sdkScheme` automatically. Add an explicit `WebProvider` only when you need `.externalApp`/`.universalLink`, or a specific `variant`.
+NOTE: A provider configured on your client with no matching entry in `providersCreators` still logs in, falling back to `.customScheme` automatically. Add an explicit `WebProvider` only when you need `.universalLink`, or a specific `variant`.
 
 TIP: Integrating a universal-link provider? See xref:providerCreator.adoc#universal-link-web-providers[the universal-link checklist].
 

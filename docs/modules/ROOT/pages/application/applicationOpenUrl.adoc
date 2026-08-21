@@ -12,7 +12,14 @@ Allows {company} to handle URLs in the following format:
 
 * `reachfive-clientId://`
 
-This includes the *custom-scheme out-of-band* login flow: when an external app finishes a login by reopening your app through the SDK's custom scheme, the SDK completes the in-flight web authentication session here. This is the custom-scheme counterpart of the universal-link flow handled by xref:application/applicationContinueUserActivity.adoc[`application(_:continue:)`].
+This is where a web login that *left your app* comes back. Some providers hand the user off to a third-party app mid-login — B.connect sends them to their bank app for strong authentication. That app does **not** reopen your app: it opens the user's *default browser*, and it is the browser that finally follows the redirect to `reachfive-clientId://callback` and hands it to this method (the user sees the system "Open in app" prompt). The SDK completes the in-flight web authentication session here and closes the `ASWebAuthenticationSession` sheet, which stayed open behind the detour.
+
+[NOTE]
+====
+Because the provider only decides mid-flight whether to make that detour, the SDK always arms both return paths for a `.customScheme` login: the sheet intercepts the callback when the flow never leaves it, and this method resolves it when the browser delivers it. You do not choose, and there is nothing to configure beyond forwarding this method.
+
+The in-flight login only lives in memory. If iOS terminates your app during the detour — which now spans an external app *and* the browser — the login is lost: the SDK finds nothing to complete, returns `false` so your app can route the URL itself, and the user must start over.
+====
 
 Additionally, the method allows configured providers to handle their own native links.
 

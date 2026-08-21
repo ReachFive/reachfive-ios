@@ -18,7 +18,7 @@ AppDelegate.reachfive().{docname}(WebviewLoginRequest(
 <1> Scope isn't explicitly required.
 If not provided here, it defaults to the scopes set up in the client configuration which is picked up when you initialize the iOS SDK.
 <2> Available starting with version 7.1.3
-<3> Optional; defaults to `.sdkScheme`. Use `.externalApp`/`.universalLink` for providers that finish their login on a universal link — see xref:providerCreator.adoc[WebProvider].
+<3> Optional; defaults to `.customScheme`, which also covers providers that detour through a third-party app. Use `.universalLink` only when the login must come back on a universal link intercepted in the sheet — see xref:providerCreator.adoc[WebProvider].
 <4> Optional; requires xref:docs:ROOT:orchestration-token.adoc[request orchestration tokens] to be enabled for the client.
 
 == Description
@@ -38,6 +38,14 @@ include::docs:ROOT:partial$general/snippets/r_orchestrated-flows-min-version.ado
 When logging in with secure webview, a dialog pops up where you must select *Continue* and acknowledge that by continuing "This allows the app and the website to exchange information about you".
 
 image::sdk-ios:ROOT:secure-login-dialog.png[width=500px,role=zoom]
+
+=== One web login at a time
+
+`{docname}`, a `login` on a xref:providerCreator.adoc[web provider] and xref:logout.adoc[`logout(webSessionLogout:)`] share a single web session. A call made while another one is still in progress ends with `AuthCanceled` and leaves the login under way untouched.
+
+There is nothing to add on your side: a double tap on a login control is absorbed by the SDK, and `AuthCanceled` means "nothing happened" (see <<ReachFiveError>>). Refusing the second call is deliberate — replacing the login in progress means dismissing its sheet and presenting another one behind it, which iOS fails asynchronously, losing *both* logins.
+
+To end a web login early, cancel the `Task` that started it: the sheet closes and the call returns `AuthCanceled`. A SwiftUI `.task` or any `Task` you cancel when tearing down your screen does this for you.
 
 == Usage
 

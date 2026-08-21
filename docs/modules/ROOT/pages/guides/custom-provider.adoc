@@ -10,7 +10,7 @@ Our built-in xref:providerCreator.adoc[provider creators] cover the most common 
 
 This custom provider guide instructs you how to implement a provider that none of the built-ins model such as a social/SSO provider with its own native SDK, or a login flow that none of the built-ins model.
 
-If your provider has no native SDK component and only needs to choose *how* its `ASWebAuthenticationSession` returns to the app (custom scheme, universal link, out-of-band), you don't need a custom provider, instead configure a xref:providerCreator.adoc[`WebProvider`].
+If your provider has no native SDK component and only needs to choose *how* its `ASWebAuthenticationSession` returns to the app (custom scheme or universal link), you don't need a custom provider, instead configure a xref:providerCreator.adoc[`WebProvider`]. That includes providers that detour through a third-party app mid-login, such as B.connect.
 
 == The two protocols
 
@@ -91,7 +91,7 @@ An example of this is resuming a paused native SDK session.
 |xref:application/applicationContinueUserActivity.adoc[application(_:continue:restorationHandler:)]
 |Your provider's callback arrives as a *universal link* (`NSUserActivityTypeBrowsingWeb`).
 
-An example of this is an out-of-band flow like `WebProvider` `.externalApp` mode. 
+An example of this is a flow whose `redirect_uri` is an https link your app is associated with, like `WebProvider` `.universalLink` mode.
 
 Return `true` only if you actually consumed the activity.
 {company} relies on that return value (see xref:application/applicationContinueUserActivity.adoc[] for details).
