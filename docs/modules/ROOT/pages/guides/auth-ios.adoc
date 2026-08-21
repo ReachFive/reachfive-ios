@@ -12,7 +12,7 @@ Calls to the SDK mainly go through the ReachFive class, to start using it add th
 
 Initialize the SDK by calling the ReachFive.initWith method with the following parameters:
 
-* `domain` (required): the domain dedicated to the client, this parameter will be used by the SDK to establish calls to the APIs
+* `domain` (required): the domain dedicated to the client, this parameter will be used by the SDK to establish calls to the APIs; give it as a bare host, with no `https://` prefix
 * `provider` (optional): Array<R5ProviderData> - allows to pass the different providers configuration (Facebook, Google, Twitter…) directly to the SDK. If this parameter is omitted then this configuration is retrieved by a call to the ReachFive backend.
 * `onInitFinishCallback`: R5InitFinishedCallback callback when initialization is complete
 
