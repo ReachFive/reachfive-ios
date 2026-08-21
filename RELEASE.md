@@ -12,19 +12,19 @@
     ./set_version.sh
     ```
 
-4. Update the [CHANGELOG.md](CHANGELOG.md) file
+4. Update the [CHANGELOG.md](CHANGELOG.md) file (don't forget to move the unreleased changes to their own section)
 5. Ask to create a new release version in JIRA and link the ticket to it
 
 6. Submit and merge the pull request
 
-7. Add git tag `x.x.x` to the merge commit
+7. Add git tag `11.0.0` to the merge commit
     ```sh
-    git tag x.x.x
+    git tag 11.0.0
     ```
 
 8. Push the tag
     ```sh
-    git push origin x.x.x
+    git push origin 11.0.0
     ```
 
 9. The tag is the published version: SPM resolves it directly, there is nothing else to publish

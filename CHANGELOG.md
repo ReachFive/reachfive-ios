@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v11.0.0
+
 ### Breaking changes
 - Changed type of redirect URL fields to URL instead of String
 - `SdkConfig`:
@@ -15,16 +17,16 @@
 - `ProviderCreator`: the factory receives the ``ReachFive`` instance instead of sub-components, so that the creator can reuse high-level helpers such as `buildAuthorizeURL`,`authWithCode`, `webviewLogin` or the new `login(withProvider:…)`.
   See the [Implement a custom provider](https://developer.reachfive.com/sdk-ios/guides/custom-provider.html) guide.
 - `Provider.login` and the native passkey requests takes a `Presentation` instead of a `UIViewController?` or an `anchor: ASPresentationAnchor` to handle the different type of implicit conformance.
-- CocoaPods support is dropped, the SDKs are distributed exclusively with Swift Package Manager.
+- CocoaPods support is dropped, the SDK is distributed exclusively with Swift Package Manager.
   If you were integrating with CocoaPods, note that the pod re-exported `UIKit` and `Foundation` through its generated umbrella header, so `import Reach5` brought them into scope implicitly. It no longer does: add the explicit `import UIKit` / `import Foundation` your files need.
 
 ### New features
-- Support the b.connect provider: handle the login flow through an external app and add the `cico` claim to OpenIdUser.
+- Support the b.connect provider: handle the login flow through an external app and add its `cico` claim to OpenIdUser.
 - Support session devices: `listSessionDevices(authToken:)` and `deleteSessionDevice(id:authToken:)`
 - `SdkConfig`:
   - init takes a new optional parameter `originWebAuthn`, so the WebAuthn origin can be configured once instead of being repeated on every passkey request
   - new field `normalizedDomain`: the normalized domain according to RFC 6454 for comparing hosts
-- `webviewLogin` has two new parameters: 
+- `webviewLogin` has two new parameters:
   - `webSessionMode` to shape the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+).
   - `loginUrlFragment` to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
 - New `WebProvider` to register a web provider with a `variant` and a completion `mode` (cf. `webSessionMode` of `webviewLogin` above). See the [Universal-link web providers](https://developer.reachfive.com/sdk-ios/providerCreator.html#universal-link-web-providers).
