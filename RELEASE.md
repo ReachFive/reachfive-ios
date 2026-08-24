@@ -29,7 +29,7 @@
 
 9. The tag is the published version: SPM resolves it directly, there is nothing else to publish
 
-10. Release Reach5Future
+10. Release Reach5Future, Reach5Google and Reach5Facebook, the later two especially if this is a new major version
 
 11. Bump the pinned versions in the SPM project DemoSharedCredentials to the new tags (Reach5 and, if released, Reach5Future) and test it. This is the first point where the actually-published versions can be resolved and built together.
 
