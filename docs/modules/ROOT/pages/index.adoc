@@ -212,7 +212,6 @@ TIP: See <<Info.plist reference>> for a comprehensive look at the file.
 ==== Fast App Switch
 
 With `fbauth2` declared, a classic Facebook login opens the native Facebook app instead of an in-app browser.
-The user is already signed in there, so the login is faster and avoids the browser cookie problems that cause needless re-authentication.
 When the Facebook app is absent, the Facebook SDK falls back to the browser flow on its own, so the login always completes.
 
 Fast App Switch applies to *classic login only*: a limited login always uses the browser flow.
@@ -223,9 +222,6 @@ It therefore takes effect only when both of the following hold, since either one
 
 It is on by default.
 Pass `appSwitch: .disabled` to xref:providerCreator.adoc#FacebookProvider[`FacebookProvider`] to force the browser flow instead.
-
-NOTE: Declaring `fbauth2` is what turns Fast App Switch on — there is nothing to enable on your Facebook application.
-If you upgrade an application that already declares `fbauth2`, its classic logins start switching to the Facebook app with no change on your side.
 
 === Google native provider
 
