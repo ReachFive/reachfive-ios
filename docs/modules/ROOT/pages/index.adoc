@@ -199,12 +199,33 @@ NOTE: If you're using the latest version of the Facebook API, remove the `user_g
 
 <key>LSApplicationQueriesSchemes</key>
 <array>
+    <string>fbauth2</string> <!--1-->
     <string>fbapi</string>
     <string>fb-messenger-share-api</string>
 </array>
 ----
+<1> Enables <<facebook-fast-app-switch,Fast App Switch>>. Available from `Reach5Facebook` 9.0.0.
 
 TIP: See <<Info.plist reference>> for a comprehensive look at the file.
+
+[#facebook-fast-app-switch]
+==== Fast App Switch
+
+With `fbauth2` declared, a classic Facebook login opens the native Facebook app instead of an in-app browser.
+The user is already signed in there, so the login is faster and avoids the browser cookie problems that cause needless re-authentication.
+When the Facebook app is absent, the Facebook SDK falls back to the browser flow on its own, so the login always completes.
+
+Fast App Switch applies to *classic login only*: a limited login always uses the browser flow.
+It therefore takes effect only when both of the following hold, since either one alone makes the SDK ask Facebook for a limited login:
+
+* You built the provider with `prefersLoginTracking: .enabled`, as the default is `.limited`.
+* App Tracking Transparency is authorized on the device.
+
+It is on by default.
+Pass `appSwitch: .disabled` to xref:providerCreator.adoc#FacebookProvider[`FacebookProvider`] to force the browser flow instead.
+
+NOTE: Declaring `fbauth2` is what turns Fast App Switch on — there is nothing to enable on your Facebook application.
+If you upgrade an application that already declares `fbauth2`, its classic logins start switching to the Facebook app with no change on your side.
 
 === Google native provider
 
@@ -420,6 +441,7 @@ If you configure all four SDKs, your `Info.plist` file should contain the follow
    <string>weixin</string>
    <string>weixinULAPI</string>
    <string>weixinURLParamsAPI</string>
+   <string>fbauth2</string>
    <string>fbapi</string>
    <string>fb-messenger-share-api</string>
 </array>
