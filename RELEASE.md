@@ -29,12 +29,14 @@
 
 9. The tag is the published version: SPM resolves it directly, there is nothing else to publish
 
-10. Release Reach5Future, Reach5Google and Reach5Facebook, the later two especially if this is a new major version
+10. Release Reach5Future
 
-11. Bump the pinned versions in the SPM project DemoSharedCredentials to the new tags (Reach5 and, if released, Reach5Future) and test it. This is the first point where the actually-published versions can be resolved and built together.
+11. If this is a major version, release Reach5Google and Reach5Facebook with updated Package.swift .upToNextMajor(from:) declaration
 
-12. Finally, draft a new release in the [Github releases tab](https://github.com/ReachFive/reachfive-ios/releases) (copy & paste the changelog in the release's description)
+12. Bump the pinned versions in the SPM project DemoSharedCredentials to the new tags (Reach5 and, if released, Reach5Future) and test it. This is the first point where the actually-published versions can be resolved and built together.
 
-13. If the new version needs a fork of the documentation, the branch `x.x.x` should exist in perpetuity for the purpose of this documentation.<br>
+13. Finally, draft a new release in the [Github releases tab](https://github.com/ReachFive/reachfive-ios/releases) (copy & paste the changelog in the release's description)
+
+14. If the new version needs a fork of the documentation, the branch `x.x.x` should exist in perpetuity for the purpose of this documentation.<br>
     If, at step 6., the `x.x.x` branch was merged (not squashed) into master, then keep the branch open.<br>
     If the branch was squashed, then delete the branch and recreate a new branch still named `x.x.x`
