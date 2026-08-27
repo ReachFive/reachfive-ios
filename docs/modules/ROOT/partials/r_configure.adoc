@@ -153,7 +153,7 @@ let reachFive = ReachFive(
     sdkConfig: SdkConfig(
         domain: DOMAIN,
         clientId: CLIENT_ID,
-        originWebAuthn: URL(string: "https://auth.example.com") <1>
+        originWebAuthn: URL(string: "https://auth.example.com")! <1>
     )
 )
 ----
