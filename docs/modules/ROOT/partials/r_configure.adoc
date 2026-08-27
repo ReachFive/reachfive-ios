@@ -145,6 +145,8 @@ relying party — a custom domain, or one shared across several of your applicat
 Set it once in the `SdkConfig` rather than on every passkey request.
 A request that carries its own `originWebAuthn` still takes precedence over this value.
 
+IMPORTANT: The origin you send must be allowed in the {cc} under menu:Settings[WebAuthn], or the server rejects the passkey request.
+See xref:guides/passkeys.adoc#allowed-origins[Allowed origins].
 [source,swift,subs="verbatim,callouts"]
 ----
 let reachFive = ReachFive(

@@ -80,6 +80,7 @@ https://<your_domain>/.well-known/apple-app-site-association <1>
 ----
 <1> Ensure you use the correct Relying Party ID as your domain here.
 
+[#allowed-origins]
 == Allowed origins
 
 In the {cc}, under menu:Settings[WebAuthn] you must allow:
