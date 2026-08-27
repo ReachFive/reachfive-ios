@@ -49,7 +49,7 @@ let reachfive = ReachFive(
     providersCreators: [GoogleProvider(), FacebookProvider(), WeChatProvider()] <2>
 )
 ----
-<1> Sets the required parameters such as `domain`, {company} `clientId`, and the `scheme`.
+<1> Sets the required parameters such as `domain`, {company} `clientId`, and the `customScheme`.
 <2> Lists the social providers you need for your iOS application.
 For more details, see xref:providerCreator.adoc[].
 
