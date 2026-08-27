@@ -70,9 +70,9 @@ WeChat() <1>
 |[[WebProvider,WebProvider]]WebProvider
 |The object for configuring a **web-only** provider — one with no native SDK component, authenticated entirely through an `ASWebAuthenticationSession`.
 
-Takes a `name` (one of `.facebook`, `.google`, `.line`, `.bconnect`), an optional `variant`, and a `mode` controlling how the session's redirection reaches the app:
+Takes a `name`, an optional `variant`, and a `mode` controlling how the session's redirection reaches the app:
 
-* `.customScheme` (default): the SDK's custom scheme, on all supported iOS versions. Covers a redirect intercepted inside the sheet *and* one delivered by the default browser to xref:application/applicationOpenUrl.adoc[] — including providers that detour through a third-party app, such as B.connect sending the user to their bank app.
+* `.customScheme` (default): the SDK's custom scheme. Covers a redirect intercepted inside the sheet *and* one delivered to xref:application/applicationOpenUrl.adoc[] for providers that detour through a third-party app.
 * `.universalLink` (iOS 17.4+): the universal-link redirect is intercepted directly inside the authentication sheet. Requires the `webcredentials:` Associated Domain and a `universalLink` on the provider's backend configuration.
 
 See the "Associated Domains" section of xref:index.adoc[] for the entitlement setup.
@@ -83,8 +83,6 @@ WebProvider(name: .bconnect, variant: "natif", mode: .customScheme)
 ----
 
 NOTE: A provider configured on your client with no matching entry in `providersCreators` still logs in, falling back to `.customScheme` automatically. Add an explicit `WebProvider` only when you need `.universalLink`, or a specific `variant`.
-
-TIP: Integrating a universal-link provider? See xref:providerCreator.adoc#universal-link-web-providers[the universal-link checklist].
 
 TIP: To implement your own provider (native SDK, custom flow) instead, see xref:guides/custom-provider.adoc[].
 

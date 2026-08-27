@@ -255,7 +255,7 @@ TIP: For more, see our xref:docs:ROOT:email-address-management.adoc#changing-ema
 // end::updateEmail[]
 
 // tag::email[]
-|[[email,email]] email `string` | 
+|[[email,email]] email `string` |
 The email address of the profile.
 // end::email[]
 
@@ -409,21 +409,17 @@ TIP: For more, see link:https://developer.apple.com/documentation/authentication
 
 The value of this property is false by default.
 
-NOTE: An ephemeral session gets its own cookie store, isolated from the default browser's. That matters only for a provider whose flow carries state in a cookie *and* detours out of the sheet: if the login leaves for a third-party app and comes back through the default browser, the cookie set inside the ephemeral sheet is not there to be read. No {company} provider depends on this today — the SDK's own leg is stateless, carrying everything in the `state` — but it is the failure mode to look at first if an otherwise-working provider breaks only when this flag is on.
-
 TIP: For more, see link:https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession/prefersephemeralwebbrowsersession[here^].
 
 // end::prefersEphemeralWebBrowserSession[]
 
 // tag::webSessionMode[]
 |[[webSessionMode,webSessionMode]] webSessionMode `WebSessionMode`
-|Controls the shape of the `ASWebAuthenticationSession` callback and its `redirect_uri`. Defaults to `.customScheme`.
+|Controls the behavior of the `ASWebAuthenticationSession` callback and its `redirect_uri`. Defaults to `.customScheme`.
 
 .Values
-* `.customScheme`: the SDK's custom scheme, on all supported iOS versions. Both return paths are armed — the sheet intercepts the redirect when the login never leaves it, and xref:application/applicationOpenUrl.adoc[] resolves it when the default browser delivers it instead.
-* `.universalLink(URL)`: universal link intercepted inside the sheet (iOS 17.4+). Requires the `webcredentials:` Associated Domain.
-
-NOTE: There is no "in-band vs out-of-band" choice to make. A provider may decide *mid-flight*, sheet already open, whether to hand off to another app: B.connect only picks `passive` or `active` after the `/authorize` call. `.customScheme` covers both outcomes.
+* `.customScheme` (default): the SDK's custom scheme. Covers a redirect intercepted inside the sheet *and* one delivered to xref:application/applicationOpenUrl.adoc[] for providers that detour through a third-party app.
+* `.universalLink(URL)` (iOS 17.4+): the universal-link redirect is intercepted directly inside the authentication sheet. Requires the `webcredentials:` Associated Domain and a `universalLink` on the provider's backend configuration.
 
 TIP: See the "Associated Domains" section of xref:index.adoc[] for entitlement setup, and the xref:providerCreator.adoc[WebProvider] entry for a ready-made provider using this mechanism.
 // end::webSessionMode[]
@@ -433,7 +429,7 @@ TIP: See the "Associated Domains" section of xref:index.adoc[] for entitlement s
 |Key/value pairs propagated in the *fragment* of the link:{site-url}/openapi/identity.html#operation/authorizeUser[`/oauth/authorize` URL] (e.g., `#key=value&key2=value2`).
 
 Intended for the token-orchestration flow: link:{site-url}/openapi/identity.html#operation/authorizeUser[`/oauth/authorize`] redirects to the client's Login URL.
-A fragment, unlike a query parameter, survives that redirect; the browser reapplies it onto the redirect target. 
+A fragment, unlike a query parameter, survives that redirect; the browser reapplies it onto the redirect target.
 The Login URL can then read it via `window.location.hash` to customize itself (logo, colors) per calling channel.
 
 IMPORTANT: Requires the client to have a Login URL configured and xref:docs:ROOT:orchestration-token.adoc[request orchestration tokens] enabled; otherwise this parameter has no effect.
@@ -579,7 +575,7 @@ Allowed values are `female`, `male` and `other`.
 // end::profilesignuprequest[]
 
 // tag::origin[]
-|[[origin, origin]]origin `string` 
+|[[origin, origin]]origin `string`
 | The origin of the call.
 // end::origin[]
 
@@ -587,7 +583,7 @@ Allowed values are `female`, `male` and `other`.
 
 ifeval::["{docname}" != "sendEmailVerification"]
 
-|[[redirectUrl,redirectUrl]] redirectUrl `string` 
+|[[redirectUrl,redirectUrl]] redirectUrl `string`
 | The URL to which the user is redirected.
 
 This URL must be whitelisted in the `Allowed Callback URLs` field of your {company} client settings.
@@ -596,8 +592,8 @@ endif::[]
 
 ifeval::["{docname}" == "sendEmailVerification"]
 
-|[[redirectUrl,redirectUrl]] redirectUrl `string` 
-| *optional* The URL to which the user will be redirected after clicking the verification link in the email. 
+|[[redirectUrl,redirectUrl]] redirectUrl `string`
+| *optional* The URL to which the user will be redirected after clicking the verification link in the email.
 
 This URL must be whitelisted in the `Allowed Callback URLs` field of your {company} client settings.
 
@@ -629,13 +625,13 @@ Both the international format and the national conventions of the account's coun
 
 // tag::verificationcode[]
 
-|[[verificationCode{sdk-code-anchor}]]verificationCode `string` 
+|[[verificationCode{sdk-code-anchor}]]verificationCode `string`
 | The verification code sent by email or SMS.
 
 // end::verificationcode[]
 
 // tag::code[]
-|[[code,code]]code `string` 
+|[[code,code]]code `string`
 | The verification code sent to the user.
 // end::code[]
 
@@ -671,7 +667,7 @@ NOTE: Both the international format and the national conventions of the account'
 // end::trustedDeviceId[]
 
 // tag::trustDevice[]
-|[[trustDevice,trustDevice]]trustDevice `boolean` 
+|[[trustDevice,trustDevice]]trustDevice `boolean`
 |Boolean indicating if the device should be trusted or not.
 
 * `true` = trust the device
@@ -681,48 +677,48 @@ NOTE: This option only applies during registration when the second factor is alr
 // end::trustDevice[]
 
 // tag::application[]
-|[[application,application]] application `UIApplication` 
-| The UIKit Application instance. 
+|[[application,application]] application `UIApplication`
+| The UIKit Application instance.
 
 For more details, see link:https://developer.apple.com/documentation/uikit/uiapplication[Apple: UIApplication^].
 
 // end::application[]
 
 // tag::applicationOpenUrl[]
-|[[applicationOpenUrl,url]] url `URL` 
+|[[applicationOpenUrl,url]] url `URL`
 | The URL resource to open.
 // end::applicationOpenUrl[]
 
 // tag::applicationOptions[]
-|[[applicationOptions,options]] options `[UIApplication.OpenURLOptionsKey : Any]` 
-| A dictionary of URL handling options. 
+|[[applicationOptions,options]] options `[UIApplication.OpenURLOptionsKey : Any]`
+| A dictionary of URL handling options.
 
 For more details, see link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/application(_:open:options:)[Apple: _:open:options:^].
 
 // end::applicationOptions[]
 
 // tag::applicationLaunchOptions[]
-|[[applicationLaunchOptions,launchOptions]] launchOptions `[UIApplication.LaunchOptionsKey: Any]?` 
+|[[applicationLaunchOptions,launchOptions]] launchOptions `[UIApplication.LaunchOptionsKey: Any]?`
 | A dictionary indicating the reason the app was launched (if any).
 // end::applicationLaunchOptions[]
 
 // tag::applicationUserActivity[]
-|[[applicationUserActivity,userActivity]] userActivity `NSUserActivity` 
+|[[applicationUserActivity,userActivity]] userActivity `NSUserActivity`
 | The activity object containing the data associated with the task the user was performing.
 // end::applicationUserActivity[]
 
 // tag::applicationRestorationHandler[]
-|[[applicationRestorationHandler,restorationHandler]] restorationHandler `([UIUserActivityRestoring]?) -> Void` 
+|[[applicationRestorationHandler,restorationHandler]] restorationHandler `([UIUserActivityRestoring]?) -> Void`
 | A block to execute if your app creates objects to perform the task the user was performing.
 // end::applicationRestorationHandler[]
 
 // tag::webSessionLogout[]
-|[[webSessionLogout,webSessionLogout]] webSessionLogout `WebSessionLogoutRequest?` 
+|[[webSessionLogout,webSessionLogout]] webSessionLogout `WebSessionLogoutRequest?`
 | _optional_ The web session logout request.
 
 Defaults to `nil`.
 
-If provided, triggers a <<WebSessionLogoutRequest, web-based logout>> by opening a web authentication session to the server's logout endpoint. 
+If provided, triggers a <<WebSessionLogoutRequest, web-based logout>> by opening a web authentication session to the server's logout endpoint.
 
 The URL must be defined in your {cc} settings at menu:Security[SSO > Allowed Callback URLs].
 // end::webSessionLogout[]
@@ -731,7 +727,7 @@ The URL must be defined in your {cc} settings at menu:Security[SSO > Allowed Cal
 |[[WebSessionLogoutRequest,WebSessionLogoutRequest]] WebSessionLogoutRequest
 | Use `WebSessionLogoutRequest` to enable web-based SSO logout, which opens a browser window to the server's logout endpoint.
 
-This class is only needed for apps using web-based SSO. 
+This class is only needed for apps using web-based SSO.
 
 Includes:
 
@@ -742,7 +738,7 @@ Includes:
 
 // tag::revoke[]
 |[[revoke,revoke]] revoke `AuthToken?`
-| _optional_ The authentication token to revoke, invalidating the user's session. 
+| _optional_ The authentication token to revoke, invalidating the user's session.
 Use `nil` to skip token revocation.
 
 Defaults to `nil`.
@@ -752,7 +748,7 @@ NOTE: The `logout` method invalidates any tokens found here.
 // end::revoke[]
 
 // tag::action[]
-|[[action, action]]action `String` 
+|[[action, action]]action `String`
 |A string describing the action for the MFA flow.
 
 You can value this with whatever you like.
