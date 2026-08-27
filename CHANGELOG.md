@@ -29,7 +29,7 @@
 - `webviewLogin` has two new parameters:
   - `webSessionMode` to shape the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+).
   - `loginUrlFragment` to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
-- New `WebProvider` to register a web provider with a `variant` and a completion `mode` (cf. `webSessionMode` of `webviewLogin` above). See the [Universal-link web providers](https://developer.reachfive.com/sdk-ios/providerCreator.html#universal-link-web-providers).
+- New `WebProvider` to register a web provider with a `variant` and a completion `mode` (cf. `webSessionMode` of `webviewLogin` above).
 - New method `login(withProvider:…)`, intended for integrators writing their own `Provider`: exchanges the ID token issued by a native provider SDK for a ReachFive `AuthToken`.
 
 ## v10.0.1

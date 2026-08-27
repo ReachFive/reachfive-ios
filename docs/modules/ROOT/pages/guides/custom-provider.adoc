@@ -88,8 +88,6 @@ An example of this is resuming a paused native SDK session.
 |xref:application/applicationContinueUserActivity.adoc[application(_:continue:restorationHandler:)]
 |Your provider's callback arrives as a *universal link* (`NSUserActivityTypeBrowsingWeb`).
 
-An example of this is a flow whose `redirect_uri` is an https link your app is associated with, like `WebProvider` `.universalLink` mode.
-
 Return `true` only if you actually consumed the activity.
 {company} relies on that return value (see xref:application/applicationContinueUserActivity.adoc[] for details).
 

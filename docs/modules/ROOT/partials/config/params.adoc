@@ -75,8 +75,6 @@ Takes a `name`, an optional `variant`, and a `mode` controlling how the session'
 * `.customScheme` (default): the SDK's custom scheme. Covers a redirect intercepted inside the sheet *and* one delivered to xref:application/applicationOpenUrl.adoc[] for providers that detour through a third-party app.
 * `.universalLink` (iOS 17.4+): the universal-link redirect is intercepted directly inside the authentication sheet. Requires the `webcredentials:` Associated Domain and a `universalLink` on the provider's backend configuration.
 
-See the "Associated Domains" section of xref:index.adoc[] for the entitlement setup.
-
 [source,swift]
 ----
 WebProvider(name: .bconnect, variant: "natif", mode: .customScheme)

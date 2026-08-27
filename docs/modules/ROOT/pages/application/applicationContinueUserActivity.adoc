@@ -16,7 +16,7 @@ Call this method in response to the equivalent UIKit method link:https://develop
 
 [IMPORTANT]
 ====
-The method returns a `Bool` that tells you whether {company} actually consumed the activity. It returns `true` only when a {company} login was waiting for that universal link; otherwise it returns `false` so your app can route the link itself. Do not assume {company} handles every universal link you forward — honour the returned value.
+The method returns a `Bool` that tells you whether {company} actually consumed the activity. Do not assume {company} handles every universal link you forward. When `false` is returned, your app should route the link itself.
 
 Universal-link delivery requires an `applinks:<host>` Associated Domain (see xref:index.adoc#configure-the-ios-sdk[Configure the SDK]).
 ====
