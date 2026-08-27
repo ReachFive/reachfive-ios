@@ -92,8 +92,8 @@ When an external app (e.g. a bank) reopens your app via the universal link, iOS 
 See xref:application/applicationContinueUserActivity.adoc[] for details.
 
 |webcredentials:$\{host\}
-|*In-band* completion on *iOS 17.4+*. 
-Lets `ASWebAuthenticationSession` intercept the redirect to the universal link directly inside its web view, without leaving the app. 
+|*In-band* completion on *iOS 17.4+*.
+Lets `ASWebAuthenticationSession` intercept the redirect to the universal link directly inside its web view, without leaving the app.
 If this entry (or the association file) is missing, the session fails to start.
 
 |===
@@ -138,8 +138,7 @@ If you restrict `components` to a path, make sure it lets through both the succe
 
 === Customise the WebAuthn origin
 
-Passkey requests carry an origin, which the server checks against the relying party your passkeys are
-registered for.
+Passkey requests carry an origin, which the server checks against the relying party your passkeys are registered for.
 It defaults to `https://$\{domain\}`, so you only need to set it when your passkeys are scoped to another
 relying party — a custom domain, or one shared across several of your applications.
 
@@ -148,7 +147,7 @@ A request that carries its own `originWebAuthn` still takes precedence over this
 
 [source,swift,subs="verbatim,callouts"]
 ----
-let ReachFive = ReachFive(
+let reachFive = ReachFive(
     sdkConfig: SdkConfig(
         domain: DOMAIN,
         clientId: CLIENT_ID,
@@ -168,7 +167,7 @@ For an example of a custom implementation, see link:https://github.com/ReachFive
 
 [source,swift,subs="verbatim,callouts"]
 ----
-let ReachFive = ReachFive(
+let reachFive = ReachFive(
     sdkConfig: SdkConfig(
         domain: DOMAIN,
         clientId: CLIENT_ID
