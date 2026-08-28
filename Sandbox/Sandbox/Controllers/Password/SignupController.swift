@@ -48,7 +48,7 @@ class SignupController: UIViewController {
         }
 
         Task {
-            let res = try await AppDelegate.reachfive().signup(profile: profile, redirectUrl: AppDelegate.reachfive().sdkConfig.emailVerificationUri, origin: origin)
+            let res = try await AppDelegate.reachfive().signup(profile: profile, redirectUrl: AppDelegate.reachfive().sdkConfig.emailVerificationUri, origin: origin, captcha: CaptchaStore.take())
             return switch res {
             case let .AchievedLogin(authToken): await handleAuthToken(errorMessage: "Signup failed") {
                     authToken
