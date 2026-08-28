@@ -103,8 +103,16 @@ class DataRequest {
                     return
                 }
 
+                // Another delegate refused the redirection before ours could intercept it. `URLSession` then
+                // hands the redirect response over as the task's own, `Location` header included — the
+                // callback is right there.
+                if let callback = Self.privateSchemeCallback(fromRedirectionRefusedIn: response) {
+                    continuation.resume(returning: callback)
+                    return
+                }
+
                 guard let response else {
-                    continuation.resume(throwing: Self.redirectionNotSeen())
+                    continuation.resume(throwing: Self.noResponseAtAll())
                     return
                 }
 
@@ -121,16 +129,34 @@ class DataRequest {
         }
     }
 
+    /// The callback URL of a redirection another delegate refused before ours could intercept it.
+    ///
+    /// Refusing a redirection makes `URLSession` end the task on the redirect response itself, `Location`
+    /// header included — which is where the callback is. This is what a network interception layer (SSL
+    /// pinning, an APM agent, a `URLProtocol`) causes when it answers `willPerformHTTPRedirection` on its own
+    /// instead of forwarding it to the session's real delegate; refusing to follow a private scheme is what
+    /// the SDK wanted anyway, so honouring that answer costs nothing.
+    private static func privateSchemeCallback(fromRedirectionRefusedIn response: URLResponse?) -> URL? {
+        guard let response = response as? HTTPURLResponse, (300 ..< 400).contains(response.statusCode),
+              let location = response.value(forHTTPHeaderField: "Location"),
+              let url = URL(string: location), let scheme = url.scheme,
+              !scheme.lowercased().starts(with: "http") else
+        {
+            return nil
+        }
+
+        return url
+    }
+
     /// The callback URL of a redirection that was followed instead of intercepted.
     ///
     /// `URLSession` has no handler for a private scheme, so following such a redirection can only end in
     /// `unsupportedURL` — but the URL it failed to load is the callback itself, authorization code included.
     /// A request the SDK sends is always `https`, so a private scheme here can only come from a redirection.
     ///
-    /// This is what a network interception layer (SSL pinning, an APM agent, a `URLProtocol`) causes when it
-    /// substitutes itself for the session delegate and answers the redirection on its own instead of
-    /// forwarding it. Recovering costs nothing in security: the TLS connection this callback comes from was
-    /// already made and validated, and the callback URL itself is never loaded.
+    /// Same cause as above, other outcome: an interception layer that forwards the redirection to
+    /// `URLSession` rather than refusing it. Recovering costs nothing in security either — the TLS connection
+    /// this callback comes from was already made and validated, and the callback URL itself is never loaded.
     private static func privateSchemeCallback(from error: Error) -> URL? {
         let error = error as NSError
         guard error.domain == NSURLErrorDomain, error.code == NSURLErrorUnsupportedURL else { return nil }
@@ -144,14 +170,13 @@ class DataRequest {
         return failing
     }
 
-    /// The task ended with no redirection, no response and no error — `URLSession` keeps nothing of a
-    /// redirection a delegate refuses, not even `task.response`, so this is all there is to report.
-    private static func redirectionNotSeen() -> ReachFiveError {
+    /// The task ended with no redirection, no response and no error at all — nothing an HTTP exchange
+    /// produces, so the only plausible source is something answering for `URLSession` on this session.
+    private static func noResponseAtAll() -> ReachFiveError {
         let error = ReachFiveError.TechnicalError(reason: """
-        Request did not redirect as expected: the redirection was refused before the SDK could read it. \
-        A network interception layer that handles redirects on the SDK's URLSession (SSL pinning, an APM \
-        agent, a URLProtocol) is the usual cause; it must forward willPerformHTTPRedirection to the SDK's \
-        own delegate, which returns nil for a private scheme.
+        Request did not redirect as expected, and ended without a response nor an error. A network \
+        interception layer standing in for URLSession on the SDK's session (SSL pinning, an APM agent, a \
+        URLProtocol) is the usual cause.
         """)
         Logger.shared.log(error: error)
         return error

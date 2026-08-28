@@ -4,8 +4,7 @@
 
 ### Bug fixes
 - `/oauth/authorize` no longer fails opaquely when it does not redirect to the private scheme. The `ApiError` the server returns is now decoded and carried by the thrown `TechnicalError` (a rejected `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`, which was being discarded), and a response that carries no error reports its HTTP status.
-- A network interception layer that substitutes itself for the SDK's session delegate — SSL pinning, an APM agent, a `URLProtocol` — no longer silently breaks the login. When it lets the redirection be followed instead of forwarding it, the SDK recovers the callback from the URL `URLSession` failed to load; when it refuses the redirection, `URLSession` keeps nothing of it and the error now names the interception as the cause instead of failing with an opaque message.
-  Such a layer must forward the async `urlSession(_:task:willPerformHTTPRedirection:newRequest:)` to the SDK's own delegate and preserve its `nil` return, which is how the OAuth callback is captured.
+- A network interception layer that answers `willPerformHTTPRedirection` for the SDK's session — SSL pinning, an APM agent, a `URLProtocol` — no longer breaks the login. Whether it refuses the redirection (the task then ends on the redirect response, whose `Location` header carries the callback) or lets `URLSession` follow it (loading a private scheme fails with `unsupportedURL`, whose failing URL is the callback), the SDK recovers the callback and the login goes through. A completion with no redirection, no response and no error at all — which no HTTP exchange produces — now says so instead of failing with an opaque message.
 
 ## v11.0.0
 

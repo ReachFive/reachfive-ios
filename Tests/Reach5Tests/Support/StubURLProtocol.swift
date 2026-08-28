@@ -9,23 +9,30 @@ final class StubURLProtocol: URLProtocol {
         let body: Data
         let networkError: Error?
         let finishWithoutResponse: Bool
+        let performsRedirection: Bool
 
         static func response(statusCode: Int, headers: [String: String] = [:], body: Data = Data()) -> Stub {
-            Stub(statusCode: statusCode, headers: headers, body: body, networkError: nil, finishWithoutResponse: false)
+            Stub(statusCode: statusCode, headers: headers, body: body, networkError: nil, finishWithoutResponse: false, performsRedirection: false)
         }
 
         static func redirect(to location: String, statusCode: Int = 302) -> Stub {
-            Stub(statusCode: statusCode, headers: ["Location": location], body: Data(), networkError: nil, finishWithoutResponse: false)
+            Stub(statusCode: statusCode, headers: ["Location": location], body: Data(), networkError: nil, finishWithoutResponse: false, performsRedirection: true)
+        }
+
+        /// Delivers the redirect response as the task's own, the way `URLSession` ends a task whose redirection
+        /// a delegate refused: the `Location` header is there, but no redirection was ever performed.
+        static func refusedRedirection(to location: String, statusCode: Int = 303) -> Stub {
+            Stub(statusCode: statusCode, headers: ["Location": location], body: Data(), networkError: nil, finishWithoutResponse: false, performsRedirection: false)
         }
 
         static func networkFailure(_ error: Error) -> Stub {
-            Stub(statusCode: 0, headers: [:], body: Data(), networkError: error, finishWithoutResponse: false)
+            Stub(statusCode: 0, headers: [:], body: Data(), networkError: error, finishWithoutResponse: false, performsRedirection: false)
         }
 
         /// Ends the load without ever delivering a response, the way `URLSession` reports a redirection a
         /// delegate refused to follow: no redirection, no response, no error.
         static func finishWithoutResponse() -> Stub {
-            Stub(statusCode: 0, headers: [:], body: Data(), networkError: nil, finishWithoutResponse: true)
+            Stub(statusCode: 0, headers: [:], body: Data(), networkError: nil, finishWithoutResponse: true, performsRedirection: false)
         }
     }
 
@@ -56,7 +63,7 @@ final class StubURLProtocol: URLProtocol {
             return
         }
 
-        if let location = stub.headers["Location"], let redirectURL = URL(string: location) {
+        if stub.performsRedirection, let location = stub.headers["Location"], let redirectURL = URL(string: location) {
             let redirectResponse = HTTPURLResponse(url: request.url!, statusCode: stub.statusCode, httpVersion: "HTTP/1.1", headerFields: stub.headers)!
             var redirectRequest = URLRequest(url: redirectURL)
             redirectRequest.httpMethod = request.httpMethod

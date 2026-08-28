@@ -122,9 +122,23 @@ final class DataRequestRedirectTests: XCTestCase {
         }
     }
 
-    /// A delegate other than the SDK's refusing the redirection leaves nothing behind — no redirection, no
-    /// response, no error. The SDK can only name what happened, and does so instead of failing opaquely.
-    func testRedirectionRefusedBeforeTheSdkSeesItNamesTheInterception() async {
+    /// A delegate other than the SDK's refusing the redirection ends the task on the redirect response
+    /// itself. Its `Location` header still carries the callback: the SDK reads it there.
+    func testRedirectionRefusedBeforeTheSdkSeesItRecoversTheCallback() async throws {
+        StubURLProtocol.stubHandler = { _ in
+            .refusedRedirection(to: "reachfive-client://callback?code=abc123")
+        }
+
+        let url = try await networkClient
+            .request(URL(string: "https://example.com/oauth/authorize")!)
+            .redirect()
+
+        XCTAssertEqual(url.absoluteString, "reachfive-client://callback?code=abc123")
+    }
+
+    /// Neither a redirection, nor a response, nor an error is not something an HTTP exchange produces: only
+    /// something answering for `URLSession` can. The SDK says so rather than failing opaquely.
+    func testCompletionWithoutResponseNorErrorNamesTheInterception() async {
         StubURLProtocol.stubHandler = { _ in .finishWithoutResponse() }
 
         do {
@@ -133,8 +147,7 @@ final class DataRequestRedirectTests: XCTestCase {
                 .redirect()
             XCTFail("attendu : une erreur")
         } catch let ReachFiveError.TechnicalError(reason, apiError) {
-            XCTAssertTrue(reason.contains("refused before the SDK could read it"), reason)
-            XCTAssertTrue(reason.contains("willPerformHTTPRedirection"), reason)
+            XCTAssertTrue(reason.contains("without a response nor an error"), reason)
             XCTAssertNil(apiError)
         } catch {
             XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
