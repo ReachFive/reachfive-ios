@@ -142,6 +142,7 @@ pod 'Reach5Facebook', '~> {sdk-ios-facebook-latest-version}' <1>
 ----
 pod install
 ----
+
 --
 Swift Package Manager::
 +
@@ -161,6 +162,7 @@ dependencies: [
     .package(url: "https://github.com/ReachFive/reachfive-ios-facebook.git", .upToNextMajor(from: "{page-component-version}"))
 ]
 ----
+
 --
 ====
 
@@ -199,29 +201,36 @@ NOTE: If you're using the latest version of the Facebook API, remove the `user_g
 
 <key>LSApplicationQueriesSchemes</key>
 <array>
-    <string>fbauth2</string> <!--1-->
+    <string>fbauth2</string> <1>
     <string>fbapi</string>
     <string>fb-messenger-share-api</string>
 </array>
 ----
-<1> Enables <<facebook-fast-app-switch,Fast App Switch>>. Available from `Reach5Facebook` 9.0.0.
+<1> Required for <<Fast App Switch>>, which `Reach5Facebook` supports from 9.0.0.
 
 TIP: See <<Info.plist reference>> for a comprehensive look at the file.
 
-[#facebook-fast-app-switch]
 ==== Fast App Switch
 
-With `fbauth2` declared, a classic Facebook login opens the native Facebook app instead of an in-app browser.
-When the Facebook app is absent, the Facebook SDK falls back to the browser flow on its own, so the login always completes.
+Fast App Switch sends the user to the native Facebook app to sign in instead of to a Safari view controller, so a user already signed in to the Facebook app does not have to sign in again.
+The `fbauth2` scheme lets the SDK open the Facebook app, and `fbapi` lets it detect that the app is installed.
 
-Fast App Switch applies to *classic login only*: a limited login always uses the browser flow.
-It therefore takes effect only when both of the following hold, since either one alone makes the SDK ask Facebook for a limited login:
+The `appSwitch` parameter is `.enabled` by default.
+Pass `appSwitch: .disabled` to xref:providerCreator.adoc#FacebookProvider[`FacebookProvider`] to always use the browser flow.
 
-* You built the provider with `prefersLoginTracking: .enabled`, as the default is `.limited`.
-* App Tracking Transparency is authorized on the device.
+Your login still completes through the browser flow in these cases:
 
-It is on by default.
-Pass `appSwitch: .disabled` to xref:providerCreator.adoc#FacebookProvider[`FacebookProvider`] to force the browser flow instead.
+* The Facebook app is not installed, in which case the Facebook SDK falls back on its own.
+* Meta has not enabled Fast App Switch for your Facebook application, as the feature is controlled remotely, and classic and limited logins are gated separately.
+
+[NOTE]
+====
+You get a classic login only when you build the provider with `prefersLoginTracking: .enabled`, the default being `.limited`, and App Tracking Transparency is authorized on the device.
+Otherwise the SDK asks Facebook for a limited login.
+
+An app switch returns to your application through the `fb$(YOUR_FACEBOOK_APPLICATION_ID)` scheme you declared above.
+Forward xref:application/applicationOpenUrl.adoc[`+application(_:open:options)+`] to {company}, and `+scene(_:openURLContexts:)+` too if your application uses scenes, otherwise the login never completes after the user approves in the Facebook app.
+====
 
 === Google native provider
 
@@ -271,6 +280,7 @@ dependencies: [
     .package(url: "https://github.com/ReachFive/reachfive-ios-google.git", .upToNextMajor(from: "7.0.0"))
 ]
 ----
+
 --
 ====
 
@@ -342,12 +352,14 @@ pod 'IdentitySdkWeChat', '~> {sdk-ios-wechat-latest-version}' <1>
 ----
 pod install
 ----
+
 --
 Swift Package Manager::
 +
 --
 Swift Package Manager is not yet supported.
 --
+
 ====
 
 ==== Configuration

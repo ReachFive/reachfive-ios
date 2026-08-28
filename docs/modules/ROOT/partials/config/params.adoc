@@ -21,16 +21,16 @@ This provider takes three optional parameters:
 * variant `string`: the provider variant to use.
 * prefersLoginTracking `FBSDKLoginKit.LoginTracking`: Indicates preference to the Facebook SDK for the limited or classic login.
 Facebook SDK is ultimately responsible for the decision.
-* appSwitch `FBSDKLoginKit.AppSwitch`: whether a classic login may open the native Facebook app rather than an in-app browser.
-Defaults to `.enabled`; pass `.disabled` to force the browser flow.
-It has no effect on a limited login, and none unless your `Info.plist` declares the `fbauth2` scheme.
-See xref:index.adoc#facebook-fast-app-switch[Fast App Switch].
+* appSwitch `FBSDKLoginKit.AppSwitch`: whether the login may open the native Facebook app instead of a Safari view controller.
+Defaults to `.enabled`; pass `.disabled` to always use the browser flow.
+It only takes effect when your `Info.plist` declares the `fbauth2` scheme and Meta has enabled Fast App Switch for your Facebook application.
+See xref:index.adoc#fast-app-switch[Fast App Switch].
 
 [source,swift]
 ----
 FacebookProvider(
     variant: "ios", <1>
-    prefersLoginTracking: .limited, <2>
+    prefersLoginTracking: .enabled, <2>
     appSwitch: .enabled <3>
 )
 ----
