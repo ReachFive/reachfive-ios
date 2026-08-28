@@ -92,18 +92,26 @@ class DataRequest {
                 }
 
                 if let error {
-                    continuation.resume(throwing: error)
+                    // The redirection was followed instead of being handed to our delegate: the callback is
+                    // still there, in the URL `URLSession` then failed to load. Recover it rather than losing
+                    // a login over it.
+                    if let callback = Self.privateSchemeCallback(from: error) {
+                        continuation.resume(returning: callback)
+                    } else {
+                        continuation.resume(throwing: error)
+                    }
                     return
                 }
 
                 guard let response else {
-                    continuation.resume(throwing: ReachFiveError.TechnicalError(reason: "Request without response"))
+                    continuation.resume(throwing: Self.redirectionNotSeen())
                     return
                 }
 
                 continuation.resume(with: Result {
                     try self.processHttpResponse(data: data ?? Data(), response: response) { _ in
-                        let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected")
+                        let status = (response as? HTTPURLResponse)?.statusCode
+                        let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected: answered \(status.map(String.init) ?? "no") HTTP status instead of a redirection to the private scheme")
                         self.logger.log(error: error)
                         throw error
                     }
@@ -111,6 +119,42 @@ class DataRequest {
             }
             task.resume()
         }
+    }
+
+    /// The callback URL of a redirection that was followed instead of intercepted.
+    ///
+    /// `URLSession` has no handler for a private scheme, so following such a redirection can only end in
+    /// `unsupportedURL` — but the URL it failed to load is the callback itself, authorization code included.
+    /// A request the SDK sends is always `https`, so a private scheme here can only come from a redirection.
+    ///
+    /// This is what a network interception layer (SSL pinning, an APM agent, a `URLProtocol`) causes when it
+    /// substitutes itself for the session delegate and answers the redirection on its own instead of
+    /// forwarding it. Recovering costs nothing in security: the TLS connection this callback comes from was
+    /// already made and validated, and the callback URL itself is never loaded.
+    private static func privateSchemeCallback(from error: Error) -> URL? {
+        let error = error as NSError
+        guard error.domain == NSURLErrorDomain, error.code == NSURLErrorUnsupportedURL else { return nil }
+
+        let failing = error.userInfo[NSURLErrorFailingURLErrorKey] as? URL
+            ?? (error.userInfo[NSURLErrorFailingURLStringErrorKey] as? String).flatMap(URL.init(string:))
+        guard let failing, let scheme = failing.scheme, !scheme.lowercased().starts(with: "http") else {
+            return nil
+        }
+
+        return failing
+    }
+
+    /// The task ended with no redirection, no response and no error — `URLSession` keeps nothing of a
+    /// redirection a delegate refuses, not even `task.response`, so this is all there is to report.
+    private static func redirectionNotSeen() -> ReachFiveError {
+        let error = ReachFiveError.TechnicalError(reason: """
+        Request did not redirect as expected: the redirection was refused before the SDK could read it. \
+        A network interception layer that handles redirects on the SDK's URLSession (SSL pinning, an APM \
+        agent, a URLProtocol) is the usual cause; it must forward willPerformHTTPRedirection to the SDK's \
+        own delegate, which returns nil for a private scheme.
+        """)
+        Logger.shared.log(error: error)
+        return error
     }
 }
 
