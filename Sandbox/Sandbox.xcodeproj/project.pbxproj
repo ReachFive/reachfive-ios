@@ -56,6 +56,7 @@
 		EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91A17236291622417196AE /* SignupPasskeyController.swift */; };
 		EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */; };
 		EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */; };
+		1DEDA8A6CA62B16118BDB49A /* CaptchaStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5663A9FC74BA8C128F17F22 /* CaptchaStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -107,6 +108,7 @@
 		A00000032E2ED7F100B26535 /* SessionDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SessionDeviceCell.xib; sourceTree = "<group>"; };
 		EA91A17236291622417196AE /* SignupPasskeyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignupPasskeyController.swift; sourceTree = "<group>"; };
 		EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecureStorage.swift; sourceTree = "<group>"; };
+		F5663A9FC74BA8C128F17F22 /* CaptchaStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptchaStore.swift; sourceTree = "<group>"; };
 		EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginPasskeyController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -189,6 +191,7 @@
 			children = (
 				2A1957132E4214D9008393DB /* UIViewController+Handling.swift */,
 				EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */,
+				F5663A9FC74BA8C128F17F22 /* CaptchaStore.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -432,6 +435,7 @@
 				2A65D1232E4253BE004B0004 /* MfaController.swift in Sources */,
 				2A65D1242E4253BE004B0004 /* PasskeyCredentialController.swift in Sources */,
 				EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */,
+				1DEDA8A6CA62B16118BDB49A /* CaptchaStore.swift in Sources */,
 				2A65D1282E44BD90004B0004 /* TrustedDevicesViewController.swift in Sources */,
 				EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */,
 				EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */,
