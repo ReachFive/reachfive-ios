@@ -170,4 +170,83 @@ final class DataRequestRedirectTests: XCTestCase {
             XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
         }
     }
+
+    // MARK: - Pinning refusing the connection
+
+    /// The pinning doing its job — a certificate that does not match. `URLSession` reports it as an ordinary
+    /// error and the SDK must let it through untouched: dressing it up would hide a real security refusal.
+    func testRejectedCertificateIsRethrownUntouched() async {
+        StubURLProtocol.stubHandler = { _ in
+            .networkFailure(URLError(.secureConnectionFailed))
+        }
+
+        do {
+            _ = try await networkClient
+                .request(URL(string: "https://example.com/oauth/authorize")!)
+                .redirect()
+            XCTFail("attendu : une erreur")
+        } catch let error as URLError {
+            XCTAssertEqual(error.code, .secureConnectionFailed)
+        } catch {
+            XCTFail("attendu : URLError, obtenu \(error)")
+        }
+    }
+
+    /// Same, when the pinning answers the authentication challenge with `cancelAuthenticationChallenge`:
+    /// `URLSession` turns it into a plain cancellation, which must not be mistaken for a user cancellation
+    /// nor swallowed by any of the recoveries.
+    func testCancelledAuthenticationChallengeIsRethrownUntouched() async {
+        StubURLProtocol.stubHandler = { _ in
+            .networkFailure(URLError(.cancelled))
+        }
+
+        do {
+            _ = try await networkClient
+                .request(URL(string: "https://example.com/oauth/authorize")!)
+                .redirect()
+            XCTFail("attendu : une erreur")
+        } catch let error as URLError {
+            XCTAssertEqual(error.code, .cancelled)
+        } catch {
+            XCTFail("attendu : URLError, obtenu \(error)")
+        }
+    }
+
+    // MARK: - Interception leading the redirection elsewhere
+
+    /// An interception layer rewriting the redirection towards its own block page: the target is not the
+    /// private scheme, so it is no callback. The error says where it actually leads.
+    func testRedirectionRewrittenToAnHttpTargetIsNotTakenForACallback() async {
+        StubURLProtocol.stubHandler = { _ in
+            .refusedRedirection(to: "https://proxy.example.com/blocked")
+        }
+
+        do {
+            _ = try await networkClient
+                .request(URL(string: "https://example.com/oauth/authorize")!)
+                .redirect()
+            XCTFail("attendu : une erreur")
+        } catch let ReachFiveError.TechnicalError(reason, _) {
+            XCTAssertEqual(reason, "Request did not redirect as expected: answered a 303 redirection to 'https://proxy.example.com/blocked', not to the private scheme the SDK intercepts")
+        } catch {
+            XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
+        }
+    }
+
+    /// A redirection stripped of its `Location` — nothing to recover, and no `ApiError` body to decode
+    /// either. The status and the missing header are all the SDK can report, so it reports them.
+    func testRedirectionWithoutLocationReportsWhatIsMissing() async {
+        StubURLProtocol.stubHandler = { _ in .response(statusCode: 302) }
+
+        do {
+            _ = try await networkClient
+                .request(URL(string: "https://example.com/oauth/authorize")!)
+                .redirect()
+            XCTFail("attendu : une erreur")
+        } catch let ReachFiveError.TechnicalError(reason, _) {
+            XCTAssertEqual(reason, "Request did not redirect as expected: answered a 302 redirection to nowhere — no Location header, not to the private scheme the SDK intercepts")
+        } catch {
+            XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
+        }
+    }
 }
