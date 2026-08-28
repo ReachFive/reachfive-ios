@@ -8,17 +8,24 @@ final class StubURLProtocol: URLProtocol {
         let headers: [String: String]
         let body: Data
         let networkError: Error?
+        let finishWithoutResponse: Bool
 
         static func response(statusCode: Int, headers: [String: String] = [:], body: Data = Data()) -> Stub {
-            Stub(statusCode: statusCode, headers: headers, body: body, networkError: nil)
+            Stub(statusCode: statusCode, headers: headers, body: body, networkError: nil, finishWithoutResponse: false)
         }
 
         static func redirect(to location: String, statusCode: Int = 302) -> Stub {
-            Stub(statusCode: statusCode, headers: ["Location": location], body: Data(), networkError: nil)
+            Stub(statusCode: statusCode, headers: ["Location": location], body: Data(), networkError: nil, finishWithoutResponse: false)
         }
 
         static func networkFailure(_ error: Error) -> Stub {
-            Stub(statusCode: 0, headers: [:], body: Data(), networkError: error)
+            Stub(statusCode: 0, headers: [:], body: Data(), networkError: error, finishWithoutResponse: false)
+        }
+
+        /// Ends the load without ever delivering a response, the way `URLSession` reports a redirection a
+        /// delegate refused to follow: no redirection, no response, no error.
+        static func finishWithoutResponse() -> Stub {
+            Stub(statusCode: 0, headers: [:], body: Data(), networkError: nil, finishWithoutResponse: true)
         }
     }
 
@@ -36,6 +43,11 @@ final class StubURLProtocol: URLProtocol {
     override func startLoading() {
         guard let stub = Self.stubHandler?(request) else {
             client?.urlProtocol(self, didFailWithError: URLError(.badURL))
+            return
+        }
+
+        if stub.finishWithoutResponse {
+            client?.urlProtocolDidFinishLoading(self)
             return
         }
 
