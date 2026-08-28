@@ -39,7 +39,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         WebProvider(name: .bconnect, variant: "natif", mode: .customScheme),
     ]
 
-    static let internalConfig = SdkInternalConfig(loggingEnabled: true)
+    static let internalConfig = SdkInternalConfig(
+        loggingEnabled: true,
+        authenticationChallengeHandler: NetworkInterception.authenticationChallengeHandler
+    )
 
     /// Built on first use, and rebuilt by ``switchEnvironment(to:)`` — the environment is a runtime choice
     /// now, so the instance cannot be a stored constant decided at compile time.
@@ -60,6 +63,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     private func makeReachFive() -> ReachFive {
+        // Before the SDK asks for its `URLSessionConfiguration`, which it does as it builds its session — so
+        // here rather than at launch, since the instance is also rebuilt on an environment switch.
+        NetworkInterception.installIfNeeded()
+
         let environment = SandboxEnvironment.selected
         print("ℹ️ ReachFive built on \(environment.label) (\(environment.domain))")
         let reachfive = ReachFive(
