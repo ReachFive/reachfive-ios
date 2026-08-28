@@ -104,8 +104,9 @@ final class CaptchaRequestsTests: XCTestCase {
 
     // MARK: - CaptchaProvider
 
-    /// The provider travels as a bare name. `Codable` synthesis would have wrapped a
-    /// `RawRepresentable` struct in a `{"rawValue": …}` object, hence the hand-written coding.
+    /// The provider travels as a bare name: the standard library's `RawRepresentable` conformance
+    /// encodes the raw value itself, where memberwise synthesis would have wrapped it in a
+    /// `{"rawValue": …}` object. Nothing in `CaptchaProvider` says so, hence this test.
     func testTheProviderEncodesAsItsBareName() {
         XCTAssertEqual(loginRequest(captcha: Captcha(token: "t", provider: .captchaFox)).dictionary()?["captcha_provider"] as? String, "captchafox")
     }

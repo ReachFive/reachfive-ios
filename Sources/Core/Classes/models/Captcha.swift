@@ -53,15 +53,4 @@ public struct CaptchaProvider: RawRepresentable, Codable, Equatable {
 
     /// CaptchaFox, verified against its own `siteverify`.
     public static let captchaFox = CaptchaProvider(rawValue: "captchafox")
-
-    /// Encoded as the bare name, not as a wrapper around `rawValue`: `Codable` synthesis for a
-    /// `RawRepresentable` covers enums only.
-    public init(from decoder: Decoder) throws {
-        rawValue = try decoder.singleValueContainer().decode(String.self)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(rawValue)
-    }
 }
