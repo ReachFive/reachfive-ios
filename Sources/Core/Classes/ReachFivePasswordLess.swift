@@ -10,7 +10,10 @@ extension ReachFive {
         self.passwordlessCallback = passwordlessCallback
     }
 
-    public func startPasswordless(_ request: PasswordLessRequest) async throws {
+    /// - Parameter captcha: the token obtained by the application when the client's configuration
+    ///   requires a captcha on the `passwordless` endpoint. A separate parameter rather than a case
+    ///   of ``PasswordLessRequest``: the captcha does not depend on the identifier. See ``Captcha``.
+    public func startPasswordless(_ request: PasswordLessRequest, captcha: Captcha? = nil) async throws {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
         let startPasswordlessRequest = switch request {
@@ -22,7 +25,8 @@ extension ReachFive {
                 redirectUri: redirectUri ?? sdkConfig.redirectUri,
                 codeChallenge: pkce.codeChallenge,
                 codeChallengeMethod: pkce.codeChallengeMethod,
-                origin: origin
+                origin: origin,
+                captcha: captcha
             )
         case let .PhoneNumber(phoneNumber, redirectUri, origin):
             StartPasswordlessRequest(
@@ -32,7 +36,8 @@ extension ReachFive {
                 redirectUri: redirectUri ?? sdkConfig.redirectUri,
                 codeChallenge: pkce.codeChallenge,
                 codeChallengeMethod: pkce.codeChallengeMethod,
-                origin: origin
+                origin: origin,
+                captcha: captcha
             )
         }
         return try await reachFiveApi.startPasswordless(startPasswordlessRequest)

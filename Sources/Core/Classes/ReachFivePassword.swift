@@ -11,13 +11,16 @@ public enum SignupFlow {
 }
 
 extension ReachFive {
-    public func signup(profile: ProfileSignupRequest, redirectUrl: URL? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> SignupFlow {
+    /// - Parameter captcha: the token obtained by the application when the client's configuration
+    ///   requires a captcha on the `signup_token` endpoint — the one this method calls. See ``Captcha``.
+    public func signup(profile: ProfileSignupRequest, redirectUrl: URL? = nil, scope: [String]? = nil, origin: String? = nil, captcha: Captcha? = nil) async throws -> SignupFlow {
         let signupRequest = SignupRequest(
             clientId: sdkConfig.clientId,
             data: profile,
             scope: (scope ?? self.scope).joined(separator: " "),
             redirectUrl: redirectUrl,
-            origin: origin
+            origin: origin,
+            captcha: captcha
         )
         let token = try await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
         guard let accessToken = token.accessToken else {
@@ -26,13 +29,16 @@ extension ReachFive {
         return try .AchievedLogin(authToken: AuthToken.fromOpenIdTokenResponse(AccessTokenResponse(idToken: token.idToken, accessToken: accessToken, refreshToken: token.refreshToken, code: nil, tokenType: token.tokenType, expiresIn: token.expiresIn, error: nil, errorDescription: nil)))
     }
 
+    /// - Parameter captcha: the token obtained by the application when the client's configuration
+    ///   requires a captcha on the `password_login` endpoint. See ``Captcha``.
     public func loginWithPassword(
         email: String? = nil,
         phoneNumber: String? = nil,
         customIdentifier: String? = nil,
         password: String,
         scope: [String]? = nil,
-        origin: String? = nil
+        origin: String? = nil,
+        captcha: Captcha? = nil
     ) async throws -> LoginFlow {
         let strScope = (scope ?? self.scope).joined(separator: " ")
         let loginRequest = LoginRequest(
@@ -43,7 +49,8 @@ extension ReachFive {
             grantType: "password",
             clientId: sdkConfig.clientId,
             scope: strScope,
-            origin: origin
+            origin: origin,
+            captcha: captcha
         )
         let resp = try await reachFiveApi.loginWithPassword(loginRequest: loginRequest)
 

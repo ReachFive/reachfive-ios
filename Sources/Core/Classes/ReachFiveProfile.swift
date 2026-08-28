@@ -55,12 +55,15 @@ extension ReachFive {
             .verifyPhoneNumber(authToken: authToken, verifyPhoneNumberRequest: verifyPhoneNumberRequest)
     }
 
+    /// - Parameter captcha: the token obtained by the application when the client's configuration
+    ///   requires a captcha on the `update_email` endpoint. See ``Captcha``.
     public func updateEmail(
         authToken: AuthToken,
         email: String,
-        redirectUrl: URL? = nil
+        redirectUrl: URL? = nil,
+        captcha: Captcha? = nil
     ) async throws -> Profile {
-        let updateEmailRequest = UpdateEmailRequest(email: email, redirectUrl: redirectUrl)
+        let updateEmailRequest = UpdateEmailRequest(email: email, redirectUrl: redirectUrl, captcha: captcha)
         return try await reachFiveApi.updateEmail(
             authToken: authToken,
             updateEmailRequest: updateEmailRequest
@@ -103,36 +106,45 @@ extension ReachFive {
         )
     }
 
+    /// - Parameter captcha: the token obtained by the application when the client's configuration
+    ///   requires a captcha on the `forgot_password` endpoint. See ``Captcha``.
     public func requestPasswordReset(
         email: String? = nil,
         phoneNumber: String? = nil,
         redirectUrl: URL? = nil,
-        origin: String? = nil
+        origin: String? = nil,
+        captcha: Captcha? = nil
     ) async throws {
         let requestPasswordResetRequest = RequestPasswordResetRequest(
             clientId: sdkConfig.clientId,
             email: email,
             phoneNumber: phoneNumber,
             redirectUrl: redirectUrl,
-            origin: origin
+            origin: origin,
+            captcha: captcha
         )
         return try await reachFiveApi.requestPasswordReset(
             requestPasswordResetRequest: requestPasswordResetRequest
         )
     }
 
+    /// - Parameter captcha: the token obtained by the application when the client's configuration
+    ///   requires a captcha on the `forgot_password` endpoint, which covers account recovery too.
+    ///   See ``Captcha``.
     public func requestAccountRecovery(
         email: String? = nil,
         phoneNumber: String? = nil,
         redirectUrl: URL? = nil,
-        origin: String? = nil
+        origin: String? = nil,
+        captcha: Captcha? = nil
     ) async throws {
         let requestAccountRecoveryRequest = RequestAccountRecoveryRequest(
             clientId: sdkConfig.clientId,
             email: email,
             phoneNumber: phoneNumber,
             redirectUrl: redirectUrl ?? sdkConfig.accountRecoveryUri,
-            origin: origin
+            origin: origin,
+            captcha: captcha
         )
         return try await reachFiveApi.requestAccountRecovery(requestAccountRecoveryRequest)
     }
