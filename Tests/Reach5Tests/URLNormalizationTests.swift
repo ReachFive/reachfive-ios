@@ -28,6 +28,25 @@ final class URLNormalizationTests: XCTestCase {
         XCTAssertNil(URL(string: "example.com")!.normalizedScheme)
     }
 
+    // MARK: - Private scheme
+
+    /// What `DataRequest.redirect()` intercepts: a redirection to anything other than `http`/`https`.
+    func testPrivateSchemeIsAnythingButHttp() {
+        let cases: [(input: String, expected: Bool)] = [
+            ("reachfive-AbC://callback", true), // the default derived from the clientId
+            ("com.example.app:/oauth2redirect", true), // RFC 8252 §7.1, one slash and no authority
+            ("https://example.com/callback", false),
+            ("HTTPS://example.com/callback", false), // the case must not make it private
+            ("http://example.com/callback", false),
+            // A free-form customScheme may start with those four letters and is private all the same
+            ("httpsapp://callback", true),
+            ("example.com/callback", false), // no scheme at all
+        ]
+        for (input, expected) in cases {
+            XCTAssertEqual(URL(string: input)!.hasPrivateScheme, expected, "'\(input)'")
+        }
+    }
+
     // MARK: - Host
 
     func testHostIsLowercased() {

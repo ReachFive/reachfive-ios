@@ -3,7 +3,8 @@
 ## Unreleased
 
 ### Bug fixes
-- `/oauth/authorize` no longer fails opaquely when it does not redirect to the private scheme. The `ApiError` the server returns is now decoded and carried by the thrown `TechnicalError` (a rejected `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`, which was being discarded), and a response that carries no error reports its HTTP status.
+- `/oauth/authorize` no longer fails opaquely when it does not redirect to the private scheme. The `ApiError` the server returns is now decoded and carried by the thrown error (a rejected `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`, which was being discarded), and a response that carries no error reports its HTTP status. This call used to fail with a `TechnicalError` whatever the status; like every other call, it now answers a `400` with a `RequestError` and a `401` with an `AuthFailure`.
+- An error response whose body is not an `ApiError` — an HTML page from a proxy, an empty body — now reports its HTTP status, on every call, instead of surfacing the JSON decoding failure alone.
 - A network interception layer that answers `willPerformHTTPRedirection` for the SDK's session — SSL pinning, an APM agent, a `URLProtocol` — no longer breaks the login. Whether it refuses the redirection (the task then ends on the redirect response, whose `Location` header carries the callback) or lets `URLSession` follow it (loading a private scheme fails with `unsupportedURL`, whose failing URL is the callback), the SDK recovers the callback and the login goes through. A redirection leading elsewhere than the private scheme — an interception rewriting the target to a block page, or one stripped of its `Location` — now names where it actually leads, and a completion with no redirection, no response and no error at all says so, instead of both failing with an opaque message. A certificate the pinning refuses stays an untouched `URLError`.
 
 ## v11.0.0
