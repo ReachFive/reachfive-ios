@@ -25,12 +25,13 @@ class NativePasswordController: UIViewController {
         guard let pass = password.text, !pass.isEmpty, let user = username.text, !user.isEmpty else { return }
         let origin = "NativePasswordController.passwordEditingDidEnd"
 
+        let captcha = CaptchaStore.take()
         Task {
             await handleLoginFlow {
                 if user.contains("@") {
-                    try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
+                    try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin, captcha: captcha)
                 } else {
-                    try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
+                    try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin, captcha: captcha)
                 }
             }
         }
