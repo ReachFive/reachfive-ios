@@ -2,12 +2,13 @@ import Foundation
 
 class NetworkClient {
     private let session: URLSession
-    private let redirectHandler = RedirectHandler()
+    private let redirectHandler: RedirectHandler
     private let decoder: JSONDecoder
     private let correlationId: String
 
-    init(decoder: JSONDecoder) {
-        session = URLSession(configuration: .default, delegate: redirectHandler, delegateQueue: nil)
+    init(decoder: JSONDecoder, configuration: URLSessionConfiguration = .default, authenticationChallengeHandler: AuthenticationChallengeHandler? = nil) {
+        redirectHandler = RedirectHandler(authenticationChallengeHandler)
+        session = URLSession(configuration: configuration, delegate: redirectHandler, delegateQueue: nil)
         self.decoder = decoder
         correlationId = UUID().uuidString
     }
@@ -39,6 +40,25 @@ class NetworkClient {
     }
 }
 
+/// Forwards an authentication challenge to the ``AuthenticationChallengeHandler`` an app configured, if any.
+/// Deliberately the only thing the SDK lets an app take over on its session: a delegate that could also
+/// answer `willPerformHTTPRedirection` would take the `/oauth/authorize` callback away from the SDK.
+///
+/// Kept apart from ``RedirectHandler`` below, which inherits it, so that what an app is allowed to answer
+/// stays visibly separate from what the SDK answers for itself.
+class ChallengeForwardingDelegate: NSObject, URLSessionDelegate {
+    private let authenticationChallengeHandler: AuthenticationChallengeHandler?
+
+    init(_ authenticationChallengeHandler: AuthenticationChallengeHandler?) {
+        self.authenticationChallengeHandler = authenticationChallengeHandler
+    }
+
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        guard let authenticationChallengeHandler else { return (.performDefaultHandling, nil) }
+        return await authenticationChallengeHandler(challenge)
+    }
+}
+
 private actor RedirectContinuationManager {
     var redirectContinuations = [Int: CheckedContinuation<URL, Error>]()
 
@@ -51,7 +71,7 @@ private actor RedirectContinuationManager {
     }
 }
 
-class RedirectHandler: NSObject, URLSessionTaskDelegate {
+class RedirectHandler: ChallengeForwardingDelegate, URLSessionTaskDelegate {
     private let continuationManager = RedirectContinuationManager()
 
     func registerContinuation(_ continuation: CheckedContinuation<URL, Error>, for taskIdentifier: Int) async {

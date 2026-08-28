@@ -4,6 +4,8 @@
 
 ### New features
 - Add a public SdkVersion which contains the current version of this Sdk
+- `SdkInternalConfig` takes an `authenticationChallengeHandler`, called for every authentication challenge on the SDK's network calls — the supported way for an app that pins the server's certificate to plug its trust evaluation in.
+  Swizzling `URLSession` or `URLSessionConfiguration` to reach the SDK's session was the only way until now, and doing so takes the `/oauth/authorize` callback away from the SDK when the swizzled layer answers `willPerformHTTPRedirection` in its place. A handler only ever sees challenges, so it cannot.
 
 ## v11.0.0
 
