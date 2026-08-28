@@ -57,6 +57,18 @@ extension URL {
         return normalizedHost != nil || normalizedPath.hasPrefix("/")
     }
 
+    /// Whether the scheme is a private one: anything other than `http`/`https`. On a callback that means the
+    /// app's own scheme (RFC 8252 §7.1), and for `URLSession` it means a redirection it has no handler for,
+    /// which is exactly what makes such a redirection interceptable rather than followable.
+    ///
+    /// The whole scheme is compared, never its first four letters: `customScheme` is free-form, so a valid
+    /// one may well start with `http` (`httpsapp`) and be private all the same. `false` for a URL carrying no
+    /// scheme, which is no callback either.
+    var hasPrivateScheme: Bool {
+        guard let normalizedScheme else { return false }
+        return !Self.webSchemes.contains(normalizedScheme)
+    }
+
     /// This URL reduced to its origin, serialized as RFC 6454 §6.2 (ASCII Serialization of an Origin)
     /// defines it: scheme, host, and the port only when it differs from the scheme's default. `nil` when
     /// there is no scheme or no host — a URL is not necessarily an origin.
@@ -80,6 +92,10 @@ extension URL {
     /// Holding the same two schemes as `defaultPorts` below is an accident of what this SDK needs, not a
     /// rule — for example, `ws`/`wss` would require an authority too (RFC 6455 §3). Either list can grow without the other.
     private static let schemesRequiringAHost: Set<String> = ["http", "https"]
+
+    /// The schemes `URLSession` loads over the web, as opposed to an app's private scheme. Its own list
+    /// rather than a reuse of the two above: those answer different questions and can grow apart.
+    private static let webSchemes: Set<String> = ["http", "https"]
 
     /// The port each scheme leaves implicit, which a serialized origin must therefore leave out (RFC 6454
     /// §6.2 step 5). Only the schemes WebAuthn allows; any other keeps whatever port it carries.

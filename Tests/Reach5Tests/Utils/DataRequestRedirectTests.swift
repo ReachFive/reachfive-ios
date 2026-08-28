@@ -2,8 +2,9 @@ import XCTest
 @testable import Reach5
 
 final class DataRequestRedirectTests: XCTestCase {
-    // `NetworkClient.deinit` invalidates its session, so it must outlive the awaited `redirect()` call —
-    // a temporary dropped right after `.request(...)` would invalidate the session before the task runs.
+    // Held in a property rather than built inline: `NetworkClient.deinit` invalidates its session, which a
+    // temporary dropped right after `.request(...)` would do before `responseJson()` could run. `redirect()`
+    // only reads that session's configuration, and runs its task on its own, but the rule is the same one.
     private var networkClient: NetworkClient!
 
     override func setUp() {
@@ -249,4 +250,79 @@ final class DataRequestRedirectTests: XCTestCase {
             XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
         }
     }
+
+    // MARK: - An error body that is not an ApiError
+
+    /// A proxy, a WAF or a gateway answers HTML rather than an `ApiError`. Decoding it can only fail, and the
+    /// status code is then the only thing left to report — it must not be lost with the decoding.
+    func testErrorBodyThatIsNotAnApiErrorStillReportsTheStatus() async {
+        StubURLProtocol.stubHandler = { _ in
+            .response(statusCode: 502, headers: ["Content-Type": "text/html"], body: Data("<html><body>Bad gateway</body></html>".utf8))
+        }
+
+        do {
+            _ = try await networkClient
+                .request(URL(string: "https://example.com/oauth/authorize")!)
+                .redirect()
+            XCTFail("attendu : une erreur")
+        } catch let ReachFiveError.TechnicalError(reason, apiError) {
+            XCTAssertEqual(reason, "Response with 502 error code")
+            XCTAssertNil(apiError)
+        } catch {
+            XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
+        }
+    }
+
+    /// Same, with no body at all to decode.
+    func testEmptyErrorBodyStillReportsTheStatus() async {
+        StubURLProtocol.stubHandler = { _ in .response(statusCode: 403) }
+
+        do {
+            _ = try await networkClient
+                .request(URL(string: "https://example.com/oauth/authorize")!)
+                .redirect()
+            XCTFail("attendu : une erreur")
+        } catch let ReachFiveError.TechnicalError(reason, apiError) {
+            XCTAssertEqual(reason, "Response with 403 error code")
+            XCTAssertNil(apiError)
+        } catch {
+            XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
+        }
+    }
+
+    // MARK: - The edges of the recovery
+
+    /// An `unsupportedURL` carrying neither of the two failing-URL keys: there is no callback to recover, and
+    /// the error must come back untouched rather than the recovery inventing a URL.
+    func testUnsupportedUrlWithoutAFailingUrlIsRethrown() async {
+        StubURLProtocol.stubHandler = { _ in
+            .networkFailure(NSError(domain: NSURLErrorDomain, code: NSURLErrorUnsupportedURL, userInfo: [:]))
+        }
+
+        do {
+            _ = try await networkClient
+                .request(URL(string: "https://example.com/oauth/authorize")!)
+                .redirect()
+            XCTFail("attendu : une erreur")
+        } catch let error as URLError {
+            XCTAssertEqual(error.code, .unsupportedURL)
+        } catch {
+            XCTFail("attendu : URLError, obtenu \(error)")
+        }
+    }
+
+    /// RFC 3986 §3.1 makes the scheme case-insensitive, and the default one is derived from the clientId, so
+    /// a callback can come back in a case the SDK never wrote.
+    func testRedirectToAPrivateSchemeInAnotherCaseSucceeds() async throws {
+        StubURLProtocol.stubHandler = { _ in
+            .redirect(to: "REACHFIVE-Client://callback?code=abc123")
+        }
+
+        let url = try await networkClient
+            .request(URL(string: "https://example.com/oauth/authorize")!)
+            .redirect()
+
+        XCTAssertEqual(url.queryValue("code"), "abc123")
+    }
 }
+
