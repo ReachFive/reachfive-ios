@@ -28,7 +28,11 @@ icon:book[] For more on configuring a client, see xref:docs:ROOT:clients.adoc#co
 
 == Installation
 
-{company} SDKs are available with Swift Package Manager as independent modules. Only <<wechat-connect,WeChat Connect>> still uses Cocoapods.
+{company} SDKs are available with Swift Package Manager as independent modules.
+Only <<wechat-connect,WeChat Connect>> still uses Cocoapods.
+
+NOTE: If you are migrating from CocoaPods, `import Reach5` no longer brings `UIKit` or `Foundation` into scope.
+Add an explicit `import UIKit` and `import Foundation` in each file that uses those types.
 
 TIP: You can also find releases directly on the {company} repo at link:https://github.com/ReachFive/reachfive-ios/releases/[ReachFive iOS SDK^].
 
@@ -235,7 +239,7 @@ Cocoapods::
 +
 [source,subs="normal,callouts"]
 ----
-pod 'IdentitySdkWeChat', '~> {sdk-ios-wechat-latest-version}' <1>
+pod 'Reach5WeChat', '~> {sdk-ios-wechat-latest-version}' <1>
 ----
 <1> `{sdk-ios-wechat-latest-version}` is the latest version of SDK.
 
