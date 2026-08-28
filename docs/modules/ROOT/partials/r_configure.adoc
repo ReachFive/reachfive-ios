@@ -138,15 +138,23 @@ If you restrict `components` to a path, make sure it lets through both the succe
 
 === Customise the WebAuthn origin
 
-Passkey requests carry an origin, which the server checks against the relying party your passkeys are registered for.
-It defaults to `https://$\{domain\}`, so you only need to set it when your passkeys are scoped to another
-relying party — a custom domain, or one shared across several of your applications.
+Passkey requests carry an origin, which defaults to `\https://$\{domain\}`.
+Set `originWebAuthn` when your passkeys are bound to another domain, such as a custom domain or one shared by several of your apps.
+Pass a full URL such as `\https://auth.example.com`, not a bare host.
 
-Set it once in the `SdkConfig` rather than on every passkey request.
+CAUTION: A value with no scheme, such as `auth.example.com`, is not a valid origin.
+`SdkConfig` stops the app at initialisation instead of falling back to your domain.
+
+You never set the Relying Party ID yourself.
+{company} derives it from the origin's host (`auth.example.com`) and returns it with each passkey request.
+Declare that same host in your Associated Domains and `apple-app-site-association` file, as described in xref:guides/passkeys.adoc[].
+
+Set the origin once in the `SdkConfig` rather than on every passkey request.
 A request that carries its own `originWebAuthn` still takes precedence over this value.
 
 IMPORTANT: The origin you send must be allowed in the {cc} under menu:Settings[WebAuthn], or the server rejects the passkey request.
 See xref:guides/passkeys.adoc#allowed-origins[Allowed origins].
+
 [source,swift,subs="verbatim,callouts"]
 ----
 let reachFive = ReachFive(
