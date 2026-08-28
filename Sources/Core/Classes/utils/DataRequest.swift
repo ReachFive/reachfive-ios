@@ -116,6 +116,13 @@ class DataRequest {
                     return
                 }
 
+                // A redirection the recovery just turned down: it leads somewhere else than the private
+                // scheme. `processHttpResponse` would only report a body it cannot decode, so say where.
+                if let unusable = Self.unusableRedirection(response) {
+                    continuation.resume(throwing: unusable)
+                    return
+                }
+
                 continuation.resume(with: Result {
                     try self.processHttpResponse(data: data ?? Data(), response: response) { _ in
                         let status = (response as? HTTPURLResponse)?.statusCode
@@ -168,6 +175,20 @@ class DataRequest {
         }
 
         return failing
+    }
+
+    /// A redirection that ended the task but leads elsewhere than the private scheme — an interception layer
+    /// rewriting the target to a block page, or a redirection stripped of its `Location`. Names where it
+    /// leads, which the decoding of a body that isn't an `ApiError` never would.
+    private static func unusableRedirection(_ response: URLResponse) -> ReachFiveError? {
+        guard let response = response as? HTTPURLResponse, (300 ..< 400).contains(response.statusCode) else {
+            return nil
+        }
+
+        let location = response.value(forHTTPHeaderField: "Location")
+        let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected: answered a \(response.statusCode) redirection to \(location.map { "'\($0)'" } ?? "nowhere — no Location header"), not to the private scheme the SDK intercepts")
+        Logger.shared.log(error: error)
+        return error
     }
 
     /// The task ended with no redirection, no response and no error at all — nothing an HTTP exchange
