@@ -536,6 +536,57 @@
             </objects>
             <point key="canvasLocation" x="1368.8372093023256" y="863.94849785407735"/>
         </scene>
+        <!--Password Reset-->
+        <scene sceneID="pRs-tA-rt1">
+            <objects>
+                <viewController storyboardIdentifier="PasswordResetController" title="Password Reset" id="pRs-Vw-001" customClass="PasswordResetController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="pRs-Lb-002">
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email or phone number" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pRs-Tf-003" userLabel="Username">
+                                <rect key="frame" x="16" y="188" width="176" height="20"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="pRs-Bt-004" userLabel="UsernameInput">
+                                <rect key="frame" x="16" y="216" width="370" height="34"/>
+                                <accessibility key="accessibilityConfiguration" identifier="email"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="username"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pRs-Sa-005">
+                                <rect key="frame" x="119" y="290" width="164" height="40.666666666666686"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Send reset link"/>
+                                <connections>
+                                    <action selector="sendLink:" destination="pRs-Vw-001" eventType="touchUpInside" id="pRs-Nv-006"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="pRs-Fr-007"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="pRs-Bt-004" firstAttribute="trailing" secondItem="pRs-Lb-002" secondAttribute="trailingMargin" id="pRs-C1-008"/>
+                            <constraint firstItem="pRs-Sa-005" firstAttribute="top" secondItem="pRs-Bt-004" secondAttribute="bottom" constant="40" id="pRs-C2-009"/>
+                            <constraint firstItem="pRs-Bt-004" firstAttribute="leading" secondItem="pRs-Tf-003" secondAttribute="leading" id="pRs-C3-010"/>
+                            <constraint firstItem="pRs-Sa-005" firstAttribute="centerX" secondItem="pRs-Fr-007" secondAttribute="centerX" id="pRs-C4-011"/>
+                            <constraint firstItem="pRs-Bt-004" firstAttribute="top" secondItem="pRs-Tf-003" secondAttribute="bottom" constant="8" id="pRs-C5-012"/>
+                            <constraint firstItem="pRs-Tf-003" firstAttribute="leading" secondItem="pRs-Lb-002" secondAttribute="leadingMargin" id="pRs-C6-013"/>
+                            <constraint firstItem="pRs-Tf-003" firstAttribute="top" secondItem="pRs-Fr-007" secondAttribute="top" constant="20" id="pRs-C7-014"/>
+                            <constraint firstItem="pRs-Fr-007" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="pRs-Tf-003" secondAttribute="trailing" symbolic="YES" id="pRs-C8-015"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Reset Password" id="pRs-Nv-016"/>
+                    <connections>
+                        <outlet property="username" destination="pRs-Bt-004" id="pRs-Ou-017"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="pRs-Fr-018" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1368.8372093023256" y="1400"/>
+        </scene>
         <!--Signup with password-->
         <scene sceneID="H6o-jf-Xhj">
             <objects>
@@ -1801,6 +1852,15 @@
                             <stackView hidden="YES" opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="L5x-gv-QiR" userLabel="Login Provider Stack View">
                                 <rect key="frame" x="16" y="316" width="370" height="64"/>
                             </stackView>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="frgt-Bt-001" userLabel="Forgot Password">
+                                <rect key="frame" x="277" y="532" width="109" height="20.333333333333371"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                <state key="normal" title="Forgot password?"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Forgot password?"/>
+                                <connections>
+                                    <action selector="forgotPassword:" destination="MTQ-Xb-hzf" eventType="touchUpInside" id="frgt-Ac-002"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="m5J-7H-g3f"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -1821,7 +1881,9 @@
                             <constraint firstItem="u6a-4F-fRl" firstAttribute="centerX" secondItem="4G2-0w-glg" secondAttribute="centerX" id="eb1-U9-ZCU"/>
                             <constraint firstItem="tSE-uc-6si" firstAttribute="leading" secondItem="Hfq-bj-MWI" secondAttribute="leading" id="hQA-GO-i9e"/>
                             <constraint firstItem="LlH-cL-TRX" firstAttribute="trailing" secondItem="4G2-0w-glg" secondAttribute="trailingMargin" id="ikK-iE-ga6"/>
-                            <constraint firstItem="xzw-kf-Pwc" firstAttribute="top" secondItem="tSE-uc-6si" secondAttribute="bottom" constant="20" id="iug-BT-l5p"/>
+                            <constraint firstItem="xzw-kf-Pwc" firstAttribute="top" secondItem="frgt-Bt-001" secondAttribute="bottom" constant="12" id="iug-BT-l5p"/>
+                            <constraint firstItem="frgt-Bt-001" firstAttribute="top" secondItem="tSE-uc-6si" secondAttribute="bottom" constant="8" id="frgt-Cn-003"/>
+                            <constraint firstItem="frgt-Bt-001" firstAttribute="trailing" secondItem="tSE-uc-6si" secondAttribute="trailing" id="frgt-Cn-004"/>
                             <constraint firstItem="m5J-7H-g3f" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="xzw-kf-Pwc" secondAttribute="trailing" symbolic="YES" id="pyH-nX-aMb"/>
                             <constraint firstItem="b96-ln-GEZ" firstAttribute="centerX" secondItem="4G2-0w-glg" secondAttribute="centerX" id="rPV-wQ-Y8n"/>
                             <constraint firstItem="xzw-kf-Pwc" firstAttribute="centerX" secondItem="4G2-0w-glg" secondAttribute="centerX" id="sQq-th-cWK"/>
@@ -1839,6 +1901,7 @@
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="createAccountButton" destination="b96-ln-GEZ" id="L4Z-xQ-MLc"/>
+                        <outlet property="forgotPasswordButton" destination="frgt-Bt-001" id="frgt-Ou-005"/>
                         <outlet property="loginButton" destination="xzw-kf-Pwc" id="jkj-oP-Djk"/>
                         <outlet property="loginProviderStackView" destination="L5x-gv-QiR" id="OKG-8u-q80"/>
                         <outlet property="passwordField" destination="tSE-uc-6si" id="ekW-7J-v19"/>

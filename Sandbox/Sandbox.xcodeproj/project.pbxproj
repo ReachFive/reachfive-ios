@@ -62,6 +62,7 @@
 		F67B05331FF01D6898129706 /* CaptchaFoxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 904A0A108CED83599BE67453 /* CaptchaFoxController.swift */; };
 		C18387D6F3E61FCE7E10796D /* CaptchaWidgetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82924DDB1DAA122ECF91D93A /* CaptchaWidgetController.swift */; };
 		98DE0DD0B6C5ACA19CE78D29 /* ReCaptchaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3061D54C3F151EA367E66A2F /* ReCaptchaController.swift */; };
+		CA127F10A945D32EC5D362F1 /* PasswordResetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894B81E45D184F26F93F3BFA /* PasswordResetController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -106,6 +107,7 @@
 		3417FF6D22FB06E50009EC84 /* PasswordlessController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordlessController.swift; sourceTree = "<group>"; };
 		3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWithPasswordController.swift; sourceTree = "<group>"; };
 		34797ABC22A9607D00ED093C /* SignupController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupController.swift; sourceTree = "<group>"; };
+		894B81E45D184F26F93F3BFA /* PasswordResetController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordResetController.swift; sourceTree = "<group>"; };
 		349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePasswordController.swift; sourceTree = "<group>"; };
 		9987CBB22FCDD17B006DF706 /* SessionDevicesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDevicesViewController.swift; sourceTree = "<group>"; };
 		99E4472E2B863AB300EC7559 /* ProfileContentTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContentTableView.swift; sourceTree = "<group>"; };
@@ -260,6 +262,7 @@
 				3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */,
 				2A1079E829721DAC00431655 /* NativePasswordController.swift */,
 				34797ABC22A9607D00ED093C /* SignupController.swift */,
+				894B81E45D184F26F93F3BFA /* PasswordResetController.swift */,
 			);
 			path = Password;
 			sourceTree = "<group>";
@@ -464,6 +467,7 @@
 				F67B05331FF01D6898129706 /* CaptchaFoxController.swift in Sources */,
 				C18387D6F3E61FCE7E10796D /* CaptchaWidgetController.swift in Sources */,
 				98DE0DD0B6C5ACA19CE78D29 /* ReCaptchaController.swift in Sources */,
+				CA127F10A945D32EC5D362F1 /* PasswordResetController.swift in Sources */,
 				2A65D1282E44BD90004B0004 /* TrustedDevicesViewController.swift in Sources */,
 				EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */,
 				EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */,
