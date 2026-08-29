@@ -14,7 +14,6 @@ class RecoveryStartController: UIViewController {
             phoneNumber = username
         }
 
-        // TODO: Ajouter aussi la gestion de "j'ai oublié mon mot de passe"
         Task { @MainActor in
             do {
                 try await AppDelegate.reachfive().requestAccountRecovery(email: email, phoneNumber: phoneNumber, origin: "RecoveryStartController:sendLink", captcha: CaptchaStore.take())
