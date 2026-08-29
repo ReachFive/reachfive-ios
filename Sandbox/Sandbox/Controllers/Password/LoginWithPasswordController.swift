@@ -28,8 +28,6 @@ class LoginWithPasswordController: UIViewController {
 
         loadScopes()
 
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Forgot password?", style: .plain, target: self, action: #selector(forgotPasswordTapped))
-
         tokenNotification = NotificationCenter.default.addObserver(forName: .DidReceiveLoginCallback, object: nil, queue: nil) { note in
             if let result = note.userInfo?["result"], let result = result as? Result<AuthToken, ReachFiveError> {
                 Task { @MainActor in
@@ -68,30 +66,6 @@ class LoginWithPasswordController: UIViewController {
                     )
             }
         }
-    }
-
-    @objc func forgotPasswordTapped() {
-        let alert = UIAlertController(title: "Reset Password", message: "Enter your email or phone number.", preferredStyle: .alert)
-        alert.addTextField { textField in
-            textField.placeholder = "Email or phone number"
-            textField.autocapitalizationType = .none
-        }
-        let sendAction = UIAlertAction(title: "Send", style: .default) { [weak self] _ in
-            guard let self, let identifier = alert.textFields?.first?.text, !identifier.isEmpty else { return }
-            let email = identifier.contains("@") ? identifier : nil
-            let phoneNumber = identifier.contains("@") ? nil : identifier
-            Task {
-                do {
-                    try await AppDelegate.reachfive().requestPasswordReset(email: email, phoneNumber: phoneNumber, origin: "LoginWithPasswordController.forgotPassword", captcha: CaptchaStore.take())
-                    self.presentAlert(title: "Reset Password", message: "If the account exists, a reset link has been sent.")
-                } catch {
-                    self.presentErrorAlert(title: "Reset Password failed", error)
-                }
-            }
-        }
-        alert.addAction(sendAction)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        present(alert, animated: true)
     }
 
     @objc func switchChanged(_ sender: UISwitch) {
