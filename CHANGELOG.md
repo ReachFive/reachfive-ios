@@ -3,6 +3,14 @@
 
 ## Unreleased
 
+## v9.1.3
+### Bug fix
+- Fix the compilation issue in Xcode 26, backported from v10.0.1.
+- Add the missing `TokenType.swift` to the Reach5 Xcode project.
+
+### New features
+- Add a public SdkVersion which contains the current version of this Sdk
+
 ## v9.1.2
 ### Bug fix
 Achieve step up in login webview by clicking on link received by email

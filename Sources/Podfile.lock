@@ -1,5 +1,5 @@
 PODS:
-  - Reach5 (9.1.2)
+  - Reach5 (9.1.3)
 
 DEPENDENCIES:
   - Reach5 (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  Reach5: acc46b725ecb6ee4bc8ab48278fd877af6544f16
+  Reach5: 070fcd87901d43b955bfdfa14d12913f7bf4fb26
 
 PODFILE CHECKSUM: 9a44ddf91ef9134960bddf8567626a150b34c6e4
 
