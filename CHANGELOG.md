@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## v10.0.2
+### Bug fix
+- Add the missing `TokenType.swift` to the Reach5 Xcode project.
+
+### New features
+- Add a public SdkVersion which contains the current version of this Sdk
+
 ## v10.0.1
 
 - Fix compilation issue in XCode 26

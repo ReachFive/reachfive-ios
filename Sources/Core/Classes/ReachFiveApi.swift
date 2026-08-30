@@ -74,7 +74,7 @@ public class ReachFiveApi {
 
         let defaultParams: [String: String] = [
             "platform": "ios",
-            "sdk": getSdkVersion(),
+            "sdk": SdkVersion.current,
         ]
 
         let additionalParams = filter(params: params ?? [:])
@@ -84,10 +84,6 @@ public class ReachFiveApi {
         // safe force-unwrap because the contract is respected:
         // If the NSURLComponents has an authority component (user, password, host or port) and a path component, then the path must either begin with "/" or be an empty string.
         return components.url!
-    }
-
-    private func getSdkVersion() -> String {
-        return Bundle(for: ReachFiveApi.self).infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
     }
 
     /// Keep only non-nil values

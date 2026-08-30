@@ -1,5 +1,5 @@
 PODS:
-  - Reach5 (10.0.1)
+  - Reach5 (10.0.2)
 
 DEPENDENCIES:
   - Reach5 (from `../Reach5.podspec`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../Reach5.podspec"
 
 SPEC CHECKSUMS:
-  Reach5: ebba01fc7fb0902847b0b63dc9507a1d85a796b2
+  Reach5: 0f5bebd8dbe72892eefb0821a335f5f501077bfa
 
 PODFILE CHECKSUM: f08d4f1661216f05437ac8922ae88c25e32e8749
 

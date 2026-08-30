@@ -103,9 +103,12 @@
 		9943B0872B6954F1007AD120 /* MfaCredentialsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9943B0862B6954F1007AD120 /* MfaCredentialsRequest.swift */; };
 		9958690C2C32DDDC005CD5C4 /* TrustedDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9958690B2C32DDDC005CD5C4 /* TrustedDevice.swift */; };
 		99DD57C22E72E19A00EE4D1C /* SignupTokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99DD57C12E72E19A00EE4D1C /* SignupTokenResponse.swift */; };
+		06FA9FFD97F751D36D924E4B /* SdkVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */; };
+		3F2A18C4D07E5B9146A0271E /* TokenType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F2A18C4D07E5B9146A0271F /* TokenType.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SdkVersion.swift; sourceTree = "<group>"; };
 		2A03050F2C04DBE500A92524 /* ResetOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetOptions.swift; sourceTree = "<group>"; };
 		2A0305112C04F07900A92524 /* ResetPasskeyRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasskeyRequest.swift; sourceTree = "<group>"; };
 		2A0305132C063DEA00A92524 /* ResetPublicKeyCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPublicKeyCredential.swift; sourceTree = "<group>"; };
@@ -145,6 +148,7 @@
 		3417FF6922FAD1810009EC84 /* ReachFivePasswordLess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachFivePasswordLess.swift; sourceTree = "<group>"; };
 		3417FF6B22FAD6CB0009EC84 /* StartPasswordlessRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartPasswordlessRequest.swift; sourceTree = "<group>"; };
 		34251C0A232FC13800B0C271 /* RefreshRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshRequest.swift; sourceTree = "<group>"; };
+		3F2A18C4D07E5B9146A0271F /* TokenType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenType.swift; sourceTree = "<group>"; };
 		3442C21D230EC48A009F8874 /* VerifyAuthCodeRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerifyAuthCodeRequest.swift; sourceTree = "<group>"; };
 		3455FCEB22F1B57400892794 /* DictionaryEncodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryEncodable.swift; sourceTree = "<group>"; };
 		34689A9022CDFAE4002970F9 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
@@ -225,6 +229,7 @@
 			isa = PBXGroup;
 			children = (
 				2AE040E32C88E33900162014 /* AppleProvider.swift */,
+				6CEBCA83371E03539C69DBD8 /* SdkVersion.swift */,
 				2AE53309299462DD00EF97E0 /* CredentialManager.swift */,
 				2A624FD92B2BDBC400BF33A7 /* DefaultProvider.swift */,
 				2AE18CDA29FC1DAF00258D2B /* LoginWKWebview.swift */,
@@ -277,6 +282,7 @@
 				991296BE2BDBBCAF00DCEDC1 /* MfaStepUpRequest.swift */,
 				34BDDA3D22E5BFAC00D16DAE /* ProfileSignupRequest.swift */,
 				34251C0A232FC13800B0C271 /* RefreshRequest.swift */,
+				3F2A18C4D07E5B9146A0271F /* TokenType.swift */,
 				2ADFF84E2BFE661200A659FE /* RequestAccountRecoveryRequest.swift */,
 				3474D28A22D32F3A005112C1 /* RequestPasswordResetRequest.swift */,
 				2A19570F2E421331008393DB /* RevokeTokenRequest.swift */,
@@ -577,6 +583,7 @@
 				8496EB2C25DEAFCF005098DD /* WebauthnSignupCredential.swift in Sources */,
 				990AF3422DD2146800D31780 /* VerifyEmailRequest.swift in Sources */,
 				34F7D3E622A54ADE003A7BC0 /* ProvidersConfigsResult.swift in Sources */,
+				06FA9FFD97F751D36D924E4B /* SdkVersion.swift in Sources */,
 				34E508B222F19F7700BF9BAF /* DataRequest.swift in Sources */,
 				340AF1F9232AA32F00AA114D /* UpdatePasswordRequest.swift in Sources */,
 				2A0305102C04DBE500A92524 /* ResetOptions.swift in Sources */,
@@ -605,6 +612,7 @@
 				991296BF2BDBBCAF00DCEDC1 /* MfaStepUpRequest.swift in Sources */,
 				3455FCEC22F1B57400892794 /* DictionaryEncodable.swift in Sources */,
 				34251C0B232FC13800B0C271 /* RefreshRequest.swift in Sources */,
+				3F2A18C4D07E5B9146A0271E /* TokenType.swift in Sources */,
 				8496EB4325DEB141005098DD /* AuthenticationToken.swift in Sources */,
 				34BDDA4422E5D95B00D16DAE /* ReachFiveProfile.swift in Sources */,
 				2AE18CDB29FC1DAF00258D2B /* LoginWKWebview.swift in Sources */,

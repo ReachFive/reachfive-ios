@@ -6,7 +6,9 @@
     ```ruby
     $VERSION = 'x.x.x'
     ```
-3. Run [update.sh](update.sh) to install the new version of this library and update the dependencies in CocoaPods and SPM
+3. Run [update.sh](update.sh) to regenerate [SdkVersion.swift](Sources/Core/Classes/SdkVersion.swift), install the new
+   version of this library and update the dependencies in CocoaPods and SPM.
+   Make sure the resulting change is committed, the CI checks that it stays in sync.
     ```shell
     ./update.sh
     ```
