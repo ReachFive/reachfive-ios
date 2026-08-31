@@ -49,6 +49,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         builtReachFive
     }
 
+    /// True while ``switchEnvironment(to:)`` is between rebuilding the instance and its client configuration
+    /// coming back.
+    private var isSwitchingEnvironment = false
+
     @MainActor
     static func reachfive() -> ReachFive {
         let app = UIApplication.shared.delegate as! AppDelegate
@@ -76,15 +80,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     /// `SecureStorage` backs every instance, and `HTTPCookieStorage` is shared by the whole app. Anything else
     /// on screen keeps showing the old environment until its next call, which then fails on a missing token —
     /// acceptable in a sandbox, and cheaper than driving every controller back to its empty state.
+    ///
+    /// Throws whatever fetching the client configuration failed with: a switch is a user action, so the
+    /// caller has something to say instead of settling on an environment that never came up.
     @MainActor
-    func switchEnvironment(to environment: SandboxEnvironment) async {
-        guard environment != SandboxEnvironment.selected else { return }
+    func switchEnvironment(to environment: SandboxEnvironment) async throws {
+        // One at a time. The fetch below suspends, and a second switch starting in that window would rebuild
+        // the instance under the first one, leaving the two of them to initialize the same object at once.
+        guard !isSwitchingEnvironment, environment != SandboxEnvironment.selected else { return }
+        isSwitchingEnvironment = true
+        defer { isSwitchingEnvironment = false }
 
         Self.clearCookies(of: reachfive.sdkConfig.domain)
         Self.storage.removeToken()
         SandboxEnvironment.selected = environment
         builtReachFive = makeReachFive()
-        await initializeReachFive()
+        try await initializeReachFive()
     }
 
     private func registerCallbacks(on reachfive: ReachFive) {
@@ -104,13 +115,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     /// Fetches the client configuration and refreshes the scopes the settings offer, the way the launch used
     /// to — a rebuilt instance starts with an empty scope list until this runs.
-    private func initializeReachFive() async {
-        do {
-            _ = try await reachfive.initialize()
-        } catch {
-            print("initialize error \(error)")
-        }
-        SettingsViewController.selectedScopes = UserDefaults.standard.stringArray(forKey: "selectedScopes") ?? reachfive.scope
+    private func initializeReachFive() async throws {
+        // On failure too: an instance with no client configuration offers no scope, and the selection has to
+        // stop carrying the previous environment's.
+        defer { SettingsViewController.restoreSelectedScopes(availableScopes: reachfive.scope) }
+        _ = try await reachfive.initialize()
     }
 
     /// A domain-scoped cookie comes back dot-prefixed and case-folded, so compare host-suffix-wise — the same
@@ -130,7 +139,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Task {
             // The callbacks come with the instance now, registered by `makeReachFive()`.
-            await self.initializeReachFive()
+            // Nothing is waiting on an answer at launch, unlike a switch, so the failure only gets logged.
+            do {
+                try await self.initializeReachFive()
+            } catch {
+                print("initialize error \(error)")
+            }
 
             if let window = self.window, let rootViewController = window.rootViewController {
                 let defaults = UserDefaults.standard

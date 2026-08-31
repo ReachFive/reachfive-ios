@@ -16,10 +16,22 @@ class SettingsViewController: UIViewController {
 
     private let environments = SandboxEnvironment.allCases
     private var selectedEnvironment = SandboxEnvironment.selected
+    /// The environment a switch is running towards, if one is: its row shows a spinner, and the section stops
+    /// answering taps until the client configuration comes back.
+    private var switchingTo: SandboxEnvironment?
     private let versions = SandboxVersions.all
 
     private var availableScopes: [String] = []
     static var selectedScopes: [String] = [] // TODO: utiliser partout ces scopes là
+    private static let selectedScopesKey = "selectedScopes"
+
+    /// Restores the persisted selection, dropping whatever the current client does not offer. The selection
+    /// lives under a single key, so a scope ticked on one environment would otherwise be sent to another that
+    /// never declared it — and, missing from the Scopes section, would be invisible there.
+    static func restoreSelectedScopes(availableScopes: [String]) {
+        let persisted = UserDefaults.standard.stringArray(forKey: selectedScopesKey)
+        selectedScopes = persisted?.filter { availableScopes.contains($0) } ?? availableScopes
+    }
 
     private let startupActions = [
         "Use refreshAccessToken at startup",
@@ -68,7 +80,8 @@ class SettingsViewController: UIViewController {
 
     private func loadSettings() {
         let defaults = UserDefaults.standard
-        SettingsViewController.selectedScopes = defaults.stringArray(forKey: "selectedScopes") ?? availableScopes
+        // The scope selection is not read here: `AppDelegate` restores it against what the current client
+        // offers, at launch and after every switch. Reading the key again would undo that filtering.
         // TODO: ces actions seront faite dans applicationDidBecomeActive ou applicationWillEnterForeground, pas dans didFinishLaunchingWithOptions
         // TODO: sur iOS, ajouter ces actions en tant que "Home screen quick action", sur Mac Catalyst, remplacer cette section par un popup button
         // TODO: sur Mac Catalyst, remplacer cette section par un popup button
@@ -78,7 +91,7 @@ class SettingsViewController: UIViewController {
 
     private func saveSettings() {
         let defaults = UserDefaults.standard
-        defaults.set(SettingsViewController.selectedScopes, forKey: "selectedScopes")
+        defaults.set(SettingsViewController.selectedScopes, forKey: Self.selectedScopesKey)
         defaults.set(selectedStartupAction, forKey: "selectedStartupAction")
     }
 
@@ -172,7 +185,16 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             let environment = environments[indexPath.row]
             cell.textLabel?.text = environment.label
             cell.detailTextLabel?.text = environment.domain
-            cell.accessoryType = selectedEnvironment == environment ? .checkmark : .none
+            if switchingTo == environment {
+                let spinner = UIActivityIndicatorView(style: .medium)
+                spinner.startAnimating()
+                cell.accessoryView = spinner
+                cell.accessoryType = .none
+            } else {
+                // Cleared explicitly: a recycled cell would keep the spinner of the row it was used for.
+                cell.accessoryView = nil
+                cell.accessoryType = selectedEnvironment == environment ? .checkmark : .none
+            }
         case .versions:
             let component = versions[indexPath.row]
             cell.selectionStyle = .none
@@ -208,13 +230,28 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         case .environment:
             let environment = environments[indexPath.row]
             guard environment != selectedEnvironment else { return }
-            selectedEnvironment = environment
+            switchingTo = environment
+            tableView.reloadSections(IndexSet(integer: Section.environment.rawValue), with: .none)
             Task { @MainActor in
-                await (UIApplication.shared.delegate as! AppDelegate).switchEnvironment(to: environment)
+                var failure: Error?
+                do {
+                    try await (UIApplication.shared.delegate as! AppDelegate).switchEnvironment(to: environment)
+                } catch {
+                    failure = error
+                }
+
+                self.switchingTo = nil
+                // Read back rather than trust the tap: a switch that was refused, or that failed, must not
+                // leave the checkmark somewhere the SDK is not.
+                self.selectedEnvironment = SandboxEnvironment.selected
                 self.environmentDomain.text = AppDelegate.reachfive().sdkConfig.domain
                 self.loadCookies()
                 self.loadScopes()
                 tableView.reloadSections(IndexSet(integer: Section.environment.rawValue), with: .none)
+
+                if let failure {
+                    self.presentErrorAlert(title: "Switching to \(environment.label) failed", failure)
+                }
             }
         case .versions, .scopes:
             break
@@ -230,6 +267,14 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         default:
             break
         }
+    }
+
+    func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        // A switch is running: its section must not answer, or a second one would rebuild the instance under it.
+        if Section(rawValue: indexPath.section) == .environment, switchingTo != nil {
+            return nil
+        }
+        return indexPath
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
