@@ -60,7 +60,7 @@ Your apple-app-site-association file is served at `\https://<account>.reach5.net
 Using custom domain icon:check-circle[]::
 +
 --
-If you do use a custom domain, your Relying Party ID is `\https://<custom_domain>`.
+If you do use a custom domain, your Relying Party ID is `<custom_domain>` (with no `https://` prefix).
 Your apple-app-site-association file is served at `\https://<custom_domain>/.well-known/apple-app-site-association`.
 
 You could also choose to host the `apple-app-site-association` file on your root domain.
@@ -80,6 +80,7 @@ https://<your_domain>/.well-known/apple-app-site-association <1>
 ----
 <1> Ensure you use the correct Relying Party ID as your domain here.
 
+[#allowed-origins]
 == Allowed origins
 
 In the {cc}, under menu:Settings[WebAuthn] you must allow:
