@@ -55,8 +55,7 @@ extension ReachFive {
             .verifyPhoneNumber(authToken: authToken, verifyPhoneNumberRequest: verifyPhoneNumberRequest)
     }
 
-    /// - Parameter captcha: the token obtained by the application when the client's configuration
-    ///   requires a captcha on the `update_email` endpoint. See ``Captcha``.
+    /// - Parameter captcha: a token, if the client requires a captcha on `update_email`. See ``Captcha``.
     public func updateEmail(
         authToken: AuthToken,
         email: String,
@@ -106,8 +105,7 @@ extension ReachFive {
         )
     }
 
-    /// - Parameter captcha: the token obtained by the application when the client's configuration
-    ///   requires a captcha on the `forgot_password` endpoint. See ``Captcha``.
+    /// - Parameter captcha: a token, if the client requires a captcha on `forgot_password`. See ``Captcha``.
     public func requestPasswordReset(
         email: String? = nil,
         phoneNumber: String? = nil,
@@ -128,9 +126,8 @@ extension ReachFive {
         )
     }
 
-    /// - Parameter captcha: the token obtained by the application when the client's configuration
-    ///   requires a captcha on the `forgot_password` endpoint, which covers account recovery too.
-    ///   See ``Captcha``.
+    /// - Parameter captcha: a token, if the client requires a captcha on `forgot_password`, whose
+    ///   configuration covers account recovery too. See ``Captcha``.
     public func requestAccountRecovery(
         email: String? = nil,
         phoneNumber: String? = nil,

@@ -45,12 +45,9 @@ extension ReachFive {
     ///   - request: where the modal sheet is presented from, plus scope and origin configuration
     ///   - requestTypes: choose between Password and/or Passkey
     ///   - mode: choose the behavior when there are no credentials available
-    ///   - captcha: the token obtained by the application when the client's configuration requires a
-    ///     captcha on the `password_login` endpoint. Only a saved password reaches that endpoint, so a
-    ///     sign-in completed with a passkey or with Sign In With Apple ignores the token. It is minted
-    ///     before the modal sheet is presented and verified only once the user has picked a credential,
-    ///     so allow for the time they spend in the sheet: a reCAPTCHA token lasts about two minutes.
-    ///     See ``Captcha``.
+    ///   - captcha: a token, if the client requires a captcha on `password_login`. Used only when the
+    ///     user picks a saved password, and verified at that moment: allow for the time they spend in
+    ///     the sheet, against the token's two minutes. See ``Captcha``.
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError.
     ///   `.OngoingStepUp` can only occur when `.Password` is among `requestTypes`: only a password grant
     ///   ever requires a step-up. Requesting only `.Passkey` and/or `.SignInWithApple` always yields
