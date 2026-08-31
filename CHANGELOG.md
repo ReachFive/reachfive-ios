@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### New features
+- `SdkVersion.current` is now public: an application can read the SDK version it embeds, and report it.
+
 ## v11.0.0
 
 ### Breaking changes
