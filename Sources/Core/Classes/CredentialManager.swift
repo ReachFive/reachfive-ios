@@ -457,8 +457,7 @@ extension CredentialManager {
     /// Completes a modal sign-in, the only flow that can receive several kinds of credential (password,
     /// Sign In With Apple, or passkey).
     ///
-    /// The captcha only concerns the password branch: it is the only one that calls `password_login`, the
-    /// endpoint a captcha can protect here.
+    /// Only the password branch uses the captcha: it alone calls `password_login`.
     private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, captcha: Captcha?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
             // a password was selected to sign in. No custom identifier: none can be used at signup either.
