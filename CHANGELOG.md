@@ -4,7 +4,8 @@
 
 ### New features
 - Add a public SdkVersion which contains the current version of this Sdk
-- Captcha support on every endpoint this SDK calls that the server can protect: `loginWithPassword`, `signup(profile:)`, `requestPasswordReset`, `requestAccountRecovery`, `startPasswordless` and `updateEmail` take a new optional `captcha: Captcha?`, carrying a token and its `CaptchaProvider` (`.reCaptcha`, `.captchaFox`, or any name the server gains later).
+- Captcha support on every endpoint this SDK calls that the server can protect: `loginWithPassword`, `signup(profile:)`, `requestPasswordReset`, `requestAccountRecovery`, `startPasswordless`, `updateEmail` and `login(withRequest:usingModalAuthorizationFor:display:)` take a new optional `captcha: Captcha?`, carrying a token and its `CaptchaProvider` (`.reCaptcha`, `.captchaFox`, or any name the server gains later).
+  On the modal sign-in the token is only used when the user picks a saved password, the one credential that signs in through `password_login`; a passkey or Sign In With Apple ignores it.
   The SDK forwards the token, it does not produce one: obtaining it is the application's job, since both services mint their tokens in a web context.
   Beware that a token is single-use, expires after about two minutes, and seals the action it was minted with — hence no action parameter.
   See the [Captcha on iOS](https://developer.reachfive.com/sdk-ios/guides/captcha.html) guide.

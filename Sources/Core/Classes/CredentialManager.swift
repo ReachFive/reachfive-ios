@@ -247,7 +247,7 @@ class CredentialManager: NSObject {
 
     // MARK: - Modal
 
-    func login(withRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, reachFive: ReachFive) async throws -> LoginFlow {
+    func login(withRequest request: ResolvedNativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, appleProvider: ConfiguredAppleProvider?, captcha: Captcha?, reachFive: ReachFive) async throws -> LoginFlow {
         let built = try await buildAuthorizationRequests(
             makeWebAuthnLoginRequest(for: request, reachFive: reachFive),
             reachFive: reachFive,
@@ -259,7 +259,7 @@ class CredentialManager: NSObject {
             performRequests(on: $0, mode: mode)
         }
 
-        return try await completeModalLogin(authorization, scopes: request.scopes, siwa: built.siwa, reachFive: reachFive, originR5: request.origin)
+        return try await completeModalLogin(authorization, scopes: request.scopes, siwa: built.siwa, captcha: captcha, reachFive: reachFive, originR5: request.origin)
     }
 
     /// Internal for testability
@@ -456,12 +456,15 @@ extension CredentialManager {
 
     /// Completes a modal sign-in, the only flow that can receive several kinds of credential (password,
     /// Sign In With Apple, or passkey).
-    private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
+    ///
+    /// The captcha only concerns the password branch: it is the only one that calls `password_login`, the
+    /// endpoint a captcha can protect here.
+    private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, captcha: Captcha?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
             // a password was selected to sign in. No custom identifier: none can be used at signup either.
             let (email, phoneNumber) = Username.Unspecified(passwordCredential.user).identifiers
 
-            return try await reachFive.loginWithPassword(email: email, phoneNumber: phoneNumber, password: passwordCredential.password, scope: scopes, origin: originR5)
+            return try await reachFive.loginWithPassword(email: email, phoneNumber: phoneNumber, password: passwordCredential.password, scope: scopes, origin: originR5, captcha: captcha)
         } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard let siwa else {
                 // Guaranteed by buildAuthorizationRequests: a Sign In With Apple request only ever makes
