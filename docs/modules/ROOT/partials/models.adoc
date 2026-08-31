@@ -156,7 +156,7 @@ The provider which name matches the name passed in argument.
 
 - `scope` `[String]`: the list of the profile’s scopes. Make sure they are allowed by the client. Default scopes are the allowed scopes set up in the client’s configuration.
 - `origin` `String`: the origin of the call
-- `presenting` `Presentation`: where the provider presents its UI. Build it from the initiating view controller: `Presentation(from: self)`. The view controller must be attached to a window at call time.
+- `presenting` `Presentation`: Where the credential provider presents its UI, built with `Presentation(from: self)` from a view controller attached to a window (`viewDidAppear` or a user interaction, not `viewDidLoad`).
 
 It authenticates the profile with the provider otherwise it returns a `ReachFiveError`.
 | logout `function` | No argument is expected. Kill the SSO session of the profile otherwise returns a `ReachFiveError`.
@@ -325,10 +325,10 @@ This is only applicable for the type `email`.
 |===
 |Field |Description
 
-|id `string` 
+|id `string`
 |The trusted device ID.
 
-|userId `string` 
+|userId `string`
 |The user ID.
 
 |createdAt `string`
@@ -396,7 +396,7 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 |===
 |Field |Description
 
-|token `string` 
+|token `string`
 |The token obtained after initiating the step-up flow.
 
 |availableMfaCredentialItemTypes `[MfaCredentialItemType]`
@@ -420,7 +420,7 @@ Returned when a signup completes but the user must verify their identifier (emai
 // tag::AchievedLoginSignup[]
 === AchievedLogin
 
-Returned when a signup completes successfully and the user is immediately logged in.  
+Returned when a signup completes successfully and the user is immediately logged in.
 Contains the authentication token and user information.
 
 [cols="1a,2a"]

@@ -1,5 +1,5 @@
 :mobile-sdk:
-= Getting Started   
+= Getting Started
 
 {sdk-ios-version-badge}
 
@@ -28,7 +28,11 @@ icon:book[] For more on configuring a client, see xref:docs:ROOT:clients.adoc#co
 
 == Installation
 
-{company} SDKs are available with Swift Package Manager and link:https://cocoapods.org/pods/Reach5[Cocoapods^] as independent modules.
+{company} SDKs are available with Swift Package Manager as independent modules.
+Only <<wechat-connect,WeChat Connect>> still uses Cocoapods.
+
+NOTE: If you are migrating from CocoaPods, `import Reach5` no longer brings `UIKit` or `Foundation` into scope.
+Add an explicit `import UIKit` and `import Foundation` in each file that uses those types.
 
 TIP: You can also find releases directly on the {company} repo at link:https://github.com/ReachFive/reachfive-ios/releases/[ReachFive iOS SDK^].
 
@@ -47,30 +51,6 @@ The core SDK contains all the main tools, interfaces, and methods related to sta
 
 ==== Installation
 
-[tabs]
-====
-Cocoapods::
-+
---
-
-. Add this line to your `Podfile` file, replacing `x` with the latest version:
-+
-[source,subs="normal,callouts"]
-----
-pod 'Reach5', '~> {sdk-ios-latest-version}' <1>
-----
-<1> `{sdk-ios-latest-version}` is the latest version of SDK.
-
-. Then run:
-+
-[source, javascript]
-----
-pod install
-----
---
-Swift Package Manager::
-+
---
 Add the package dependency with XCode using this package URL:
 
 [source]
@@ -83,12 +63,9 @@ Or directly add this to the dependencies in `Package.swift`
 [source,swift,subs="attributes"]
 ----
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "{page-component-version}"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "{sdk-ios-latest-version}"))
 ]
 ----
-
---
-====
 
 ==== Configuration
 
@@ -122,31 +99,6 @@ TIP: Refer to the xref:docs::facebook.adoc[] guide to create your Facebook appli
 
 ==== Installation
 
-[tabs]
-====
-Cocoapods::
-+
---
-
-. Add this line to your `Podfile` file.
-+
-[source,subs="normal,callouts"]
-----
-pod 'Reach5Facebook', '~> {sdk-ios-facebook-latest-version}' <1>
-----
-<1> `{sdk-ios-facebook-latest-version}` is the latest version of SDK.
-
-. Then run:
-+
-[source]
-----
-pod install
-----
-
---
-Swift Package Manager::
-+
---
 Add the package dependency with XCode using this package URL:
 
 [source]
@@ -159,12 +111,9 @@ Or directly add this to the dependencies in `Package.swift`
 [source,swift,subs="attributes"]
 ----
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios-facebook.git", .upToNextMajor(from: "{page-component-version}"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios-facebook.git", .upToNextMajor(from: "{sdk-ios-facebook-latest-version}"))
 ]
 ----
-
---
-====
 
 ==== Configuration
 
@@ -240,31 +189,6 @@ TIP: Refer to the xref:docs:ROOT:google.adoc[] guide to create your Google appli
 
 ==== Installation
 
-[tabs]
-====
-Cocoapods::
-+
---
-
-. Add this line to your `Podfile` file.
-+
-[source,subs="normal,callouts"]
-----
-pod 'Reach5Google', '~> {sdk-ios-google-latest-version}' <1>
-----
-<1> `{sdk-ios-google-latest-version}` is the latest version of SDK.
-
-. Then run:
-+
-[source]
-----
-pod install
-----
-
---
-Swift Package Manager::
-+
---
 Add the package dependency with XCode using this package URL:
 
 [source]
@@ -274,15 +198,12 @@ https://github.com/ReachFive/reachfive-ios-google.git
 
 Or directly add this to the dependencies in `Package.swift`
 
-[source,swift]
+[source,swift,subs="attributes"]
 ----
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios-google.git", .upToNextMajor(from: "7.0.0"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios-google.git", .upToNextMajor(from: "{sdk-ios-google-latest-version}"))
 ]
 ----
-
---
-====
 
 ==== Configuration
 
@@ -325,7 +246,7 @@ See <<Info.plist reference>> for a comprehensive look at the file.
 [#wechat-connect]
 === WeChat Connect
 
-As of {localdate}, WeChat is not yet available for our iOS SDK version {page-component-version}.
+As of {localdate}, WeChat is not yet available for our iOS SDK version {sdk-ios-latest-version}.
 We will update this page accordingly when it is available.
 
 This module uses the WeChat native SDK to be able to interact with the WeChat app.

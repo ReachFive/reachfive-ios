@@ -49,7 +49,7 @@ let reachfive = ReachFive(
     providersCreators: [GoogleProvider(), FacebookProvider(), WeChatProvider()] <2>
 )
 ----
-<1> Sets the required parameters such as `domain`, {company} `clientId`, and the `scheme`.
+<1> Sets the required parameters such as `domain`, {company} `clientId`, and the `customScheme`.
 <2> Lists the social providers you need for your iOS application.
 For more details, see xref:providerCreator.adoc[].
 
@@ -92,8 +92,8 @@ When an external app (e.g. a bank) reopens your app via the universal link, iOS 
 See xref:application/applicationContinueUserActivity.adoc[] for details.
 
 |webcredentials:$\{host\}
-|*In-band* completion on *iOS 17.4+*. 
-Lets `ASWebAuthenticationSession` intercept the redirect to the universal link directly inside its web view, without leaving the app. 
+|*In-band* completion on *iOS 17.4+*.
+Lets `ASWebAuthenticationSession` intercept the redirect to the universal link directly inside its web view, without leaving the app.
 If this entry (or the association file) is missing, the session fails to start.
 
 |===
@@ -136,6 +136,37 @@ The sample below includes both sections for a host used in both modes; for `.ext
 If you restrict `components` to a path, make sure it lets through both the success callback (`?code=...`) *and* the OAuth error callback (`?error=...`, e.g. when the user denies consent), so that the SDK can end the login cleanly with the error instead of leaving the authentication sheet open.
 ====
 
+=== Customise the WebAuthn origin
+
+Passkey requests carry an origin, which defaults to `\https://$\{domain\}`.
+Set `originWebAuthn` when your passkeys are bound to another domain, such as a custom domain or one shared by several of your apps.
+Pass a full URL such as `\https://auth.example.com`, not a bare host.
+
+CAUTION: A value with no scheme, such as `auth.example.com`, is not a valid origin.
+`SdkConfig` stops the app at initialisation instead of falling back to your domain.
+
+You never set the Relying Party ID yourself.
+{company} derives it from the origin's host (`auth.example.com`) and returns it with each passkey request.
+Declare that same host in your Associated Domains and `apple-app-site-association` file, as described in xref:guides/passkeys.adoc[].
+
+Set the origin once in the `SdkConfig` rather than on every passkey request.
+A request that carries its own `originWebAuthn` still takes precedence over this value.
+
+IMPORTANT: The origin you send must be allowed in the {cc} under menu:Settings[WebAuthn], or the server rejects the passkey request.
+See xref:guides/passkeys.adoc#allowed-origins[Allowed origins].
+
+[source,swift,subs="verbatim,callouts"]
+----
+let reachFive = ReachFive(
+    sdkConfig: SdkConfig(
+        domain: DOMAIN,
+        clientId: CLIENT_ID,
+        originWebAuthn: URL(string: "https://auth.example.com")! <1>
+    )
+)
+----
+<1> Only the scheme, the host and a non-default port are sent: a path or a trailing slash is ignored.
+
 === Customise storage
 
 Storage is used by the iOS SDK to store the PKCE code during passwordless and MFA flows.
@@ -146,7 +177,7 @@ For an example of a custom implementation, see link:https://github.com/ReachFive
 
 [source,swift,subs="verbatim,callouts"]
 ----
-let ReachFive = ReachFive(
+let reachFive = ReachFive(
     sdkConfig: SdkConfig(
         domain: DOMAIN,
         clientId: CLIENT_ID
