@@ -8,8 +8,15 @@ version: 2.1
 check_sdk_version: &check_sdk_version
   name: Check SdkVersion.swift is in sync with version.rb
   command: |
+    FILE=Sources/Core/Classes/SdkVersion.swift
     EXPECTED=$(ruby -r ./version.rb -e 'puts $VERSION')
-    ACTUAL=$(grep -oE '"[^"]+"' Sources/Core/Classes/SdkVersion.swift | tr -d '"')
+    if [ ! -f "$FILE" ]; then
+      echo "$FILE is missing. Run ./set_version.sh and commit the result."
+      exit 1
+    fi
+    # sed rather than grep: it matches the declaration itself instead of any quoted string,
+    # and it exits 0 on no match, so the comparison below reports the problem itself.
+    ACTUAL=$(sed -n 's/^ *static let current = "\(.*\)"$/\1/p' "$FILE")
     if [ "$EXPECTED" != "$ACTUAL" ]; then
       echo "SdkVersion.swift ($ACTUAL) is out of sync with version.rb ($EXPECTED). Run ./set_version.sh and commit the result."
       exit 1
