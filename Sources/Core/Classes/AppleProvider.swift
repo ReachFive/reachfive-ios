@@ -51,7 +51,8 @@ class ConfiguredAppleProvider: NSObject, Provider {
         let scope: [String] = scope ?? clientConfigResponse.scope.components(separatedBy: " ")
         let request = ResolvedNativeLoginRequest(presenting: presenting, originWebAuthn: reachfive.sdkConfig.originWebAuthn, scopes: scope, origin: origin)
 
-        let flow = try await reachfive.credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self, reachFive: reachfive)
+        // No captcha: only Sign In With Apple is requested here, and that branch never calls `password_login`.
+        let flow = try await reachfive.credentialManager.login(withRequest: request, usingModalAuthorizationFor: [.SignInWithApple], display: .Always, appleProvider: self, captcha: nil, reachFive: reachfive)
 
         switch flow {
         case let .AchievedLogin(authToken): return authToken
