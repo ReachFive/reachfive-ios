@@ -7,10 +7,16 @@ class SettingsViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
     private enum Section: Int, CaseIterable {
+        case environment
+        case versions
         case scopes
         case startupActions
         case cookies
     }
+
+    private let environments = SandboxEnvironment.allCases
+    private var selectedEnvironment = SandboxEnvironment.selected
+    private let versions = SandboxVersions.all
 
     private var availableScopes: [String] = []
     static var selectedScopes: [String] = [] // TODO: utiliser partout ces scopes là
@@ -38,6 +44,8 @@ class SettingsViewController: UIViewController {
         loadSettings()
         let cookiesHeaderNib = UINib(nibName: "EditableSectionHeaderView", bundle: nil)
         tableView.register(cookiesHeaderNib, forHeaderFooterViewReuseIdentifier: EditableSectionHeaderView.reuseIdentifier)
+        tableView.register(SubtitleCell.self, forCellReuseIdentifier: "settingsEnvironmentCell")
+        tableView.register(SubtitleCell.self, forCellReuseIdentifier: "settingsVersionCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsScopeCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsStartupCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsCookieCell")
@@ -65,6 +73,7 @@ class SettingsViewController: UIViewController {
         // TODO: sur iOS, ajouter ces actions en tant que "Home screen quick action", sur Mac Catalyst, remplacer cette section par un popup button
         // TODO: sur Mac Catalyst, remplacer cette section par un popup button
         selectedStartupAction = defaults.string(forKey: "selectedStartupAction")
+        selectedEnvironment = SandboxEnvironment.selected
     }
 
     private func saveSettings() {
@@ -116,6 +125,10 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let section = Section(rawValue: section) else { return 0 }
         switch section {
+        case .environment:
+            return environments.count
+        case .versions:
+            return versions.count
         case .scopes:
             return availableScopes.count
         case .startupActions:
@@ -128,6 +141,10 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         guard let section = Section(rawValue: section) else { return nil }
         switch section {
+        case .environment:
+            return "Environment"
+        case .versions:
+            return "Versions"
         case .scopes:
             return "Scopes"
         case .startupActions:
@@ -139,6 +156,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = switch indexPath.section {
+        case Section.environment.rawValue: "settingsEnvironmentCell"
+        case Section.versions.rawValue: "settingsVersionCell"
         case Section.scopes.rawValue: "settingsScopeCell"
         case Section.startupActions.rawValue: "settingsStartupCell"
         case Section.cookies.rawValue: "settingsCookieCell"
@@ -149,6 +168,16 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         guard let section = Section(rawValue: indexPath.section) else { return cell }
 
         switch section {
+        case .environment:
+            let environment = environments[indexPath.row]
+            cell.textLabel?.text = environment.label
+            cell.detailTextLabel?.text = environment.domain
+            cell.accessoryType = selectedEnvironment == environment ? .checkmark : .none
+        case .versions:
+            let component = versions[indexPath.row]
+            cell.selectionStyle = .none
+            cell.textLabel?.text = component.name
+            cell.detailTextLabel?.text = component.detail
         case .scopes:
             cell.selectionStyle = .none
             let scope = availableScopes[indexPath.row]
@@ -176,7 +205,18 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         guard let section = Section(rawValue: indexPath.section) else { return }
 
         switch section {
-        case .scopes:
+        case .environment:
+            let environment = environments[indexPath.row]
+            guard environment != selectedEnvironment else { return }
+            selectedEnvironment = environment
+            Task { @MainActor in
+                await (UIApplication.shared.delegate as! AppDelegate).switchEnvironment(to: environment)
+                self.environmentDomain.text = AppDelegate.reachfive().sdkConfig.domain
+                self.loadCookies()
+                self.loadScopes()
+                tableView.reloadSections(IndexSet(integer: Section.environment.rawValue), with: .none)
+            }
+        case .versions, .scopes:
             break
         case .startupActions:
             let action = startupActions[indexPath.row]
@@ -231,5 +271,18 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         Section(rawValue: indexPath.section) == .cookies
+    }
+}
+
+/// A plain cell registered by class comes back in the `.default` style, which has no detail label — and the
+/// environment rows are unreadable without the domain, the version rows without what they report.
+private final class SubtitleCell: UITableViewCell {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
