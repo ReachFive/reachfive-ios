@@ -16,21 +16,27 @@ GoogleProvider(variant: "native") <1>
 |[[FacebookProvider,FacebookProvider]]FacebookProvider
 |The object for configuring xref:index.adoc#facebook-native-provider[Facebook native provider] for our {page-component-title}.
 
-This provider takes two optional parameters:
+This provider takes three optional parameters:
 
 * variant `string`: the provider variant to use.
 * prefersLoginTracking `FBSDKLoginKit.LoginTracking`: Indicates preference to the Facebook SDK for the limited or classic login.
 Facebook SDK is ultimately responsible for the decision.
+* appSwitch `FBSDKLoginKit.AppSwitch`: whether the login may open the native Facebook app instead of a Safari view controller.
+Defaults to `.enabled`; pass `.disabled` to always use the browser flow.
+It only takes effect when your `Info.plist` declares the `fbauth2` scheme and Meta has enabled Fast App Switch for your Facebook application.
+See xref:index.adoc#fast-app-switch[Fast App Switch].
 
 [source,swift]
 ----
 FacebookProvider(
     variant: "ios", <1>
-    prefersLoginTracking: .limited <2>
+    prefersLoginTracking: .enabled, <2>
+    appSwitch: .enabled <3>
 )
 ----
 <1> Available from `Reach5Facebook` 7.1.0.
 <2> Available from `Reach5Facebook` 7.2.0.
+<3> Available from `Reach5Facebook` 9.0.0.
 
 // end::FacebookProvider[]
 
