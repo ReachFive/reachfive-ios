@@ -14,6 +14,7 @@ class SettingsViewController: UIViewController {
     }
 
     private enum CaptchaRow: Int, CaseIterable {
+        case serverConfig
         case status
         case consumesOnUse
         case obtainCaptchaFoxToken
@@ -127,6 +128,25 @@ class SettingsViewController: UIViewController {
 
         guard let row = CaptchaRow(rawValue: indexPath.row) else { return }
         switch row {
+        case .serverConfig:
+            // What the server expects, against which the token in the store can be read: a mismatched
+            // action or provider is otherwise invisible until the call comes back as a plain refusal.
+            cell.selectionStyle = .none
+            let configs = AppDelegate.reachfive().captchaConfigs
+            if configs.isEmpty {
+                cell.textLabel?.text = "Serveur : aucun captcha déclaré"
+                cell.textLabel?.textColor = .secondaryLabel
+            } else {
+                cell.textLabel?.text = configs.map { config in
+                    let actions = config.actions ?? []
+                    let version = config.version.map { " \($0)" } ?? ""
+                    return """
+                    Serveur : \(config.provider.rawValue)\(version)
+                    endpoints : \(config.endpoints.joined(separator: ", "))
+                    actions : \(actions.isEmpty ? "toutes" : actions.joined(separator: ", "))
+                    """
+                }.joined(separator: "\n")
+            }
         case .status:
             cell.selectionStyle = .none
             if let entry = CaptchaStore.peek() {
@@ -158,7 +178,7 @@ class SettingsViewController: UIViewController {
     private func didSelectCaptchaRow(at indexPath: IndexPath) {
         guard let row = CaptchaRow(rawValue: indexPath.row) else { return }
         switch row {
-        case .status, .consumesOnUse:
+        case .serverConfig, .status, .consumesOnUse:
             break
         case .obtainCaptchaFoxToken:
             navigationController?.pushViewController(CaptchaFoxController(), animated: true)

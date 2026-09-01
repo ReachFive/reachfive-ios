@@ -33,6 +33,12 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
     /// public by design — but kept per-provider so trying both does not overwrite either.
     var siteKeyDefaultsKey: String { fatalError("override siteKeyDefaultsKey") }
 
+    /// The configuration the server declares for this provider, when it declares one. Absent until the
+    /// config endpoint carries a captcha section, and absent for a client with no captcha.
+    var serverConfig: CaptchaConfig? {
+        AppDelegate.reachfive().captchaConfigs.first { $0.provider.rawValue == providerRawValue }
+    }
+
     /// The `captcha_provider` value this page writes to `CaptchaStore`.
     var providerRawValue: String { fatalError("override providerRawValue") }
 
@@ -65,7 +71,9 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
         setupWebView()
         setupActionSegments()
 
-        captchaView.siteKeyField.text = UserDefaults.standard.string(forKey: siteKeyDefaultsKey)
+        // A key typed here wins over the server's: this page has to be able to try a wrong one.
+        let savedSiteKey = UserDefaults.standard.string(forKey: siteKeyDefaultsKey)
+        captchaView.siteKeyField.text = savedSiteKey?.isEmpty == false ? savedSiteKey : serverConfig?.siteKey
         captchaView.obtainButton.addTarget(self, action: #selector(obtainTapped), for: .touchUpInside)
         captchaView.copyButton.addTarget(self, action: #selector(copyTapped), for: .touchUpInside)
         captchaView.webViewContainer.isHidden = true
@@ -90,16 +98,27 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
     }
 
     private func setupActionSegments() {
+        // The actions the server accepts, when it says; otherwise the names the SDK web UI uses. An
+        // empty list server-side means it validates none, so the built-in list stays the useful offer.
+        let declared = serverConfig?.actions ?? []
+        let actions = declared.isEmpty ? Self.actions : declared
+
         captchaView.actionSegmentedControl.removeAllSegments()
-        for (index, action) in Self.actions.enumerated() {
+        for (index, action) in actions.enumerated() {
             captchaView.actionSegmentedControl.insertSegment(withTitle: action, at: index, animated: false)
         }
         captchaView.actionSegmentedControl.selectedSegmentIndex = 0
     }
 
+    /// Read from the control rather than from `Self.actions`: the segments may come from the server's
+    /// own list, which is neither the same order nor the same length.
     var selectedAction: String {
-        let index = captchaView.actionSegmentedControl.selectedSegmentIndex
-        return index >= 0 ? Self.actions[index] : Self.actions[0]
+        let control: UISegmentedControl = captchaView.actionSegmentedControl
+        let index = control.selectedSegmentIndex
+        guard index >= 0, index < control.numberOfSegments, let title = control.titleForSegment(at: index) else {
+            return Self.actions[0]
+        }
+        return title
     }
 
     @objc private func obtainTapped() {
