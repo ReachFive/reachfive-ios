@@ -10,15 +10,28 @@ AppDelegate.reachfive().application(<<application, application>>, continue: <<ap
 
 Allows {company} to handle user activity continuation such as handoffs, and more importantly, universal links.
 
-This method is required by xref:index.adoc#wechat-connect[WeChat] and by providers whose login finishes on a universal link.
+This method is required by xref:index.adoc#wechat-connect[WeChat] and by a xref:guides/custom-provider.adoc[custom provider] whose callback arrives as a universal link (`NSUserActivityTypeBrowsingWeb`).
 
-Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/[`application(_:continue:restorationHandler:)`^]. If your app uses scenes, forward link:https://developer.apple.com/documentation/uikit/uiscenedelegate/[`scene(_:continue:)`^] here as well.
+[NOTE]
+====
+This is *not* how a web login that leaves your app comes back.
+When a provider hands the user off to a third-party app, that app reopens the *default browser*, not your app — so the callback arrives through xref:application/applicationOpenUrl.adoc[`application(_:open:)`] as a custom scheme.
+Forward that method for those providers.
+
+It is also not how xref:providerCreator.adoc[`WebProvider`] `.universalLink` completes: the authentication sheet intercepts that redirect itself.
+====
+
+Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/[`application(_:continue:restorationHandler:)`^].
+If your app uses scenes, forward link:https://developer.apple.com/documentation/uikit/uiscenedelegate/[`scene(_:continue:)`^] here as well.
 
 [IMPORTANT]
 ====
-The method returns a `Bool` that tells you whether {company} actually consumed the activity. Do not assume {company} handles every universal link you forward. When `false` is returned, your app should route the link itself.
+The method returns a `Bool` that tells you whether {company} actually consumed the activity.
+Do not assume {company} handles every universal link you forward.
+When `false` is returned, your app should route the link itself.
 
-Universal-link delivery requires an `applinks:<host>` Associated Domain (see xref:index.adoc#configure-the-ios-sdk[Configure the SDK]).
+Delivering an https URL into the app requires an `applinks:<host>` Associated Domain.
+See xref:guides/apple-app-site-association.adoc#applinks[].
 ====
 
 == Examples

@@ -12,13 +12,26 @@ Allows {company} to handle URLs in the following format:
 
 * `reachfive-clientId://`
 
+This is where a web login that *left your app* comes back.
+Some providers hand the user off to a third-party app mid-login.
+That app does **not** reopen your app: it opens the user's *default browser*, and the browser follows the redirect to `reachfive-clientId://callback` and hands it to this method.
+
+Because the provider only decides mid-flight whether to make that detour, a `.customScheme` login that expects an authorization code prepares both return paths: the sheet intercepts the callback when the flow never leaves it, and this method resolves it when the browser delivers it.
+You do not choose a return path; forward this method so the SDK can complete the detour.
+
+The in-flight web session lives only in memory.
+If iOS terminates your app during the detour — which spans a third-party app *and* the browser — that session is gone and the user must start the login again.
+
 Additionally, the method allows configured providers to handle their own native links.
 
-Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/[`application(_:open:options)`^]. If your app uses scenes, forward link:https://developer.apple.com/documentation/uikit/uiscenedelegate/[`scene(_:openURLContexts:)`^] here as well.
+Call this method in response to the equivalent UIKit method link:https://developer.apple.com/documentation/uikit/uiapplicationdelegate/[`application(_:open:options)`^].
+If your app uses scenes, forward link:https://developer.apple.com/documentation/uikit/uiscenedelegate/[`scene(_:openURLContexts:)`^] here as well.
 
 [IMPORTANT]
 ====
-The method returns a `Bool` that tells you whether {company} actually consumed the URL. Do not assume {company} handles every URL you forward. When `false` is returned, your app should route the link itself.
+The method returns a `Bool` that tells you whether {company} actually consumed the URL.
+Do not assume {company} handles every URL you forward.
+When `false` is returned, your app should route the link itself.
 ====
 
 == Examples

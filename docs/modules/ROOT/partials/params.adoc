@@ -418,8 +418,11 @@ TIP: For more, see link:https://developer.apple.com/documentation/authentication
 |Controls the behavior of the `ASWebAuthenticationSession` callback and its `redirect_uri`. Defaults to `.customScheme`.
 
 .Values
-* `.customScheme` (default): the SDK's custom scheme. Covers a redirect intercepted inside the sheet *and* one delivered to xref:application/applicationOpenUrl.adoc[] for providers that detour through a third-party app.
-* `.universalLink(URL)` (iOS 17.4+): the universal-link redirect is intercepted directly inside the authentication sheet. Requires the `webcredentials:` Associated Domain.
+* `.customScheme` (default): the SDK's custom scheme.
+Covers a redirect intercepted inside the sheet *and* one delivered to xref:application/applicationOpenUrl.adoc[] when a provider detours through a third-party app.
+* `.universalLink(URL)` (iOS 17.4+): the universal-link redirect is intercepted directly inside the authentication sheet.
+Requires the `webcredentials:` Associated Domain.
+See xref:guides/apple-app-site-association.adoc#webcredentials[].
 
 TIP: See the xref:providerCreator.adoc[WebProvider] entry for a ready-made provider using this mechanism.
 // end::webSessionMode[]

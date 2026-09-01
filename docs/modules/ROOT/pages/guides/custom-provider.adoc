@@ -90,5 +90,6 @@ An example of this is resuming a paused native SDK session.
 
 Return `true` only if you actually consumed the activity.
 {company} relies on that return value (see xref:application/applicationContinueUserActivity.adoc[] for details).
+Declare `applinks:<host>` and the matching `applinks` section in `apple-app-site-association` (see xref:guides/apple-app-site-association.adoc#applinks[]).
 
 |===

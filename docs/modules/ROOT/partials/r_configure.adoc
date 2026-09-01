@@ -79,6 +79,11 @@ let reachFive = ReachFive(
 <4> Overrides the full account recovery callback URI.
 <5> Overrides the full email verification callback URI.
 
+=== Associated Domains
+
+Passkeys and xref:providerCreator.adoc[`WebProvider`] `.universalLink` need an Associated Domain and a matching `apple-app-site-association` file.
+See xref:guides/apple-app-site-association.adoc[].
+
 === Customise the WebAuthn origin
 
 Passkey requests carry an origin, which defaults to `\https://$\{domain\}`.
@@ -90,7 +95,7 @@ CAUTION: A value with no scheme, such as `auth.example.com`, is not a valid orig
 
 You never set the Relying Party ID yourself.
 {company} derives it from the origin's host (`auth.example.com`) and returns it with each passkey request.
-Declare that same host in your Associated Domains and `apple-app-site-association` file, as described in xref:guides/passkeys.adoc[].
+Declare that same host in your Associated Domains and `apple-app-site-association` file, as described in xref:guides/apple-app-site-association.adoc[].
 
 Set the origin once in the `SdkConfig` rather than on every passkey request.
 A request that carries its own `originWebAuthn` still takes precedence over this value.
