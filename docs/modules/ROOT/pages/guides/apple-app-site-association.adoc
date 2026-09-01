@@ -7,7 +7,8 @@ You need it for two different {company} features on iOS:
 * xref:providerCreator.adoc#universal-link-web-providers[`WebProvider` `.universalLink`] (and xref:webviewLogin.adoc[`webviewLogin`] with `.universalLink(_:)`), whose OAuth `redirect_uri` is an https URL on that host.
 
 A custom provider or xref:index.adoc#wechat-connect[WeChat] that receives its callback as a universal link *into the app* also needs this file, with an `applinks` section.
-xref:providerCreator.adoc#web-providers-that-leave-the-app[A web login that detours through a third-party app] does *not*: that return is a custom scheme, not a universal link.
+
+You also need it so that passwords your users saved for your website can be autofilled in your app.
 
 == Host the file
 
@@ -51,7 +52,7 @@ Declare this entry only when a *provider* must receive that link in the app:
 Do *not* add `applinks:` for xref:providerCreator.adoc[`WebProvider`] `.universalLink`.
 That mode intercepts the redirect inside the authentication sheet; `application(_:continue:)` is not on the path.
 
-Do *not* add `applinks:` for `.customScheme`, including providers that detour through a third-party app.
+Do *not* add `applinks:` for `.customScheme`, including providers that hand the flow off to their own native app.
 
 == File contents
 
@@ -83,5 +84,5 @@ Only needed if you declare `applinks:<host>`.
 
 [NOTE]
 ====
-If you declare `applinks:` and restrict `components` to a path, make sure that path matches both the success callback (`?code=...`) *and* the OAuth error callback (`?error=...`, for example when the user denies consent).
+If you declare `applinks:` and restrict `components` to a path, make sure that path matches both the success callback (`?code=...`) *and* the OAuth error callback (`?error=...`).
 ====

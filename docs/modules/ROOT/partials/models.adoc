@@ -168,8 +168,15 @@ It authenticates the profile with the provider otherwise it returns a `ReachFive
 
 Based on the problem, the `ReachFiveError` will be:
 
-* `AuthCanceled`: Nothing happened, and nothing is expected of you — ignoring it is a valid way to handle it.
-The user cancelled the request, no credential was available in the keychain, a web login was dropped because another one was already in progress (see xref:webviewLogin.adoc[]), or the app is not associated with the host of an `.https` callback (see xref:guides/apple-app-site-association.adoc#webcredentials[]).
+* `AuthCanceled`: Nothing happened, and nothing is expected of you — ignoring it is a valid way to handle it. +
+This can happen for any of the following reasons:
++
+--
+** The user canceled the request.
+** No passkey was saved for your app.
+** A web login was dropped because another one was already in progress. See xref:webviewLogin.adoc[].
+** The app is not associated with the host of an xref:providerCreator.adoc#universal-link-web-providers[`WebProvider` `.universalLink`] callback. See xref:guides/apple-app-site-association.adoc#webcredentials[].
+--
 * `RequestError(apiError: ApiError)` for a Bad Request (status 400) error.
 * `AuthFailure(reason: String, apiError: ApiError?)` mainly for Unauthorized (status 401) error.
 * `TechnicalError(reason: String, apiError: ApiError?)` if it's an Internal Server Error (status 500) or other internal errors.

@@ -419,7 +419,7 @@ TIP: For more, see link:https://developer.apple.com/documentation/authentication
 
 .Values
 * `.customScheme` (default): the SDK's custom scheme.
-Covers a redirect intercepted inside the sheet *and* one delivered to xref:application/applicationOpenUrl.adoc[] when a provider detours through a third-party app.
+Covers a redirect intercepted inside the sheet *and* one delivered to xref:application/applicationOpenUrl.adoc[] when a provider hands the flow off to their own native app.
 * `.universalLink(URL)` (iOS 17.4+): the universal-link redirect is intercepted directly inside the authentication sheet.
 Requires the `webcredentials:` Associated Domain.
 See xref:guides/apple-app-site-association.adoc#webcredentials[].

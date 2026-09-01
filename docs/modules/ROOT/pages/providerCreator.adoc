@@ -31,46 +31,17 @@ include::partial$config/params.adoc[tags="GoogleProvider,FacebookProvider,AppleP
 
 |===
 
-[#web-providers-that-leave-the-app]
-== Use a WebProvider
-
-Some web providers hand the user off to a third-party app mid-login.
-This needs no special mode.
-
-The third-party app opens the user's default browser, not your app.
-The browser then redirects to `reachfive-clientId://callback`, delivered to xref:application/applicationOpenUrl.adoc[`application(_:open:)`].
-The default `.customScheme` already covers a login that stays in the sheet *and* one that takes that detour.
-The provider only decides which, after the sheet is open.
-
-[%interactive]
-* [ ] Configure the provider and variant on your {cc}.
-* [ ] Register a <<WebProvider,`WebProvider`>> with `mode: .customScheme` (or omit `mode`) in `ReachFive(providersCreators:)`.
-* [ ] Initialize the SDK so `getProvider` can resolve your provider (see xref:application/applicationDidFinishLaunchingWithOptions.adoc[]).
-* [ ] Whitelist `reachfive-$\{clientId\}://callback` in *Allowed Callback URLs* (see xref:docs:ROOT:clients.adoc[Clients]).
-* [ ] Forward `application(_:open:options:)` to {company} (see xref:application/applicationOpenUrl.adoc[]).
-* [ ] Call xref:getProvider.adoc[`getProvider(name:).login(...)`] with a `Presentation` built from a `UIViewController` attached to a window.
-
-No Associated Domain is required.
-Do not use xref:loadLoginWebview.adoc[`loadLoginWebview`].
-
-The in-flight web session lives only in memory.
-If iOS terminates your app during the detour, the user must start the login again.
-
 [#universal-link-web-providers]
-=== `.universalLink` instead (iOS 17.4+)
+== Use a WebProvider with `.universalLink` (iOS 17.4+)
 
 Use this only when the OAuth `redirect_uri` must be the provider's `https` `universalLink`, intercepted inside the authentication sheet.
 This mode cannot complete a login that leaves the app for a third-party app.
 There is no fallback below iOS 17.4: `login()` fails with a `TechnicalError` if the OS is too old or the provider has no `universalLink` in its backend configuration.
 
-Follow the checklist above, with these changes:
 
 * Register `WebProvider` with `mode: .universalLink`.
 +
 The URL comes from the provider's backend configuration; you do not pass it in.
-* Also whitelist that `universalLink` URL in *Allowed Callback URLs*.
 * Add `webcredentials:$\{host\}` and the matching AASA section (see xref:guides/apple-app-site-association.adoc#webcredentials[]).
-
-No `application(_:continue:)` wiring is required.
 
 TIP: None of these fit your case? See xref:guides/custom-provider.adoc[] to implement your own.

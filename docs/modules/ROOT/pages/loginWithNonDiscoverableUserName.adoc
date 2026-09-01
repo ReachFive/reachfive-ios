@@ -13,8 +13,8 @@ AppDelegate.reachfive().login(
 
 == Description
 
-Logs the user in using credentials stored in the keychain.
-The system only displays the credential associated with the given username in a link:https://developer.apple.com/design/human-interface-guidelines/sheets[modal sheet^].
+Logs the user in using a saved passkey.
+The system only displays the passkey associated with the given username in a link:https://developer.apple.com/design/human-interface-guidelines/sheets[modal sheet^].
 
 NOTE: In this case, the user needs to manually enter the username in the username field.
 

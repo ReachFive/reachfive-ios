@@ -12,7 +12,7 @@ AppDelegate.reachfive().login(
 
 == Description
 
-Logs the user in using credentials stored in the keychain.
+Logs the user in using credentials saved for your app.
 The system displays all available credentials in a link:https://developer.apple.com/design/human-interface-guidelines/sheets[modal sheet^].
 Credentials can be any combination of passwords, passkeys, or Sign in with Apple.
 
@@ -20,10 +20,10 @@ In the case where step-up authentication is required, `{docname}` returns <<Resp
 
 == Usage
 
-Start this request in response to a user interaction. 
+Start this request in response to a user interaction.
 Setting the parameter <<Parameters, `display`>> to `.Always` works best.
 
-Alternatively, start the request automatically early in a view lifecycle (e.g., in ``viewDidAppear``) or during the application launch. 
+Alternatively, start the request automatically early in a view lifecycle (e.g., in ``viewDidAppear``) or during the application launch.
 Prefer setting <<Parameters, `display`>> to `.IfImmediatelyAvailableCredentials` for this use case.
 
 == Examples
@@ -50,7 +50,7 @@ include::partial$params.adoc[tag="display"]
 * *Type*: LoginFlow.<<AchievedLogin>> | <<OngoingStepUp>>
 * *Error*: <<ReachFiveError>>
 
-If the credentials are valid, the promise returns the profile's authentication token or continues the step-up process depending on the flow. 
+If the credentials are valid, the promise returns the profile's authentication token or continues the step-up process depending on the flow.
 Otherwise it is rejected and returns a `ReachFiveError`.
 
 include::partial$models.adoc[tag=AchievedLogin]

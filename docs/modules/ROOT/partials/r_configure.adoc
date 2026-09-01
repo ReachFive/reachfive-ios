@@ -17,7 +17,7 @@ All *must be* whitelisted in Allowed Callback URLs on your {cc}.
 
 Other uses:
 
-* Switching from web context to app context in `webviewLogin`.
+* Switching from web context to app context in `webviewLogin` or some providers.
 * OAuth flow
 
 |reachfive-$\{clientId\}://mfa
@@ -81,7 +81,8 @@ let reachFive = ReachFive(
 
 === Associated Domains
 
-Passkeys and xref:providerCreator.adoc[`WebProvider`] `.universalLink` need an Associated Domain and a matching `apple-app-site-association` file.
+Passkeys and xref:providerCreator.adoc[`WebProvider`] `.universalLink` need an Associated Domain and a matching `apple-app-site-association` file. +
+Associated domains also link your app to your website, so that credential managers can autofill passwords your users already saved for that website. +
 See xref:guides/apple-app-site-association.adoc[].
 
 === Customise the WebAuthn origin

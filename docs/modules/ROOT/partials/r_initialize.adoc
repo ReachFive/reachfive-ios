@@ -101,9 +101,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 <2> Initializes the iOS SDK by fetching information from the server about the client.
 For more details, see xref:application/applicationDidFinishLaunchingWithOptions.adoc[].
 <3> Forwards universal links to {company}.
-Required by WeChat and by custom providers whose callback is a universal link; not by `WebProvider` `.universalLink` or by a login that detours through a third-party app.
+Required by WeChat and by custom providers whose callback is a universal link; not by `WebProvider` `.universalLink`.
 For more details, see xref:application/applicationContinueUserActivity.adoc[].
-<4> Forwards custom-scheme callbacks used by passwordless, MFA, account recovery, and web logins that return through the default browser.
+<4> Forwards custom-scheme callbacks used by passwordless, MFA, account recovery, and provider native apps.
 For more details, see xref:application/applicationOpenUrl.adoc[].
 <5> This method is used to provide functionality to the providers.
 For more details, see xref:application/applicationDidBecomeActive.adoc[].

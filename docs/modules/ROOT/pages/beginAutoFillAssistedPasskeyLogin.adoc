@@ -8,7 +8,7 @@ AppDelegate.reachfive().{docname}(<<withRequest>>)
 
 == Description
 
-Logs the user in using credentials stored in the keychain.
+Logs the user in using a saved passkey.
 The passkey is shown in the QuickType bar when selecting a field with the Username content type.
 
 == Usage

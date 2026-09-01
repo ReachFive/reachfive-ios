@@ -73,8 +73,7 @@ WeChat() <1>
 Takes a `name`, an optional `variant`, and a `mode` controlling how the session's redirection reaches the app:
 
 * `.customScheme` (default): the SDK's custom scheme.
-Covers a redirect intercepted inside the sheet *and* one delivered to xref:application/applicationOpenUrl.adoc[] when a provider detours through a third-party app.
-See xref:providerCreator.adoc#web-providers-that-leave-the-app[Use a WebProvider].
+Covers a redirect intercepted inside the sheet *and* one delivered to xref:application/applicationOpenUrl.adoc[] when a provider hands the flow off to their own native app.
 * `.universalLink` (iOS 17.4+): the universal-link redirect is intercepted directly inside the authentication sheet.
 Requires the `webcredentials:` Associated Domain and a `universalLink` on the provider's backend configuration.
 See xref:guides/apple-app-site-association.adoc#webcredentials[].
