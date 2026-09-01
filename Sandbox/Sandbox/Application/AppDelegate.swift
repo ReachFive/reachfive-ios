@@ -34,6 +34,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     static let storage = SecureStorage()
 
+    /// Lets `RedirectUriMismatchController`'s magic-link scenario see a callback URL the SDK itself declined
+    /// to route (`ReachFive.application(_:open:)`/`(_:continue:)` return `false`). Consulted only then, and
+    /// only while that scenario is waiting — never a general fallback, since `interceptUrl` would swallow
+    /// any unrecognized URL as a passwordless callback and could steal another flow's PKCE.
+    static var pendingDemoUrlHandler: ((URL) -> Bool)?
+
     /// La reco pour la redirectURI de [https://datatracker.ietf.org/doc/html/rfc8252#section-7.1](RFC 8252) est:
     /// - apps MUST use a URI scheme based on a domain name under their control, expressed in reverse order, as recommended by Section 3.8 of [RFC7595] for private-use URI schemes
     /// - Following the requirements of Section 3.2 of [RFC3986], as there is no naming authority for private-use URI scheme redirects, only a single slash ("/") appears after the scheme component.
@@ -142,11 +148,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        reachfive.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        if reachfive.application(application, continue: userActivity, restorationHandler: restorationHandler) {
+            return true
+        }
+        if let url = userActivity.webpageURL, let handler = Self.pendingDemoUrlHandler {
+            return handler(url)
+        }
+        return false
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        reachfive.application(app, open: url, options: options)
+        if reachfive.application(app, open: url, options: options) {
+            return true
+        }
+        if let handler = Self.pendingDemoUrlHandler {
+            return handler(url)
+        }
+        return false
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

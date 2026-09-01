@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1EC4821C8525C7504E83C7C2 /* Reach5Facebook in Frameworks */ = {isa = PBXBuildFile; productRef = 461F45794127FA82F5D977CD /* Reach5Facebook */; };
 		21C31F2F41D355036C304D7A /* Reach5 in Frameworks */ = {isa = PBXBuildFile; productRef = 3181DA566F37A71436C0220A /* Reach5 */; };
+		BFF5D8D27CA99407039FADA5 /* RedirectUriMismatchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349842096A2E73614AB5C7C1 /* RedirectUriMismatchController.swift */; };
 		2A0757F9296F49B10072869F /* PasskeyAutoFillController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0757F8296F49B10072869F /* PasskeyAutoFillController.swift */; };
 		2A0757FB296F69E30072869F /* PasskeyNonDiscoverableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0757FA296F69E30072869F /* PasskeyNonDiscoverableController.swift */; };
 		2A1079E929721DAC00431655 /* NativePasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1079E829721DAC00431655 /* NativePasswordController.swift */; };
@@ -59,6 +60,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		349842096A2E73614AB5C7C1 /* RedirectUriMismatchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedirectUriMismatchController.swift; sourceTree = "<group>"; };
 		2A0757F8296F49B10072869F /* PasskeyAutoFillController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyAutoFillController.swift; sourceTree = "<group>"; };
 		2A0757FA296F69E30072869F /* PasskeyNonDiscoverableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyNonDiscoverableController.swift; sourceTree = "<group>"; };
 		2A1079E829721DAC00431655 /* NativePasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePasswordController.swift; sourceTree = "<group>"; };
@@ -200,11 +202,20 @@
 				2AE326C82E3A4399007D6763 /* Password */,
 				2AE326C92E3A440C007D6763 /* Passwordless */,
 				2A65D1202E4252BB004B0004 /* Profile subviews */,
+				701BDE2E99711D87566625A9 /* RedirectUri */,
 				2AE326C52E3A4034007D6763 /* Recovery */,
 				2AE326CB2E3A447F007D6763 /* Social */,
 				2AE326CA2E3A4444007D6763 /* Web */,
 			);
 			path = Controllers;
+			sourceTree = "<group>";
+		};
+		701BDE2E99711D87566625A9 /* RedirectUri */ = {
+			isa = PBXGroup;
+			children = (
+				349842096A2E73614AB5C7C1 /* RedirectUriMismatchController.swift */,
+			);
+			path = RedirectUri;
 			sourceTree = "<group>";
 		};
 		2AE326C52E3A4034007D6763 /* Recovery */ = {
@@ -405,6 +416,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFF5D8D27CA99407039FADA5 /* RedirectUriMismatchController.swift in Sources */,
 				34797ABD22A9607D00ED093C /* SignupController.swift in Sources */,
 				2AD29AB32E2E931500B26535 /* EditableSectionHeaderView.swift in Sources */,
 				3417FF7022FB11CD0009EC84 /* LoginWithPasswordController.swift in Sources */,
