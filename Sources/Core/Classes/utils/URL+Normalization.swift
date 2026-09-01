@@ -57,14 +57,15 @@ extension URL {
         return normalizedHost != nil || normalizedPath.hasPrefix("/")
     }
 
-    /// Whether the scheme is a private one: anything other than `http`/`https`. On a callback that means the
-    /// app's own scheme (RFC 8252 §7.1), and for `URLSession` it means a redirection it has no handler for,
-    /// which is exactly what makes such a redirection interceptable rather than followable.
+    /// Whether the scheme is the app's own — `customScheme` in ``SdkConfig``'s terms — rather than a web
+    /// one, read as "anything other than `http`/`https`". Nothing here knows the app's actual scheme, and it
+    /// does not need to: for `URLSession` the operative distinction is that a non-web scheme is a redirection
+    /// it has no handler for, and must therefore refuse rather than follow.
     ///
     /// The whole scheme is compared, never its first four letters: `customScheme` is free-form, so a valid
-    /// one may well start with `http` (`httpsapp`) and be private all the same. `false` for a URL carrying no
-    /// scheme, which is no callback either.
-    var hasPrivateScheme: Bool {
+    /// one may well start with `http` (`httpsapp`) and be the app's own all the same. `false` for a URL
+    /// carrying no scheme, which is no callback either.
+    var hasCustomScheme: Bool {
         guard let normalizedScheme else { return false }
         return !Self.webSchemes.contains(normalizedScheme)
     }
@@ -93,7 +94,7 @@ extension URL {
     /// rule — for example, `ws`/`wss` would require an authority too (RFC 6455 §3). Either list can grow without the other.
     private static let schemesRequiringAHost: Set<String> = ["http", "https"]
 
-    /// The schemes `URLSession` loads over the web, as opposed to an app's private scheme. Its own list
+    /// The schemes `URLSession` loads over the web, as opposed to an app's custom scheme. Its own list
     /// rather than a reuse of the two above: those answer different questions and can grow apart.
     private static let webSchemes: Set<String> = ["http", "https"]
 
