@@ -22,10 +22,6 @@ class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
 class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
     static let messageHandlerName = "captcha"
 
-    /// The action names the SDK web UI uses, so the picker stays aligned with what an account
-    /// actually configures.
-    static let actions = ["login", "signup", "update_email", "passwordless_email", "passwordless_phone", "account_recovery", "password_reset_requested"]
-
     private(set) var captchaView: CaptchaView!
     private(set) var webView: WKWebView!
 
@@ -71,6 +67,11 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
         captchaView.webViewContainer.isHidden = true
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        refreshActionSegmentsIfNeeded()
+    }
+
     private func setupWebView() {
         let configuration = WKWebViewConfiguration()
         configuration.userContentController.add(WeakScriptMessageHandler(target: self), name: Self.messageHandlerName)
@@ -91,15 +92,31 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
 
     private func setupActionSegments() {
         captchaView.actionSegmentedControl.removeAllSegments()
-        for (index, action) in Self.actions.enumerated() {
+        for (index, action) in CaptchaStore.actions.enumerated() {
             captchaView.actionSegmentedControl.insertSegment(withTitle: action, at: index, animated: false)
         }
         captchaView.actionSegmentedControl.selectedSegmentIndex = 0
     }
 
+    /// Rebuilt only when the list actually changed, so coming back to this page does not silently
+    /// reset the action that was picked.
+    private func refreshActionSegmentsIfNeeded() {
+        let control: UISegmentedControl = captchaView.actionSegmentedControl
+        let shown = (0 ..< control.numberOfSegments).compactMap { control.titleForSegment(at: $0) }
+        if shown != CaptchaStore.actions {
+            setupActionSegments()
+        }
+    }
+
+    /// Read from the control rather than from the store: the list can be edited between building the
+    /// segments and reading the choice.
     var selectedAction: String {
-        let index = captchaView.actionSegmentedControl.selectedSegmentIndex
-        return index >= 0 ? Self.actions[index] : Self.actions[0]
+        let control: UISegmentedControl = captchaView.actionSegmentedControl
+        let index = control.selectedSegmentIndex
+        guard index >= 0, index < control.numberOfSegments, let title = control.titleForSegment(at: index) else {
+            return CaptchaStore.actions[0]
+        }
+        return title
     }
 
     @objc private func obtainTapped() {
