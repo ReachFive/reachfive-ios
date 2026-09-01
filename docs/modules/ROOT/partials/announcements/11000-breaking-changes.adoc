@@ -9,7 +9,6 @@ Read the following for an overview of the changes, and follow the linked pages f
 * Redirect URL fields (`redirectUri`, `mfaUri`, `accountRecoveryUri`, `emailVerificationUri`) are now `URL` instead of `String`.
 * The `scheme` alias for `redirectUri` is removed.
 * `baseScheme` is renamed to `customScheme`.
-`baseScheme` is renamed to `customScheme`.
 * The initializer stops the app with a `preconditionFailure` when the scheme, domain, redirect URLs, or `originWebAuthn` fail validation, instead of failing later during a network call.
 
 See xref:index.adoc#configure-the-ios-sdk[].
