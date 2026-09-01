@@ -48,6 +48,14 @@ public class ReachFive: NSObject {
         }
     }
 
+    /// The captcha configurations the server declares for this client, empty until ``initialize()``
+    /// has fetched the client configuration — and empty too when no captcha protects this client.
+    ///
+    /// Read it to obtain a token the server will accept: which provider to mint with, under which site
+    /// key, for which endpoints, and which actions are allowed. The SDK only forwards the resulting
+    /// ``Captcha``; it never reads this itself.
+    public var captchaConfigs: [CaptchaConfig] { clientConfig?.captcha ?? [] }
+
     override public var description: String {
         """
         Config: domain=\(sdkConfig.domain), clientId=\(sdkConfig.clientId)
