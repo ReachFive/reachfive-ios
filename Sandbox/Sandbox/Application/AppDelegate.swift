@@ -116,7 +116,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         Task {
                             await rootViewController.handleLoginFlow {
                                 let loginRequest = NativeLoginRequest(presenting: Presentation(from: rootViewController), scopes: SettingsViewController.selectedScopes, origin: #function)
-                                return try await self.reachfive.login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey, .Password, .SignInWithApple], display: .IfImmediatelyAvailableCredentials)
+                                return try await self.reachfive.login(withRequest: loginRequest, usingModalAuthorizationFor: [.Passkey, .Password, .SignInWithApple], display: .IfImmediatelyAvailableCredentials, captcha: CaptchaStore.take())
                             }
                         }
                     }

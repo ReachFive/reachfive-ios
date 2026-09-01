@@ -61,7 +61,7 @@ class DemoController: UIViewController {
         }
         Task { @MainActor in
             do {
-                let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
+                let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode, captcha: CaptchaStore.take())
                 flowTheLogin(flow)
             } catch {
                 self.usernameField.isHidden = false

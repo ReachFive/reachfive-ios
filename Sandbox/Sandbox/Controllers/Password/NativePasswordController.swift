@@ -42,7 +42,9 @@ class NativePasswordController: UIViewController {
         Task {
             let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "NativePasswordController.viewDidAppear")
             await handleLoginFlow {
-                try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Password], display: .Always)
+                // The token is consumed on the way in, even if the system sheet is dismissed or a
+                // passkey is picked instead: the call is decided before the user chooses a credential.
+                try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Password], display: .Always, captcha: CaptchaStore.take())
             }
         }
     }
