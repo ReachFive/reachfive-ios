@@ -1,0 +1,50 @@
+= Breaking changes for `iOS 11.0.0`
+
+There are several updates with the `iOS 11.0.0` release that are considered breaking.
+Read the following for an overview of the changes, and follow the linked pages for the current API.
+
+[discrete]
+== `SdkConfig`
+
+* Redirect URL fields (`redirectUri`, `mfaUri`, `accountRecoveryUri`, `emailVerificationUri`) are now `URL` instead of `String`.
+* The `scheme` alias for `redirectUri` is removed.
+* `baseScheme` is renamed to `customScheme`.
+* The initializer stops the app with a `preconditionFailure` when the scheme, domain, redirect URLs, or `originWebAuthn` fail validation, instead of failing later during a network call.
+
+See xref:index.adoc#configure-the-ios-sdk[].
+
+[discrete]
+== Passkey `originWebAuthn`
+
+A passkey request's `originWebAuthn` is validated and normalized the same way as the `SdkConfig` value.
+The call can throw `ReachFiveError.TechnicalError` if validation fails.
+
+See xref:index.adoc#customise-the-webauthn-origin[].
+
+[discrete]
+== App-lifecycle callbacks return `false`
+
+xref:application/applicationOpenUrl.adoc[`application(_:open:options:)`] and xref:application/applicationContinueUserActivity.adoc[`application(_:continue:restorationHandler:)`] now return `false` when neither the SDK nor a registered provider consumed the URL or activity.
+Previously they always returned `true`.
+
+NOTE: If your app also routes universal links or custom-scheme URLs, do so only when the call returns `false`.
+
+[discrete]
+== `ProviderCreator` and `Presentation`
+
+The `ProviderCreator` factory receives the `ReachFive` instance instead of sub-components, so it can reuse helpers such as `buildAuthorizeURL`, `authWithCode`, `webviewLogin`, and `login(withProvider:)`.
+
+See xref:guides/custom-provider.adoc[].
+
+`Provider.login` and native passkey requests take a `Presentation` instead of a `UIViewController?` or an `anchor: ASPresentationAnchor`.
+
+See xref:getProvider.adoc[] and xref:loginWithRequest.adoc[] respectively.
+
+[discrete]
+== CocoaPods is dropped
+
+The core SDK and the Facebook and Google providers are only distributed with Swift Package Manager.
+`import Reach5` no longer brings `UIKit` or `Foundation` into scope.
+Add those imports where your files need them.
+
+See xref:index.adoc#installation[].
