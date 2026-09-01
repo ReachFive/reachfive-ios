@@ -43,7 +43,7 @@ See xref:getProvider.adoc[] and xref:loginWithRequest.adoc[] respectively.
 [discrete]
 == CocoaPods is dropped
 
-The core SDK and the Facebook and Google providers are distributed with Swift Package Manager.
+The core SDK and the Facebook and Google providers are only distributed with Swift Package Manager.
 `import Reach5` no longer brings `UIKit` or `Foundation` into scope.
 Add those imports where your files need them.
 
