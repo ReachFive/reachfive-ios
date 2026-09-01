@@ -58,6 +58,7 @@ AppDelegate.reachfive()
         action: "signup"
     ))
 ----
+
 --
 `LoginFlow`::
 +
@@ -79,6 +80,7 @@ AppDelegate.reachfive()
         origin: "ios-app"
     ))
 ----
+
 --
 ====
 
@@ -116,7 +118,7 @@ Object parameters:
 
 * `presenting`: Where the credential provider presents its UI, built with `Presentation(from: self)` from a view controller attached to a window (`viewDidAppear` or a user interaction, not `viewDidLoad`).
 * `originWebAuthn`: The origin of the webauthn call.
-Defaults to the `originWebAuthn` of your `SdkConfig`, or to `https://$\{domain}`.
+Defaults to the `originWebAuthn` of your `SdkConfig`, or to `\https://$\{domain\}`.
 * `scopes`: The scopes granted to the profile.
 * `origin`: The origin of the call.
 This helps categorize inbound traffic.
@@ -130,7 +132,7 @@ Object parameters:
 
 * `presenting`: Where the credential provider presents its UI, built with `Presentation(from: self)` from a view controller attached to a window (`viewDidAppear` or a user interaction, not `viewDidLoad`).
 * `originWebAuthn`: The origin of the webauthn call.
-Defaults to the `originWebAuthn` of your `SdkConfig`, or to `https://$\{domain}`.
+Defaults to the `originWebAuthn` of your `SdkConfig`, or to `\https://$\{domain\}`.
 * `scopes`: The scopes granted to the profile.
 * `origin`: The origin of the call.
 This helps categorize inbound traffic.
@@ -146,7 +148,7 @@ Object parameters:
 * `friendlyName`: The name that is displayed by the system when presenting the passkey for login.
 * `presenting`: Where the credential provider presents its UI, built with `Presentation(from: self)` from a view controller attached to a window (`viewDidAppear` or a user interaction, not `viewDidLoad`).
 * `originWebAuthn`: The origin of the webauthn call.
-Defaults to the `originWebAuthn` of your `SdkConfig`, or to `https://$\{domain}`.
+Defaults to the `originWebAuthn` of your `SdkConfig`, or to `\https://$\{domain\}`.
 * `scopes`: The scopes granted to the profile.
 * `origin`: The origin of the call.
 This helps categorize inbound traffic.
@@ -161,7 +163,7 @@ Object parameters:
 * `presenting`: Where the credential provider presents its UI, built with `Presentation(from: self)` from a view controller attached to a window (`viewDidAppear` or a user interaction, not `viewDidLoad`).
 * `friendlyName`: The name that is displayed by the system when presenting the passkey for login.
 * `originWebAuthn`: The origin of the webauthn call.
-Defaults to the `originWebAuthn` of your `SdkConfig`, or to `https://$\{domain}`.
+Defaults to the `originWebAuthn` of your `SdkConfig`, or to `\https://$\{domain\}`.
 * `origin`: The origin of the call.
 This helps categorize inbound traffic.
 // end::NewPasskeyRequest[]
@@ -176,7 +178,7 @@ Object parameters:
 * `phoneNumber`: The user's phone number.
 * `verificationCode`: The verification code that confirms the user.
 * `originWebAuthn`: The origin of the webauthn call.
-Defaults to the `originWebAuthn` of your `SdkConfig`, or to `https://$\{domain}`.
+Defaults to the `originWebAuthn` of your `SdkConfig`, or to `\https://$\{domain\}`.
 * `origin`: The origin of the call.
 * `friendlyName`: The name that will be displayed by the system when presenting the passkey for login
 * `presenting`: Where the credential provider presents its UI, built with `Presentation(from: self)` from a view controller attached to a window (`viewDidAppear` or a user interaction, not `viewDidLoad`).
