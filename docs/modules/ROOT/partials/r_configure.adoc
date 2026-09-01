@@ -3,7 +3,7 @@
 You must configure the iOS SDK to use it.
 This is where you provide the values for your domain and client ID, and define which native library you want to integrate with for Social Login.
 
-By default, the URL scheme follows this  pattern: `reachfive-$\{clientId\}://callback`.
+By default, the URL scheme follows this pattern: `reachfive-$\{clientId\}://callback`.
 
 There are multiple schemes.
 All *must be* whitelisted in Allowed Callback URLs on your {cc}.
@@ -17,7 +17,7 @@ All *must be* whitelisted in Allowed Callback URLs on your {cc}.
 
 Other uses:
 
-* Switching from web context to app context in `webviewLogin`.
+* Switching from web context to app context in `webviewLogin` or some providers.
 * OAuth flow
 
 |reachfive-$\{clientId\}://mfa
@@ -32,6 +32,8 @@ Available from version `7.0.0`.
 
 |reachfive-$\{clientId\}://email-verification
 |This callback URL is used to return to the app after email verification.
+
+Available from version `8.2.0`.
 
 |===
 
@@ -59,82 +61,29 @@ You can also specify a scheme manually and customise schemes as shown here.
 
 [source,swift,subs="verbatim,callouts"]
 ----
-let ReachFive = ReachFive(
+let reachFive = ReachFive(
     sdkConfig: SdkConfig(
         domain: DOMAIN,
         clientId: CLIENT_ID,
         customScheme: "myOwnScheme", <1>
-        mfaUri: URL(string: "myOwnScheme://myOwnMfaPath")!, <2>
-        accountRecoveryUri: URL(string: "myOwnScheme://myOwnRecoveryPath")!, <3>
-        emailVerificationUri: URL(string: "myOwnScheme://myOwnEmailVerificationPath")! <4>
+        redirectUri: URL(string: "myOwnScheme://myOwnRedirectPath")!, <2>
+        mfaUri: URL(string: "myOwnScheme://myOwnMfaPath")!, <3>
+        accountRecoveryUri: URL(string: "myOwnScheme://myOwnRecoveryPath")!, <4>
+        emailVerificationUri: URL(string: "myOwnScheme://myOwnEmailVerificationPath")! <5>
     )
 )
 ----
 <1> The custom URL scheme. Pass the scheme only (no `://`); it replaces the default `reachfive-${clientId}`. Every callback URI that you don't override explicitly is then derived from it (`myOwnScheme://callback`, `myOwnScheme://mfa`, and so on).
-<2> Overrides the full MFA callback URI.
-<3> Overrides the full account recovery callback URI.
-<4> Overrides the full email verification callback URI.
+<2> Overrides the full default callback URI.
+<3> Overrides the full MFA callback URI.
+<4> Overrides the full account recovery callback URI.
+<5> Overrides the full email verification callback URI.
 
-=== Associated Domains (universal-link providers)
+=== Associated Domains
 
-Some providers (such as B.connect) finish their login on an *https universal link* instead of the custom scheme.
-Which Associated Domains entry you declare depends on your xref:providerCreator.adoc[`WebProvider`] mode—add `applinks:$\{host\}` for `.externalApp`, or `webcredentials:$\{host\}` for `.universalLink` (iOS 17.4+).
-Declare both only if you support both modes on the same host, or also use xref:guides/passkeys.adoc[passkeys] on that host.
-Host a matching `apple-app-site-association` file on `$\{host\}` with the sections that match the entitlements you declared.
-
-[cols="4m,6a"]
-|===
-|Entry |Role
-
-|applinks:$\{host\}
-|*Out-of-band* return (all iOS versions).
-When an external app (e.g. a bank) reopens your app via the universal link, iOS delivers it to `application(_:continue:)`, which you must forward to {company}.
-See xref:application/applicationContinueUserActivity.adoc[] for details.
-
-|webcredentials:$\{host\}
-|*In-band* completion on *iOS 17.4+*.
-Lets `ASWebAuthenticationSession` intercept the redirect to the universal link directly inside its web view, without leaving the app.
-If this entry (or the association file) is missing, the session fails to start.
-
-|===
-
-`$\{host\}` is the host of the `universalLink` returned by {company} for that provider.
-An `apple-app-site-association` file on that host is always required; include the `applinks` and/or `webcredentials` sections that correspond to the Associated Domains entries you declared above.
-
-IMPORTANT: Whitelist the full `universalLink` URL (e.g. `\https://$\{host\}/path/to/callback`) in *Allowed Callback URLs* on your {cc} in addition to the custom-scheme entries above.
-The SDK sends this URL as the OAuth `redirect_uri` for both `/authorize` and the code exchange when using xref:providerCreator.adoc[`WebProvider`] with `.externalApp` or `.universalLink`, or xref:webviewLogin.adoc[`webviewLogin`] with a matching `webSessionMode`.
-Use the exact URL returned in your provider configuration for the chosen variant—the same value that supplies `$\{host\}` and the callback path below.
-See xref:docs:ROOT:clients.adoc[] for how to configure Allowed Callback URLs.
-
-The file must be served at `\https://$\{host\}/.well-known/apple-app-site-association` with a `200` response and a JSON `Content-Type`; a redirect or a non-JSON content type causes verification to fail.
-
-The sample below includes both sections for a host used in both modes; for `.externalApp` only, include `applinks` and omit `webcredentials`.
-
-.apple-app-site-association example
-[source,json]
-----
-{
-  "applinks": {
-    "details": [
-      {
-        "appIDs": ["ABCDE12345.com.example.app"], <1>
-        "components": [
-          {"/": "/_dev/mobile/callback"} <2>
-        ]
-      }
-    ]
-  },
-  "webcredentials": {"apps": ["ABCDE12345.com.example.app"]} <3>
-}
-----
-<1> `<Application Identifier Prefix>.<Bundle Identifier>`.
-<2> Restrict to the callback path of the `universalLink` returned by {company} for this provider. Omit the whole `components` array to match every path on the host.
-<3> Only needed if you also declare `webcredentials:$\{host\}` (`.universalLink` in-band mode), or use xref:guides/passkeys.adoc[passkeys] on the same host.
-
-[NOTE]
-====
-If you restrict `components` to a path, make sure it lets through both the success callback (`?code=...`) *and* the OAuth error callback (`?error=...`, e.g. when the user denies consent), so that the SDK can end the login cleanly with the error instead of leaving the authentication sheet open.
-====
+Passkeys and xref:providerCreator.adoc[`WebProvider`] `.universalLink` need an Associated Domain and a matching `apple-app-site-association` file. +
+Associated domains also link your app to your website, so that credential managers can autofill passwords your users already saved for that website. +
+See xref:guides/apple-app-site-association.adoc[].
 
 === Customise the WebAuthn origin
 
@@ -147,7 +96,7 @@ CAUTION: A value with no scheme, such as `auth.example.com`, is not a valid orig
 
 You never set the Relying Party ID yourself.
 {company} derives it from the origin's host (`auth.example.com`) and returns it with each passkey request.
-Declare that same host in your Associated Domains and `apple-app-site-association` file, as described in xref:guides/passkeys.adoc[].
+Declare that same host in your Associated Domains and `apple-app-site-association` file, as described in xref:guides/apple-app-site-association.adoc[].
 
 Set the origin once in the `SdkConfig` rather than on every passkey request.
 A request that carries its own `originWebAuthn` still takes precedence over this value.

@@ -27,25 +27,14 @@ With non-discoverable login, the user must manually enter his or her username be
 
 == Associated Domain
 
-You need to host an link:https://developer.apple.com/documentation/xcode/supporting-associated-domains[apple-app-site-association^] file on `\https://<your_domain>/.well-known/apple-app-site-association` to allow the application to register and authenticate with credentials associated with the Relying Party ID `<your_domain>`.
+You need to host an `apple-app-site-association` file on `\https://<your_domain>/.well-known/apple-app-site-association` so the app can register and authenticate with credentials associated with the Relying Party ID `<your_domain>`.
+Declare `webcredentials:<your_domain>` in Associated Domains.
+See xref:guides/apple-app-site-association.adoc[] for the file format, hosting rules, and entitlements.
 
-.apple-app-site-association example
-[source,json]
-----
-{
-  "webcredentials": {"apps": ["ABCDE12345.com.example.app"]} <1>
-}
-----
-<1> A value of the following format: `<Application Identifier Prefix>.<Bundle Identifier>`.
-
-// === `assetlinks` response
-
-// The `\https://<RelyingPartyId>/.well-known/assetlinks.json` link must return a `200` HTTP response with a JSON MIME `Content-Type` header.
-// Returning a `301` or `302` HTTP redirect or a non-JSON Content-Type causes verification to fail. See link:https://developer.android.com/training/sign-in/passkeys#add-support-dal[Android's docs^] for more details.
-
+[#hosted-pages]
 === Hosted pages
 
-If you are using's {company}'s xref:docs:ROOT:hosted-pages.adoc[] and need the `apple-app-site-association` file hosted on your domain at {company}, you should input the content of your `apple-app-site-association` file into the text area called *apple-app-site-association* in the menu:Settings[WebAuthn] section of the {cc}.
+If you are using {company}'s xref:docs:ROOT:hosted-pages.adoc[] and need the `apple-app-site-association` file hosted on your domain at {company}, you should input the content of your `apple-app-site-association` file into the text area called *apple-app-site-association* in the menu:Settings[WebAuthn] section of the {cc}.
 
 CAUTION: We do not perform any validation on the file.
 
