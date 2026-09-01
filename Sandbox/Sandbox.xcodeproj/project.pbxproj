@@ -41,6 +41,7 @@
 		2AFF7DE9296F1EB900514B47 /* ActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFF7DE8296F1EB900514B47 /* ActionController.swift */; };
 		3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3414A7CC22DDD39C00CF393A /* ProfileController.swift */; };
 		341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341731FD229D6B6400681CFD /* AppDelegate.swift */; };
+		38E7E8AED43F4F578EB62544 /* NetworkInterception.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B02284F45B44039032A430 /* NetworkInterception.swift */; };
 		34173200229D6B6400681CFD /* LoginWithProvidersController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 341731FF229D6B6400681CFD /* LoginWithProvidersController.swift */; };
 		34173203229D6B6400681CFD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34173201229D6B6400681CFD /* Main.storyboard */; };
 		34173205229D6B6400681CFD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 34173204229D6B6400681CFD /* Assets.xcassets */; };
@@ -94,6 +95,7 @@
 		3414A7CC22DDD39C00CF393A /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
 		341731FA229D6B6400681CFD /* Sandbox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sandbox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		341731FD229D6B6400681CFD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		64B02284F45B44039032A430 /* NetworkInterception.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkInterception.swift; sourceTree = "<group>"; };
 		341731FF229D6B6400681CFD /* LoginWithProvidersController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWithProvidersController.swift; sourceTree = "<group>"; };
 		34173202229D6B6400681CFD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		34173204229D6B6400681CFD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -180,6 +182,7 @@
 				34173209229D6B6400681CFD /* Info.plist */,
 				341731FD229D6B6400681CFD /* AppDelegate.swift */,
 				79D45E7887184705B6AEE28E /* SandboxEnvironment.swift */,
+				64B02284F45B44039032A430 /* NetworkInterception.swift */,
 				34173204229D6B6400681CFD /* Assets.xcassets */,
 				34173206229D6B6400681CFD /* LaunchScreen.storyboard */,
 				34173201229D6B6400681CFD /* Main.storyboard */,
@@ -430,6 +433,7 @@
 				2AB299F12C0E2AB900D0C5C8 /* RecoveryVerificationController.swift in Sources */,
 				341731FE229D6B6400681CFD /* AppDelegate.swift in Sources */,
 				68197FD0A2BD4727891A2668 /* SandboxEnvironment.swift in Sources */,
+				38E7E8AED43F4F578EB62544 /* NetworkInterception.swift in Sources */,
 				2AE326BD2E3931D1007D6763 /* DemoController.swift in Sources */,
 				3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */,
 				3417FF6E22FB06E50009EC84 /* PasswordlessController.swift in Sources */,

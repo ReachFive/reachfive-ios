@@ -11,6 +11,7 @@ class SettingsViewController: UIViewController {
         case versions
         case scopes
         case startupActions
+        case networkInterception
         case cookies
     }
 
@@ -39,6 +40,9 @@ class SettingsViewController: UIViewController {
     ]
     private var selectedStartupAction: String?
 
+    private let interceptionStrategies = NetworkInterceptionStrategy.allCases
+    private var selectedInterception: NetworkInterceptionStrategy = .none
+
     private var cookies: [HTTPCookie] = [] {
         didSet {
             Task { @MainActor in
@@ -60,6 +64,7 @@ class SettingsViewController: UIViewController {
         tableView.register(SubtitleCell.self, forCellReuseIdentifier: "settingsVersionCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsScopeCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsStartupCell")
+        tableView.register(SubtitleCell.self, forCellReuseIdentifier: "settingsInterceptionCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsCookieCell")
 
         let config = AppDelegate.reachfive().sdkConfig
@@ -87,6 +92,7 @@ class SettingsViewController: UIViewController {
         // TODO: sur Mac Catalyst, remplacer cette section par un popup button
         selectedStartupAction = defaults.string(forKey: "selectedStartupAction")
         selectedEnvironment = SandboxEnvironment.selected
+        selectedInterception = NetworkInterception.strategy
     }
 
     private func saveSettings() {
@@ -146,6 +152,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             return availableScopes.count
         case .startupActions:
             return startupActions.count
+        case .networkInterception:
+            return interceptionStrategies.count
         case .cookies:
             return cookies.count
         }
@@ -162,6 +170,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             return "Scopes"
         case .startupActions:
             return "Startup Actions"
+        case .networkInterception:
+            return "Network interception (takes effect at next launch)"
         case .cookies:
             return "" // Title set in viewForHeaderInSection
         }
@@ -173,6 +183,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         case Section.versions.rawValue: "settingsVersionCell"
         case Section.scopes.rawValue: "settingsScopeCell"
         case Section.startupActions.rawValue: "settingsStartupCell"
+        case Section.networkInterception.rawValue: "settingsInterceptionCell"
         case Section.cookies.rawValue: "settingsCookieCell"
         default: "cell"
         }
@@ -215,6 +226,11 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
             let action = startupActions[indexPath.row]
             cell.textLabel?.text = action
             cell.accessoryType = selectedStartupAction == action ? .checkmark : .none
+        case .networkInterception:
+            let strategy = interceptionStrategies[indexPath.row]
+            cell.textLabel?.text = strategy.label
+            cell.detailTextLabel?.text = strategy.summary
+            cell.accessoryType = selectedInterception == strategy ? .checkmark : .none
         case .cookies:
             let cookie = cookies[indexPath.row]
             cell.textLabel?.text = cookie.name
@@ -263,6 +279,10 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
                 selectedStartupAction = action
             }
             saveSettings()
+            tableView.reloadSections(IndexSet(integer: indexPath.section), with: .none)
+        case .networkInterception:
+            selectedInterception = interceptionStrategies[indexPath.row]
+            NetworkInterception.strategy = selectedInterception
             tableView.reloadSections(IndexSet(integer: indexPath.section), with: .none)
         default:
             break
@@ -320,7 +340,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
 }
 
 /// A plain cell registered by class comes back in the `.default` style, which has no detail label — and the
-/// environment rows are unreadable without the domain, the version rows without what they report.
+/// environment rows are unreadable without the domain, the version rows without what they report, and the
+/// interception strategies without the one-line summary of what each does.
 private final class SubtitleCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
