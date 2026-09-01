@@ -20,9 +20,12 @@ final class DataRequestRedirectTests: XCTestCase {
         super.tearDown()
     }
 
-    func testRedirectToPrivateSchemeSucceeds() async throws {
+    /// The nominal outcome: the task ends on the redirection, refused rather than followed, and the callback
+    /// is read from its `Location` header. Whoever refused it — the SDK's own delegate or an interception
+    /// layer answering in its place — leaves the same thing behind, so a single path covers both.
+    func testRedirectionToTheCustomSchemeYieldsTheCallback() async throws {
         StubURLProtocol.stubHandler = { _ in
-            .redirect(to: "reachfive-client://callback?code=abc123")
+            .redirection(to: "reachfive-client://callback?code=abc123")
         }
 
         let url = try await networkClient
@@ -71,7 +74,7 @@ final class DataRequestRedirectTests: XCTestCase {
     }
 
     /// A network interception layer that answers the redirection itself instead of forwarding it to the SDK
-    /// delegate leaves `URLSession` to follow it — and loading a private scheme can only fail with
+    /// delegate may let `URLSession` follow it — and loading the app's custom scheme can only fail with
     /// `unsupportedURL`. The callback, authorization code included, is in the failing URL: the SDK recovers it.
     func testRedirectionFollowedInsteadOfInterceptedRecoversTheCallback() async throws {
         let callback = URL(string: "reachfive-client://callback?code=abc123")!
@@ -123,22 +126,9 @@ final class DataRequestRedirectTests: XCTestCase {
         }
     }
 
-    /// A delegate other than the SDK's refusing the redirection ends the task on the redirect response
-    /// itself. Its `Location` header still carries the callback: the SDK reads it there.
-    func testRedirectionRefusedBeforeTheSdkSeesItRecoversTheCallback() async throws {
-        StubURLProtocol.stubHandler = { _ in
-            .refusedRedirection(to: "reachfive-client://callback?code=abc123")
-        }
-
-        let url = try await networkClient
-            .request(URL(string: "https://example.com/oauth/authorize")!)
-            .redirect()
-
-        XCTAssertEqual(url.absoluteString, "reachfive-client://callback?code=abc123")
-    }
-
-    /// Neither a redirection, nor a response, nor an error is not something an HTTP exchange produces: only
-    /// something answering for `URLSession` can. The SDK says so rather than failing opaquely.
+    /// Neither a response nor an error is not something an HTTP exchange produces: only something answering
+    /// for `URLSession` can. `URLSession.data(for:)` traps on that outcome, which is why the SDK does not use
+    /// it; it names the interception instead.
     func testCompletionWithoutResponseNorErrorNamesTheInterception() async {
         StubURLProtocol.stubHandler = { _ in .finishWithoutResponse() }
 
@@ -166,7 +156,7 @@ final class DataRequestRedirectTests: XCTestCase {
                 .redirect()
             XCTFail("attendu : une erreur")
         } catch let ReachFiveError.TechnicalError(reason, _) {
-            XCTAssertEqual(reason, "Request did not redirect as expected: answered 200 HTTP status instead of a redirection to the private scheme")
+            XCTAssertEqual(reason, "Request did not redirect as expected: answered 200 HTTP status instead of a redirection to the app's custom scheme")
         } catch {
             XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
         }
@@ -216,10 +206,10 @@ final class DataRequestRedirectTests: XCTestCase {
     // MARK: - Interception leading the redirection elsewhere
 
     /// An interception layer rewriting the redirection towards its own block page: the target is not the
-    /// private scheme, so it is no callback. The error says where it actually leads.
+    /// app's custom scheme, so it is no callback. The error says where it actually leads.
     func testRedirectionRewrittenToAnHttpTargetIsNotTakenForACallback() async {
         StubURLProtocol.stubHandler = { _ in
-            .refusedRedirection(to: "https://proxy.example.com/blocked")
+            .redirection(to: "https://proxy.example.com/blocked", statusCode: 303)
         }
 
         do {
@@ -228,7 +218,7 @@ final class DataRequestRedirectTests: XCTestCase {
                 .redirect()
             XCTFail("attendu : une erreur")
         } catch let ReachFiveError.TechnicalError(reason, _) {
-            XCTAssertEqual(reason, "Request did not redirect as expected: answered a 303 redirection to 'https://proxy.example.com/blocked', not to the private scheme the SDK intercepts")
+            XCTAssertEqual(reason, "Request did not redirect as expected: answered a 303 redirection to 'https://proxy.example.com/blocked', not to the app's custom scheme")
         } catch {
             XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
         }
@@ -245,7 +235,7 @@ final class DataRequestRedirectTests: XCTestCase {
                 .redirect()
             XCTFail("attendu : une erreur")
         } catch let ReachFiveError.TechnicalError(reason, _) {
-            XCTAssertEqual(reason, "Request did not redirect as expected: answered a 302 redirection to nowhere — no Location header, not to the private scheme the SDK intercepts")
+            XCTAssertEqual(reason, "Request did not redirect as expected: answered a 302 redirection to nowhere — no Location header, not to the app's custom scheme")
         } catch {
             XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
         }
@@ -313,9 +303,9 @@ final class DataRequestRedirectTests: XCTestCase {
 
     /// RFC 3986 §3.1 makes the scheme case-insensitive, and the default one is derived from the clientId, so
     /// a callback can come back in a case the SDK never wrote.
-    func testRedirectToAPrivateSchemeInAnotherCaseSucceeds() async throws {
+    func testRedirectionToTheCustomSchemeInAnotherCaseSucceeds() async throws {
         StubURLProtocol.stubHandler = { _ in
-            .redirect(to: "REACHFIVE-Client://callback?code=abc123")
+            .redirection(to: "REACHFIVE-Client://callback?code=abc123")
         }
 
         let url = try await networkClient
@@ -324,5 +314,21 @@ final class DataRequestRedirectTests: XCTestCase {
 
         XCTAssertEqual(url.queryValue("code"), "abc123")
     }
-}
 
+    /// The same guard on an ordinary call: every request goes through it, and the trapping `data(for:)` would
+    /// have taken the app down on all of them alike.
+    func testAnOrdinaryCallWithoutResponseNorErrorAlsoNamesTheInterception() async {
+        StubURLProtocol.stubHandler = { _ in .finishWithoutResponse() }
+
+        do {
+            try await networkClient
+                .request(URL(string: "https://example.com/identity/v1/logout")!)
+                .responseJson()
+            XCTFail("attendu : une erreur")
+        } catch let ReachFiveError.TechnicalError(reason, _) {
+            XCTAssertTrue(reason.contains("without a response nor an error"), reason)
+        } catch {
+            XCTFail("attendu : ReachFiveError.TechnicalError, obtenu \(error)")
+        }
+    }
+}

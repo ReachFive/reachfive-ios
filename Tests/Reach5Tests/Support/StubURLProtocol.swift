@@ -1,7 +1,13 @@
 import Foundation
 
-/// A minimal `URLProtocol` stub used to script HTTP responses — including a redirect to a private
-/// scheme — without touching the network, so `NetworkClient`/`DataRequest` can be exercised end to end.
+/// A minimal `URLProtocol` stub used to script the outcomes a task can end on, without touching the network,
+/// so `NetworkClient`/`DataRequest` can be exercised end to end.
+///
+/// It scripts what `URLSession` hands back, never how it gets there: a redirection is delivered as the
+/// response that ends the task, which is what both a refusal by the SDK's own delegate and one by an
+/// interception layer leave behind. `RedirectRefusalTests` is what pins that against a real exchange —
+/// signalling `wasRedirectedTo` from here would not, since the URL loading system keeps no response of its
+/// own in that case.
 final class StubURLProtocol: URLProtocol {
     struct Stub {
         let statusCode: Int
@@ -9,30 +15,25 @@ final class StubURLProtocol: URLProtocol {
         let body: Data
         let networkError: Error?
         let finishWithoutResponse: Bool
-        let performsRedirection: Bool
 
         static func response(statusCode: Int, headers: [String: String] = [:], body: Data = Data()) -> Stub {
-            Stub(statusCode: statusCode, headers: headers, body: body, networkError: nil, finishWithoutResponse: false, performsRedirection: false)
+            Stub(statusCode: statusCode, headers: headers, body: body, networkError: nil, finishWithoutResponse: false)
         }
 
-        static func redirect(to location: String, statusCode: Int = 302) -> Stub {
-            Stub(statusCode: statusCode, headers: ["Location": location], body: Data(), networkError: nil, finishWithoutResponse: false, performsRedirection: true)
-        }
-
-        /// Delivers the redirect response as the task's own, the way `URLSession` ends a task whose redirection
-        /// a delegate refused: the `Location` header is there, but no redirection was ever performed.
-        static func refusedRedirection(to location: String, statusCode: Int = 303) -> Stub {
-            Stub(statusCode: statusCode, headers: ["Location": location], body: Data(), networkError: nil, finishWithoutResponse: false, performsRedirection: false)
+        /// The redirect response as the task's own, the way a refused redirection ends it: the `Location`
+        /// header is there, and no redirection was ever followed.
+        static func redirection(to location: String, statusCode: Int = 302) -> Stub {
+            .response(statusCode: statusCode, headers: ["Location": location])
         }
 
         static func networkFailure(_ error: Error) -> Stub {
-            Stub(statusCode: 0, headers: [:], body: Data(), networkError: error, finishWithoutResponse: false, performsRedirection: false)
+            Stub(statusCode: 0, headers: [:], body: Data(), networkError: error, finishWithoutResponse: false)
         }
 
-        /// Ends the load without ever delivering a response, the way `URLSession` reports a redirection a
-        /// delegate refused to follow: no redirection, no response, no error.
+        /// Ends the load without ever delivering a response — no response, no error — which is what an
+        /// interception layer standing in for `URLSession` can leave behind.
         static func finishWithoutResponse() -> Stub {
-            Stub(statusCode: 0, headers: [:], body: Data(), networkError: nil, finishWithoutResponse: true, performsRedirection: false)
+            Stub(statusCode: 0, headers: [:], body: Data(), networkError: nil, finishWithoutResponse: true)
         }
     }
 
@@ -60,15 +61,6 @@ final class StubURLProtocol: URLProtocol {
 
         if let networkError = stub.networkError {
             client?.urlProtocol(self, didFailWithError: networkError)
-            return
-        }
-
-        if stub.performsRedirection, let location = stub.headers["Location"], let redirectURL = URL(string: location) {
-            let redirectResponse = HTTPURLResponse(url: request.url!, statusCode: stub.statusCode, httpVersion: "HTTP/1.1", headerFields: stub.headers)!
-            var redirectRequest = URLRequest(url: redirectURL)
-            redirectRequest.httpMethod = request.httpMethod
-            client?.urlProtocol(self, wasRedirectedTo: redirectRequest, redirectResponse: redirectResponse)
-            client?.urlProtocolDidFinishLoading(self)
             return
         }
 
