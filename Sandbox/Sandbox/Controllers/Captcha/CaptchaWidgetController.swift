@@ -29,6 +29,10 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
     /// public by design — but kept per-provider so trying both does not overwrite either.
     var siteKeyDefaultsKey: String { fatalError("override siteKeyDefaultsKey") }
 
+    /// Whether this provider seals an action into its token. CaptchaFox does not, so its page hides
+    /// the picker rather than offer a choice that changes nothing.
+    var usesActions: Bool { true }
+
     /// The `captcha_provider` value this page writes to `CaptchaStore`.
     var providerRawValue: String { fatalError("override providerRawValue") }
 
@@ -59,7 +63,10 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
         ])
 
         setupWebView()
-        setupActionSegments()
+        captchaView.actionSegmentedControl.isHidden = !usesActions
+        if usesActions {
+            setupActionSegments()
+        }
 
         captchaView.siteKeyField.text = UserDefaults.standard.string(forKey: siteKeyDefaultsKey)
         captchaView.obtainButton.addTarget(self, action: #selector(obtainTapped), for: .touchUpInside)
@@ -101,6 +108,8 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
     /// Rebuilt only when the list actually changed, so coming back to this page does not silently
     /// reset the action that was picked.
     private func refreshActionSegmentsIfNeeded() {
+        guard usesActions else { return }
+
         let control: UISegmentedControl = captchaView.actionSegmentedControl
         let shown = (0 ..< control.numberOfSegments).compactMap { control.titleForSegment(at: $0) }
         if shown != CaptchaStore.actions {
@@ -159,7 +168,7 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
         CaptchaStore.entry = CaptchaStore.Entry(
             token: token,
             provider: providerRawValue,
-            action: selectedAction,
+            action: usesActions ? selectedAction : nil,
             obtainedAt: Date()
         )
 
