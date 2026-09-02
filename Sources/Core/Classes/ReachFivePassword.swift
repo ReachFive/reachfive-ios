@@ -11,8 +11,6 @@ public enum SignupFlow {
 }
 
 extension ReachFive {
-    /// - Parameter captcha: a token, if the client requires a captcha on `signup_token`, the endpoint
-    ///   this method calls. See ``Captcha``.
     public func signup(profile: ProfileSignupRequest, redirectUrl: URL? = nil, scope: [String]? = nil, origin: String? = nil, captcha: Captcha? = nil) async throws -> SignupFlow {
         let signupRequest = SignupRequest(
             clientId: sdkConfig.clientId,
@@ -29,7 +27,6 @@ extension ReachFive {
         return try .AchievedLogin(authToken: AuthToken.fromOpenIdTokenResponse(AccessTokenResponse(idToken: token.idToken, accessToken: accessToken, refreshToken: token.refreshToken, code: nil, tokenType: token.tokenType, expiresIn: token.expiresIn, error: nil, errorDescription: nil)))
     }
 
-    /// - Parameter captcha: a token, if the client requires a captcha on `password_login`. See ``Captcha``.
     public func loginWithPassword(
         email: String? = nil,
         phoneNumber: String? = nil,

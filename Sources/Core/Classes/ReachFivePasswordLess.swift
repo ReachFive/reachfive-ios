@@ -10,8 +10,6 @@ extension ReachFive {
         self.passwordlessCallback = passwordlessCallback
     }
 
-    /// - Parameter captcha: a token, if the client requires a captcha on `passwordless`. A parameter
-    ///   rather than a case of ``PasswordLessRequest``: it does not depend on the identifier. See ``Captcha``.
     public func startPasswordless(_ request: PasswordLessRequest, captcha: Captcha? = nil) async throws {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)

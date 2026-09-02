@@ -454,9 +454,7 @@ extension CredentialManager {
         return try await reachFive.loginCallback(tkn: authenticationToken.tkn, scopes: scopes, origin: originR5)
     }
 
-    /// Completes a modal sign-in, the only flow that can receive several kinds of credential (password,
-    /// Sign In With Apple, or passkey).
-    ///
+    /// Completes a modal sign-in, the only flow that can receive several kinds of credential (password, Sign In With Apple, or passkey).
     /// Only the password branch uses the captcha: it alone calls `password_login`.
     private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, captcha: Captcha?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
