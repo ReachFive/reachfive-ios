@@ -57,7 +57,12 @@ final class LoopbackHTTPServer {
         Thread.detachNewThread { [respond] in
             while true {
                 let connection = accept(fileDescriptor, nil, nil)
-                guard connection >= 0 else { return } // the listening socket was closed: stop() was called
+                if connection < 0 {
+                    // Only a closed listening socket means stop() was called; a transient interruption must
+                    // not end the loop, or every later request would hang until URLSession's own timeout.
+                    if errno == EINTR || errno == ECONNABORTED { continue }
+                    return
+                }
                 defer { close(connection) }
 
                 var request = ""

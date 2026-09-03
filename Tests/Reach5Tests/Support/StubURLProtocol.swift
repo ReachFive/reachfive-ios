@@ -15,9 +15,10 @@ final class StubURLProtocol: URLProtocol {
         let body: Data
         let networkError: Error?
         let finishWithoutResponse: Bool
+        let neverAnswers: Bool
 
         static func response(statusCode: Int, headers: [String: String] = [:], body: Data = Data()) -> Stub {
-            Stub(statusCode: statusCode, headers: headers, body: body, networkError: nil, finishWithoutResponse: false)
+            Stub(statusCode: statusCode, headers: headers, body: body, networkError: nil, finishWithoutResponse: false, neverAnswers: false)
         }
 
         /// The redirect response as the task's own, the way a refused redirection ends it: the `Location`
@@ -27,13 +28,18 @@ final class StubURLProtocol: URLProtocol {
         }
 
         static func networkFailure(_ error: Error) -> Stub {
-            Stub(statusCode: 0, headers: [:], body: Data(), networkError: error, finishWithoutResponse: false)
+            Stub(statusCode: 0, headers: [:], body: Data(), networkError: error, finishWithoutResponse: false, neverAnswers: false)
         }
 
         /// Ends the load without ever delivering a response — no response, no error — which is what an
         /// interception layer standing in for `URLSession` can leave behind.
+        /// Leaves the load hanging, so only a cancellation can end the task.
+        static func neverAnswers() -> Stub {
+            Stub(statusCode: 0, headers: [:], body: Data(), networkError: nil, finishWithoutResponse: false, neverAnswers: true)
+        }
+
         static func finishWithoutResponse() -> Stub {
-            Stub(statusCode: 0, headers: [:], body: Data(), networkError: nil, finishWithoutResponse: true)
+            Stub(statusCode: 0, headers: [:], body: Data(), networkError: nil, finishWithoutResponse: true, neverAnswers: false)
         }
     }
 
@@ -53,6 +59,8 @@ final class StubURLProtocol: URLProtocol {
             client?.urlProtocol(self, didFailWithError: URLError(.badURL))
             return
         }
+
+        if stub.neverAnswers { return }
 
         if stub.finishWithoutResponse {
             client?.urlProtocolDidFinishLoading(self)
