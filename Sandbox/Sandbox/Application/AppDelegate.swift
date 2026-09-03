@@ -19,8 +19,6 @@ import UIKit
 // TODO:
 // cf. wireframe de JC pour d'autres idées : https://miro.com/app/board/uXjVOMB0pG4=/
 //   - notamment : affichage des jetons quand on est connecté et demande d'introspection
-// Pouvoir sélectionner entre plusieurs confs ReachFive
-// - ensuite en choisir une avec Xcode Custom Environment Variables : https://derrickho328.medium.com/xcode-custom-environment-variables-681b5b8674ec
 // Essayer d'améliorer la navigation pour qu'il n'y ait pas tous ces retours en arrière inutiles quand on navigue les onglets à la main
 // Apparemment sur Mac Catalyst pour que le remplissage automatique des mots de passe fonctionne il faut mettre "l'appid" dans apple-app-site-association. cf. https://developer.apple.com/videos/play/wwdc2019/516?time=289
 // register for revocation notification dans l'app (https://developer.apple.com/videos/play/wwdc2022/10122/?time=738)
@@ -34,43 +32,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     static let storage = SecureStorage()
 
-    /// La reco pour la redirectURI de [https://datatracker.ietf.org/doc/html/rfc8252#section-7.1](RFC 8252) est:
-    /// - apps MUST use a URI scheme based on a domain name under their control, expressed in reverse order, as recommended by Section 3.8 of [RFC7595] for private-use URI schemes
-    /// - Following the requirements of Section 3.2 of [RFC3986], as there is no naming authority for private-use URI scheme redirects, only a single slash ("/") appears after the scheme component.
-    ///
-    /// A complete example of a redirect URI utilizing a private-use URI scheme is:
-    ///
-    ///     com.example.app:/oauth2redirect/example-provider
-    static let sdkLocal = SdkConfig(
-        domain: "local-sandbox.og4.me",
-        clientId: "9DKRdQyDLpaJqQQQAR9K"
-    )
-
-    static let sdkRemote = SdkConfig(
-        domain: "integ-qa-fonctionnelle.reach5.net",
-        clientId: "9DKRdQyDLpaJqQQQAR9K"
-    )
-
     static let providers: [ProviderCreator] = [
         GoogleProvider(variant: "one_tap"),
         FacebookProvider(),
         AppleProvider(variant: "natif"),
         WebProvider(name: .bconnect, variant: "natif", mode: .customScheme),
     ]
+
     static let internalConfig = SdkInternalConfig(loggingEnabled: true)
-    #if targetEnvironment(macCatalyst)
-        static let macLocal: ReachFive = .init(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
-        static let macRemote: ReachFive = .init(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
-        let reachfive = macLocal
-    #else
-        static let local: ReachFive = .init(sdkConfig: sdkLocal, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
-        static let remote: ReachFive = .init(sdkConfig: sdkRemote, providersCreators: providers, storage: storage, sdkInternalConfig: internalConfig)
-        #if targetEnvironment(simulator)
-            let reachfive = local
-        #else
-            let reachfive = remote
-        #endif
-    #endif
+
+    /// Built on first use, and rebuilt by ``switchEnvironment(to:)`` — the environment is a runtime choice
+    /// now, so the instance cannot be a stored constant decided at compile time.
+    private lazy var builtReachFive: ReachFive = makeReachFive()
+
+    var reachfive: ReachFive {
+        builtReachFive
+    }
+
+    /// True while ``switchEnvironment(to:)`` is between rebuilding the instance and its client configuration
+    /// coming back.
+    private var isSwitchingEnvironment = false
 
     @MainActor
     static func reachfive() -> ReachFive {
@@ -78,9 +59,46 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return app.reachfive
     }
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        print("application:didFinishLaunchingWithOptions:\(launchOptions ?? [:])")
+    private func makeReachFive() -> ReachFive {
+        let environment = SandboxEnvironment.selected
+        print("ℹ️ ReachFive built on \(environment.label) (\(environment.domain))")
+        let reachfive = ReachFive(
+            sdkConfig: environment.sdkConfig,
+            providersCreators: Self.providers,
+            storage: Self.storage,
+            sdkInternalConfig: Self.internalConfig
+        )
+        // Registered on the instance, not at launch: a rebuild would silently lose them otherwise, and the
+        // passwordless and MFA screens would wait for a callback that can no longer arrive.
+        registerCallbacks(on: reachfive)
+        return reachfive
+    }
 
+    /// Rebuilds the SDK on another environment, and clears what belonged to the previous one.
+    ///
+    /// The token and the session cookies are the two things that would otherwise cross over: a single
+    /// `SecureStorage` backs every instance, and `HTTPCookieStorage` is shared by the whole app. Anything else
+    /// on screen keeps showing the old environment until its next call, which then fails on a missing token —
+    /// acceptable in a sandbox, and cheaper than driving every controller back to its empty state.
+    ///
+    /// Throws whatever fetching the client configuration failed with: a switch is a user action, so the
+    /// caller has something to say instead of settling on an environment that never came up.
+    @MainActor
+    func switchEnvironment(to environment: SandboxEnvironment) async throws {
+        // One at a time. The fetch below suspends, and a second switch starting in that window would rebuild
+        // the instance under the first one, leaving the two of them to initialize the same object at once.
+        guard !isSwitchingEnvironment, environment != SandboxEnvironment.selected else { return }
+        isSwitchingEnvironment = true
+        defer { isSwitchingEnvironment = false }
+
+        Self.clearCookies(of: reachfive.sdkConfig.domain)
+        Self.storage.removeToken()
+        SandboxEnvironment.selected = environment
+        builtReachFive = makeReachFive()
+        try await initializeReachFive()
+    }
+
+    private func registerCallbacks(on reachfive: ReachFive) {
         reachfive.addPasswordlessCallback { result in
             print("addPasswordlessCallback \(result)")
             NotificationCenter.default.post(name: .DidReceiveLoginCallback, object: nil, userInfo: ["result": result])
@@ -93,10 +111,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("addEmailVerificationCallback \(result)")
             NotificationCenter.default.post(name: .DidReceiveEmailVerificationCallback, object: nil, userInfo: ["result": result])
         }
+    }
+
+    /// Fetches the client configuration and refreshes the scopes the settings offer, the way the launch used
+    /// to — a rebuilt instance starts with an empty scope list until this runs.
+    private func initializeReachFive() async throws {
+        // On failure too: an instance with no client configuration offers no scope, and the selection has to
+        // stop carrying the previous environment's.
+        defer { SettingsViewController.restoreSelectedScopes(availableScopes: reachfive.scope) }
+        _ = try await reachfive.initialize()
+    }
+
+    /// A domain-scoped cookie comes back dot-prefixed and case-folded, so compare host-suffix-wise — the same
+    /// matching the settings screen uses to list them.
+    private static func clearCookies(of domain: String) {
+        let domain = domain.lowercased()
+        HTTPCookieStorage.shared.cookies?
+            .filter { cookie in
+                let cookieDomain = cookie.domain.lowercased()
+                return cookieDomain == domain || domain.hasSuffix(cookieDomain.hasPrefix(".") ? cookieDomain : ".\(cookieDomain)")
+            }
+            .forEach(HTTPCookieStorage.shared.deleteCookie)
+    }
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        print("application:didFinishLaunchingWithOptions:\(launchOptions ?? [:])")
 
         Task {
-            let _ = try await self.reachfive.initialize()
-            SettingsViewController.selectedScopes = UserDefaults.standard.stringArray(forKey: "selectedScopes") ?? self.reachfive.scope
+            // The callbacks come with the instance now, registered by `makeReachFive()`.
+            // Nothing is waiting on an answer at launch, unlike a switch, so the failure only gets logged.
+            do {
+                try await self.initializeReachFive()
+            } catch {
+                print("initialize error \(error)")
+            }
 
             if let window = self.window, let rootViewController = window.rootViewController {
                 let defaults = UserDefaults.standard
