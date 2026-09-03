@@ -16,6 +16,16 @@ class DataRequest {
         status >= 200 && status < 300
     }
 
+    private func isRedirection(_ status: Int) -> Bool {
+        status >= 300 && status < 400
+    }
+
+    /// Logs an error and hands it back, so a throw site stays one expression.
+    private func logged(_ error: ReachFiveError) -> ReachFiveError {
+        logger.log(error: error)
+        return error
+    }
+
     private func parseJson<T: Decodable>(json: Data, type: T.Type) throws -> T {
         do {
             let parsed = try decoder.decode(type, from: json)
@@ -33,20 +43,20 @@ class DataRequest {
         } else if status == 401 {
             .AuthFailure(reason: "Unauthorized", apiError: apiError)
         } else {
-            .TechnicalError(
-                reason: "Response with \(status) error code",
-                apiError: apiError
-            )
+            .TechnicalError(reason: "Response with \(status) error code", apiError: apiError)
         }
-        logger.log(error: error)
-        return error
+        return logged(error)
     }
 
-    private func processHttpResponse<T>(data: Data, response: URLResponse, onSuccess: (Data, HTTPURLResponse) throws -> T) throws -> T {
+    /// Checks the response is one the caller can read, and hands it back cast. Throws on anything else, the
+    /// `ApiError` of the body decoded into the error whenever the body carries one.
+    ///
+    /// A `nil` response reaches here only from ``perform()``, on a task that ended with neither a response
+    /// nor an error — which is what a network interception layer standing in for `URLSession` can produce.
+    @discardableResult
+    private func validate(data: Data, response: URLResponse?) throws -> HTTPURLResponse {
         guard let httpResponse = response as? HTTPURLResponse else {
-            let error = ReachFiveError.TechnicalError(reason: "Request without response")
-            logger.log(error: error)
-            throw error
+            throw logged(.TechnicalError(reason: "Request ended without a response nor an error"))
         }
 
         logger.log(response: httpResponse, data: data)
@@ -57,132 +67,113 @@ class DataRequest {
             // surfaces as a JSON decoding message alone, with the status code nowhere in it. `parseJson`
             // has already logged that decoding failure by the time this falls back on the status.
             guard let apiError = try? parseJson(json: data, type: ApiError.self) else {
-                let error = ReachFiveError.TechnicalError(reason: "Response with \(status) error code")
-                logger.log(error: error)
-                throw error
+                throw logged(.TechnicalError(reason: "Response with \(status) error code"))
             }
             throw handleResponseStatus(status: status, apiError: apiError)
         }
 
-        return try onSuccess(data, httpResponse)
+        return httpResponse
     }
 
-    /// Runs the request, the way `URLSession.data(for:)` would — except on the one outcome it cannot
-    /// represent: a task ending with neither a response nor an error.
-    ///
-    /// `data(for:)` resolves here to the form Foundation back-deploys over `dataTask(with:completionHandler:)`,
-    /// since the iOS 15 `data(for:delegate:)` is out of reach of this SDK's iOS 13 floor — and that form
-    /// force-unwraps the response, so it traps (measured: `SIGTRAP`, inside Foundation) on that outcome. The
-    /// completion handler reports it plainly, and it is precisely what a network interception layer standing
-    /// in for `URLSession` produces, so the SDK says so rather than taking the app down.
-    private func perform() async throws -> (Data, URLResponse) {
-        try await withCheckedThrowingContinuation { continuation in
-            session.dataTask(with: request) { data, response, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else if let response {
-                    continuation.resume(returning: (data ?? Data(), response))
-                } else {
-                    continuation.resume(throwing: Self.noResponseAtAll())
-                }
-            }.resume()
+    /// Runs the request the way `URLSession.data(for:)` does, cancellation included — except on the one
+    /// outcome it cannot represent: a task ending with neither a response nor an error, which its
+    /// back-deployed form force-unwraps and traps on (measured: `SIGTRAP`, inside Foundation). Handing that
+    /// back as a `nil` response lets ``validate(data:response:)`` name it instead.
+    private func perform() async throws -> (Data, URLResponse?) {
+        let running = RunningTask()
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                running.start(session.dataTask(with: request) { data, response, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: (data ?? Data(), response))
+                    }
+                })
+            }
+        } onCancel: {
+            running.cancel()
         }
     }
 
     func responseJson() async throws {
         logger.log(request: request)
         let (data, response) = try await perform()
-        try processHttpResponse(data: data, response: response) { _, _ in }
+        try validate(data: data, response: response)
     }
 
     func responseJson<T: Decodable>(type: T.Type) async throws -> T {
         logger.log(request: request)
         let (data, response) = try await perform()
-        return try processHttpResponse(data: data, response: response) { data, _ in
-            try parseJson(json: data, type: T.self)
-        }
+        try validate(data: data, response: response)
+        return try parseJson(json: data, type: T.self)
     }
 
     /// The `/oauth/authorize` call, whose result is not a response to read but a redirection to the app's
     /// custom scheme: the callback URL, with the authorization code in it.
     ///
-    /// That redirection is refused rather than followed by ``CustomSchemeRedirectRefusal``, the session's
-    /// delegate — `URLSession` has no handler for such a scheme — and refusing ends the task on the redirect
-    /// response itself, `Location` header included. Reading the callback from that header, rather than from
-    /// the `newRequest` the delegate is handed, is what makes the call survive a network interception layer
-    /// (SSL pinning, an APM agent, a `URLProtocol`) answering `willPerformHTTPRedirection` in the SDK's
-    /// place: refusing is what the SDK wanted anyway, so whoever answers, the callback ends up in the same
-    /// header. Hence an ordinary ``perform()``, exactly like every other call above.
+    /// ``CustomSchemeRedirectRefusal`` refuses that redirection, which ends the task on the redirect response
+    /// itself, `Location` header included. Reading the callback from that header rather than from the
+    /// `newRequest` handed to the delegate is what makes the call survive a network interception layer
+    /// answering `willPerformHTTPRedirection` in the SDK's place: refusing is what the SDK wanted anyway, so
+    /// whoever refuses leaves the callback in the same header.
     func redirect() async throws -> URL {
         logger.log(request: request)
 
         let data: Data
-        let response: URLResponse
+        let response: URLResponse?
         do {
             (data, response) = try await perform()
         } catch {
-            guard let callback = Self.callbackURL(ofRedirectionFollowedIn: error) else { throw error }
+            guard let callback = Self.callbackFollowedInstead(of: error) else { throw error }
             // Without this line the recovery is silent, and an interception layer breaking the SDK's redirect
             // handling stays invisible for as long as the recovery holds. The callback URL is left out of it:
             // it carries the authorization code.
-            logger.log("""
-            The redirection to the app's custom scheme was followed instead of being refused; the callback \
-            was recovered from the unsupportedURL error it failed on. A network interception layer answering \
-            willPerformHTTPRedirection on the SDK's URLSession is the usual cause.
-            """)
+            logger.log("The redirection to the app's custom scheme was followed instead of being refused; the callback was recovered from the unsupportedURL error it failed on.")
             return callback
         }
 
-        if let redirection = response as? HTTPURLResponse, (300 ..< 400).contains(redirection.statusCode) {
+        if let redirection = response as? HTTPURLResponse, isRedirection(redirection.statusCode) {
             // The only response this call ever gets when it works, and the one nothing used to log — which is
             // what made an `/oauth/authorize` failure take days to diagnose. `Logger` prints the status and
             // the request URL, never the headers, so the authorization code stays out of it.
             logger.log(response: redirection, data: data)
-            guard let callback = Self.callbackURL(of: redirection) else {
-                throw Self.unusableRedirection(redirection)
+
+            let location = redirection.value(forHTTPHeaderField: "Location")
+            guard let callback = location.flatMap(URL.init(string:)), callback.hasCustomScheme else {
+                throw notRedirected(redirection, location: location)
             }
             return callback
         }
 
-        return try processHttpResponse(data: data, response: response) { _, httpResponse in
-            let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected: answered \(httpResponse.statusCode) HTTP status instead of a redirection to the app's custom scheme")
-            self.logger.log(error: error)
-            throw error
-        }
+        // Anything but a 2xx has thrown by now, `ApiError` decoded — a rejected `redirect_uri` answers
+        // `403 error.client.redirectUrlNotAllowed`. What is left is a final response that simply did not
+        // redirect, and its status is all there is to report.
+        throw notRedirected(try validate(data: data, response: response), location: nil)
     }
 
-    /// The callback URL a refused redirection carries in its `Location` header, `nil` when it leads elsewhere
-    /// than the app's custom scheme or carries no `Location` at all.
-    ///
-    /// Refusing a redirection makes `URLSession` end the task on the redirect response itself, `Location`
-    /// included. That is not a documented contract, but it is the mechanism this SDK shipped throughout 8.x
-    /// (Alamofire's `Redirector.doNotFollow`, then this very header read), and `RedirectRefusalTests` pins it
-    /// against a real HTTP exchange — a `URLProtocol` stub cannot reproduce it.
-    private static func callbackURL(of redirection: HTTPURLResponse) -> URL? {
-        guard let location = redirection.value(forHTTPHeaderField: "Location"),
-              let url = URL(string: location), url.hasCustomScheme
-        else {
-            return nil
-        }
-
-        return url
+    /// The expected redirection did not happen: either the task ended on an ordinary HTTP response, or on a
+    /// redirection leading elsewhere than the app's custom scheme — an interception layer rewriting the target
+    /// to a block page, or a redirection stripped of its `Location`. Names where it actually leads, which
+    /// decoding a body that is not an `ApiError` never would.
+    private func notRedirected(_ response: HTTPURLResponse, location: String?) -> ReachFiveError {
+        let target = isRedirection(response.statusCode)
+            ? " with \(location.map { "Location '\($0)'" } ?? "no Location header")"
+            : ""
+        return logged(.TechnicalError(
+            reason: "Request did not redirect to the app's custom scheme: answered HTTP \(response.statusCode)\(target)"
+        ))
     }
 
-    /// The callback URL of a redirection that was followed instead of being refused.
+    /// The callback URL of a redirection that an interception layer forwarded to `URLSession` instead of
+    /// refusing it. `URLSession` has no handler for the app's custom scheme, so following such a redirection
+    /// ends in `unsupportedURL` — and the URL it failed to load is the callback itself, authorization code
+    /// included. Recovering it costs nothing in security: the TLS connection it came from was already made and
+    /// validated, and the callback is never loaded.
     ///
-    /// `URLSession` has no handler for the app's custom scheme, so following such a redirection ends in
-    /// `unsupportedURL` — and the URL it failed to load is the callback itself, authorization code included.
-    /// A request the SDK sends is always `https`, so a non-web scheme here can only come from a redirection.
-    ///
-    /// The cause is an interception layer that forwards the redirection to `URLSession` rather than refusing
-    /// it. Recovering costs nothing in security: the TLS connection this callback comes from was already made
-    /// and validated, and the callback URL itself is never loaded.
-    ///
-    /// The shape of that error — `NSURLErrorDomain`, `unsupportedURL`, the failing URL under one of the two
-    /// `userInfo` keys — is measured on an iOS 26 simulator and on Mac Catalyst, not a documented contract.
-    /// A runtime reporting it otherwise gets `nil` here and the raw error, which is the behaviour that
-    /// preceded this recovery.
-    private static func callbackURL(ofRedirectionFollowedIn error: Error) -> URL? {
+    /// The shape of that error is measured on an iOS 26 simulator and on Mac Catalyst, not a documented
+    /// contract; a runtime reporting it otherwise gets `nil` here and the raw error.
+    private static func callbackFollowedInstead(of error: Error) -> URL? {
         let error = error as NSError
         guard error.domain == NSURLErrorDomain, error.code == NSURLErrorUnsupportedURL else { return nil }
 
@@ -192,26 +183,33 @@ class DataRequest {
 
         return failing
     }
-
-    /// The task ended with no response and no error at all — nothing an HTTP exchange produces, so the only
-    /// plausible source is something answering for `URLSession` on this session.
-    private static func noResponseAtAll() -> ReachFiveError {
-        let error = ReachFiveError.TechnicalError(reason: """
-        Request ended without a response nor an error. A network interception layer standing in for \
-        URLSession on the SDK's session (SSL pinning, an APM agent, a URLProtocol) is the usual cause.
-        """)
-        Logger.shared.log(error: error)
-        return error
-    }
-
-    /// A redirection that ended the task but leads elsewhere than the app's custom scheme — an interception
-    /// layer rewriting the target to a block page, or a redirection stripped of its `Location`. Names where it
-    /// leads, which the decoding of a body that isn't an `ApiError` never would.
-    private static func unusableRedirection(_ redirection: HTTPURLResponse) -> ReachFiveError {
-        let location = redirection.value(forHTTPHeaderField: "Location")
-        let error = ReachFiveError.TechnicalError(reason: "Request did not redirect as expected: answered a \(redirection.statusCode) redirection to \(location.map { "'\($0)'" } ?? "nowhere — no Location header"), not to the app's custom scheme")
-        Logger.shared.log(error: error)
-        return error
-    }
 }
 
+/// The task a ``DataRequest`` is running, so cancelling the calling `Task` cancels the request — which is what
+/// `URLSession.data(for:)` does, and what a hand-rolled continuation over `dataTask(with:completionHandler:)`
+/// would otherwise drop. Locked because the cancellation can land before `URLSession` has handed the task
+/// over, and would then be lost.
+private final class RunningTask {
+    private let lock = NSLock()
+    private var task: URLSessionTask?
+    private var cancelled = false
+
+    func start(_ task: URLSessionTask) {
+        lock.lock()
+        self.task = task
+        let alreadyCancelled = cancelled
+        lock.unlock()
+
+        task.resume()
+        if alreadyCancelled { task.cancel() }
+    }
+
+    func cancel() {
+        lock.lock()
+        cancelled = true
+        let task = self.task
+        lock.unlock()
+
+        task?.cancel()
+    }
+}

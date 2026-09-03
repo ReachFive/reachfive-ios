@@ -46,7 +46,11 @@ final class RedirectRefusalTests: XCTestCase {
     }
 
     private func session() -> URLSession {
-        URLSession(configuration: .ephemeral, delegate: CustomSchemeRedirectRefusal(), delegateQueue: nil)
+        let configuration = URLSessionConfiguration.ephemeral
+        // Well under URLSession's 60 s default: a server that stops answering must fail the test, not stall
+        // the whole suite on it.
+        configuration.timeoutIntervalForRequest = 5
+        return URLSession(configuration: configuration, delegate: CustomSchemeRedirectRefusal(), delegateQueue: nil)
     }
 
     private func authorizeURL() -> URL {
