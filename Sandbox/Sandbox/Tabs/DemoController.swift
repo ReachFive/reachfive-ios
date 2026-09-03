@@ -93,9 +93,9 @@ class DemoController: UIViewController {
     }
 
     @IBAction func forgotPassword(_ sender: Any) {
-        guard let passwordResetController = storyboard?.instantiateViewController(withIdentifier: "PasswordResetController") as? PasswordResetController else { return }
-        passwordResetController.initialUsername = usernameField.text
-        navigationController?.pushViewController(passwordResetController, animated: true)
+        guard let recoveryController = storyboard?.instantiateViewController(withIdentifier: "RecoveryStartController") as? RecoveryStartController else { return }
+        recoveryController.initialUsername = usernameField.text
+        navigationController?.pushViewController(recoveryController, animated: true)
     }
 
     @IBAction func createAccount(_ sender: Any) {

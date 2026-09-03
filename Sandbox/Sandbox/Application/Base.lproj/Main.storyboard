@@ -435,7 +435,7 @@
         <!--Recovery Start-->
         <scene sceneID="JaR-FT-pVy">
             <objects>
-                <viewController title="Recovery Start" id="9TN-Qr-dqK" customClass="RecoveryStartController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="RecoveryStartController" title="Recovery Start" id="9TN-Qr-dqK" customClass="RecoveryStartController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="pe2-oD-l3d">
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -452,22 +452,35 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="username"/>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="38k-m4-u0D">
-                                <rect key="frame" x="119" y="290" width="164" height="40.666666666666686"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Send recovery link"/>
-                                <connections>
-                                    <action selector="sendLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="dYn-Lk-XKE"/>
-                                </connections>
-                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="rec-St-001">
+                                <rect key="frame" x="52" y="290" width="298" height="40.666666666666686"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="38k-m4-u0D">
+                                        <rect key="frame" x="0.0" y="0.0" width="164" height="40.666666666666686"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="filled" title="Send recovery link"/>
+                                        <connections>
+                                            <action selector="sendLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="dYn-Lk-XKE"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rec-Bt-002">
+                                        <rect key="frame" x="176" y="0.0" width="122" height="40.666666666666686"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="gray" title="Send reset link"/>
+                                        <connections>
+                                            <action selector="sendResetLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="rec-Ac-003"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="546-Za-vvZ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="5KP-Ry-JMm" firstAttribute="trailing" secondItem="pe2-oD-l3d" secondAttribute="trailingMargin" id="5OS-AQ-anB"/>
-                            <constraint firstItem="38k-m4-u0D" firstAttribute="top" secondItem="5KP-Ry-JMm" secondAttribute="bottom" constant="40" id="7KS-oW-16K"/>
+                            <constraint firstItem="rec-St-001" firstAttribute="top" secondItem="5KP-Ry-JMm" secondAttribute="bottom" constant="40" id="7KS-oW-16K"/>
                             <constraint firstItem="5KP-Ry-JMm" firstAttribute="leading" secondItem="DyU-iH-FUf" secondAttribute="leading" id="8uX-Yh-uTa"/>
-                            <constraint firstItem="38k-m4-u0D" firstAttribute="centerX" secondItem="546-Za-vvZ" secondAttribute="centerX" id="O5E-bU-QTX"/>
+                            <constraint firstItem="rec-St-001" firstAttribute="centerX" secondItem="546-Za-vvZ" secondAttribute="centerX" id="O5E-bU-QTX"/>
                             <constraint firstItem="5KP-Ry-JMm" firstAttribute="leading" secondItem="DyU-iH-FUf" secondAttribute="leading" id="OOZ-hv-Yr3"/>
                             <constraint firstItem="5KP-Ry-JMm" firstAttribute="top" secondItem="DyU-iH-FUf" secondAttribute="bottom" constant="8" id="Py7-CC-7os"/>
                             <constraint firstItem="DyU-iH-FUf" firstAttribute="leading" secondItem="pe2-oD-l3d" secondAttribute="leadingMargin" id="TXZ-F7-5Le"/>
@@ -475,7 +488,7 @@
                             <constraint firstItem="546-Za-vvZ" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="DyU-iH-FUf" secondAttribute="trailing" symbolic="YES" id="bhj-I2-dJh"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Recover Account" id="0Iq-TK-5y9"/>
+                    <navigationItem key="navigationItem" title="Recovery &amp; Reset" id="0Iq-TK-5y9"/>
                     <connections>
                         <outlet property="username" destination="5KP-Ry-JMm" id="zET-CN-jsn"/>
                     </connections>
@@ -535,57 +548,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1z1-9C-pAb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1368.8372093023256" y="863.94849785407735"/>
-        </scene>
-        <!--Password Reset-->
-        <scene sceneID="pRs-tA-rt1">
-            <objects>
-                <viewController storyboardIdentifier="PasswordResetController" title="Password Reset" id="pRs-Vw-001" customClass="PasswordResetController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="pRs-Lb-002">
-                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email or phone number" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pRs-Tf-003" userLabel="Username">
-                                <rect key="frame" x="16" y="188" width="176" height="20"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="pRs-Bt-004" userLabel="UsernameInput">
-                                <rect key="frame" x="16" y="216" width="370" height="34"/>
-                                <accessibility key="accessibilityConfiguration" identifier="email"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="username"/>
-                            </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pRs-Sa-005">
-                                <rect key="frame" x="119" y="290" width="164" height="40.666666666666686"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Send reset link"/>
-                                <connections>
-                                    <action selector="sendLink:" destination="pRs-Vw-001" eventType="touchUpInside" id="pRs-Nv-006"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="pRs-Fr-007"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="pRs-Bt-004" firstAttribute="trailing" secondItem="pRs-Lb-002" secondAttribute="trailingMargin" id="pRs-C1-008"/>
-                            <constraint firstItem="pRs-Sa-005" firstAttribute="top" secondItem="pRs-Bt-004" secondAttribute="bottom" constant="40" id="pRs-C2-009"/>
-                            <constraint firstItem="pRs-Bt-004" firstAttribute="leading" secondItem="pRs-Tf-003" secondAttribute="leading" id="pRs-C3-010"/>
-                            <constraint firstItem="pRs-Sa-005" firstAttribute="centerX" secondItem="pRs-Fr-007" secondAttribute="centerX" id="pRs-C4-011"/>
-                            <constraint firstItem="pRs-Bt-004" firstAttribute="top" secondItem="pRs-Tf-003" secondAttribute="bottom" constant="8" id="pRs-C5-012"/>
-                            <constraint firstItem="pRs-Tf-003" firstAttribute="leading" secondItem="pRs-Lb-002" secondAttribute="leadingMargin" id="pRs-C6-013"/>
-                            <constraint firstItem="pRs-Tf-003" firstAttribute="top" secondItem="pRs-Fr-007" secondAttribute="top" constant="20" id="pRs-C7-014"/>
-                            <constraint firstItem="pRs-Fr-007" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="pRs-Tf-003" secondAttribute="trailing" symbolic="YES" id="pRs-C8-015"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Reset Password" id="pRs-Nv-016"/>
-                    <connections>
-                        <outlet property="username" destination="pRs-Bt-004" id="pRs-Ou-017"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="pRs-Fr-018" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1368.8372093023256" y="1400"/>
         </scene>
         <!--Signup with password-->
         <scene sceneID="H6o-jf-Xhj">
@@ -1438,7 +1400,7 @@
                                             <rect key="frame" x="0.0" y="0.0" width="383.66666666666669" height="23.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" text="Recover Account" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7v3-6C-fQ8">
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" text="Recovery &amp; Reset" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7v3-6C-fQ8">
                                                     <rect key="frame" x="8" y="0.0" width="367.66666666666669" height="23.5"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
