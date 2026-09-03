@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### New features
+- Add a public SdkVersion which contains the current version of this Sdk
+
 ## v11.0.0
 
 ### Breaking changes
