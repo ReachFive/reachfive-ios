@@ -14,30 +14,6 @@ The compatibility bridge is provided as a separate module to ensure BrightFuture
 
 === Installation
 
-[tabs]
-====
-Cocoapods::
-+
---
-
-. Add this line to your `Podfile` file.
-+
-[source,subs="normal,callouts"]
-----
-pod 'Reach5Future', '~> {sdk-ios-future-latest-version}' <1>
-----
-<1> `{sdk-ios-future-latest-version}` is the latest version of the SDK.
-
-. Then run:
-+
-[source, javascript]
-----
-pod install
-----
---
-Swift Package Manager::
-+
---
 Add the package dependency with XCode using this package URL:
 
 [source]
@@ -53,9 +29,6 @@ dependencies: [
     .package(url: "https://github.com/ReachFive/reachfive-ios-future.git", .upToNextMajor(from: "{sdk-ios-future-latest-version}"))
 ]
 ----
-
---
-====
 
 == Handling compilation errors
 
@@ -94,7 +67,7 @@ This new underlying system may make different choices of execution queue in some
 .Example
 [source,swift]
 ----
-let nativeRequest = NativeLoginRequest(anchor: window, origin: "Password Manager")
+let nativeRequest = NativeLoginRequest(presenting: Presentation(from: self), origin: "Password Manager")
 AppDelegate.reachfive()
     .login(withRequest: nativeRequest, usingModalAuthorizationFor: [.Password], display: .Always)
     .onSuccess(DispatchQueue.main.context) { loginFlow in
@@ -125,7 +98,7 @@ You can call `Future`-based methods from the *Reach5Future SDK* alongside `async
     }
 
     // Using Reach5Future SDK with BrightFutures
-    let request = NativeLoginRequest(anchor: window, origin: "DemoController.login")
+    let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.login")
     AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
     .onSuccess(callback: handleLoginFlow)
     .onFailure { error in

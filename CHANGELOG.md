@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### New features
+- Add a public SdkVersion which contains the current version of this Sdk
+
 ### Bug fixes
 - `/oauth/authorize` no longer fails opaquely when it does not redirect to the app's custom scheme. The `ApiError` the server returns is now decoded and carried by the thrown error (a rejected `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`, which was being discarded), and a response that carries no error reports its HTTP status. This call used to fail with a `TechnicalError` whatever the status; like every other call, it now answers a `400` with a `RequestError` and a `401` with an `AuthFailure`. It is also logged: a successful `/oauth/authorize` used to leave no trace of its response at all, only of the outgoing request.
 - An error response whose body is not an `ApiError` — an HTML page from a proxy, an empty body — now reports its HTTP status, on every call, instead of surfacing the JSON decoding failure alone.
@@ -35,7 +38,7 @@
 - `webviewLogin` has two new parameters:
   - `webSessionMode` to shape the `ASWebAuthenticationSession` callback: `.customScheme` (default) or `.universalLink(_:)` (iOS 17.4+).
   - `loginUrlFragment` to pass key/value pairs in the fragment of the `/oauth/authorize` URL, so a client's Login URL can customize itself (logo, colors) per calling channel in an orchestrated flow.
-- New `WebProvider` to register a web provider with a `variant` and a completion `mode` (cf. `webSessionMode` of `webviewLogin` above). See the [Universal-link web providers](https://developer.reachfive.com/sdk-ios/providerCreator.html#universal-link-web-providers).
+- New `WebProvider` to register a web provider with a `variant` and a completion `mode` (cf. `webSessionMode` of `webviewLogin` above).
 - New method `login(withProvider:…)`, intended for integrators writing their own `Provider`: exchanges the ID token issued by a native provider SDK for a ReachFive `AuthToken`.
 
 ## v10.0.1

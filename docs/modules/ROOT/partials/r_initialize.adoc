@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 ----
 <1> Import the UIKit if using it.
 If using another UI framework, you may not initialize provider configuration.
-<2> Your {company} domain such as `integ-sandbox.reach5.dev`.
+<2> Your {company} domain, as a bare host such as `integ-sandbox.reach5.dev` — no `https://` prefix, no port and no trailing slash.
 <3> The {company} client such as `zhU43...51nvOM`;
 <4> Initializes the iOS SDK by fetching information from the server about the client.
 For more details, see xref:application/applicationDidFinishLaunchingWithOptions.adoc[].
@@ -59,7 +59,7 @@ import Reach5Google
 import Reach5WeChat
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    let DOMAIN    = "Here paste your ReachFive domain" // e.g. integ-sandbox-squad2.reach5.dev
+    let DOMAIN    = "Here paste your ReachFive domain" // e.g. integ-sandbox-squad2.reach5.dev, as a bare host — no https:// prefix, no port and no trailing slash
     let CLIENT_ID = "Here paste your ReachFive client ID" // e.g. zhU43aRKZtzps551nvOM
 
     let reachfive = ReachFive(
@@ -100,9 +100,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 <1> An example of how to access the {company} object from within the app.
 <2> Initializes the iOS SDK by fetching information from the server about the client.
 For more details, see xref:application/applicationDidFinishLaunchingWithOptions.adoc[].
-<3> This method is used to handle universal links which are used by providers.
+<3> Forwards universal links to {company}.
+Required by WeChat and by custom providers whose callback is a universal link; not by `WebProvider` `.universalLink`.
 For more details, see xref:application/applicationContinueUserActivity.adoc[].
-<4> This method is used to handle callback schemes which are used by passwordless, MFA and account recovery, as well as providers.
+<4> Forwards custom-scheme callbacks used by passwordless, MFA, account recovery, and provider native apps.
 For more details, see xref:application/applicationOpenUrl.adoc[].
 <5> This method is used to provide functionality to the providers.
 For more details, see xref:application/applicationDidBecomeActive.adoc[].

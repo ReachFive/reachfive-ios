@@ -1,15 +1,15 @@
 :mobile-sdk:
 = Getting Started   
 
-{sdk-ios-version-badge}
+// {sdk-ios-version-badge}
 
 [.expand]
-icon:warning[] Breaking changes for `10.0.0`, please read.
+icon:warning[] Breaking changes for `11.0.0`, please read.
 
 [.expand-content]
 ====
 [discrete]
-include::partial$announcements/1000-breaking-changes.adoc[leveloffset=+1]
+include::partial$announcements/11000-breaking-changes.adoc[leveloffset=+1]
 ====
 
 == Requirements
@@ -28,7 +28,11 @@ icon:book[] For more on configuring a client, see xref:docs:ROOT:clients.adoc#co
 
 == Installation
 
-{company} SDKs are available with Swift Package Manager and link:https://cocoapods.org/pods/Reach5[Cocoapods^] as independent modules.
+{company} SDKs are available with Swift Package Manager as independent modules.
+Only <<wechat-connect,WeChat Connect>> still uses Cocoapods.
+
+NOTE: If you are migrating from CocoaPods, `import Reach5` no longer brings `UIKit` or `Foundation` into scope.
+Add an explicit `import UIKit` and `import Foundation` in each file that uses those types.
 
 TIP: You can also find releases directly on the {company} repo at link:https://github.com/ReachFive/reachfive-ios/releases/[ReachFive iOS SDK^].
 
@@ -47,30 +51,6 @@ The core SDK contains all the main tools, interfaces, and methods related to sta
 
 ==== Installation
 
-[tabs]
-====
-Cocoapods::
-+
---
-
-. Add this line to your `Podfile` file, replacing `x` with the latest version:
-+
-[source,subs="normal,callouts"]
-----
-pod 'Reach5', '~> {sdk-ios-latest-version}' <1>
-----
-<1> `{sdk-ios-latest-version}` is the latest version of SDK.
-
-. Then run:
-+
-[source, javascript]
-----
-pod install
-----
---
-Swift Package Manager::
-+
---
 Add the package dependency with XCode using this package URL:
 
 [source]
@@ -83,12 +63,9 @@ Or directly add this to the dependencies in `Package.swift`
 [source,swift,subs="attributes"]
 ----
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "{page-component-version}"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios.git", .upToNextMajor(from: "{sdk-ios-latest-version}"))
 ]
 ----
-
---
-====
 
 ==== Configuration
 
@@ -122,30 +99,6 @@ TIP: Refer to the xref:docs::facebook.adoc[] guide to create your Facebook appli
 
 ==== Installation
 
-[tabs]
-====
-Cocoapods::
-+
---
-
-. Add this line to your `Podfile` file.
-+
-[source,subs="normal,callouts"]
-----
-pod 'Reach5Facebook', '~> {sdk-ios-facebook-latest-version}' <1>
-----
-<1> `{sdk-ios-facebook-latest-version}` is the latest version of SDK.
-
-. Then run:
-+
-[source]
-----
-pod install
-----
---
-Swift Package Manager::
-+
---
 Add the package dependency with XCode using this package URL:
 
 [source]
@@ -158,11 +111,9 @@ Or directly add this to the dependencies in `Package.swift`
 [source,swift,subs="attributes"]
 ----
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios-facebook.git", .upToNextMajor(from: "{page-component-version}"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios-facebook.git", .upToNextMajor(from: "{sdk-ios-facebook-latest-version}"))
 ]
 ----
---
-====
 
 ==== Configuration
 
@@ -199,12 +150,36 @@ NOTE: If you're using the latest version of the Facebook API, remove the `user_g
 
 <key>LSApplicationQueriesSchemes</key>
 <array>
+    <string>fbauth2</string> <1>
     <string>fbapi</string>
     <string>fb-messenger-share-api</string>
 </array>
 ----
+<1> Required for <<Fast App Switch>>, which `Reach5Facebook` supports from 9.0.0.
 
 TIP: See <<Info.plist reference>> for a comprehensive look at the file.
+
+==== Fast App Switch
+
+Fast App Switch sends the user to the native Facebook app to sign in instead of to a Safari view controller, so a user already signed in to the Facebook app does not have to sign in again.
+The `fbauth2` scheme lets the SDK open the Facebook app, and `fbapi` lets it detect that the app is installed.
+
+The `appSwitch` parameter is `.enabled` by default.
+Pass `appSwitch: .disabled` to xref:providerCreator.adoc#FacebookProvider[`FacebookProvider`] to always use the browser flow.
+
+Your login still completes through the browser flow in these cases:
+
+* The Facebook app is not installed, in which case the Facebook SDK falls back on its own.
+* Meta has not enabled Fast App Switch for your Facebook application, as the feature is controlled remotely, and classic and limited logins are gated separately.
+
+[NOTE]
+====
+You get a classic login only when you build the provider with `prefersLoginTracking: .enabled`, the default being `.limited`, and App Tracking Transparency is authorized on the device.
+Otherwise the SDK asks Facebook for a limited login.
+
+An app switch returns to your application through the `fb$(YOUR_FACEBOOK_APPLICATION_ID)` scheme you declared above.
+Forward xref:application/applicationOpenUrl.adoc[`+application(_:open:options)+`] to {company}, and `+scene(_:openURLContexts:)+` too if your application uses scenes, otherwise the login never completes after the user approves in the Facebook app.
+====
 
 === Google native provider
 
@@ -214,31 +189,6 @@ TIP: Refer to the xref:docs:ROOT:google.adoc[] guide to create your Google appli
 
 ==== Installation
 
-[tabs]
-====
-Cocoapods::
-+
---
-
-. Add this line to your `Podfile` file.
-+
-[source,subs="normal,callouts"]
-----
-pod 'Reach5Google', '~> {sdk-ios-google-latest-version}' <1>
-----
-<1> `{sdk-ios-google-latest-version}` is the latest version of SDK.
-
-. Then run:
-+
-[source]
-----
-pod install
-----
-
---
-Swift Package Manager::
-+
---
 Add the package dependency with XCode using this package URL:
 
 [source]
@@ -248,14 +198,12 @@ https://github.com/ReachFive/reachfive-ios-google.git
 
 Or directly add this to the dependencies in `Package.swift`
 
-[source,swift]
+[source,swift,subs="attributes"]
 ----
 dependencies: [
-    .package(url: "https://github.com/ReachFive/reachfive-ios-google.git", .upToNextMajor(from: "7.0.0"))
+    .package(url: "https://github.com/ReachFive/reachfive-ios-google.git", .upToNextMajor(from: "{sdk-ios-google-latest-version}"))
 ]
 ----
---
-====
 
 ==== Configuration
 
@@ -298,7 +246,7 @@ See <<Info.plist reference>> for a comprehensive look at the file.
 [#wechat-connect]
 === WeChat Connect
 
-As of {localdate}, WeChat is not yet available for our iOS SDK version {page-component-version}.
+As of {localdate}, WeChat is not yet available for our iOS SDK version {sdk-ios-latest-version}.
 We will update this page accordingly when it is available.
 
 This module uses the WeChat native SDK to be able to interact with the WeChat app.
@@ -325,12 +273,14 @@ pod 'IdentitySdkWeChat', '~> {sdk-ios-wechat-latest-version}' <1>
 ----
 pod install
 ----
+
 --
 Swift Package Manager::
 +
 --
 Swift Package Manager is not yet supported.
 --
+
 ====
 
 ==== Configuration
@@ -420,6 +370,7 @@ If you configure all four SDKs, your `Info.plist` file should contain the follow
    <string>weixin</string>
    <string>weixinULAPI</string>
    <string>weixinURLParamsAPI</string>
+   <string>fbauth2</string>
    <string>fbapi</string>
    <string>fb-messenger-share-api</string>
 </array>

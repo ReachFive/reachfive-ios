@@ -5,6 +5,6 @@ static let reachfive: ReachFive = ReachFive(
         FacebookProvider(),
         AppleProvider(variant: "ios_native"),
         WeChat(),
-        WebProvider(name: .bconnect, variant: "natif", mode: .externalApp)
+        WebProvider(name: .bconnect, variant: "natif", mode: .customScheme)
     ]
 )

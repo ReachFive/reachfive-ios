@@ -1,0 +1,88 @@
+= apple-app-site-association
+
+An link:https://developer.apple.com/documentation/xcode/supporting-associated-domains[`apple-app-site-association`^] file tells iOS that your app is associated with a given https host.
+You need it for two different {company} features on iOS:
+
+* xref:guides/passkeys.adoc[Passkeys], whose Relying Party ID is that host.
+* xref:providerCreator.adoc#universal-link-web-providers[`WebProvider` `.universalLink`] (and xref:webviewLogin.adoc[`webviewLogin`] with `.universalLink(_:)`), whose OAuth `redirect_uri` is an https URL on that host.
+
+A custom provider or xref:index.adoc#wechat-connect[WeChat] that receives its callback as a universal link *into the app* also needs this file, with an `applinks` section.
+
+You also need it so that passwords your users saved for your website can be autofilled in your app.
+
+== Host the file
+
+Serve the file at `\https://<host>/.well-known/apple-app-site-association` with a `200` response and a JSON `Content-Type`.
+A redirect or a non-JSON content type causes verification to fail.
+
+`<host>` is the host you declare in Associated Domains:
+
+* For passkeys, the Relying Party ID (see xref:guides/passkeys.adoc[]).
+* For `.universalLink`, the host of the `universalLink` URL returned by {company} for that provider.
+
+If {company} should serve the file for passkeys on Hosted Pages, paste it in the {cc} as described in xref:guides/passkeys.adoc#hosted-pages[Passkeys: Hosted pages].
+Otherwise, host it yourself on `<host>`.
+
+== Associated Domains entitlements
+
+In Xcode, add the Associated Domains capability and declare the entries that match the sections in your association file.
+
+[#webcredentials]
+=== webcredentials:<host>
+
+Lets the system treat your app as associated with credentials and with `ASWebAuthenticationSession`'s `.https` callback on that host.
+
+Declare this entry for:
+
+* xref:guides/passkeys.adoc[Passkeys] on that Relying Party ID.
+* xref:providerCreator.adoc[`WebProvider`] or xref:webviewLogin.adoc[`webviewLogin`] with `.universalLink` (iOS 17.4+).
++
+If this entry or the matching `webcredentials` section is missing, the session ends with `AuthCanceled`.
+
+[#applinks]
+=== applinks:<host>
+
+Lets iOS deliver an https URL on that host to your app as a universal link (`NSUserActivityTypeBrowsingWeb`), which you forward to xref:application/applicationContinueUserActivity.adoc[`application(_:continue:)`].
+
+Declare this entry only when a *provider* must receive that link in the app:
+
+* xref:index.adoc#wechat-connect[WeChat]
+* A xref:guides/custom-provider.adoc[custom provider] whose callback arrives as a universal link
+
+Do *not* add `applinks:` for xref:providerCreator.adoc[`WebProvider`] `.universalLink`.
+That mode intercepts the redirect inside the authentication sheet; `application(_:continue:)` is not on the path.
+
+Do *not* add `applinks:` for `.customScheme`, including providers that hand the flow off to their own native app.
+
+== File contents
+
+Include the sections that correspond to the entitlements you declared.
+The sample below includes both, for a host used in more than one mode.
+
+.apple-app-site-association example
+[source,json]
+----
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["ABCDE12345.com.example.app"], <1>
+        "components": [
+          {"/": "/callback"} <2>
+        ]
+      }
+    ]
+  },
+  "webcredentials": {"apps": ["ABCDE12345.com.example.app"]} <3>
+}
+----
+<1> `<Application Identifier Prefix>.<Bundle Identifier>`.
+<2> Restrict to the callback path iOS should deliver into the app.
+Omit the whole `components` array to match every path on the host.
+Only needed if you declare `applinks:<host>`.
+<3> Needed if you declare `webcredentials:<host>` (`.universalLink`, or xref:guides/passkeys.adoc[passkeys] on the same host).
+
+[NOTE]
+====
+If you declare `applinks:` and restrict `components` to a path, make sure that path matches both the success callback (`?code=...`) *and* the OAuth error callback (`?error=...`).
+====
