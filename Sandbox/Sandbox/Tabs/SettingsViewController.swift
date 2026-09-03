@@ -146,7 +146,7 @@ class SettingsViewController: UIViewController {
             cell.accessoryView = switchView
         case .editActions:
             let actions = CaptchaStore.actions
-            cell.textLabel?.text = "Actions : \(actions.joined(separator: ", "))"
+            cell.textLabel?.text = "Actions: \(actions.joined(separator: ", "))"
             cell.textLabel?.textColor = .secondaryLabel
             cell.accessoryType = .disclosureIndicator
         case .obtainCaptchaFoxToken:

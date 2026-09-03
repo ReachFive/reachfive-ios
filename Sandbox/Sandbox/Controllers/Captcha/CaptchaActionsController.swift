@@ -26,12 +26,12 @@ class CaptchaActionsController: UITableViewController, UITextFieldDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Actions du captcha"
+        title = "Captcha actions"
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "captchaActionCell")
         tableView.register(TextFieldCell.self, forCellReuseIdentifier: "captchaActionAddCell")
         navigationItem.rightBarButtonItems = [
             editButtonItem,
-            UIBarButtonItem(title: "Défaut", style: .plain, target: self, action: #selector(resetTapped)),
+            UIBarButtonItem(title: "Defaults", style: .plain, target: self, action: #selector(resetTapped)),
         ]
     }
 
@@ -71,7 +71,7 @@ class CaptchaActionsController: UITableViewController, UITextFieldDelegate {
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         switch Section(rawValue: section) {
         case .actions:
-            "Ces noms doivent correspondre exactement à la liste « Actions » de la configuration captcha du client, accents compris. Une liste vide rétablit les actions par défaut. L'ordre est celui du sélecteur, le premier étant présélectionné."
+            "These names must match the client's captcha configuration exactly, accents included. An empty list restores the default actions. The order is the picker's, and the first one is preselected."
         default:
             nil
         }
@@ -143,7 +143,7 @@ private class TextFieldCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        field.placeholder = "Ajouter une action"
+        field.placeholder = "Add an action"
         field.autocapitalizationType = .none
         field.autocorrectionType = .no
         field.spellCheckingType = .no
