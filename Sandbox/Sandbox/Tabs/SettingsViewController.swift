@@ -147,7 +147,7 @@ class SettingsViewController: UIViewController {
             cell.textLabel?.text = "Get a CaptchaFox token"
             cell.accessoryType = .disclosureIndicator
         case .obtainReCaptchaToken:
-            cell.textLabel?.text = "Obtenir un jeton reCAPTCHA"
+            cell.textLabel?.text = "Get a reCAPTCHA token"
             cell.accessoryType = .disclosureIndicator
         case .clearStore:
             cell.textLabel?.text = "Clear the store"
