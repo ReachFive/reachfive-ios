@@ -143,10 +143,10 @@ class SettingsViewController: UIViewController {
             switchView.addTarget(self, action: #selector(consumesOnUseChanged(_:)), for: .valueChanged)
             cell.accessoryView = switchView
         case .obtainCaptchaFoxToken:
-            cell.textLabel?.text = "Obtenir un jeton CaptchaFox"
+            cell.textLabel?.text = "Get a CaptchaFox token"
             cell.accessoryType = .disclosureIndicator
         case .clearStore:
-            cell.textLabel?.text = "Vider le magasin"
+            cell.textLabel?.text = "Clear the store"
             cell.textLabel?.textColor = .systemRed
         }
     }
