@@ -11,13 +11,14 @@ public enum SignupFlow {
 }
 
 extension ReachFive {
-    public func signup(profile: ProfileSignupRequest, redirectUrl: URL? = nil, scope: [String]? = nil, origin: String? = nil) async throws -> SignupFlow {
+    public func signup(profile: ProfileSignupRequest, redirectUrl: URL? = nil, scope: [String]? = nil, origin: String? = nil, captcha: Captcha? = nil) async throws -> SignupFlow {
         let signupRequest = SignupRequest(
             clientId: sdkConfig.clientId,
             data: profile,
             scope: (scope ?? self.scope).joined(separator: " "),
             redirectUrl: redirectUrl,
-            origin: origin
+            origin: origin,
+            captcha: captcha
         )
         let token = try await reachFiveApi.signupWithPassword(signupRequest: signupRequest)
         guard let accessToken = token.accessToken else {
@@ -32,7 +33,8 @@ extension ReachFive {
         customIdentifier: String? = nil,
         password: String,
         scope: [String]? = nil,
-        origin: String? = nil
+        origin: String? = nil,
+        captcha: Captcha? = nil
     ) async throws -> LoginFlow {
         let strScope = (scope ?? self.scope).joined(separator: " ")
         let loginRequest = LoginRequest(
@@ -43,7 +45,8 @@ extension ReachFive {
             grantType: "password",
             clientId: sdkConfig.clientId,
             scope: strScope,
-            origin: origin
+            origin: origin,
+            captcha: captcha
         )
         let resp = try await reachFiveApi.loginWithPassword(loginRequest: loginRequest)
 

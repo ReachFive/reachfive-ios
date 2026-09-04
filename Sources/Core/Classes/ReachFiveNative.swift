@@ -45,13 +45,12 @@ extension ReachFive {
     ///   - request: where the modal sheet is presented from, plus scope and origin configuration
     ///   - requestTypes: choose between Password and/or Passkey
     ///   - mode: choose the behavior when there are no credentials available
+    ///   - captcha: a token, if the client requires a captcha on `password_login`. Used only when the user picks a saved password
     /// - Returns: an AuthToken when the user was successfully logged in, ReachFiveError.AuthCanceled when the user cancelled the modal sheet or when there was no credentials available, or other kinds of ReachFiveError.
-    ///   `.OngoingStepUp` can only occur when `.Password` is among `requestTypes`: only a password grant
-    ///   ever requires a step-up. Requesting only `.Passkey` and/or `.SignInWithApple` always yields
-    ///   `.AchievedLogin`.
-    public func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode) async throws -> LoginFlow {
+    ///   `.OngoingStepUp` can only occur when `.Password` is among `requestTypes`: only a password grant ever requires a step-up. Requesting only `.Passkey` and/or `.SignInWithApple` always yields `.AchievedLogin`.
+    public func login(withRequest request: NativeLoginRequest, usingModalAuthorizationFor requestTypes: [ModalAuthorization], display mode: Mode, captcha: Captcha? = nil) async throws -> LoginFlow {
         let appleProvider = providers.first { $0.name == AppleProvider.NAME } as? ConfiguredAppleProvider
-        return try await credentialManager.login(withRequest: resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider, reachFive: self)
+        return try await credentialManager.login(withRequest: resolve(request), usingModalAuthorizationFor: requestTypes, display: mode, appleProvider: appleProvider, captcha: captcha, reachFive: self)
     }
 
     /// Signs in the user using credentials stored in the keychain, letting the system display the credentials corresponding to the given username in a modal sheet.

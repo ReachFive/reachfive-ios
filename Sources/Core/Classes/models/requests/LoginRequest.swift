@@ -9,8 +9,10 @@ public class LoginRequest: Codable, DictionaryEncodable {
     public let clientId: String
     public let scope: String
     public let origin: String?
+    public let captchaToken: String?
+    public let captchaProvider: CaptchaProvider?
 
-    public init(email: String?, phoneNumber: String?, customIdentifier: String?, password: String, grantType: String, clientId: String, scope: String, origin: String? = nil) {
+    public init(email: String?, phoneNumber: String?, customIdentifier: String?, password: String, grantType: String, clientId: String, scope: String, origin: String? = nil, captcha: Captcha? = nil) {
         self.email = email
         self.phoneNumber = phoneNumber
         self.customIdentifier = customIdentifier
@@ -19,5 +21,7 @@ public class LoginRequest: Codable, DictionaryEncodable {
         self.clientId = clientId
         self.scope = scope
         self.origin = origin
+        captchaToken = captcha?.token
+        captchaProvider = captcha?.provider
     }
 }
