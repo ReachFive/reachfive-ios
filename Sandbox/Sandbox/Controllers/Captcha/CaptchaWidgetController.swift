@@ -22,16 +22,16 @@ class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
 class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
     static let messageHandlerName = "captcha"
 
-    /// The action names the SDK web UI uses, so the picker stays aligned with what an account
-    /// actually configures.
-    static let actions = ["login", "signup", "update_email", "passwordless_email", "passwordless_phone", "account_recovery", "password_reset_requested"]
-
     private(set) var captchaView: CaptchaView!
     private(set) var webView: WKWebView!
 
     /// The `UserDefaults` key the site key is persisted under. Never a captcha secret — a site key is
     /// public by design — but kept per-provider so trying both does not overwrite either.
     var siteKeyDefaultsKey: String { fatalError("override siteKeyDefaultsKey") }
+
+    /// Whether this provider seals an action into its token. CaptchaFox does not, so its page hides
+    /// the picker rather than offer a choice that changes nothing.
+    var usesActions: Bool { true }
 
     /// The `captcha_provider` value this page writes to `CaptchaStore`.
     var providerRawValue: String { fatalError("override providerRawValue") }
@@ -63,12 +63,20 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
         ])
 
         setupWebView()
-        setupActionSegments()
+        captchaView.actionSegmentedControl.isHidden = !usesActions
+        if usesActions {
+            setupActionSegments()
+        }
 
         captchaView.siteKeyField.text = UserDefaults.standard.string(forKey: siteKeyDefaultsKey)
         captchaView.obtainButton.addTarget(self, action: #selector(obtainTapped), for: .touchUpInside)
         captchaView.copyButton.addTarget(self, action: #selector(copyTapped), for: .touchUpInside)
         captchaView.webViewContainer.isHidden = true
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        refreshActionSegmentsIfNeeded()
     }
 
     private func setupWebView() {
@@ -91,15 +99,33 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
 
     private func setupActionSegments() {
         captchaView.actionSegmentedControl.removeAllSegments()
-        for (index, action) in Self.actions.enumerated() {
+        for (index, action) in CaptchaStore.actions.enumerated() {
             captchaView.actionSegmentedControl.insertSegment(withTitle: action, at: index, animated: false)
         }
         captchaView.actionSegmentedControl.selectedSegmentIndex = 0
     }
 
+    /// Rebuilt only when the list actually changed, so coming back to this page does not silently
+    /// reset the action that was picked.
+    private func refreshActionSegmentsIfNeeded() {
+        guard usesActions else { return }
+
+        let control: UISegmentedControl = captchaView.actionSegmentedControl
+        let shown = (0 ..< control.numberOfSegments).compactMap { control.titleForSegment(at: $0) }
+        if shown != CaptchaStore.actions {
+            setupActionSegments()
+        }
+    }
+
+    /// Read from the control rather than from the store: the list can be edited between building the
+    /// segments and reading the choice.
     var selectedAction: String {
-        let index = captchaView.actionSegmentedControl.selectedSegmentIndex
-        return index >= 0 ? Self.actions[index] : Self.actions[0]
+        let control: UISegmentedControl = captchaView.actionSegmentedControl
+        let index = control.selectedSegmentIndex
+        guard index >= 0, index < control.numberOfSegments, let title = control.titleForSegment(at: index) else {
+            return CaptchaStore.actions[0]
+        }
+        return title
     }
 
     @objc private func obtainTapped() {
@@ -142,7 +168,7 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
         CaptchaStore.entry = CaptchaStore.Entry(
             token: token,
             provider: providerRawValue,
-            action: selectedAction,
+            action: usesActions ? selectedAction : nil,
             obtainedAt: Date()
         )
 

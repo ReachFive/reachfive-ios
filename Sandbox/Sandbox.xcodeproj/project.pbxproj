@@ -60,6 +60,7 @@
 		B7AD81A115A533449D613799 /* CaptchaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63937D4F8538E22025E9210E /* CaptchaView.swift */; };
 		259207C998BAACBF3E815789 /* CaptchaView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5F0A0D361AA0DF22899C16A2 /* CaptchaView.xib */; };
 		F67B05331FF01D6898129706 /* CaptchaFoxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 904A0A108CED83599BE67453 /* CaptchaFoxController.swift */; };
+		F67B05341FF01D6898129707 /* CaptchaActionsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 904A0A118CED83599BE67454 /* CaptchaActionsController.swift */; };
 		C18387D6F3E61FCE7E10796D /* CaptchaWidgetController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82924DDB1DAA122ECF91D93A /* CaptchaWidgetController.swift */; };
 		98DE0DD0B6C5ACA19CE78D29 /* ReCaptchaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3061D54C3F151EA367E66A2F /* ReCaptchaController.swift */; };
 /* End PBXBuildFile section */
@@ -117,6 +118,7 @@
 		63937D4F8538E22025E9210E /* CaptchaView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptchaView.swift; sourceTree = "<group>"; };
 		5F0A0D361AA0DF22899C16A2 /* CaptchaView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CaptchaView.xib; sourceTree = "<group>"; };
 		904A0A108CED83599BE67453 /* CaptchaFoxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptchaFoxController.swift; sourceTree = "<group>"; };
+		904A0A118CED83599BE67454 /* CaptchaActionsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptchaActionsController.swift; sourceTree = "<group>"; };
 		82924DDB1DAA122ECF91D93A /* CaptchaWidgetController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptchaWidgetController.swift; sourceTree = "<group>"; };
 		3061D54C3F151EA367E66A2F /* ReCaptchaController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReCaptchaController.swift; sourceTree = "<group>"; };
 		EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginPasskeyController.swift; sourceTree = "<group>"; };
@@ -227,6 +229,7 @@
 			isa = PBXGroup;
 			children = (
 				82924DDB1DAA122ECF91D93A /* CaptchaWidgetController.swift */,
+				904A0A118CED83599BE67454 /* CaptchaActionsController.swift */,
 				904A0A108CED83599BE67453 /* CaptchaFoxController.swift */,
 				3061D54C3F151EA367E66A2F /* ReCaptchaController.swift */,
 			);
@@ -462,6 +465,7 @@
 				1DEDA8A6CA62B16118BDB49A /* CaptchaStore.swift in Sources */,
 				B7AD81A115A533449D613799 /* CaptchaView.swift in Sources */,
 				F67B05331FF01D6898129706 /* CaptchaFoxController.swift in Sources */,
+				F67B05341FF01D6898129707 /* CaptchaActionsController.swift in Sources */,
 				C18387D6F3E61FCE7E10796D /* CaptchaWidgetController.swift in Sources */,
 				98DE0DD0B6C5ACA19CE78D29 /* ReCaptchaController.swift in Sources */,
 				2A65D1282E44BD90004B0004 /* TrustedDevicesViewController.swift in Sources */,

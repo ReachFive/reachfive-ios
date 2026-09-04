@@ -16,6 +16,7 @@ class SettingsViewController: UIViewController {
     private enum CaptchaRow: Int, CaseIterable {
         case status
         case consumesOnUse
+        case editActions
         case obtainCaptchaFoxToken
         case obtainReCaptchaToken
         case clearStore
@@ -143,6 +144,11 @@ class SettingsViewController: UIViewController {
             switchView.setOn(CaptchaStore.consumesOnUse, animated: false)
             switchView.addTarget(self, action: #selector(consumesOnUseChanged(_:)), for: .valueChanged)
             cell.accessoryView = switchView
+        case .editActions:
+            let actions = CaptchaStore.actions
+            cell.textLabel?.text = "Actions: \(actions.joined(separator: ", "))"
+            cell.textLabel?.textColor = .secondaryLabel
+            cell.accessoryType = .disclosureIndicator
         case .obtainCaptchaFoxToken:
             cell.textLabel?.text = "Get a CaptchaFox token"
             cell.accessoryType = .disclosureIndicator
@@ -160,6 +166,8 @@ class SettingsViewController: UIViewController {
         switch row {
         case .status, .consumesOnUse:
             break
+        case .editActions:
+            navigationController?.pushViewController(CaptchaActionsController(), animated: true)
         case .obtainCaptchaFoxToken:
             navigationController?.pushViewController(CaptchaFoxController(), animated: true)
         case .obtainReCaptchaToken:

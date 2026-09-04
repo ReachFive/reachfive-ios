@@ -13,6 +13,36 @@ enum CaptchaStore {
 
     private static let entryKey = "captchaEntry"
     private static let consumesOnUseKey = "captchaConsumesOnUse"
+    private static let actionsKey = "captchaActions"
+
+    /// The action names the SDK web UI uses. A starting point, not a rule: the actions a client
+    /// accepts are whatever its console configuration lists, and nothing forces them to be these.
+    static let defaultActions = ["login", "signup", "update_email", "passwordless_email", "passwordless_phone", "account_recovery", "password_reset_requested"]
+
+    /// The actions offered when minting a token, in the order the picker shows them. Editable in
+    /// Settings, because a token is refused when its action is not one the client declares — and no
+    /// error says so.
+    static var actions: [String] {
+        get {
+            guard let stored = UserDefaults.standard.stringArray(forKey: actionsKey), !stored.isEmpty else {
+                return defaultActions
+            }
+            return stored
+        }
+        set {
+            let cleaned = newValue.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+            if cleaned.isEmpty {
+                UserDefaults.standard.removeObject(forKey: actionsKey)
+            } else {
+                UserDefaults.standard.set(cleaned, forKey: actionsKey)
+            }
+        }
+    }
+
+    /// Back to ``defaultActions``.
+    static func resetActions() {
+        UserDefaults.standard.removeObject(forKey: actionsKey)
+    }
 
     static var entry: Entry? {
         get {
