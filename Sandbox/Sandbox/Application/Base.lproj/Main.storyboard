@@ -435,7 +435,7 @@
         <!--Recovery Start-->
         <scene sceneID="JaR-FT-pVy">
             <objects>
-                <viewController title="Recovery Start" id="9TN-Qr-dqK" customClass="RecoveryStartController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="RecoveryStartController" title="Recovery Start" id="9TN-Qr-dqK" customClass="RecoveryStartController" customModule="Sandbox" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="pe2-oD-l3d">
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -452,22 +452,35 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="username"/>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="38k-m4-u0D">
-                                <rect key="frame" x="119" y="290" width="164" height="40.666666666666686"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Send recovery link"/>
-                                <connections>
-                                    <action selector="sendLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="dYn-Lk-XKE"/>
-                                </connections>
-                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="rec-St-001">
+                                <rect key="frame" x="52" y="290" width="298" height="40.666666666666686"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="38k-m4-u0D">
+                                        <rect key="frame" x="0.0" y="0.0" width="164" height="40.666666666666686"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="filled" title="Send recovery link"/>
+                                        <connections>
+                                            <action selector="sendLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="dYn-Lk-XKE"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rec-Bt-002">
+                                        <rect key="frame" x="176" y="0.0" width="122" height="40.666666666666686"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="gray" title="Send reset link"/>
+                                        <connections>
+                                            <action selector="sendResetLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="rec-Ac-003"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="546-Za-vvZ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="5KP-Ry-JMm" firstAttribute="trailing" secondItem="pe2-oD-l3d" secondAttribute="trailingMargin" id="5OS-AQ-anB"/>
-                            <constraint firstItem="38k-m4-u0D" firstAttribute="top" secondItem="5KP-Ry-JMm" secondAttribute="bottom" constant="40" id="7KS-oW-16K"/>
+                            <constraint firstItem="rec-St-001" firstAttribute="top" secondItem="5KP-Ry-JMm" secondAttribute="bottom" constant="40" id="7KS-oW-16K"/>
                             <constraint firstItem="5KP-Ry-JMm" firstAttribute="leading" secondItem="DyU-iH-FUf" secondAttribute="leading" id="8uX-Yh-uTa"/>
-                            <constraint firstItem="38k-m4-u0D" firstAttribute="centerX" secondItem="546-Za-vvZ" secondAttribute="centerX" id="O5E-bU-QTX"/>
+                            <constraint firstItem="rec-St-001" firstAttribute="centerX" secondItem="546-Za-vvZ" secondAttribute="centerX" id="O5E-bU-QTX"/>
                             <constraint firstItem="5KP-Ry-JMm" firstAttribute="leading" secondItem="DyU-iH-FUf" secondAttribute="leading" id="OOZ-hv-Yr3"/>
                             <constraint firstItem="5KP-Ry-JMm" firstAttribute="top" secondItem="DyU-iH-FUf" secondAttribute="bottom" constant="8" id="Py7-CC-7os"/>
                             <constraint firstItem="DyU-iH-FUf" firstAttribute="leading" secondItem="pe2-oD-l3d" secondAttribute="leadingMargin" id="TXZ-F7-5Le"/>
@@ -475,7 +488,7 @@
                             <constraint firstItem="546-Za-vvZ" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="DyU-iH-FUf" secondAttribute="trailing" symbolic="YES" id="bhj-I2-dJh"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Recover Account" id="0Iq-TK-5y9"/>
+                    <navigationItem key="navigationItem" title="Recovery &amp; Reset" id="0Iq-TK-5y9"/>
                     <connections>
                         <outlet property="username" destination="5KP-Ry-JMm" id="zET-CN-jsn"/>
                     </connections>
@@ -1387,7 +1400,7 @@
                                             <rect key="frame" x="0.0" y="0.0" width="383.66666666666669" height="23.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" text="Recover Account" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7v3-6C-fQ8">
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" text="Recovery &amp; Reset" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7v3-6C-fQ8">
                                                     <rect key="frame" x="8" y="0.0" width="367.66666666666669" height="23.5"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -1801,6 +1814,15 @@
                             <stackView hidden="YES" opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="L5x-gv-QiR" userLabel="Login Provider Stack View">
                                 <rect key="frame" x="16" y="316" width="370" height="64"/>
                             </stackView>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="frgt-Bt-001" userLabel="Forgot Password">
+                                <rect key="frame" x="277" y="532" width="109" height="20.333333333333371"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                <state key="normal" title="Forgot password?"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Forgot password?"/>
+                                <connections>
+                                    <action selector="forgotPassword:" destination="MTQ-Xb-hzf" eventType="touchUpInside" id="frgt-Ac-002"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="m5J-7H-g3f"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -1821,7 +1843,9 @@
                             <constraint firstItem="u6a-4F-fRl" firstAttribute="centerX" secondItem="4G2-0w-glg" secondAttribute="centerX" id="eb1-U9-ZCU"/>
                             <constraint firstItem="tSE-uc-6si" firstAttribute="leading" secondItem="Hfq-bj-MWI" secondAttribute="leading" id="hQA-GO-i9e"/>
                             <constraint firstItem="LlH-cL-TRX" firstAttribute="trailing" secondItem="4G2-0w-glg" secondAttribute="trailingMargin" id="ikK-iE-ga6"/>
-                            <constraint firstItem="xzw-kf-Pwc" firstAttribute="top" secondItem="tSE-uc-6si" secondAttribute="bottom" constant="20" id="iug-BT-l5p"/>
+                            <constraint firstItem="xzw-kf-Pwc" firstAttribute="top" secondItem="frgt-Bt-001" secondAttribute="bottom" constant="12" id="iug-BT-l5p"/>
+                            <constraint firstItem="frgt-Bt-001" firstAttribute="top" secondItem="tSE-uc-6si" secondAttribute="bottom" constant="8" id="frgt-Cn-003"/>
+                            <constraint firstItem="frgt-Bt-001" firstAttribute="trailing" secondItem="tSE-uc-6si" secondAttribute="trailing" id="frgt-Cn-004"/>
                             <constraint firstItem="m5J-7H-g3f" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="xzw-kf-Pwc" secondAttribute="trailing" symbolic="YES" id="pyH-nX-aMb"/>
                             <constraint firstItem="b96-ln-GEZ" firstAttribute="centerX" secondItem="4G2-0w-glg" secondAttribute="centerX" id="rPV-wQ-Y8n"/>
                             <constraint firstItem="xzw-kf-Pwc" firstAttribute="centerX" secondItem="4G2-0w-glg" secondAttribute="centerX" id="sQq-th-cWK"/>
@@ -1839,6 +1863,7 @@
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="createAccountButton" destination="b96-ln-GEZ" id="L4Z-xQ-MLc"/>
+                        <outlet property="forgotPasswordButton" destination="frgt-Bt-001" id="frgt-Ou-005"/>
                         <outlet property="loginButton" destination="xzw-kf-Pwc" id="jkj-oP-Djk"/>
                         <outlet property="loginProviderStackView" destination="L5x-gv-QiR" id="OKG-8u-q80"/>
                         <outlet property="passwordField" destination="tSE-uc-6si" id="ekW-7J-v19"/>

@@ -306,7 +306,7 @@ extension ProfileController {
             return actions
         }
 
-        actions.append(UIAction(title: "Update", handler: { _ in /* self.updateEmail() */ }))
+        actions.append(UIAction(title: "Update", handler: { _ in self.updateEmail() }))
         actions.append(UIAction(title: "Delete", handler: { _ in /* self.deleteEmail() */ }))
         actions.append(UIAction(title: "Copy", handler: { _ in UIPasteboard.general.string = email }))
 
@@ -413,6 +413,34 @@ extension ProfileController {
             enrollMfaCredential(registering: .PhoneNumber(phoneNumber), token: token)
         }
         alert.addAction(addAction)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
+    }
+
+    func updateEmail() {
+        guard let authToken else { return }
+        let alert = UIAlertController(title: "Update Email", message: "Enter the new email address.", preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.placeholder = "Email"
+            textField.keyboardType = .emailAddress
+            textField.autocapitalizationType = .none
+        }
+        let updateAction = UIAlertAction(title: "Update", style: .default) { [weak self] _ in
+            guard let self, let email = alert.textFields?.first?.text, !email.isEmpty else { return }
+            Task {
+                do {
+                    let profile = try await AppDelegate.reachfive().updateEmail(authToken: authToken, email: email, captcha: CaptchaStore.take())
+                    self.profile = profile
+                    self.profileData.reloadData()
+                } catch {
+                    self.presentAlert(
+                        title: "Update email failed",
+                        message: "\(error.localizedDescription)\n\nCheck that the profile has the full_write scope and that an update-email template is configured for this account."
+                    )
+                }
+            }
+        }
+        alert.addAction(updateAction)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(alert, animated: true)
     }

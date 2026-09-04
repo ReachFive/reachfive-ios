@@ -8,6 +8,7 @@ class DemoController: UIViewController {
     @IBOutlet var passwordLabel: UILabel!
     @IBOutlet var passwordField: UITextField!
     @IBOutlet var loginButton: UIButton!
+    @IBOutlet var forgotPasswordButton: UIButton!
     @IBOutlet var createAccountButton: UIButton!
     @IBOutlet var loginProviderStackView: UIStackView!
     var tokenNotification: NSObjectProtocol?
@@ -40,6 +41,7 @@ class DemoController: UIViewController {
         passwordField.isHidden = true
         passwordLabel.isHidden = true
         loginButton.isHidden = true
+        forgotPasswordButton.isHidden = true
         createAccountButton.isHidden = true
         loginProviderStackView.isHidden = true
 
@@ -67,6 +69,7 @@ class DemoController: UIViewController {
                 self.usernameField.isHidden = false
                 self.usernameLabel.isHidden = false
                 self.loginButton.isHidden = false
+                self.forgotPasswordButton.isHidden = false
                 self.createAccountButton.isHidden = false
                 self.passwordField.isHidden = false
                 self.passwordLabel.isHidden = false
@@ -87,6 +90,12 @@ class DemoController: UIViewController {
                 }
             }
         }
+    }
+
+    @IBAction func forgotPassword(_ sender: Any) {
+        guard let recoveryController = storyboard?.instantiateViewController(withIdentifier: "RecoveryStartController") as? RecoveryStartController else { return }
+        recoveryController.initialUsername = usernameField.text
+        navigationController?.pushViewController(recoveryController, animated: true)
     }
 
     @IBAction func createAccount(_ sender: Any) {
