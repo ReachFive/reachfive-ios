@@ -32,7 +32,8 @@ class PasswordlessController: UIViewController {
                             email: emailInput.text ?? "",
                             redirectUri: typedRedirectUri(),
                             origin: "PasswordlessController.loginWithEmail"
-                        )
+                        ),
+                        captcha: CaptchaStore.take()
                     )
                 self.presentAlert(title: "Login with email", message: "Success")
             } catch {
@@ -50,7 +51,8 @@ class PasswordlessController: UIViewController {
                             phoneNumber: phoneNumberInput.text ?? "",
                             redirectUri: typedRedirectUri(),
                             origin: "PasswordlessController.loginWithPhoneNumber"
-                        )
+                        ),
+                        captcha: CaptchaStore.take()
                     )
                 self.presentAlert(title: "Login with phone number", message: "Success")
             } catch {

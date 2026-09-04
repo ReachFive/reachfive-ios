@@ -61,7 +61,7 @@ class DemoController: UIViewController {
         }
         Task { @MainActor in
             do {
-                let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode)
+                let flow = try await AppDelegate.reachfive().login(withRequest: NativeLoginRequest(presenting: Presentation(from: self), origin: "DemoController.viewDidAppear"), usingModalAuthorizationFor: types, display: mode, captcha: CaptchaStore.take())
                 flowTheLogin(flow)
             } catch {
                 self.usernameField.isHidden = false
@@ -169,11 +169,12 @@ class DemoController: UIViewController {
         guard let pass = passwordField.text, !pass.isEmpty, let user = usernameField.text, !user.isEmpty else { return }
         let origin = "DemoController.loginWithPassword"
 
+        let captcha = CaptchaStore.take()
         await handleLoginFlow {
             if user.contains("@") {
-                try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
+                try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin, captcha: captcha)
             } else {
-                try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
+                try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin, captcha: captcha)
             }
         }
     }

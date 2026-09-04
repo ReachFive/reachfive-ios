@@ -61,7 +61,8 @@ class LoginWithPasswordController: UIViewController {
                         customIdentifier: customIdentifier,
                         password: password,
                         scope: selectedScopes,
-                        origin: "LoginWithPasswordController.loginWithPassword"
+                        origin: "LoginWithPasswordController.loginWithPassword",
+                        captcha: CaptchaStore.take()
                     )
             }
         }

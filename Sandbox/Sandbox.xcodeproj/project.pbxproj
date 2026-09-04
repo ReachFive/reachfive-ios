@@ -56,6 +56,10 @@
 		EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91A17236291622417196AE /* SignupPasskeyController.swift */; };
 		EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */; };
 		EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */; };
+		1DEDA8A6CA62B16118BDB49A /* CaptchaStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5663A9FC74BA8C128F17F22 /* CaptchaStore.swift */; };
+		B7AD81A115A533449D613799 /* CaptchaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63937D4F8538E22025E9210E /* CaptchaView.swift */; };
+		259207C998BAACBF3E815789 /* CaptchaView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5F0A0D361AA0DF22899C16A2 /* CaptchaView.xib */; };
+		F67B05331FF01D6898129706 /* CaptchaFoxController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 904A0A108CED83599BE67453 /* CaptchaFoxController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -107,6 +111,10 @@
 		A00000032E2ED7F100B26535 /* SessionDeviceCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SessionDeviceCell.xib; sourceTree = "<group>"; };
 		EA91A17236291622417196AE /* SignupPasskeyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignupPasskeyController.swift; sourceTree = "<group>"; };
 		EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecureStorage.swift; sourceTree = "<group>"; };
+		F5663A9FC74BA8C128F17F22 /* CaptchaStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptchaStore.swift; sourceTree = "<group>"; };
+		63937D4F8538E22025E9210E /* CaptchaView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptchaView.swift; sourceTree = "<group>"; };
+		5F0A0D361AA0DF22899C16A2 /* CaptchaView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CaptchaView.xib; sourceTree = "<group>"; };
+		904A0A108CED83599BE67453 /* CaptchaFoxController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaptchaFoxController.swift; sourceTree = "<group>"; };
 		EA91AFCB7679A47D752EA6B3 /* LoginPasskeyController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginPasskeyController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -155,6 +163,8 @@
 			children = (
 				2A1957172E423904008393DB /* DecodedTokenView.swift */,
 				2A1957182E423904008393DB /* DecodedTokenView.xib */,
+				63937D4F8538E22025E9210E /* CaptchaView.swift */,
+				5F0A0D361AA0DF22899C16A2 /* CaptchaView.xib */,
 				2A1956FB2E4111BF008393DB /* EditableProfileFieldCell.swift */,
 				2A1956FC2E4111BF008393DB /* EditableProfileFieldCell.xib */,
 				2AD29AB22E2E931500B26535 /* EditableSectionHeaderView.swift */,
@@ -189,6 +199,7 @@
 			children = (
 				2A1957132E4214D9008393DB /* UIViewController+Handling.swift */,
 				EA91A294C5DD405D6A38ADCC /* SecureStorage.swift */,
+				F5663A9FC74BA8C128F17F22 /* CaptchaStore.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -196,6 +207,7 @@
 		2AE326C42E3A4010007D6763 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				8D6C7A106C45EADC6D25D198 /* Captcha */,
 				2AE326C72E3A414C007D6763 /* Passkey */,
 				2AE326C82E3A4399007D6763 /* Password */,
 				2AE326C92E3A440C007D6763 /* Passwordless */,
@@ -205,6 +217,14 @@
 				2AE326CA2E3A4444007D6763 /* Web */,
 			);
 			path = Controllers;
+			sourceTree = "<group>";
+		};
+		8D6C7A106C45EADC6D25D198 /* Captcha */ = {
+			isa = PBXGroup;
+			children = (
+				904A0A108CED83599BE67453 /* CaptchaFoxController.swift */,
+			);
+			path = Captcha;
 			sourceTree = "<group>";
 		};
 		2AE326C52E3A4034007D6763 /* Recovery */ = {
@@ -369,6 +389,7 @@
 				A00000042E2ED7F100B26535 /* SessionDeviceCell.xib in Resources */,
 				2AD29AB52E2E9F9F00B26535 /* EditableSectionHeaderView.xib in Resources */,
 				2A1957192E423904008393DB /* DecodedTokenView.xib in Resources */,
+				259207C998BAACBF3E815789 /* CaptchaView.xib in Resources */,
 				34173205229D6B6400681CFD /* Assets.xcassets in Resources */,
 				34173203229D6B6400681CFD /* Main.storyboard in Resources */,
 				2A1957042E4111BF008393DB /* LogoutCell.xib in Resources */,
@@ -432,6 +453,9 @@
 				2A65D1232E4253BE004B0004 /* MfaController.swift in Sources */,
 				2A65D1242E4253BE004B0004 /* PasskeyCredentialController.swift in Sources */,
 				EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */,
+				1DEDA8A6CA62B16118BDB49A /* CaptchaStore.swift in Sources */,
+				B7AD81A115A533449D613799 /* CaptchaView.swift in Sources */,
+				F67B05331FF01D6898129706 /* CaptchaFoxController.swift in Sources */,
 				2A65D1282E44BD90004B0004 /* TrustedDevicesViewController.swift in Sources */,
 				EA91A0276CEFFE580E9C24DD /* SignupPasskeyController.swift in Sources */,
 				EA91A44398415C17C88BD067 /* LoginPasskeyController.swift in Sources */,

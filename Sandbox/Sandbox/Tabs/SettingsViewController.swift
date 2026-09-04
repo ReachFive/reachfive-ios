@@ -7,9 +7,17 @@ class SettingsViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
     private enum Section: Int, CaseIterable {
+        case captcha
         case scopes
         case startupActions
         case cookies
+    }
+
+    private enum CaptchaRow: Int, CaseIterable {
+        case status
+        case consumesOnUse
+        case obtainCaptchaFoxToken
+        case clearStore
     }
 
     private var availableScopes: [String] = []
@@ -41,6 +49,7 @@ class SettingsViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsScopeCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsStartupCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsCookieCell")
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "settingsCaptchaCell")
 
         let config = AppDelegate.reachfive().sdkConfig
         environmentDomain.text = config.domain
@@ -50,6 +59,7 @@ class SettingsViewController: UIViewController {
         super.viewWillAppear(animated)
         loadCookies()
         loadScopes()
+        tableView.reloadSections(IndexSet(integer: Section.captcha.rawValue), with: .none)
     }
 
     private func setupTableView() {
@@ -106,6 +116,57 @@ class SettingsViewController: UIViewController {
         }
         saveSettings()
     }
+
+    private func configureCaptchaCell(_ cell: UITableViewCell, at indexPath: IndexPath) {
+        cell.accessoryView = nil
+        cell.accessoryType = .none
+        cell.selectionStyle = .default
+        cell.textLabel?.numberOfLines = 0
+        cell.textLabel?.textColor = .label
+
+        guard let row = CaptchaRow(rawValue: indexPath.row) else { return }
+        switch row {
+        case .status:
+            cell.selectionStyle = .none
+            if let entry = CaptchaStore.peek() {
+                let age = Date().timeIntervalSince(entry.obtainedAt)
+                cell.textLabel?.text = "\(entry.provider) · \(entry.action ?? "no action") · \(Int(age))s ago"
+                cell.textLabel?.textColor = age > 120 ? .systemRed : .label
+            } else {
+                cell.textLabel?.text = "No token"
+            }
+        case .consumesOnUse:
+            cell.selectionStyle = .none
+            cell.textLabel?.text = "Consume token on use"
+            let switchView = UISwitch(frame: .zero)
+            switchView.setOn(CaptchaStore.consumesOnUse, animated: false)
+            switchView.addTarget(self, action: #selector(consumesOnUseChanged(_:)), for: .valueChanged)
+            cell.accessoryView = switchView
+        case .obtainCaptchaFoxToken:
+            cell.textLabel?.text = "Get a CaptchaFox token"
+            cell.accessoryType = .disclosureIndicator
+        case .clearStore:
+            cell.textLabel?.text = "Clear the store"
+            cell.textLabel?.textColor = .systemRed
+        }
+    }
+
+    private func didSelectCaptchaRow(at indexPath: IndexPath) {
+        guard let row = CaptchaRow(rawValue: indexPath.row) else { return }
+        switch row {
+        case .status, .consumesOnUse:
+            break
+        case .obtainCaptchaFoxToken:
+            navigationController?.pushViewController(CaptchaFoxController(), animated: true)
+        case .clearStore:
+            CaptchaStore.clear()
+            tableView.reloadSections(IndexSet(integer: Section.captcha.rawValue), with: .none)
+        }
+    }
+
+    @objc func consumesOnUseChanged(_ sender: UISwitch) {
+        CaptchaStore.consumesOnUse = sender.isOn
+    }
 }
 
 extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
@@ -116,6 +177,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let section = Section(rawValue: section) else { return 0 }
         switch section {
+        case .captcha:
+            return CaptchaRow.allCases.count
         case .scopes:
             return availableScopes.count
         case .startupActions:
@@ -128,6 +191,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         guard let section = Section(rawValue: section) else { return nil }
         switch section {
+        case .captcha:
+            return "Captcha"
         case .scopes:
             return "Scopes"
         case .startupActions:
@@ -139,6 +204,7 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellIdentifier = switch indexPath.section {
+        case Section.captcha.rawValue: "settingsCaptchaCell"
         case Section.scopes.rawValue: "settingsScopeCell"
         case Section.startupActions.rawValue: "settingsStartupCell"
         case Section.cookies.rawValue: "settingsCookieCell"
@@ -149,6 +215,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         guard let section = Section(rawValue: indexPath.section) else { return cell }
 
         switch section {
+        case .captcha:
+            configureCaptchaCell(cell, at: indexPath)
         case .scopes:
             cell.selectionStyle = .none
             let scope = availableScopes[indexPath.row]
@@ -176,6 +244,8 @@ extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
         guard let section = Section(rawValue: indexPath.section) else { return }
 
         switch section {
+        case .captcha:
+            didSelectCaptchaRow(at: indexPath)
         case .scopes:
             break
         case .startupActions:

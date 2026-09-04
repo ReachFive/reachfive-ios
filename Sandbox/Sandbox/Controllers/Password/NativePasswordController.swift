@@ -25,12 +25,13 @@ class NativePasswordController: UIViewController {
         guard let pass = password.text, !pass.isEmpty, let user = username.text, !user.isEmpty else { return }
         let origin = "NativePasswordController.passwordEditingDidEnd"
 
+        let captcha = CaptchaStore.take()
         Task {
             await handleLoginFlow {
                 if user.contains("@") {
-                    try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin)
+                    try await AppDelegate.reachfive().loginWithPassword(email: user, password: pass, origin: origin, captcha: captcha)
                 } else {
-                    try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin)
+                    try await AppDelegate.reachfive().loginWithPassword(phoneNumber: user, password: pass, origin: origin, captcha: captcha)
                 }
             }
         }
@@ -41,7 +42,9 @@ class NativePasswordController: UIViewController {
         Task {
             let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "NativePasswordController.viewDidAppear")
             await handleLoginFlow {
-                try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Password], display: .Always)
+                // The token is consumed on the way in, even if the system sheet is dismissed or a
+                // passkey is picked instead: the call is decided before the user chooses a credential.
+                try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Password], display: .Always, captcha: CaptchaStore.take())
             }
         }
     }
