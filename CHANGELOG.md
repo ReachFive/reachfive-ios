@@ -6,6 +6,12 @@
 - Add a public SdkVersion which contains the current version of this Sdk
 - Captcha support on every endpoint this SDK calls that the server can protect: `loginWithPassword`, `signup(profile:)`, `requestPasswordReset`, `requestAccountRecovery`, `startPasswordless`, `updateEmail` and `login(withRequest:usingModalAuthorizationFor:display:)` take a new optional `captcha: Captcha?`, a token and its `CaptchaProvider` (`.reCaptcha`, `.captchaFox`, or any name the server gains later). On the modal sign-in it only applies if a saved password is selected.
 
+### Bug fixes
+- `/oauth/authorize` no longer fails opaquely when it does not redirect to the app's custom scheme. The `ApiError` the server returns is now decoded and carried by the thrown error (a rejected `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`, which was being discarded), and a response that carries no error reports its HTTP status. Like every other call, it now answers a `400` with a `RequestError` and a `401` with an `AuthFailure` instead of a `TechnicalError` whatever the status. Its response is also logged, where a successful call used to leave no trace of one.
+- A network interception layer — SSL pinning, an APM agent, a `URLProtocol` — no longer breaks the login by answering the redirection in the SDK's place. Whichever way it answers, the callback is recovered; a redirection leading elsewhere now says where, and a certificate the pinning refuses comes back as an untouched `URLError`.
+- An error response whose body is not an `ApiError` — an HTML page from a proxy, an empty body — now reports its HTTP status, on every call, instead of surfacing the JSON decoding failure alone.
+- A request whose task ends with neither a response nor an error no longer takes the app down, and is reported as a `TechnicalError` instead.
+
 ## v11.0.0
 
 ### Breaking changes
