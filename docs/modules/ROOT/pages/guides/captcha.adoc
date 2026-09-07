@@ -1,0 +1,111 @@
+= Captcha on iOS
+
+== Introduction
+
+Several {company} endpoints can be protected by a captcha.
+When a captcha is enabled for a client, a call that carries no token, or one the captcha service refuses, is rejected.
+
+The SDK forwards a token; **it does not produce one**.
+Obtaining the token is your application's job, and this guide explains why, how, and what goes wrong.
+
+== Which methods accept a captcha
+
+Captcha protection is enabled per client and per endpoint in the {company} console.
+The endpoint names used there map onto the SDK as follows.
+
+[cols="4,3,5a"]
+|===
+|SDK method |Endpoint name in the console |Notes
+
+|xref:loginWithPassword.adoc[]
+|`password_login`
+|
+
+|xref:signup.adoc[]
+|`signup_token`
+|Not `signup`: the SDK signs up through the token endpoint.
+
+|xref:requestPasswordReset.adoc[]
+|`forgot_password`
+|
+
+|xref:requestAccountRecovery.adoc[]
+|`forgot_password`
+|Shares its configuration with `requestPasswordReset`; enabling one enables the other.
+
+|xref:startPasswordless.adoc[]
+|`passwordless`
+|Only the passwordless start, not an MFA step-up.
+
+|xref:updateEmail.adoc[]
+|`update_email`
+|
+|===
+
+Enabling a captcha on any of these endpoints rejects calls from an application that sends no token, whatever SDK version it uses.
+Plan the two changes together.
+
+== Obtaining a token
+
+Both captcha services {company} verifies mint their tokens in a web context, so an application with a native form needs one:
+
+* **reCAPTCHA** — `grecaptcha.execute(siteKey, {action})`, from a page served on a domain allowed by your site key.
+  {company} verifies the token against Google's `siteverify` endpoint, so the key must be a **website** key.
+  Tokens from Google's native iOS SDK belong to reCAPTCHA Enterprise, are verified through a different API, and are refused.
+* **CaptchaFox** — the CaptchaFox widget, from a site configuration whose domain matches the page serving it.
+
+=== Prototyping reCAPTCHA in a native WKWebView
+
+reCAPTCHA validates the calling page's domain server-side, so a `WKWebView` loading a bare HTML string with `loadHTMLString(_:baseURL:)` gives the document no origin at all and is rejected outright.
+`WKWebView.loadSimulatedRequest(_:responseHTML:)` (iOS 15+) gives the page a real origin instead — for example `https://localhost/captcha`, from a request the SDK never actually sends over the network — and `localhost` is a domain reCAPTCHA's console lets a site key allow explicitly.
+
+Whether Google's domain check accepts that simulated origin the same way it accepts a page genuinely served from an allowed host is unresolved: `grecaptcha.execute()` neither resolves nor rejects for a site key Google does not recognize at all, with or without a real origin behind the page — the silence is the same either way, so it settles nothing about the origin question specifically. Confirming this needs a real, registered site key.
+
+If a simulated origin turns out not to satisfy the check, serve the page from the integration's own domain instead, added to the site key's allowed domains — also the path to recommend for a production integration, since a domain a user can navigate to and verify is a stronger signal than `localhost`.
+As a last resort for a demo only, a test key with "Domain/Package Name Validation" unchecked accepts any origin, but then requires verifying the `hostname` Google returns server-side — {company}'s backend does not read it, so that key must never reach production.
+
+A `WKWebView` that only runs the captcha and hands back a token never sees the user's credentials, so it is not the embedded user-agent that https://www.rfc-editor.org/rfc/rfc8252[RFC 8252^] warns against.
+The alternative that needs no web view of your own is to authenticate through the hosted login page — see xref:webviewLogin.adoc[] — where the captcha is handled by the page itself and you have nothing to pass.
+
+== Passing the token
+
+[source,swift]
+----
+include::example$loginWithPasswordWithCaptcha.swift[]
+----
+
+Always pass the provider alongside the token.
+Left to guess, the server runs every verifier configured for the client and all of them must pass, so a reCAPTCHA token would be submitted to CaptchaFox as well.
+
+`CaptchaProvider` is a struct rather than an enum, so a service added on the server side can be named without waiting for an SDK release:
+
+[source,swift]
+----
+Captcha(token: captchaToken, provider: CaptchaProvider(rawValue: "newcomer"))
+----
+
+A name the server does not know is refused as an invalid parameter, before any verification takes place — so a typo here reads as a malformed request, not as a failed challenge.
+
+== Pitfalls
+
+Four properties of a captcha token cause most integration failures, and none of them is visible from the SDK.
+
+Single use::
+A token is consumed by the first verification. Reusing it for a second call fails.
+
+Short lifetime::
+Roughly two minutes for reCAPTCHA. Obtain the token when the user submits, not when the screen appears.
+
+The action is sealed inside the token::
+It is chosen when you mint it (`grecaptcha.execute(siteKey, {action: 'login'})`) and the server compares it against the actions configured for the client.
+A token minted for `login` is refused on a signup as soon as the client declares its actions.
+This is why no method takes an action parameter.
+
+The score threshold::
+reCAPTCHA returns a score, compared against the threshold configured for the client (0.5 by default).
+A web view with no browsing history tends to score low, so expect to tune the threshold rather than assume a bug.
+
+== Diagnosing a rejection
+
+A refused captcha returns the same error as any other access denial, deliberately: telling the two apart would let an attacker know whether their password or their token was the problem.
+The reason is therefore not in the error your application receives — it is in the {company} server logs, which distinguish a missing token, a failed challenge and a technical error.

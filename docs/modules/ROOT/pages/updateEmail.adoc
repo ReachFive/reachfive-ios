@@ -7,7 +7,8 @@ AppDelegate.reachfive().updateEmail(
     <<authToken,authToken>>,
     <<updateEmail,email>>,
     // Optional arguments
-    <<redirectUrl>>
+    <<redirectUrl>>,
+    <<captcha>>
 )
 ----
 
@@ -36,7 +37,7 @@ include::example${docname}.swift[]
 |===
 |Parameter |Description
 
-include::partial$params.adoc[tags="authtoken,redirecturl,updateEmail"]
+include::partial$params.adoc[tags="authtoken,redirecturl,updateEmail,captcha"]
 
 |===
 

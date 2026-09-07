@@ -577,6 +577,35 @@ Allowed values are `female`, `male` and `other`.
 !===
 // end::profilesignuprequest[]
 
+// tag::captcha[]
+|[[captcha,captcha]] captcha `Captcha`
+| *optional* A captcha token your application obtained, forwarded as is to {company}.
+
+Needed as soon as the client's configuration enables a captcha on the endpoint this method calls, and ignored otherwise.
+ifeval::["{docname}" == "loginWithPassword"]
+In that configuration, this endpoint is named `password_login`.
+endif::[]
+ifeval::["{docname}" == "signup"]
+In that configuration, this endpoint is named `signup_token`.
+endif::[]
+ifeval::["{docname}" == "requestPasswordReset"]
+In that configuration, this endpoint is named `forgot_password`.
+endif::[]
+ifeval::["{docname}" == "requestAccountRecovery"]
+In that configuration, this endpoint is named `forgot_password`.
+endif::[]
+ifeval::["{docname}" == "startPasswordless"]
+In that configuration, this endpoint is named `passwordless`.
+endif::[]
+ifeval::["{docname}" == "updateEmail"]
+In that configuration, this endpoint is named `update_email`.
+endif::[]
+
+The SDK never produces the token: obtaining one is your application's job.
+A token is single-use and short-lived, and the action it was minted with is sealed inside it, so there is no action parameter to pass here.
+See xref:guides/captcha.adoc[] for how to obtain one and for the pitfalls.
+// end::captcha[]
+
 // tag::origin[]
 |[[origin, origin]]origin `string`
 | The origin of the call.
