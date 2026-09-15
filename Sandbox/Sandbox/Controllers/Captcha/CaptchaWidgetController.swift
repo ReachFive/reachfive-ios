@@ -1,4 +1,3 @@
-import Reach5
 import UIKit
 import WebKit
 
@@ -16,67 +15,17 @@ class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
     }
 }
 
-/// Shared shell for a captcha demo page: installs `CaptchaView`, wires its buttons, and writes
-/// whatever token comes back through the `captcha` script message to `CaptchaStore`. A subclass only
-/// supplies the provider's identity and how it loads its widget into the web view.
-class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
+/// A ``CaptchaController`` whose provider mints its token in a web page: shows a `WKWebView` for the
+/// duration of the challenge and takes the token from the `captcha` script message. A subclass only
+/// supplies how it loads its widget into that web view.
+class CaptchaWidgetController: CaptchaController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
     static let messageHandlerName = "captcha"
 
-    private(set) var captchaView: CaptchaView!
     private(set) var webView: WKWebView!
-
-    /// The `UserDefaults` key the site key is persisted under. Never a captcha secret — a site key is
-    /// public by design — but kept per-provider so trying both does not overwrite either.
-    var siteKeyDefaultsKey: String { fatalError("override siteKeyDefaultsKey") }
-
-    /// Whether this provider seals an action into its token. CaptchaFox does not, so its page hides
-    /// the picker rather than offer a choice that changes nothing.
-    var usesActions: Bool { true }
-
-    /// The `captcha_provider` value this page writes to `CaptchaStore`.
-    var providerRawValue: String { fatalError("override providerRawValue") }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-
-        let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(scrollView)
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-        ])
-
-        guard let captchaView = CaptchaView.create() else { return }
-        self.captchaView = captchaView
-        captchaView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(captchaView)
-        NSLayoutConstraint.activate([
-            captchaView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            captchaView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            captchaView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            captchaView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            captchaView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-        ])
-
         setupWebView()
-        captchaView.actionSegmentedControl.isHidden = !usesActions
-        if usesActions {
-            setupActionSegments()
-        }
-
-        captchaView.siteKeyField.text = UserDefaults.standard.string(forKey: siteKeyDefaultsKey)
-        captchaView.obtainButton.addTarget(self, action: #selector(obtainTapped), for: .touchUpInside)
-        captchaView.copyButton.addTarget(self, action: #selector(copyTapped), for: .touchUpInside)
-        captchaView.webViewContainer.isHidden = true
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        refreshActionSegmentsIfNeeded()
     }
 
     private func setupWebView() {
@@ -97,46 +46,9 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
         ])
     }
 
-    private func setupActionSegments() {
-        captchaView.actionSegmentedControl.removeAllSegments()
-        for (index, action) in CaptchaStore.actions.enumerated() {
-            captchaView.actionSegmentedControl.insertSegment(withTitle: action, at: index, animated: false)
-        }
-        captchaView.actionSegmentedControl.selectedSegmentIndex = 0
-    }
-
-    /// Rebuilt only when the list actually changed, so coming back to this page does not silently
-    /// reset the action that was picked.
-    private func refreshActionSegmentsIfNeeded() {
-        guard usesActions else { return }
-
-        let control: UISegmentedControl = captchaView.actionSegmentedControl
-        let shown = (0 ..< control.numberOfSegments).compactMap { control.titleForSegment(at: $0) }
-        if shown != CaptchaStore.actions {
-            setupActionSegments()
-        }
-    }
-
-    /// Read from the control rather than from the store: the list can be edited between building the
-    /// segments and reading the choice.
-    var selectedAction: String {
-        let control: UISegmentedControl = captchaView.actionSegmentedControl
-        let index = control.selectedSegmentIndex
-        guard index >= 0, index < control.numberOfSegments, let title = control.titleForSegment(at: index) else {
-            return CaptchaStore.actions[0]
-        }
-        return title
-    }
-
-    @objc private func obtainTapped() {
-        guard let siteKey = captchaView.siteKeyField.text, !siteKey.isEmpty else {
-            presentAlert(title: "Site key missing", message: "Enter a site key first.")
-            return
-        }
-        UserDefaults.standard.set(siteKey, forKey: siteKeyDefaultsKey)
-
+    override func obtain(siteKey: String, action: String) {
         captchaView.webViewContainer.isHidden = false
-        load(siteKey: siteKey, action: selectedAction, into: webView)
+        load(siteKey: siteKey, action: action, into: webView)
     }
 
     /// Loads the provider's widget into `webView` for `siteKey`, using `action` if the provider takes
@@ -145,44 +57,23 @@ class CaptchaWidgetController: UIViewController, WKScriptMessageHandler, WKNavig
         fatalError("override load(siteKey:action:into:)")
     }
 
-    @objc private func copyTapped() {
-        guard let token = CaptchaStore.peek()?.token else { return }
-        UIPasteboard.general.string = token
-
-        let originalText = captchaView.tokenLabel.text
-        captchaView.tokenLabel.text = "Copied!"
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            self?.captchaView.tokenLabel.text = originalText
-        }
-    }
-
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.name == Self.messageHandlerName, let token = message.body as? String else { return }
+        guard message.name == Self.messageHandlerName, let body = message.body as? String else { return }
 
-        if token.hasPrefix("error: ") {
-            captchaView.tokenLabel.text = token
-            captchaView.webViewContainer.isHidden = true
-            return
+        let errorPrefix = "error: "
+        if body.hasPrefix(errorPrefix) {
+            deliver(error: String(body.dropFirst(errorPrefix.count)))
+        } else {
+            deliver(token: body)
         }
-
-        CaptchaStore.entry = CaptchaStore.Entry(
-            token: token,
-            provider: providerRawValue,
-            action: usesActions ? selectedAction : nil,
-            obtainedAt: Date()
-        )
-
-        let truncated = token.count > 24 ? "\(token.prefix(24))…" : token
-        captchaView.tokenLabel.text = truncated
-        captchaView.webViewContainer.isHidden = true
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        captchaView.tokenLabel.text = "Page load failed: \(error.localizedDescription)"
+        deliver(error: "page load failed: \(error.localizedDescription)")
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        captchaView.tokenLabel.text = "Page load failed: \(error.localizedDescription)"
+        deliver(error: "page load failed: \(error.localizedDescription)")
     }
 
     // Without a `WKUIDelegate`, a page calling `alert`/`confirm`/`prompt` blocks its JS thread forever —
