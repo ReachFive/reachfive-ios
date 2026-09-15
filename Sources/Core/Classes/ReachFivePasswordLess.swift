@@ -81,7 +81,7 @@ extension ReachFive {
             do {
                 try await self.passwordlessCallback?(.success(authWithCode(code: code, pkce: pkce)))
             } catch {
-                self.passwordlessCallback?(.failure(error as! ReachFiveError))
+                self.passwordlessCallback?(.failure(ReachFiveError.wrapping(error)))
             }
         }
     }

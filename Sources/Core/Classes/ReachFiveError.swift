@@ -77,6 +77,16 @@ public enum ReachFiveError: Error, CustomStringConvertible, LocalizedError {
     case TechnicalError(reason: String, apiError: ApiError? = nil)
 }
 
+extension ReachFiveError {
+    /// Every failure the SDK reports is a `ReachFiveError`, but the system APIs it builds on throw their
+    /// own error types: `URLSession` reports a network failure as a `URLError`, for instance. Wrap
+    /// whatever is not already a `ReachFiveError` so that a caller — and the `Reach5Future` bridge, which
+    /// converts the failure into a typed `Future<T, ReachFiveError>` — always gets the documented type.
+    static func wrapping(_ error: Error) -> ReachFiveError {
+        error as? ReachFiveError ?? .TechnicalError(reason: error.localizedDescription)
+    }
+}
+
 public class ApiError: Codable, CustomStringConvertible {
     public var description: String {
         mkString(

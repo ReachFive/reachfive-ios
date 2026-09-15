@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Bug fixes
+- A network failure — airplane mode, no connection, timeout — no longer escapes as a `URLError`: `URLSession` errors are now reported as `ReachFiveError.TechnicalError`, both on a regular call and on the redirect that `/oauth/authorize` relies on. Every SDK call already documented `ReachFiveError` as the only error type it reports; letting a `URLError` through crashed the `Reach5Future` bridge, which casts the failure to `ReachFiveError`.
+- `interceptPasswordless` no longer traps when the code exchange fails: it cast the error to `ReachFiveError` with `as!`, so a network failure crashed the app instead of reaching the passwordless callback.
+
 ## v11.1.0
 
 ### New features

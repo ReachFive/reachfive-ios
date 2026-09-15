@@ -62,15 +62,28 @@ class DataRequest {
         return try onSuccess(data)
     }
 
+    /// `URLSession` reports a transport failure — no connection, timeout, TLS failure, cancelled task —
+    /// as a `URLError`, which is not a `ReachFiveError`. Translating it here keeps the SDK's contract:
+    /// nothing but a `ReachFiveError` ever reaches the caller.
+    private func data() async throws -> (Data, URLResponse) {
+        do {
+            return try await session.data(for: request)
+        } catch {
+            let reachFiveError = ReachFiveError.wrapping(error)
+            logger.log(error: reachFiveError)
+            throw reachFiveError
+        }
+    }
+
     func responseJson() async throws {
         logger.log(request: request)
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await data()
         try processHttpResponse(data: data, response: response) { _ in }
     }
 
     func responseJson<T: Decodable>(type: T.Type) async throws -> T {
         logger.log(request: request)
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await data()
         return try processHttpResponse(data: data, response: response) { data in
             try parseJson(json: data, type: T.self)
         }

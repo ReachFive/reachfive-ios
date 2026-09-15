@@ -74,7 +74,11 @@ class RedirectHandler: NSObject, URLSessionTaskDelegate {
 
             // empty error means request finished with success
             if let error {
-                continuation?.resume(throwing: error)
+                // Same translation as in `DataRequest`: the delegate hands over the `URLError` raised by
+                // the transport, and the SDK only ever reports a `ReachFiveError`.
+                let reachFiveError = ReachFiveError.wrapping(error)
+                Logger.shared.log(error: reachFiveError)
+                continuation?.resume(throwing: reachFiveError)
             } else {
                 continuation?.resume(throwing: ReachFiveError.TechnicalError(reason: "Request did not redirect as expected"))
             }
