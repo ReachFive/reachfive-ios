@@ -19,6 +19,7 @@ class SettingsViewController: UIViewController {
         case editActions
         case obtainCaptchaFoxToken
         case obtainReCaptchaToken
+        case obtainReCaptchaEnterpriseToken
         case clearStore
     }
 
@@ -155,6 +156,9 @@ class SettingsViewController: UIViewController {
         case .obtainReCaptchaToken:
             cell.textLabel?.text = "Get a reCAPTCHA token"
             cell.accessoryType = .disclosureIndicator
+        case .obtainReCaptchaEnterpriseToken:
+            cell.textLabel?.text = "Get a reCAPTCHA Enterprise token"
+            cell.accessoryType = .disclosureIndicator
         case .clearStore:
             cell.textLabel?.text = "Clear the store"
             cell.textLabel?.textColor = .systemRed
@@ -172,6 +176,8 @@ class SettingsViewController: UIViewController {
             navigationController?.pushViewController(CaptchaFoxController(), animated: true)
         case .obtainReCaptchaToken:
             navigationController?.pushViewController(ReCaptchaController(), animated: true)
+        case .obtainReCaptchaEnterpriseToken:
+            navigationController?.pushViewController(ReCaptchaEnterpriseController(), animated: true)
         case .clearStore:
             CaptchaStore.clear()
             tableView.reloadSections(IndexSet(integer: Section.captcha.rawValue), with: .none)
