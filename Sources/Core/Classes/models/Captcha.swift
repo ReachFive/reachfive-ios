@@ -23,5 +23,7 @@ public struct CaptchaProvider: RawRepresentable, Codable, Equatable {
 
     public static let reCaptcha = CaptchaProvider(rawValue: "recaptcha")
 
+    public static let reCaptchaEnterprise = CaptchaProvider(rawValue: "recaptcha_enterprise")
+
     public static let captchaFox = CaptchaProvider(rawValue: "captchafox")
 }

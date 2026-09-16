@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### New features
+- Captcha provider `CaptchaProvider.reCaptchaEnterprise` (`recaptcha_enterprise`), for tokens obtained from reCAPTCHA Enterprise.
+
 ## v11.1.0
 
 ### New features
