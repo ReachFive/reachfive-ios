@@ -39,11 +39,8 @@ class NetworkClient {
 }
 
 /// Follows redirections as `URLSession` normally would, except one to the app's custom scheme — the
-/// `/oauth/authorize` callback — which it refuses, since `URLSession` has no handler for such a scheme.
-///
-/// Refusing leaves the callback in the `Location` header of the response that then ends the task, which is
-/// where ``DataRequest/redirect()`` reads it. Nothing has to be carried out of this delegate, so it holds no
-/// state and one instance answers every task of the session.
+/// `/oauth/authorize` callback — which it refuses. The task then ends on the redirect response itself, and
+/// ``DataRequest/redirect()`` reads the callback from its `Location` header.
 class CustomSchemeRedirectRefusal: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
         request.url?.hasCustomScheme == true ? nil : request
