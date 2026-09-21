@@ -6,10 +6,8 @@
 - Add a public SdkVersion which contains the current version of this Sdk
 
 ### Bug fixes
-- `/oauth/authorize` no longer fails opaquely when it does not redirect to the app's custom scheme. The `ApiError` the server returns is now decoded and carried by the thrown error (a rejected `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`, which was being discarded), and a response that carries no error reports its HTTP status. Like every other call, it now answers a `400` with a `RequestError` and a `401` with an `AuthFailure` instead of a `TechnicalError` whatever the status. Its response is also logged, where a successful call used to leave no trace of one.
-- A network interception layer — SSL pinning, an APM agent, a `URLProtocol` — no longer breaks the login by answering the redirection in the SDK's place. Whichever way it answers, the callback is recovered; a redirection leading elsewhere now says where, and a certificate the pinning refuses comes back as an untouched `URLError`.
+- `/oauth/authorize` no longer fails opaquely when it does not redirect to the app's custom scheme. The `ApiError` the server returns is now decoded and carried by the thrown error (a rejected `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`, which was being discarded), and a response that carries no `ApiError` reports its HTTP status and, for a redirection leading elsewhere, its `Location`. The response is also logged. The callback is now read from the `Location` header of the refused redirection rather than from the SDK's own session delegate, so a network layer answering that redirection in the SDK's place (SSL pinning, an APM agent) no longer breaks the login, as it did not in 8.x.
 - An error response whose body is not an `ApiError` — an HTML page from a proxy, an empty body — now reports its HTTP status, on every call, instead of surfacing the JSON decoding failure alone.
-- A request whose task ends with neither a response nor an error no longer takes the app down, and is reported as a `TechnicalError` instead.
 
 ## v11.0.0
 

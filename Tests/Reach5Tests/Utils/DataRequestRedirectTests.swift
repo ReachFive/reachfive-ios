@@ -3,8 +3,7 @@ import XCTest
 
 final class DataRequestRedirectTests: XCTestCase {
     // Held in a property rather than built inline: `NetworkClient.deinit` invalidates its session, which a
-    // temporary dropped right after `.request(...)` would do before `responseJson()` could run. `redirect()`
-    // only reads that session's configuration, and runs its task on its own, but the rule is the same one.
+    // temporary dropped right after `.request(...)` would do before the request could run.
     private var networkClient: NetworkClient!
 
     override func setUp() {
@@ -21,8 +20,7 @@ final class DataRequestRedirectTests: XCTestCase {
     }
 
     /// The nominal outcome: the task ends on the redirection, refused rather than followed, and the callback
-    /// is read from its `Location` header. Whoever refused it — the SDK's own delegate or an interception
-    /// layer answering in its place — leaves the same thing behind, so a single path covers both.
+    /// is read from its `Location` header.
     func testRedirectionToTheCustomSchemeYieldsTheCallback() async throws {
         StubURLProtocol.stubHandler = { _ in .redirection(to: "reachfive-client://callback?code=abc123") }
 
@@ -76,10 +74,9 @@ final class DataRequestRedirectTests: XCTestCase {
         }
     }
 
-    /// A response that simply did not redirect, and three redirections that lead anywhere but the app's
-    /// custom scheme: an interception layer rewriting the target to its own block page, and one stripped of
-    /// its `Location`. None carries a callback, and none carries an `ApiError` body either, so the status —
-    /// and where it actually leads — is all the SDK can report.
+    /// A response that simply did not redirect, and redirections that lead anywhere but the app's custom
+    /// scheme. None carries a callback nor an `ApiError` body, so the status and where it leads is all there
+    /// is to report.
     func testResponsesThatDoNotRedirectToTheCustomSchemeReportWhereTheyLead() async throws {
         let cases: [(stub: StubURLProtocol.Stub, reason: String)] = [
             (.response(statusCode: 200),
@@ -99,99 +96,13 @@ final class DataRequestRedirectTests: XCTestCase {
         }
     }
 
-    // MARK: - Recovering the callback when the redirection was followed
+    /// A network failure — the pinning refusing a certificate among them — comes back untouched.
+    func testNetworkFailureIsRethrownUntouched() async throws {
+        StubURLProtocol.stubHandler = { _ in .networkFailure(URLError(.secureConnectionFailed)) }
 
-    /// A network interception layer that answers the redirection itself instead of forwarding it to the SDK
-    /// delegate may let `URLSession` follow it — and loading the app's custom scheme can only fail with
-    /// `unsupportedURL`. The callback, authorization code included, is in the failing URL: the SDK recovers
-    /// it, whether the error carries it as a `URL` or as a string.
-    func testRedirectionFollowedInsteadOfRefusedRecoversTheCallback() async throws {
-        let callback = "reachfive-client://callback?code=abc123"
-        let keys: [String: Any] = [
-            NSURLErrorFailingURLErrorKey: URL(string: callback)!,
-            NSURLErrorFailingURLStringErrorKey: callback,
-        ]
+        let thrown = try await failureOfAuthorize()
 
-        for (key, value) in keys {
-            StubURLProtocol.stubHandler = { _ in
-                .networkFailure(NSError(domain: NSURLErrorDomain, code: NSURLErrorUnsupportedURL, userInfo: [key: value]))
-            }
-
-            let url = try await authorize()
-
-            XCTAssertEqual(url.absoluteString, callback, "recovering from \(key)")
-        }
-    }
-
-    /// Every error that carries no callback must come back untouched, rather than a recovery inventing a URL
-    /// or dressing the error up. Two of these are the pinning doing its job — a certificate that does not
-    /// match, and an authentication challenge it answered with `cancelAuthenticationChallenge`, which
-    /// `URLSession` turns into a plain cancellation. The last two are an `unsupportedURL` that is a genuine
-    /// failure: on an http URL, and with no failing URL at all.
-    func testErrorsThatCarryNoCallbackAreRethrownUntouched() async throws {
-        let errors: [(error: Error, code: URLError.Code)] = [
-            (URLError(.networkConnectionLost), .networkConnectionLost),
-            (URLError(.secureConnectionFailed), .secureConnectionFailed),
-            (URLError(.cancelled), .cancelled),
-            (NSError(domain: NSURLErrorDomain, code: NSURLErrorUnsupportedURL, userInfo: [
-                NSURLErrorFailingURLErrorKey: URL(string: "https://example.com/oauth/authorize")!,
-            ]), .unsupportedURL),
-            (NSError(domain: NSURLErrorDomain, code: NSURLErrorUnsupportedURL, userInfo: [:]), .unsupportedURL),
-        ]
-
-        for expected in errors {
-            StubURLProtocol.stubHandler = { _ in .networkFailure(expected.error) }
-
-            let thrown = try await failureOfAuthorize()
-
-            guard let urlError = thrown as? URLError else {
-                return XCTFail("expected a URLError, got \(thrown)")
-            }
-            XCTAssertEqual(urlError.code, expected.code)
-        }
-    }
-
-    // MARK: - A task ending with neither a response nor an error
-
-    /// Not something an HTTP exchange produces: only something answering for `URLSession` can.
-    /// `URLSession.data(for:)` traps on that outcome, which is why the SDK does not use it. Asserted on
-    /// `/oauth/authorize` and on an ordinary call alike, since every request goes through the same guard.
-    func testCompletionWithoutResponseNorErrorIsReportedOnEveryCall() async throws {
-        StubURLProtocol.stubHandler = { _ in .finishWithoutResponse() }
-
-        let (redirectReason, apiError) = try await technicalErrorFromAuthorize()
-        XCTAssertEqual(redirectReason, "Request ended without a response nor an error")
-        XCTAssertNil(apiError)
-
-        let ordinary = try await failure {
-            try await self.networkClient.request(URL(string: "https://example.com/identity/v1/logout")!).responseJson()
-        }
-        guard case ReachFiveError.TechnicalError(let reason, _) = ordinary else {
-            return XCTFail("expected a TechnicalError, got \(ordinary)")
-        }
-        XCTAssertEqual(reason, "Request ended without a response nor an error")
-    }
-
-    // MARK: - Cancellation
-
-    /// Cancelling the calling `Task` must cancel the request, which is what `URLSession.data(for:)` did
-    /// through its own cancellation handler. A continuation over `dataTask(with:completionHandler:)` drops
-    /// that unless it is wired back, and the request would then run to `URLSession`'s 60 s timeout instead.
-    func testCancellingTheCallingTaskCancelsTheRequest() async throws {
-        StubURLProtocol.stubHandler = { _ in .neverAnswers() }
-
-        let request = Task { try await self.authorize() }
-        // Long enough for the task to have started, short enough that a dropped cancellation shows up as a
-        // test that never finishes rather than one that passes.
-        try await Task.sleep(nanoseconds: 200_000_000)
-        request.cancel()
-
-        do {
-            _ = try await request.value
-            XCTFail("the request should have been cancelled")
-        } catch let error as URLError {
-            XCTAssertEqual(error.code, .cancelled)
-        }
+        XCTAssertEqual((thrown as? URLError)?.code, .secureConnectionFailed)
     }
 
     // MARK: - Helpers
