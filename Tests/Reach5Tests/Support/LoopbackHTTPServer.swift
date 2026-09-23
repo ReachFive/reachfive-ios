@@ -80,7 +80,10 @@ final class LoopbackHTTPServer {
     }
 
     func stop() {
-        close(listeningSocket) // unblocks the accept the thread is sitting on, which then returns
+        // Shut down before closing, so the accept the thread is sitting on fails for good: once closed, the
+        // descriptor number can be handed to the next test's server.
+        shutdown(listeningSocket, SHUT_RDWR)
+        close(listeningSocket)
     }
 
     enum Failure: Error {

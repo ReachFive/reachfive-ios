@@ -30,8 +30,7 @@ final class URLNormalizationTests: XCTestCase {
 
     // MARK: - Custom scheme
 
-    /// What `DataRequest.redirect()` refuses to follow: a redirection to anything other than `http`/`https`.
-    func testCustomSchemeIsAnythingButHttp() {
+    func testCustomSchemeIsAnySchemeOtherThanHttpOrHttps() {
         let cases: [(input: String, expected: Bool)] = [
             ("reachfive-AbC://callback", true), // the default derived from the clientId
             ("com.example.app:/oauth2redirect", true), // RFC 8252 §7.1, one slash and no authority

@@ -36,8 +36,8 @@ class DataRequest {
         }
     }
 
-    private func handleResponseStatus(status: Int, apiError: ApiError) -> ReachFiveError {
-        let error: ReachFiveError = if status == 400 {
+    private func handleResponseStatus(status: Int, apiError: ApiError?) -> ReachFiveError {
+        let error: ReachFiveError = if status == 400, let apiError {
             .RequestError(apiError: apiError)
         } else if status == 401 {
             .AuthFailure(reason: "Unauthorized", apiError: apiError)
@@ -50,34 +50,48 @@ class DataRequest {
     /// Logs the response and hands it back when it is a 2xx. Throws on anything else, with the `ApiError` of
     /// the body decoded into the error whenever the body carries one, and the status code alone otherwise.
     @discardableResult
-    private func validate(data: Data, response: URLResponse) throws -> HTTPURLResponse {
+    private func validate(data: Data, response: URLResponse?) throws -> HTTPURLResponse {
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw logged(.TechnicalError(reason: "Request without response"))
+            throw logged(.TechnicalError(reason: "Request ended without a response nor an error"))
         }
 
         logger.log(response: httpResponse, data: data)
 
         let status = httpResponse.statusCode
         guard isSuccess(status) else {
-            // An HTML error page from a proxy, an empty body: not an `ApiError`, and the status is all there is.
-            guard let apiError = try? parseJson(json: data, type: ApiError.self) else {
-                throw logged(.TechnicalError(reason: "Response with \(status) error code"))
-            }
+            // Decoded without `parseJson`, which would log a decoding failure for an HTML page or an empty body.
+            let apiError = try? decoder.decode(ApiError.self, from: data)
             throw handleResponseStatus(status: status, apiError: apiError)
         }
 
         return httpResponse
     }
 
+    /// Runs the request over the completion handler rather than `URLSession.data(for:)`, whose back-deployed
+    /// form traps when a task ends with neither a response nor an error — which a network interception layer
+    /// can produce. Cancelling the calling `Task` does not cancel the request: its result is dropped instead.
+    private func perform() async throws -> (Data, URLResponse?) {
+        try await withCheckedThrowingContinuation { continuation in
+            session.dataTask(with: request) { [logger] data, response, error in
+                if let error {
+                    logger.log(error: error)
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: (data ?? Data(), response))
+                }
+            }.resume()
+        }
+    }
+
     func responseJson() async throws {
         logger.log(request: request)
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await perform()
         try validate(data: data, response: response)
     }
 
     func responseJson<T: Decodable>(type: T.Type) async throws -> T {
         logger.log(request: request)
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await perform()
         try validate(data: data, response: response)
         return try parseJson(json: data, type: T.self)
     }
@@ -89,7 +103,7 @@ class DataRequest {
     /// itself and the callback is read from its `Location` header.
     func redirect() async throws -> URL {
         logger.log(request: request)
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await perform()
 
         if let redirection = response as? HTTPURLResponse, isRedirection(redirection.statusCode) {
             logger.log(response: redirection, data: data)
@@ -105,10 +119,12 @@ class DataRequest {
         }
 
         // Anything but a 2xx throws here, its `ApiError` decoded: a rejected `redirect_uri` answers
-        // `403 error.client.redirectUrlNotAllowed`.
+        // `403 error.client.redirectUrlNotAllowed`. A 2xx is either the server not redirecting, or a web
+        // redirection `URLSession` followed, to a login or error page.
         let final = try validate(data: data, response: response)
+        let redirectedTo = final.url.flatMap { $0 == request.url ? nil : " after redirecting to '\($0.absoluteString)'" } ?? ""
         throw logged(.TechnicalError(
-            reason: "Request did not redirect to the app's custom scheme: answered HTTP \(final.statusCode)"
+            reason: "Request did not redirect to the app's custom scheme: answered HTTP \(final.statusCode)\(redirectedTo)"
         ))
     }
 }

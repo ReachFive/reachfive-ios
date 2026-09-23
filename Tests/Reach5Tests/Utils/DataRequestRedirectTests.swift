@@ -19,9 +19,7 @@ final class DataRequestRedirectTests: XCTestCase {
         super.tearDown()
     }
 
-    /// The nominal outcome: the task ends on the redirection, refused rather than followed, and the callback
-    /// is read from its `Location` header.
-    func testRedirectionToTheCustomSchemeYieldsTheCallback() async throws {
+    func testCallbackIsReadFromTheLocationOfTheRedirectionThatEndsTheTask() async throws {
         StubURLProtocol.stubHandler = { _ in .redirection(to: "reachfive-client://callback?code=abc123") }
 
         let url = try await authorize()
@@ -29,9 +27,7 @@ final class DataRequestRedirectTests: XCTestCase {
         XCTAssertEqual(url.absoluteString, "reachfive-client://callback?code=abc123")
     }
 
-    /// RFC 3986 §3.1 makes the scheme case-insensitive, and the default one is derived from the clientId, so
-    /// a callback can come back in a case the SDK never wrote.
-    func testRedirectionToTheCustomSchemeInAnotherCaseSucceeds() async throws {
+    func testCallbackWhoseSchemeCaseDiffersFromTheOneSentIsStillRecognised() async throws {
         StubURLProtocol.stubHandler = { _ in .redirection(to: "REACHFIVE-Client://callback?code=abc123") }
 
         let url = try await authorize()
@@ -39,9 +35,7 @@ final class DataRequestRedirectTests: XCTestCase {
         XCTAssertEqual(url.queryValue("code"), "abc123")
     }
 
-    /// The failure the whole call used to swallow: the server refuses the request outright — a rejected
-    /// `redirect_uri` answers `403 error.client.redirectUrlNotAllowed` — and the body says why.
-    func testNoRedirectWithApiErrorBodyThrowsTechnicalErrorWithApiError() async throws {
+    func testRejectedRedirectUriThrowsTheApiErrorOfThe403Body() async throws {
         let body = #"{"error":"access_denied","error_message_key":"error.client.redirectUrlNotAllowed","error_description":"The redirect url is not allowed."}"#
         StubURLProtocol.stubHandler = { _ in .response(statusCode: 403, body: Data(body.utf8)) }
 
@@ -53,10 +47,7 @@ final class DataRequestRedirectTests: XCTestCase {
         XCTAssertEqual(apiError?.errorDescription, "The redirect url is not allowed.")
     }
 
-    /// A proxy, a WAF or a gateway answers HTML rather than an `ApiError`, or nothing at all. Decoding can
-    /// only fail, and the status code is then the only thing left to report — it must not be lost with the
-    /// decoding. Covers `validate`, so it holds for every call, not just this one.
-    func testErrorBodyThatIsNotAnApiErrorStillReportsTheStatus() async throws {
+    func testErrorBodyThatIsNotAnApiErrorReportsTheStatus() async throws {
         let bodies: [(status: Int, headers: [String: String], body: Data)] = [
             (502, ["Content-Type": "text/html"], Data("<html><body>Bad gateway</body></html>".utf8)),
             (403, [:], Data()),
@@ -74,10 +65,18 @@ final class DataRequestRedirectTests: XCTestCase {
         }
     }
 
-    /// A response that simply did not redirect, and redirections that lead anywhere but the app's custom
-    /// scheme. None carries a callback nor an `ApiError` body, so the status and where it leads is all there
-    /// is to report.
-    func testResponsesThatDoNotRedirectToTheCustomSchemeReportWhereTheyLead() async throws {
+    func test401WithoutApiErrorBodyIsStillAnAuthFailure() async throws {
+        StubURLProtocol.stubHandler = { _ in .response(statusCode: 401) }
+
+        let thrown = try await failureOfAuthorize()
+
+        guard case ReachFiveError.AuthFailure(_, let apiError) = thrown else {
+            return XCTFail("expected an AuthFailure, got \(thrown)")
+        }
+        XCTAssertNil(apiError)
+    }
+
+    func testResponseThatDoesNotRedirectToTheCustomSchemeSaysWhereItLeads() async throws {
         let cases: [(stub: StubURLProtocol.Stub, reason: String)] = [
             (.response(statusCode: 200),
              "Request did not redirect to the app's custom scheme: answered HTTP 200"),
@@ -96,7 +95,6 @@ final class DataRequestRedirectTests: XCTestCase {
         }
     }
 
-    /// A network failure — the pinning refusing a certificate among them — comes back untouched.
     func testNetworkFailureIsRethrownUntouched() async throws {
         StubURLProtocol.stubHandler = { _ in .networkFailure(URLError(.secureConnectionFailed)) }
 
@@ -105,14 +103,27 @@ final class DataRequestRedirectTests: XCTestCase {
         XCTAssertEqual((thrown as? URLError)?.code, .secureConnectionFailed)
     }
 
+    func testTaskEndingWithNeitherResponseNorErrorThrowsInsteadOfCrashingOnEveryCall() async throws {
+        StubURLProtocol.stubHandler = { _ in .finishWithoutResponse }
+
+        let (redirectReason, _) = try await technicalErrorFromAuthorize()
+        XCTAssertEqual(redirectReason, "Request ended without a response nor an error")
+
+        let ordinary = try await failure {
+            try await self.networkClient.request(URL(string: "https://example.com/identity/v1/logout")!).responseJson()
+        }
+        guard case ReachFiveError.TechnicalError(let reason, _) = ordinary else {
+            return XCTFail("expected a TechnicalError, got \(ordinary)")
+        }
+        XCTAssertEqual(reason, "Request ended without a response nor an error")
+    }
+
     // MARK: - Helpers
 
     private func authorize() async throws -> URL {
         try await networkClient.request(URL(string: "https://example.com/oauth/authorize")!).redirect()
     }
 
-    /// The error `/oauth/authorize` threw. No test here can legitimately succeed instead: that would mean a
-    /// callback was read out of a response that carries none.
     private func failureOfAuthorize(
         file: StaticString = #filePath, line: UInt = #line
     ) async throws -> Error {

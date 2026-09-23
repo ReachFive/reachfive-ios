@@ -12,10 +12,14 @@ final class StubURLProtocol: URLProtocol {
         let headers: [String: String]
         let body: Data
         let networkError: Error?
+        var finishWithoutResponse = false
 
         static func response(statusCode: Int, headers: [String: String] = [:], body: Data = Data()) -> Stub {
             Stub(statusCode: statusCode, headers: headers, body: body, networkError: nil)
         }
+
+        /// Ends the load with neither a response nor an error, which only an interception layer can produce.
+        static let finishWithoutResponse = Stub(statusCode: 0, headers: [:], body: Data(), networkError: nil, finishWithoutResponse: true)
 
         static func redirection(to location: String, statusCode: Int = 302) -> Stub {
             .response(statusCode: statusCode, headers: ["Location": location])
@@ -40,6 +44,11 @@ final class StubURLProtocol: URLProtocol {
     override func startLoading() {
         guard let stub = Self.stubHandler?(request) else {
             client?.urlProtocol(self, didFailWithError: URLError(.badURL))
+            return
+        }
+
+        if stub.finishWithoutResponse {
+            client?.urlProtocolDidFinishLoading(self)
             return
         }
 
