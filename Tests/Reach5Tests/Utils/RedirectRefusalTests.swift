@@ -1,59 +1,60 @@
 import XCTest
 @testable import Reach5
 
-/// What `DataRequest.redirect()` rests on, measured against a real HTTP exchange rather than a stub: refusing
-/// a redirection ends the task on the redirect response itself, `Location` header included.
+/// `DataRequest.redirect()` run through `NetworkClient` against a real HTTP exchange on the loopback interface.
 ///
-/// Not a documented contract, which is why it is pinned here: it is the mechanism this SDK shipped throughout
-/// 8.x, and the whole reading of the `/oauth/authorize` callback depends on it. A runtime that stopped
-/// keeping that response would fail these two tests rather than silently break every login.
+/// A `URLProtocol` stub cannot show what `URLSession` does with a redirection the session delegate refuses:
+/// that the task ends on the 3xx itself, `Location` included, is not a documented contract, and every login
+/// rests on it.
 final class RedirectRefusalTests: XCTestCase {
     private var server: LoopbackHTTPServer!
+    private var networkClient: NetworkClient!
 
-    override func tearDown() {
-        server?.stop()
-        server = nil
-        super.tearDown()
-    }
-
-    /// A redirection to the app's custom scheme: the delegate refuses it, and the callback is still readable.
-    func testRefusedRedirectionLeavesTheCallbackInTheLocationHeader() async throws {
-        server = try LoopbackHTTPServer { _ in
-            "HTTP/1.1 302 Found\r\nLocation: reachfive-client://callback?code=abc123\r\nContent-Length: 0\r\n\r\n"
-        }
-
-        let (_, response) = try await session().data(for: URLRequest(url: authorizeURL()))
-
-        let redirection = try XCTUnwrap(response as? HTTPURLResponse)
-        XCTAssertEqual(redirection.statusCode, 302)
-        XCTAssertEqual(redirection.value(forHTTPHeaderField: "Location"), "reachfive-client://callback?code=abc123")
-    }
-
-    /// A redirection to a web scheme is none of the SDK's business: the delegate lets `URLSession` follow it,
-    /// so what comes back is the target's response, not the redirection.
-    func testWebRedirectionIsStillFollowed() async throws {
-        server = try LoopbackHTTPServer { requestLine in
-            requestLine.contains("/oauth/authorize")
-                ? "HTTP/1.1 302 Found\r\nLocation: /elsewhere\r\nContent-Length: 0\r\n\r\n"
-                : "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\n{}"
-        }
-
-        let (_, response) = try await session().data(for: URLRequest(url: authorizeURL()))
-
-        let followed = try XCTUnwrap(response as? HTTPURLResponse)
-        XCTAssertEqual(followed.statusCode, 200)
-        XCTAssertEqual(followed.url?.path, "/elsewhere")
-    }
-
-    private func session() -> URLSession {
+    override func setUp() {
+        super.setUp()
         let configuration = URLSessionConfiguration.ephemeral
         // Well under URLSession's 60 s default: a server that stops answering must fail the test, not stall
         // the whole suite on it.
         configuration.timeoutIntervalForRequest = 5
-        return URLSession(configuration: configuration, delegate: CustomSchemeRedirectRefusal(), delegateQueue: nil)
+        networkClient = NetworkClient(decoder: JSONDecoder(), configuration: configuration)
     }
 
-    private func authorizeURL() -> URL {
-        URL(string: "http://127.0.0.1:\(server.port)/oauth/authorize")!
+    override func tearDown() {
+        server?.stop()
+        server = nil
+        networkClient = nil
+        super.tearDown()
+    }
+
+    func testRedirectionToTheCustomSchemeIsRefusedAndYieldsTheCallback() async throws {
+        server = try LoopbackHTTPServer { _ in
+            "HTTP/1.1 302 Found\r\nLocation: reachfive-client://callback?code=abc123\r\nContent-Length: 0\r\n\r\n"
+        }
+
+        let callback = try await authorize()
+
+        XCTAssertEqual(callback.absoluteString, "reachfive-client://callback?code=abc123")
+    }
+
+    func testWebRedirectionIsFollowedAndTheErrorNamesWhereItEnded() async throws {
+        server = try LoopbackHTTPServer { requestLine in
+            requestLine.contains("/oauth/authorize")
+                ? "HTTP/1.1 302 Found\r\nLocation: /login\r\nContent-Length: 0\r\n\r\n"
+                : "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\n{}"
+        }
+
+        do {
+            _ = try await authorize()
+            XCTFail("the request should have failed")
+        } catch ReachFiveError.TechnicalError(let reason, _) {
+            XCTAssertEqual(
+                reason,
+                "Request did not redirect to the app's custom scheme: answered HTTP 200 after redirecting to 'http://127.0.0.1:\(server.port)/login'"
+            )
+        }
+    }
+
+    private func authorize() async throws -> URL {
+        try await networkClient.request(URL(string: "http://127.0.0.1:\(server.port)/oauth/authorize")!).redirect()
     }
 }
