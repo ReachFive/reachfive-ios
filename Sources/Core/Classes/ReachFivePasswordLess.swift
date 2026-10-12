@@ -37,11 +37,13 @@ extension ReachFive {
                 captcha: captcha
             )
         }
+        storage.save(key: passwordlessRedirectUriKey, value: startPasswordlessRequest.redirectUri)
         return try await reachFiveApi.startPasswordless(startPasswordlessRequest)
     }
 
     public func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> AuthToken {
         let pkce: Pkce? = storage.take(key: pkceKey)
+        let redirectUri: URL? = storage.take(key: passwordlessRedirectUriKey)
         guard let pkce else {
             throw ReachFiveError.TechnicalError(reason: "Pkce not found")
         }
@@ -61,13 +63,14 @@ extension ReachFive {
             throw ReachFiveError.TechnicalError(reason: "No authorization code")
         }
 
-        return try await authWithCode(code: code, pkce: pkce)
+        return try await authWithCode(code: code, pkce: pkce, redirectUri: redirectUri)
     }
 
     func interceptPasswordless(_ url: URL) {
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
 
         let pkce: Pkce? = storage.take(key: pkceKey)
+        let redirectUri: URL? = storage.take(key: passwordlessRedirectUriKey)
         guard let pkce else {
             passwordlessCallback?(.failure(.TechnicalError(reason: "Pkce not found")))
             return
@@ -79,7 +82,7 @@ extension ReachFive {
 
         Task {
             do {
-                try await self.passwordlessCallback?(.success(authWithCode(code: code, pkce: pkce)))
+                try await self.passwordlessCallback?(.success(authWithCode(code: code, pkce: pkce, redirectUri: redirectUri)))
             } catch {
                 self.passwordlessCallback?(.failure(error as! ReachFiveError))
             }
