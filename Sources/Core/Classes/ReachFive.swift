@@ -34,6 +34,8 @@ public class ReachFive: NSObject {
     // The web login in progress (see ``WebAuthenticationSession``).
     let webAuthSession: WebAuthenticationSession
     public let pkceKey = "PASSWORDLESS_PKCE"
+    // The `redirect_uri` the passwordless code is bound to, which its exchange must send back.
+    let passwordlessRedirectUriKey = "PASSWORDLESS_REDIRECT_URI"
 
     public init(sdkConfig: SdkConfig, providersCreators: [ProviderCreator] = [], storage: Storage? = nil, sdkInternalConfig: SdkInternalConfig? = nil) {
         self.sdkConfig = sdkConfig

@@ -5,6 +5,9 @@
 ### New features
 - Captcha provider `CaptchaProvider.reCaptchaEnterprise` (`recaptcha_enterprise`), for tokens obtained from reCAPTCHA Enterprise.
 
+### Bug fixes
+- `verifyPasswordlessCode` and the magic link intercepted by `interceptUrl` now exchange the code with the `redirectUri` given to `startPasswordless`, instead of always `SdkConfig.redirectUri`, which failed with `invalid_request` (`Invalid redirect uri`) whenever the two differed.
+
 ## v11.1.0
 
 ### New features
