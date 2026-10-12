@@ -39,7 +39,7 @@ public class ReachFive: NSObject {
         self.sdkConfig = sdkConfig
         self.providersCreators = providersCreators
         self.storage = storage ?? UserDefaultsStorage()
-        reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig)
+        reachFiveApi = ReachFiveApi(sdkConfig: sdkConfig, sessionConfiguration: sdkInternalConfig?.sessionConfiguration ?? .default)
         credentialManager = CredentialManager()
         webAuthSession = WebAuthenticationSession(baseScheme: sdkConfig.customScheme, sdkRedirectUri: sdkConfig.redirectUri)
 

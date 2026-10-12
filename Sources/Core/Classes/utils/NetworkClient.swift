@@ -6,8 +6,8 @@ class NetworkClient {
     private let decoder: JSONDecoder
     private let correlationId: String
 
-    init(decoder: JSONDecoder) {
-        session = URLSession(configuration: .default, delegate: redirectHandler, delegateQueue: nil)
+    init(decoder: JSONDecoder, configuration: URLSessionConfiguration = .default) {
+        session = URLSession(configuration: configuration, delegate: redirectHandler, delegateQueue: nil)
         self.decoder = decoder
         correlationId = UUID().uuidString
     }
