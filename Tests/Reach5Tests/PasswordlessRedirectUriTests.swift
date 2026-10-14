@@ -72,6 +72,15 @@ final class PasswordlessRedirectUriTests: XCTestCase {
 
         XCTAssertEqual(FakeIdentityBackend.startScope, "openid profile offline_access")
     }
+
+    func testStartPasswordlessSendsTheScopeGivenToTheRequestOverTheSdkScope() async throws {
+        let reachFive = makeReachFive()
+        reachFive.scope = ["openid", "profile", "offline_access"]
+
+        try await reachFive.startPasswordless(.PhoneNumber(phoneNumber: "+33600000000", redirectUri: nil, scope: ["openid", "bl:orders"]))
+
+        XCTAssertEqual(FakeIdentityBackend.startScope, "openid bl:orders")
+    }
 }
 
 private final class InMemoryStorage: Storage {
