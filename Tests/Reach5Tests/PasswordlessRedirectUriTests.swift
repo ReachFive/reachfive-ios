@@ -63,6 +63,15 @@ final class PasswordlessRedirectUriTests: XCTestCase {
         XCTAssertEqual(try result?.get().accessToken, "the-access-token")
         XCTAssertEqual(FakeIdentityBackend.tokenRedirectUri, integratorRedirectUri.absoluteString)
     }
+
+    func testStartPasswordlessSendsTheSdkScope() async throws {
+        let reachFive = makeReachFive()
+        reachFive.scope = ["openid", "profile", "offline_access"]
+
+        try await reachFive.startPasswordless(.Email(email: "jane@example.com", redirectUri: nil))
+
+        XCTAssertEqual(FakeIdentityBackend.startScope, "openid profile offline_access")
+    }
 }
 
 private final class InMemoryStorage: Storage {
@@ -91,11 +100,13 @@ private final class InMemoryStorage: Storage {
 private final class FakeIdentityBackend: URLProtocol {
     private static let lock = NSLock()
     nonisolated(unsafe) private static var startRedirectUri: String?
+    nonisolated(unsafe) private(set) static var startScope: String?
     nonisolated(unsafe) private(set) static var tokenRedirectUri: String?
 
     static func reset() {
         lock.withLock {
             startRedirectUri = nil
+            startScope = nil
             tokenRedirectUri = nil
         }
     }
@@ -114,6 +125,7 @@ private final class FakeIdentityBackend: URLProtocol {
             switch request.url?.path {
             case "/identity/v1/passwordless/start":
                 Self.startRedirectUri = body["redirect_uri"] as? String
+                Self.startScope = body["scope"] as? String
                 return (200, [:])
             case "/identity/v1/verify-auth-code":
                 return (200, [:])
