@@ -1,8 +1,8 @@
 import Foundation
 
 public enum PasswordLessRequest {
-    case Email(email: String, redirectUri: URL?, origin: String? = nil)
-    case PhoneNumber(phoneNumber: String, redirectUri: URL?, origin: String? = nil)
+    case Email(email: String, redirectUri: URL?, origin: String? = nil, scope: [String]? = nil)
+    case PhoneNumber(phoneNumber: String, redirectUri: URL?, origin: String? = nil, scope: [String]? = nil)
 }
 
 extension ReachFive {
@@ -14,7 +14,7 @@ extension ReachFive {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
         let startPasswordlessRequest = switch request {
-        case let .Email(email, redirectUri, origin):
+        case let .Email(email, redirectUri, origin, scope):
             StartPasswordlessRequest(
                 clientId: sdkConfig.clientId,
                 email: email,
@@ -23,9 +23,10 @@ extension ReachFive {
                 codeChallenge: pkce.codeChallenge,
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin,
-                captcha: captcha
+                captcha: captcha,
+                scope: (scope ?? self.scope).joined(separator: " ")
             )
-        case let .PhoneNumber(phoneNumber, redirectUri, origin):
+        case let .PhoneNumber(phoneNumber, redirectUri, origin, scope):
             StartPasswordlessRequest(
                 clientId: sdkConfig.clientId,
                 phoneNumber: phoneNumber,
@@ -34,7 +35,8 @@ extension ReachFive {
                 codeChallenge: pkce.codeChallenge,
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin,
-                captcha: captcha
+                captcha: captcha,
+                scope: (scope ?? self.scope).joined(separator: " ")
             )
         }
         return try await reachFiveApi.startPasswordless(startPasswordlessRequest)

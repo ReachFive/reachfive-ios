@@ -5,6 +5,9 @@
 ### New features
 - Captcha provider `CaptchaProvider.reCaptchaEnterprise` (`recaptcha_enterprise`), for tokens obtained from reCAPTCHA Enterprise.
 
+### Bug fixes
+- `startPasswordless` now sends a scope, so the token obtained after a passwordless login is no longer issued without any. It is the SDK scope by default, or the new `scope` parameter of `PasswordLessRequest.Email` and `.PhoneNumber`.
+
 ## v11.1.0
 
 ### New features
