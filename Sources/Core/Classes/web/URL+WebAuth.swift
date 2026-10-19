@@ -18,6 +18,15 @@ extension URL {
             && normalizedPath == expected.normalizedPath
     }
 
+    /// `true` when this redirection target is the OAuth callback of `request`: the `redirect_uri` that
+    /// request carries in its query, whatever its scheme, or any custom scheme, which `URLSession` has no
+    /// handler for anyway.
+    func isCallback(of request: URL?) -> Bool {
+        if hasCustomScheme { return true }
+        guard let redirectUri = request?.queryValue("redirect_uri").flatMap(URL.init(string:)) else { return false }
+        return matchesEndpoint(of: redirectUri)
+    }
+
     /// The authorization `code` of this OAuth callback, or a `TechnicalError` carrying the `ApiError`
     /// described by the callback's parameters (`error`, `error_description`…).
     func authorizationCode() throws -> String {

@@ -20,7 +20,9 @@ public class SdkConfig {
     /// The scheme. Defaults to `reachfive-clientId`, kept in the case given — the one the console whitelists.
     /// A scheme is case-insensitive (RFC 3986 §3.1), so comparisons against it go through `normalizedScheme`.
     public let customScheme: String
-    /// The redirect URI for passwordless. Defaults to `reachfive-clientId://callback`
+    /// The `redirect_uri` of the authorizations the SDK obtains in the background (password, passkeys, native
+    /// providers), which accept any scheme, `https` included; also the web login's in custom-scheme mode, and
+    /// passwordless's when its request carries none. Defaults to `reachfive-clientId://callback`
     public let redirectUri: URL
     /// The redirect URI for MFA. Defaults to `reachfive-clientId://mfa`
     public let mfaUri: URL

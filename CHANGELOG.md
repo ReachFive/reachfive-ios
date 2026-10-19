@@ -7,6 +7,7 @@
 
 ### Bug fixes
 - `/oauth/authorize` no longer fails opaquely when it does not redirect to the app's custom scheme. The `ApiError` the server returns is now decoded and carried by the thrown error (a rejected `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`, which was being discarded), and a response that carries no `ApiError` reports its HTTP status and, for a redirection leading elsewhere, where it leads. The response is also logged. The callback is now read from the `Location` header of the refused redirection rather than from the SDK's own session delegate, so a network layer answering that redirection in the SDK's place (SSL pinning, an APM agent) no longer breaks the login, as it did not in 8.x.
+- An `https` `SdkConfig.redirectUri` works again for the logins whose code the SDK obtains itself (password, passkeys, native providers), as it did in 8.x: since 9.0.0 the SDK followed that redirection to the website, which received the authorization code, and the login failed. The SDK now stops on the redirection to the `redirect_uri` it sent, whatever its scheme.
 - An error response whose body is not an `ApiError` — an HTML page from a proxy, an empty body — now reports its HTTP status, on every call, instead of surfacing the JSON decoding failure alone. A `401` stays an `AuthFailure` even without an `ApiError` body.
 - A request whose task ends with neither a response nor an error, which a network interception layer can produce, no longer crashes the app and throws a `TechnicalError` instead.
 
