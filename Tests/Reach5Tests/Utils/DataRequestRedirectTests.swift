@@ -79,11 +79,11 @@ final class DataRequestRedirectTests: XCTestCase {
     func testResponseThatDoesNotRedirectToTheCustomSchemeSaysWhereItLeads() async throws {
         let cases: [(stub: StubURLProtocol.Stub, reason: String)] = [
             (.response(statusCode: 200),
-             "Request did not redirect to the app's custom scheme: answered HTTP 200"),
+             "Request did not redirect to its redirect_uri: answered HTTP 200"),
             (.redirection(to: "https://proxy.example.com/blocked", statusCode: 303),
-             "Request did not redirect to the app's custom scheme: answered HTTP 303 with Location 'https://proxy.example.com/blocked'"),
+             "Request did not redirect to its redirect_uri: answered HTTP 303 with Location 'https://proxy.example.com/blocked'"),
             (.response(statusCode: 302),
-             "Request did not redirect to the app's custom scheme: answered HTTP 302 with no Location header"),
+             "Request did not redirect to its redirect_uri: answered HTTP 302 with no Location header"),
         ]
 
         for expected in cases {

@@ -96,10 +96,10 @@ class DataRequest {
         return try parseJson(json: data, type: T.self)
     }
 
-    /// The `/oauth/authorize` call, whose result is not a response to read but a redirection to the app's
-    /// custom scheme: the callback URL, with the authorization code in it.
+    /// The `/oauth/authorize` call, whose result is not a response to read but a redirection to its
+    /// `redirect_uri`: the callback URL, with the authorization code in it.
     ///
-    /// ``CustomSchemeRedirectRefusal`` refuses that redirection, so the task ends on the redirect response
+    /// ``CallbackRedirectRefusal`` refuses that redirection, so the task ends on the redirect response
     /// itself and the callback is read from its `Location` header.
     func redirect() async throws -> URL {
         logger.log(request: request)
@@ -109,12 +109,12 @@ class DataRequest {
             logger.log(response: redirection, data: data)
 
             let location = redirection.value(forHTTPHeaderField: "Location")
-            if let callback = location.flatMap(URL.init(string:)), callback.hasCustomScheme {
+            if let callback = location.flatMap(URL.init(string:)), callback.isCallback(of: request.url) {
                 return callback
             }
             let target = location.map { "Location '\($0)'" } ?? "no Location header"
             throw logged(.TechnicalError(
-                reason: "Request did not redirect to the app's custom scheme: answered HTTP \(redirection.statusCode) with \(target)"
+                reason: "Request did not redirect to its redirect_uri: answered HTTP \(redirection.statusCode) with \(target)"
             ))
         }
 
@@ -124,7 +124,7 @@ class DataRequest {
         let final = try validate(data: data, response: response)
         let redirectedTo = final.url.flatMap { $0 == request.url ? nil : " after redirecting to '\($0.absoluteString)'" } ?? ""
         throw logged(.TechnicalError(
-            reason: "Request did not redirect to the app's custom scheme: answered HTTP \(final.statusCode)\(redirectedTo)"
+            reason: "Request did not redirect to its redirect_uri: answered HTTP \(final.statusCode)\(redirectedTo)"
         ))
     }
 }
