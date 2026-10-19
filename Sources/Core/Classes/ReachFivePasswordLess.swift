@@ -5,6 +5,12 @@ public enum PasswordLessRequest {
     case PhoneNumber(phoneNumber: String, redirectUri: URL?, origin: String? = nil)
 }
 
+/// The `redirect_uri` a passwordless code is bound to, saved with the challenge of the PKCE started alongside.
+private struct PasswordlessRedirect: Codable {
+    let codeChallenge: String
+    let redirectUri: URL
+}
+
 extension ReachFive {
     public func addPasswordlessCallback(passwordlessCallback: @escaping PasswordlessCallback) {
         self.passwordlessCallback = passwordlessCallback
@@ -37,13 +43,13 @@ extension ReachFive {
                 captcha: captcha
             )
         }
-        storage.save(key: passwordlessRedirectUriKey, value: startPasswordlessRequest.redirectUri)
+        storage.save(key: passwordlessRedirectUriKey, value: PasswordlessRedirect(codeChallenge: pkce.codeChallenge, redirectUri: startPasswordlessRequest.redirectUri))
         return try await reachFiveApi.startPasswordless(startPasswordlessRequest)
     }
 
     public func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> AuthToken {
         let pkce: Pkce? = storage.take(key: pkceKey)
-        let redirectUri: URL? = storage.take(key: passwordlessRedirectUriKey)
+        let redirectUri = takePasswordlessRedirectUri(for: pkce)
         guard let pkce else {
             throw ReachFiveError.TechnicalError(reason: "Pkce not found")
         }
@@ -66,11 +72,20 @@ extension ReachFive {
         return try await authWithCode(code: code, pkce: pkce, redirectUri: redirectUri)
     }
 
+    /// The `redirect_uri` `startPasswordless` bound its code to, only if `pkce` is the one it started with.
+    /// The PKCE key is shared with other flows (web login, MFA step-up) whose callback can also reach
+    /// `interceptPasswordless`: a value left by an abandoned passwordless must not apply to their code, which
+    /// was obtained with `SdkConfig.redirectUri`.
+    private func takePasswordlessRedirectUri(for pkce: Pkce?) -> URL? {
+        let saved: PasswordlessRedirect? = storage.take(key: passwordlessRedirectUriKey)
+        return saved.flatMap { $0.codeChallenge == pkce?.codeChallenge ? $0.redirectUri : nil }
+    }
+
     func interceptPasswordless(_ url: URL) {
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
 
         let pkce: Pkce? = storage.take(key: pkceKey)
-        let redirectUri: URL? = storage.take(key: passwordlessRedirectUriKey)
+        let redirectUri = takePasswordlessRedirectUri(for: pkce)
         guard let pkce else {
             passwordlessCallback?(.failure(.TechnicalError(reason: "Pkce not found")))
             return
