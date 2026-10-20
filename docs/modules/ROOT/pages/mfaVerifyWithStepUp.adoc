@@ -12,6 +12,8 @@ AppDelegate.reachfive().mfaVerify(
 
 Verifies the step up process by passing the verification code and challenge ID.
 
+The SDK exchanges the authorization code with the `redirectUri` passed to `AuthTokenFlow` in xref:mfaStartWithStepUp.adoc[], or with `SdkConfig.redirectUri` otherwise.
+
 == Examples
 
 [source, kotlin]
