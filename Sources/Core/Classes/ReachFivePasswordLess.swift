@@ -49,10 +49,10 @@ extension ReachFive {
 
     public func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> AuthToken {
         let pkce: Pkce? = storage.take(key: pkceKey)
-        let redirectUri = takePasswordlessRedirectUri(for: pkce)
         guard let pkce else {
             throw ReachFiveError.TechnicalError(reason: "Pkce not found")
         }
+        let redirectUri = takePasswordlessRedirectUri(for: pkce)
 
         try await reachFiveApi.verifyAuthCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
         let verifyPasswordlessRequest = VerifyPasswordlessRequest(
@@ -76,20 +76,20 @@ extension ReachFive {
     /// The PKCE key is shared with other flows (web login, MFA step-up) whose callback can also reach
     /// `interceptPasswordless`: a value left by an abandoned passwordless must not apply to their code, which
     /// was obtained with `SdkConfig.redirectUri`.
-    private func takePasswordlessRedirectUri(for pkce: Pkce?) -> URL? {
+    private func takePasswordlessRedirectUri(for pkce: Pkce) -> URL? {
         let saved: PasswordlessRedirect? = storage.take(key: passwordlessRedirectUriKey)
-        return saved.flatMap { $0.codeChallenge == pkce?.codeChallenge ? $0.redirectUri : nil }
+        return saved.flatMap { $0.codeChallenge == pkce.codeChallenge ? $0.redirectUri : nil }
     }
 
     func interceptPasswordless(_ url: URL) {
         let params = URLComponents(url: url, resolvingAgainstBaseURL: true)?.queryItems
 
         let pkce: Pkce? = storage.take(key: pkceKey)
-        let redirectUri = takePasswordlessRedirectUri(for: pkce)
         guard let pkce else {
             passwordlessCallback?(.failure(.TechnicalError(reason: "Pkce not found")))
             return
         }
+        let redirectUri = takePasswordlessRedirectUri(for: pkce)
         guard let params, let code = params.first(where: { $0.name == "code" })?.value else {
             passwordlessCallback?(.failure(.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))))
             return
