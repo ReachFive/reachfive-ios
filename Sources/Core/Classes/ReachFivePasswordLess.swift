@@ -6,9 +6,15 @@ public enum PasswordLessRequest {
 }
 
 /// The `redirect_uri` a passwordless code is bound to, saved with the challenge of the PKCE started alongside.
-private struct PasswordlessRedirect: Codable {
+/// Also used by the MFA step-up, whose code goes through `/passwordless/start` too.
+struct PasswordlessRedirect: Codable {
     let codeChallenge: String
     let redirectUri: URL
+
+    /// `redirectUri`, only if `pkce` is the one it was saved with: the PKCE key is shared with other flows.
+    func redirectUri(for pkce: Pkce) -> URL? {
+        codeChallenge == pkce.codeChallenge ? redirectUri : nil
+    }
 }
 
 extension ReachFive {
@@ -80,7 +86,7 @@ extension ReachFive {
     /// was obtained with `SdkConfig.redirectUri`.
     private func takePasswordlessRedirectUri(for pkce: Pkce) -> URL? {
         let saved: PasswordlessRedirect? = storage.take(key: passwordlessRedirectUriKey)
-        return saved.flatMap { $0.codeChallenge == pkce.codeChallenge ? $0.redirectUri : nil }
+        return saved?.redirectUri(for: pkce)
     }
 
     func interceptPasswordless(_ url: URL) {

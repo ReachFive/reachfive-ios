@@ -8,6 +8,7 @@
 ### Bug fixes
 - `verifyPasswordlessCode` and the magic link intercepted by `interceptUrl` now exchange the code with the `redirectUri` given to `startPasswordless`, instead of always `SdkConfig.redirectUri`, which failed with `invalid_request` (`Invalid redirect uri`) whenever the two differed.
 - `startPasswordless` now sends a scope, so the token obtained after a passwordless login is no longer issued without any. It is the SDK scope by default, or the new `scope` parameter of `PasswordLessRequest.Email` and `.PhoneNumber`.
+- The MFA step-up started with `mfaStart(stepUp: .AuthTokenFlow(...))` now exchanges its code with the `redirectUri` it was given, instead of always `SdkConfig.redirectUri`, which failed with `invalid_request` whenever the two differed. The `redirectUri` of `.LoginFlow` is documented as ignored by the backend.
 
 ## v11.1.0
 
