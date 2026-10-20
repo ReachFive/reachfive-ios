@@ -6,8 +6,8 @@
 - Captcha provider `CaptchaProvider.reCaptchaEnterprise` (`recaptcha_enterprise`), for tokens obtained from reCAPTCHA Enterprise.
 
 ### Bug fixes
-- `verifyPasswordlessCode` and the magic link intercepted by `interceptUrl` now exchange the code with the `redirectUri` given to `startPasswordless`, instead of always `SdkConfig.redirectUri`, which failed with `invalid_request` (`Invalid redirect uri`) whenever the two differed.
-- `mfaStart(stepUp: .AuthTokenFlow(...))` now exchanges its code with the `redirectUri` it was given, instead of always `SdkConfig.redirectUri`, which failed with `invalid_request` whenever the two differed. The `redirectUri` of `.LoginFlow` is documented as ignored by the backend.
+- `startPasswordless` and `mfaStart(stepUp: .AuthTokenFlow(...))` now correctly keep track of a nn default `redirectUri` used when finishing their flow. Resolve the `Invalid redirect uri` error.
+- The `redirectUri` of `.LoginFlow` is documented as ignored by the backend.
 
 ## v11.1.0
 
