@@ -7,7 +7,7 @@
 
 ### Bug fixes
 - `startPasswordless` now sends a scope. It is the SDK scope by default, or the new `scope` parameter of `PasswordLessRequest.Email` and `.PhoneNumber`.
-- `startPasswordless` and `mfaStart(stepUp: .AuthTokenFlow(...))` now correctly keep track of a nn default `redirectUri` used when finishing their flow. Resolve the `Invalid redirect uri` error.
+- `startPasswordless` and `mfaStart(stepUp: .AuthTokenFlow(...))` now correctly keep track of a non default `redirectUri` used when finishing their flow. Resolve the `Invalid redirect uri` error.
 - The `redirectUri` of `.LoginFlow` is documented as ignored by the backend.
 
 ## v11.1.0
