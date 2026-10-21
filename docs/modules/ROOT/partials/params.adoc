@@ -31,7 +31,6 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 * `scope`: The defined scope such as `openid`, `email`, or `phone_number`.
 * `redirectUri`: The URL to which the user is redirected.
 This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
-xref:mfaVerifyWithStepUp.adoc[] exchanges the authorization code with this same URL.
 * `origin`: The domain of the origin.
 It must be a valid URL.
 * `action`: A string describing the action for the MFA flow.
