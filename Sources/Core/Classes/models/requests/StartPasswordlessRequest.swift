@@ -18,6 +18,7 @@ public class StartPasswordlessRequest: Codable, DictionaryEncodable {
     public let origin: String?
     public let captchaToken: String?
     public let captchaProvider: CaptchaProvider?
+    public let scope: String?
 
     public convenience init(
         clientId: String,
@@ -28,7 +29,8 @@ public class StartPasswordlessRequest: Codable, DictionaryEncodable {
         codeChallenge: String,
         codeChallengeMethod: String,
         origin: String? = nil,
-        captcha: Captcha? = nil
+        captcha: Captcha? = nil,
+        scope: String? = nil
     ) {
         self.init(
             clientId: clientId,
@@ -41,7 +43,8 @@ public class StartPasswordlessRequest: Codable, DictionaryEncodable {
             codeChallenge: codeChallenge,
             codeChallengeMethod: codeChallengeMethod,
             origin: origin,
-            captcha: captcha
+            captcha: captcha,
+            scope: scope
         )
     }
 
@@ -56,7 +59,8 @@ public class StartPasswordlessRequest: Codable, DictionaryEncodable {
         codeChallenge: String,
         codeChallengeMethod: String,
         origin: String? = nil,
-        captcha: Captcha? = nil
+        captcha: Captcha? = nil,
+        scope: String? = nil
     ) {
         self.clientId = clientId
         self.email = email
@@ -70,5 +74,6 @@ public class StartPasswordlessRequest: Codable, DictionaryEncodable {
         self.origin = origin
         captchaToken = captcha?.token
         captchaProvider = captcha?.provider
+        self.scope = scope
     }
 }
