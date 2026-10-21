@@ -7,6 +7,7 @@
 ** xref:guides/account-recovery.adoc[]
 ** xref:guides/passkeys.adoc[]
 ** xref:guides/apple-app-site-association.adoc[]
+** xref:guides/captcha.adoc[]
 ** xref:guides/migrate-futures.adoc[]
 ** xref:guides/migrate-reach5future.adoc[]
 ** xref:guides/custom-provider.adoc[]
