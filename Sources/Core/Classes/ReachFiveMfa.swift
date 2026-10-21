@@ -19,6 +19,8 @@ public enum Credential {
 
 public enum StartStepUp {
     case AuthTokenFlow(authType: MfaCredentialItemType, authToken: AuthToken, redirectUri: URL? = nil, scope: [String]? = nil, origin: String? = nil, action: String? = nil)
+    /// `redirectUri` is ignored by the backend: the step-up token already carries the one sent when it was
+    /// issued (`SdkConfig.redirectUri`, by `loginWithPassword`), and the code is bound to that one.
     case LoginFlow(authType: MfaCredentialItemType, stepUpToken: String, redirectUri: URL? = nil, origin: String? = nil)
     public var authType: MfaCredentialItemType {
         switch self {
@@ -122,6 +124,7 @@ extension ReachFive {
         case let .AuthTokenFlow(authType, authToken, redirectUri, overwrittenScope, origin, action):
             let pkce = Pkce.generate()
             storage.save(key: pkceKey, value: pkce)
+            storage.save(key: passwordlessRedirectUriKey, value: PasswordlessRedirect(codeChallenge: pkce.codeChallenge, redirectUri: redirectUri ?? sdkConfig.redirectUri))
             let stepUp = StartMfaStepUpRequest(clientId: sdkConfig.clientId, redirectUri: redirectUri ?? sdkConfig.redirectUri, pkce: pkce, scope: (overwrittenScope ?? scope).joined(separator: " "), action: action)
             let result = try await reachFiveApi.startMfaStepUp(stepUp, authToken: authToken)
             let req = StartMfaPasswordlessRequest(redirectUri: redirectUri ?? sdkConfig.redirectUri, clientId: sdkConfig.clientId, stepUp: result.token, authType: authType, origin: origin)
@@ -135,11 +138,13 @@ extension ReachFive {
         guard let pkce else {
             throw ReachFiveError.TechnicalError(reason: "Pkce not found")
         }
+        // Read, not taken, like the PKCE: a wrong code can be retried.
+        let saved: PasswordlessRedirect? = storage.get(key: passwordlessRedirectUriKey)
         let response = try await reachFiveApi.verifyPasswordless(mfa: VerifyMfaPasswordlessRequest(challengeId: request.challengeId, verificationCode: request.verificationCode, trustDevice: request.trustDevice))
         guard let code = response.code else {
             throw ReachFiveError.TechnicalError(reason: "No authorization code")
         }
-        return try await authWithCode(code: code, pkce: pkce)
+        return try await authWithCode(code: code, pkce: pkce, redirectUri: saved?.redirectUri(for: pkce))
     }
 
     public func mfaDeleteCredential(_ phoneNumber: String? = nil, authToken: AuthToken) async throws {

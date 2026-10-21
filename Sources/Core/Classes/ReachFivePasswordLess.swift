@@ -5,6 +5,18 @@ public enum PasswordLessRequest {
     case PhoneNumber(phoneNumber: String, redirectUri: URL?, origin: String? = nil, scope: [String]? = nil)
 }
 
+/// The `redirect_uri` a passwordless code is bound to, saved with the challenge of the PKCE started alongside.
+/// Also used by the MFA step-up, whose code goes through `/passwordless/start` too.
+struct PasswordlessRedirect: Codable {
+    let codeChallenge: String
+    let redirectUri: URL
+
+    /// `redirectUri`, only if `pkce` is the one it was saved with: the PKCE key is shared with other flows.
+    func redirectUri(for pkce: Pkce) -> URL? {
+        codeChallenge == pkce.codeChallenge ? redirectUri : nil
+    }
+}
+
 extension ReachFive {
     public func addPasswordlessCallback(passwordlessCallback: @escaping PasswordlessCallback) {
         self.passwordlessCallback = passwordlessCallback
@@ -39,6 +51,7 @@ extension ReachFive {
                 scope: (scope ?? self.scope).joined(separator: " ")
             )
         }
+        storage.save(key: passwordlessRedirectUriKey, value: PasswordlessRedirect(codeChallenge: pkce.codeChallenge, redirectUri: startPasswordlessRequest.redirectUri))
         return try await reachFiveApi.startPasswordless(startPasswordlessRequest)
     }
 
@@ -47,6 +60,7 @@ extension ReachFive {
         guard let pkce else {
             throw ReachFiveError.TechnicalError(reason: "Pkce not found")
         }
+        let redirectUri = takePasswordlessRedirectUri(for: pkce)
 
         try await reachFiveApi.verifyAuthCode(verifyAuthCodeRequest: verifyAuthCodeRequest)
         let verifyPasswordlessRequest = VerifyPasswordlessRequest(
@@ -63,7 +77,16 @@ extension ReachFive {
             throw ReachFiveError.TechnicalError(reason: "No authorization code")
         }
 
-        return try await authWithCode(code: code, pkce: pkce)
+        return try await authWithCode(code: code, pkce: pkce, redirectUri: redirectUri)
+    }
+
+    /// The `redirect_uri` `startPasswordless` bound its code to, only if `pkce` is the one it started with.
+    /// The PKCE key is shared with other flows (web login, MFA step-up) whose callback can also reach
+    /// `interceptPasswordless`: a value left by an abandoned passwordless must not apply to their code, which
+    /// was obtained with `SdkConfig.redirectUri`.
+    private func takePasswordlessRedirectUri(for pkce: Pkce) -> URL? {
+        let saved: PasswordlessRedirect? = storage.take(key: passwordlessRedirectUriKey)
+        return saved?.redirectUri(for: pkce)
     }
 
     func interceptPasswordless(_ url: URL) {
@@ -74,6 +97,7 @@ extension ReachFive {
             passwordlessCallback?(.failure(.TechnicalError(reason: "Pkce not found")))
             return
         }
+        let redirectUri = takePasswordlessRedirectUri(for: pkce)
         guard let params, let code = params.first(where: { $0.name == "code" })?.value else {
             passwordlessCallback?(.failure(.TechnicalError(reason: "No authorization code", apiError: ApiError(fromQueryParams: params))))
             return
@@ -81,7 +105,7 @@ extension ReachFive {
 
         Task {
             do {
-                try await self.passwordlessCallback?(.success(authWithCode(code: code, pkce: pkce)))
+                try await self.passwordlessCallback?(.success(authWithCode(code: code, pkce: pkce, redirectUri: redirectUri)))
             } catch {
                 self.passwordlessCallback?(.failure(error as! ReachFiveError))
             }
