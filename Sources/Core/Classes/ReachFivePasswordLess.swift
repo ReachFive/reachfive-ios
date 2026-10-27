@@ -1,8 +1,8 @@
 import Foundation
 
 public enum PasswordLessRequest {
-    case Email(email: String, redirectUri: URL?, origin: String? = nil, scope: [String]? = nil)
-    case PhoneNumber(phoneNumber: String, redirectUri: URL?, origin: String? = nil, scope: [String]? = nil)
+    case Email(email: String, redirectUri: URL?, origin: String? = nil, scope: [String]? = nil, data: PasswordlessSignupData? = nil)
+    case PhoneNumber(phoneNumber: String, redirectUri: URL?, origin: String? = nil, scope: [String]? = nil, data: PasswordlessSignupData? = nil)
 }
 
 /// The `redirect_uri` a passwordless code is bound to, saved with the challenge of the PKCE started alongside.
@@ -26,7 +26,7 @@ extension ReachFive {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
         let startPasswordlessRequest = switch request {
-        case let .Email(email, redirectUri, origin, scope):
+        case let .Email(email, redirectUri, origin, scope, data):
             StartPasswordlessRequest(
                 clientId: sdkConfig.clientId,
                 email: email,
@@ -36,9 +36,10 @@ extension ReachFive {
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin,
                 captcha: captcha,
-                scope: (scope ?? self.scope).joined(separator: " ")
+                scope: (scope ?? self.scope).joined(separator: " "),
+                data: data
             )
-        case let .PhoneNumber(phoneNumber, redirectUri, origin, scope):
+        case let .PhoneNumber(phoneNumber, redirectUri, origin, scope, data):
             StartPasswordlessRequest(
                 clientId: sdkConfig.clientId,
                 phoneNumber: phoneNumber,
@@ -48,7 +49,8 @@ extension ReachFive {
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin,
                 captcha: captcha,
-                scope: (scope ?? self.scope).joined(separator: " ")
+                scope: (scope ?? self.scope).joined(separator: " "),
+                data: data
             )
         }
         storage.save(key: passwordlessRedirectUriKey, value: PasswordlessRedirect(codeChallenge: pkce.codeChallenge, redirectUri: startPasswordlessRequest.redirectUri))
