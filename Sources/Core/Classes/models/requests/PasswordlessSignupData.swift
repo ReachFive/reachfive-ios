@@ -1,7 +1,8 @@
 import Foundation
 
-/// The profile a passwordless start creates if it resolves to a signup. It is ignored when the identifier
-/// already has a profile, and written only once the code is verified.
+/// The profile a passwordless start creates if it resolves to a signup, written once the code is verified.
+/// Ignored when the identifier already has a profile, and unless the account accepts profile data in its
+/// passwordless settings (off by default).
 ///
 /// The identifier of the flow stays in `PasswordLessRequest`. An `email` or `phoneNumber` here of the same kind
 /// is ignored; one of the other kind is written to the profile unverified.
