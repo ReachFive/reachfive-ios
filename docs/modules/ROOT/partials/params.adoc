@@ -334,6 +334,7 @@ include::partial$params.adoc[tag="email"]
 include::partial$params.adoc[tag="phoneNumber"]
 include::partial$params.adoc[tag="redirecturi"]
 include::partial$params.adoc[tag="scope"]
+include::partial$params.adoc[tag="passwordlesssignupdata"]
 // end::passwordlessrequest[]
 
 // tag::phoneNumber[]
@@ -577,6 +578,37 @@ Allowed values are `female`, `male` and `other`.
 ! consents `Map<string, Consent>` ! The consents granted to the profile. It is a map of string keys with the associated consent object.
 !===
 // end::profilesignuprequest[]
+
+// tag::passwordlesssignupdata[]
+|[[data, data]] data `PasswordlessSignupData`
+|The profile to create if the flow turns out to be a signup. It is written once the code is verified.
+
+It is ignored when the identifier already has a profile, and unless *Accept profile data* is selected in the Console under *Passwordless settings*.
+
+An `email` or `phoneNumber` of the same kind as the identifier of the flow is ignored. One of the other kind is saved unverified.
+
+[cols="1,3a"]
+!===
+! email `string` ! An email address of the profile.
+! phoneNumber `string` ! A phone number of the profile.
+! givenName `string` ! The given name of the profile.
+! middleName `string` ! The middle name of the profile.
+! familyName `string` ! The family name of the profile.
+! name `string` ! The full name of the profile.
+! nickname `string` ! The nickname of the profile.
+! username `string` ! The username of the profile (the login's name).
+! birthdate `string` ! The birthdate of the profile, represented as an {iso-8601}[ISO 8601^] `YYYY-MM-DD` format.
+! gender `string` ! The gender of the profile.
+
+Allowed values are `female`, `male` and `other`.
+! addresses `ProfileAddress[]` ! The list of the profile's postal addresses.
+! picture `string` ! The URL of one of the profile picture. This URL refers to an image file (PNG, JPEG, or GIF image file).
+! company `string` ! The company's name of the profile.
+! locale `string` ! The profile's language code in lowercase and country code in uppercase, separated by a dash (eg `en`, `fr-FR` ...).
+! customFields `Map<string, any>` ! The custom fields of the profile.
+! consents `Map<string, Consent>` ! The consents granted to the profile. It is a map of string keys with the associated consent object.
+!===
+// end::passwordlesssignupdata[]
 
 // tag::origin[]
 |[[origin, origin]]origin `string`
