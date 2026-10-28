@@ -210,27 +210,27 @@
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits" textContentType="family-name"/>
                                                             </textField>
-                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pws-Lb-005">
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Birthdate" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pws-Lb-005">
                                                                 <rect key="frame" x="0.0" y="180" width="370" height="20"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
-                                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="pws-Tf-003" userLabel="DataEmailInput">
+                                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="YYYY-MM-DD" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="pws-Tf-003" userLabel="BirthdateInput">
                                                                 <rect key="frame" x="0.0" y="208" width="370" height="34"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" textContentType="email"/>
+                                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="numbersAndPunctuation"/>
                                                             </textField>
-                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Phone number" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pws-Lb-006">
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Gender" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pws-Lb-006">
                                                                 <rect key="frame" x="0.0" y="250" width="370" height="20"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
-                                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="pws-Tf-004" userLabel="DataPhoneNumberInput">
+                                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="female, male or other" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="pws-Tf-004" userLabel="GenderInput">
                                                                 <rect key="frame" x="0.0" y="278" width="370" height="34"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                                <textInputTraits key="textInputTraits" keyboardType="phonePad" textContentType="tel"/>
+                                                                <textInputTraits key="textInputTraits" autocapitalizationType="none" autocorrectionType="no" spellCheckingType="no"/>
                                                             </textField>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Consent" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pws-Lb-007">
                                                                 <rect key="frame" x="0.0" y="320" width="370" height="20"/>
@@ -316,8 +316,8 @@
                     <connections>
                         <outlet property="consentGranted" destination="pws-Sw-001" id="pws-Ou-001"/>
                         <outlet property="consentKeyInput" destination="pws-Tf-005" id="pws-Ou-002"/>
-                        <outlet property="dataEmailInput" destination="pws-Tf-003" id="pws-Ou-003"/>
-                        <outlet property="dataPhoneNumberInput" destination="pws-Tf-004" id="pws-Ou-004"/>
+                        <outlet property="birthdateInput" destination="pws-Tf-003" id="pws-Ou-003"/>
+                        <outlet property="genderInput" destination="pws-Tf-004" id="pws-Ou-004"/>
                         <outlet property="familyNameInput" destination="pws-Tf-002" id="pws-Ou-005"/>
                         <outlet property="givenNameInput" destination="pws-Tf-001" id="pws-Ou-006"/>
                         <outlet property="identifierInput" destination="eoo-7E-NMJ" id="a01-mH-9QJ"/>
@@ -383,12 +383,6 @@
                                             <action selector="verify:" destination="pwv-Vc-001" eventType="touchUpInside" id="UaL-mx-6SN"/>
                                         </connections>
                                     </button>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="A magic link opened in the app also completes the flow." textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pwv-Lb-004">
-                                        <rect key="frame" x="0.0" y="218" width="370" height="18"/>
-                                        <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
-                                        <color key="textColor" systemColor="secondaryLabelColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
                                 </subviews>
                             </stackView>
                         </subviews>
@@ -589,60 +583,78 @@
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email or phone number" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DyU-iH-FUf" userLabel="Username">
-                                <rect key="frame" x="16" y="188" width="176" height="20"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="5KP-Ry-JMm" userLabel="UsernameInput">
-                                <rect key="frame" x="16" y="216" width="370" height="34"/>
-                                <accessibility key="accessibilityConfiguration" identifier="email"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="username"/>
-                            </textField>
-                            <stackView opaque="NO" contentMode="scaleToFill" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="rec-St-001">
-                                <rect key="frame" x="52" y="290" width="298" height="40.666666666666686"/>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" keyboardDismissMode="interactive" translatesAutoresizingMaskIntoConstraints="NO" id="rcs-Sc-001">
+                                <rect key="frame" x="0.0" y="62" width="402" height="778"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="38k-m4-u0D">
-                                        <rect key="frame" x="0.0" y="0.0" width="164" height="40.666666666666686"/>
-                                        <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="filled" title="Send recovery link"/>
-                                        <connections>
-                                            <action selector="sendLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="dYn-Lk-XKE"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rec-Bt-002">
-                                        <rect key="frame" x="176" y="0.0" width="122" height="40.666666666666686"/>
-                                        <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="gray" title="Send reset link"/>
-                                        <connections>
-                                            <action selector="sendResetLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="rec-Ac-003"/>
-                                        </connections>
-                                    </button>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="rcs-St-001">
+                                        <rect key="frame" x="16" y="20" width="370" height="400"/>
+                                        <subviews>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="rcs-St-002" userLabel="Identifier">
+                                                <rect key="frame" x="0.0" y="0.0" width="370" height="62"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Email or phone number" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rcs-Lb-001">
+                                                        <rect key="frame" x="0.0" y="0.0" width="370" height="20"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="5KP-Ry-JMm" userLabel="IdentifierInput">
+                                                        <rect key="frame" x="0.0" y="28" width="370" height="34"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                        <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="emailAddress" textContentType="username"/>
+                                                    </textField>
+                                                </subviews>
+                                            </stackView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="rcs-St-007" userLabel="Buttons">
+                                                <rect key="frame" x="0.0" y="86" width="370" height="93"/>
+                                                <subviews>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="38k-m4-u0D" userLabel="Send recovery link">
+                                                        <rect key="frame" x="0.0" y="0.0" width="370" height="40.666666666666686"/>
+                                                        <state key="normal" title="Button"/>
+                                                        <buttonConfiguration key="configuration" style="filled" title="Send recovery link"/>
+                                                        <connections>
+                                                            <action selector="sendLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="dYn-Lk-XKE"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rec-Bt-002" userLabel="Send reset link">
+                                                        <rect key="frame" x="0.0" y="52.666666666666686" width="370" height="40.666666666666686"/>
+                                                        <state key="normal" title="Button"/>
+                                                        <buttonConfiguration key="configuration" style="gray" title="Send reset link"/>
+                                                        <connections>
+                                                            <action selector="sendResetLink:" destination="9TN-Qr-dqK" eventType="touchUpInside" id="rec-Ac-003"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
+                                            </stackView>
+                                        </subviews>
+                                    </stackView>
                                 </subviews>
-                            </stackView>
+                                <constraints>
+                                    <constraint firstItem="rcs-St-001" firstAttribute="top" secondItem="rcs-Cg-001" secondAttribute="top" constant="20" id="rcs-Co-001"/>
+                                    <constraint firstItem="rcs-St-001" firstAttribute="leading" secondItem="rcs-Cg-001" secondAttribute="leading" constant="16" id="rcs-Co-002"/>
+                                    <constraint firstItem="rcs-Cg-001" firstAttribute="trailing" secondItem="rcs-St-001" secondAttribute="trailing" constant="16" id="rcs-Co-003"/>
+                                    <constraint firstItem="rcs-Cg-001" firstAttribute="bottom" secondItem="rcs-St-001" secondAttribute="bottom" constant="20" id="rcs-Co-004"/>
+                                    <constraint firstItem="rcs-St-001" firstAttribute="width" secondItem="rcs-Fg-001" secondAttribute="width" constant="-32" id="rcs-Co-005"/>
+                                </constraints>
+                                <viewLayoutGuide key="contentLayoutGuide" id="rcs-Cg-001"/>
+                                <viewLayoutGuide key="frameLayoutGuide" id="rcs-Fg-001"/>
+                            </scrollView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="546-Za-vvZ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="5KP-Ry-JMm" firstAttribute="trailing" secondItem="pe2-oD-l3d" secondAttribute="trailingMargin" id="5OS-AQ-anB"/>
-                            <constraint firstItem="rec-St-001" firstAttribute="top" secondItem="5KP-Ry-JMm" secondAttribute="bottom" constant="40" id="7KS-oW-16K"/>
-                            <constraint firstItem="5KP-Ry-JMm" firstAttribute="leading" secondItem="DyU-iH-FUf" secondAttribute="leading" id="8uX-Yh-uTa"/>
-                            <constraint firstItem="rec-St-001" firstAttribute="centerX" secondItem="546-Za-vvZ" secondAttribute="centerX" id="O5E-bU-QTX"/>
-                            <constraint firstItem="5KP-Ry-JMm" firstAttribute="leading" secondItem="DyU-iH-FUf" secondAttribute="leading" id="OOZ-hv-Yr3"/>
-                            <constraint firstItem="5KP-Ry-JMm" firstAttribute="top" secondItem="DyU-iH-FUf" secondAttribute="bottom" constant="8" id="Py7-CC-7os"/>
-                            <constraint firstItem="DyU-iH-FUf" firstAttribute="leading" secondItem="pe2-oD-l3d" secondAttribute="leadingMargin" id="TXZ-F7-5Le"/>
-                            <constraint firstItem="DyU-iH-FUf" firstAttribute="top" secondItem="546-Za-vvZ" secondAttribute="top" constant="20" id="TdR-Xg-Zj6"/>
-                            <constraint firstItem="546-Za-vvZ" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="DyU-iH-FUf" secondAttribute="trailing" symbolic="YES" id="bhj-I2-dJh"/>
+                            <constraint firstItem="rcs-Sc-001" firstAttribute="top" secondItem="546-Za-vvZ" secondAttribute="top" id="rcs-Co-006"/>
+                            <constraint firstItem="rcs-Sc-001" firstAttribute="leading" secondItem="546-Za-vvZ" secondAttribute="leading" id="rcs-Co-007"/>
+                            <constraint firstItem="546-Za-vvZ" firstAttribute="trailing" secondItem="rcs-Sc-001" secondAttribute="trailing" id="rcs-Co-008"/>
+                            <constraint firstItem="pe2-oD-l3d" firstAttribute="bottom" secondItem="rcs-Sc-001" secondAttribute="bottom" id="rcs-Co-009"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Recovery &amp; Reset" id="0Iq-TK-5y9"/>
                     <connections>
-                        <outlet property="username" destination="5KP-Ry-JMm" id="zET-CN-jsn"/>
+                        <outlet property="identifierInput" destination="5KP-Ry-JMm" id="zET-CN-jsn"/>
                     </connections>
                 </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="YAy-1k-tuj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="YAy-1k-tuj" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="550" y="864"/>
         </scene>
@@ -654,44 +666,65 @@
                         <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Code" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yEp-AX-FF4">
-                                <rect key="frame" x="15.999999999999996" y="144" width="40.666666666666657" height="20"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="zAz-lt-ibz" userLabel="CodeInput">
-                                <rect key="frame" x="16" y="172" width="370" height="34"/>
-                                <accessibility key="accessibilityConfiguration" identifier="email"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" keyboardType="numberPad" textContentType="one-time-code"/>
-                            </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TzZ-In-Hng">
-                                <rect key="frame" x="158.66666666666666" y="245.99999999999997" width="84.666666666666657" height="40.666666666666657"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Validate"/>
-                                <connections>
-                                    <action selector="validate:" destination="29F-LL-1sO" eventType="touchUpInside" id="3m3-ni-3cu"/>
-                                </connections>
-                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="24" translatesAutoresizingMaskIntoConstraints="NO" id="rcv-St-001">
+                                <rect key="frame" x="16" y="82" width="370" height="200"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="rcv-St-002" userLabel="Sent to">
+                                        <rect key="frame" x="0.0" y="0.0" width="370" height="44"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Code sent to" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rcv-Lb-001">
+                                                <rect key="frame" x="0.0" y="0.0" width="370" height="18"/>
+                                                <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                                <color key="textColor" systemColor="secondaryLabelColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="john.doe@example.com" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rcv-Lb-002" userLabel="Identifier">
+                                                <rect key="frame" x="0.0" y="22" width="370" height="22"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="rcv-St-003" userLabel="Code">
+                                        <rect key="frame" x="0.0" y="68" width="370" height="62"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Code" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rcv-Lb-003">
+                                                <rect key="frame" x="0.0" y="0.0" width="370" height="20"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="zAz-lt-ibz" userLabel="CodeInput">
+                                                <rect key="frame" x="0.0" y="28" width="370" height="34"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" keyboardType="numberPad" textContentType="one-time-code"/>
+                                            </textField>
+                                        </subviews>
+                                    </stackView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TzZ-In-Hng" userLabel="Verify">
+                                        <rect key="frame" x="0.0" y="154" width="370" height="40.666666666666686"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="filled" title="Verify"/>
+                                        <connections>
+                                            <action selector="verify:" destination="29F-LL-1sO" eventType="touchUpInside" id="3m3-ni-3cu"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="JE5-qw-5Ds"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="zAz-lt-ibz" firstAttribute="trailing" secondItem="OlR-em-nXU" secondAttribute="trailingMargin" id="AB2-Mt-GQE"/>
-                            <constraint firstItem="JE5-qw-5Ds" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="yEp-AX-FF4" secondAttribute="trailing" id="FM0-2C-rbX"/>
-                            <constraint firstItem="yEp-AX-FF4" firstAttribute="top" secondItem="JE5-qw-5Ds" secondAttribute="top" constant="20" id="GCL-h3-hxs"/>
-                            <constraint firstItem="TzZ-In-Hng" firstAttribute="top" secondItem="zAz-lt-ibz" secondAttribute="bottom" constant="40" id="JLx-fO-6Z3"/>
-                            <constraint firstItem="yEp-AX-FF4" firstAttribute="leading" secondItem="OlR-em-nXU" secondAttribute="leadingMargin" id="JuW-lr-VP1"/>
-                            <constraint firstItem="zAz-lt-ibz" firstAttribute="leading" secondItem="yEp-AX-FF4" secondAttribute="leading" id="SZL-Ho-4q4"/>
-                            <constraint firstItem="TzZ-In-Hng" firstAttribute="centerX" secondItem="JE5-qw-5Ds" secondAttribute="centerX" id="kYP-b7-aqY"/>
-                            <constraint firstItem="zAz-lt-ibz" firstAttribute="leading" secondItem="yEp-AX-FF4" secondAttribute="leading" id="kqH-RV-spv"/>
-                            <constraint firstItem="zAz-lt-ibz" firstAttribute="top" secondItem="yEp-AX-FF4" secondAttribute="bottom" constant="8" id="rqS-wH-DZa"/>
+                            <constraint firstItem="rcv-St-001" firstAttribute="top" secondItem="JE5-qw-5Ds" secondAttribute="top" constant="20" id="rcv-Co-001"/>
+                            <constraint firstItem="rcv-St-001" firstAttribute="leading" secondItem="JE5-qw-5Ds" secondAttribute="leading" constant="16" id="rcv-Co-002"/>
+                            <constraint firstItem="JE5-qw-5Ds" firstAttribute="trailing" secondItem="rcv-St-001" secondAttribute="trailing" constant="16" id="rcv-Co-003"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Verification" id="ndk-40-Vkr"/>
                     <connections>
-                        <outlet property="code" destination="zAz-lt-ibz" id="vEe-ye-XH2"/>
+                        <outlet property="codeInput" destination="zAz-lt-ibz" id="vEe-ye-XH2"/>
+                        <outlet property="identifierLabel" destination="rcv-Lb-002" id="rcv-Ou-001"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1z1-9C-pAb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

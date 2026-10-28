@@ -2,8 +2,8 @@ import Foundation
 import Reach5
 import UIKit
 
-/// Starts a passwordless flow on one identifier, the way the recovery screen does: an email sends a code or
-/// a magic link, anything else an SMS. The code step continues on `PasswordlessVerificationController`.
+/// Starts a passwordless flow on one identifier, laid out like `RecoveryStartController`: an email sends a
+/// code or a magic link, a phone number an SMS. The code step continues on `PasswordlessVerificationController`.
 ///
 /// The signup data and the redirect URI are folded by default. Each one is sent only while it is unfolded,
 /// so what the screen shows is what the request carries.
@@ -14,8 +14,8 @@ class PasswordlessController: UIViewController {
     @IBOutlet var signupDataForm: UIStackView!
     @IBOutlet var givenNameInput: UITextField!
     @IBOutlet var familyNameInput: UITextField!
-    @IBOutlet var dataEmailInput: UITextField!
-    @IBOutlet var dataPhoneNumberInput: UITextField!
+    @IBOutlet var birthdateInput: UITextField!
+    @IBOutlet var genderInput: UITextField!
     @IBOutlet var consentKeyInput: UITextField!
     @IBOutlet var consentGranted: UISwitch!
 
@@ -24,17 +24,9 @@ class PasswordlessController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        dismissKeyboardOnBackgroundTap()
         updateChevron(of: signupDataToggle, unfolded: !signupDataForm.isHidden)
         updateChevron(of: redirectUriToggle, unfolded: !redirectUriInput.isHidden)
-
-        // tap anywhere to dismiss the keyboard and access the buttons underneath
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedBackground))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
-    }
-
-    @objc private func tappedBackground() {
-        view.endEditing(true)
     }
 
     @IBAction func toggleSignupData(_ sender: Any) {
@@ -66,10 +58,7 @@ class PasswordlessController: UIViewController {
     }
 
     @IBAction func sendCode(_ sender: Any) {
-        guard let identifier = identifierInput.nonEmptyText else { return }
-        let email = identifier.contains("@") ? identifier : nil
-        let phoneNumber = email == nil ? identifier : nil
-
+        guard let (email, phoneNumber) = identifierInput.identifiers else { return }
         let origin = "PasswordlessController.sendCode"
         let scope = SettingsViewController.selectedScopes
 
@@ -80,18 +69,16 @@ class PasswordlessController: UIViewController {
                 let request: PasswordLessRequest = if let email {
                     .Email(email: email, redirectUri: redirectUri, origin: origin)
                 } else {
-                    .PhoneNumber(phoneNumber: identifier, redirectUri: redirectUri, origin: origin)
+                    .PhoneNumber(phoneNumber: phoneNumber!, redirectUri: redirectUri, origin: origin)
                 }
                 try await AppDelegate.reachfive().startPasswordless(request, scope: scope, data: data, captcha: CaptchaStore.take())
-
-                let verification = storyboard?.instantiateViewController(withIdentifier: "PasswordlessVerification")
-                if let verificationController = verification as? PasswordlessVerificationController {
+                if let verificationController = self.storyboard?.instantiateViewController(withIdentifier: "PasswordlessVerification") as? PasswordlessVerificationController {
                     verificationController.email = email
                     verificationController.phoneNumber = phoneNumber
-                    navigationController?.pushViewController(verificationController, animated: true)
+                    self.navigationController?.pushViewController(verificationController, animated: true)
                 }
             } catch {
-                presentErrorAlert(title: "Passwordless start failed", error)
+                self.presentErrorAlert(title: "Passwordless start failed", error)
             }
         }
     }
@@ -103,14 +90,14 @@ class PasswordlessController: UIViewController {
         let consents = consentKeyInput.nonEmptyText.map { key in
             [key: Consent(granted: consentGranted.isOn, consentType: nil, date: ISO8601DateFormatter().string(from: Date()))]
         }
-        let fields = [givenNameInput, familyNameInput, dataEmailInput, dataPhoneNumberInput].map(\.nonEmptyText)
+        let fields = [givenNameInput, familyNameInput, birthdateInput, genderInput].map(\.nonEmptyText)
         guard consents != nil || fields.contains(where: { $0 != nil }) else { return nil }
 
         return PasswordlessSignupData(
-            email: dataEmailInput.nonEmptyText,
-            phoneNumber: dataPhoneNumberInput.nonEmptyText,
             givenName: givenNameInput.nonEmptyText,
             familyName: familyNameInput.nonEmptyText,
+            birthdate: birthdateInput.nonEmptyText,
+            gender: genderInput.nonEmptyText,
             consents: consents
         )
     }
@@ -129,12 +116,5 @@ class PasswordlessController: UIViewController {
         var errorDescription: String? {
             "'\(text)' is not a valid URL."
         }
-    }
-}
-
-private extension UITextField {
-    var nonEmptyText: String? {
-        guard let text, !text.isEmpty else { return nil }
-        return text
     }
 }
