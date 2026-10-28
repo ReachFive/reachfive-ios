@@ -57,6 +57,17 @@ extension URL {
         return normalizedHost != nil || normalizedPath.hasPrefix("/")
     }
 
+    /// Whether the scheme is the app's own — `customScheme` in ``SdkConfig``'s terms — rather than a web one,
+    /// read as "anything other than `http`/`https`", which is the only distinction `URLSession` needs: a
+    /// non-web scheme is a redirection it has no handler for, and must refuse rather than follow.
+    ///
+    /// The whole scheme is compared, never its first four letters: `customScheme` is free-form, so a valid
+    /// one may start with `http` (`httpsapp`) and be the app's own all the same.
+    var hasCustomScheme: Bool {
+        guard let normalizedScheme else { return false }
+        return normalizedScheme != "http" && normalizedScheme != "https"
+    }
+
     /// This URL reduced to its origin, serialized as RFC 6454 §6.2 (ASCII Serialization of an Origin)
     /// defines it: scheme, host, and the port only when it differs from the scheme's default. `nil` when
     /// there is no scheme or no host — a URL is not necessarily an origin.
