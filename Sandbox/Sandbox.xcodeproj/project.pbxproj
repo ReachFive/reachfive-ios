@@ -45,6 +45,7 @@
 		34173205229D6B6400681CFD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 34173204229D6B6400681CFD /* Assets.xcassets */; };
 		34173208229D6B6400681CFD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34173206229D6B6400681CFD /* LaunchScreen.storyboard */; };
 		3417FF6E22FB06E50009EC84 /* PasswordlessController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3417FF6D22FB06E50009EC84 /* PasswordlessController.swift */; };
+		A1C0FFEE22FB06E50009EC84 /* PasswordlessVerificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0FFEE22FB06E50009EC85 /* PasswordlessVerificationController.swift */; };
 		3417FF7022FB11CD0009EC84 /* LoginWithPasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */; };
 		34797ABD22A9607D00ED093C /* SignupController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34797ABC22A9607D00ED093C /* SignupController.swift */; };
 		349E16EC230BEBBF002EA06B /* UpdatePasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */; };
@@ -105,6 +106,7 @@
 		34173207229D6B6400681CFD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		34173209229D6B6400681CFD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3417FF6D22FB06E50009EC84 /* PasswordlessController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordlessController.swift; sourceTree = "<group>"; };
+		A1C0FFEE22FB06E50009EC85 /* PasswordlessVerificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordlessVerificationController.swift; sourceTree = "<group>"; };
 		3417FF6F22FB11CD0009EC84 /* LoginWithPasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWithPasswordController.swift; sourceTree = "<group>"; };
 		34797ABC22A9607D00ED093C /* SignupController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupController.swift; sourceTree = "<group>"; };
 		349E16EB230BEBBF002EA06B /* UpdatePasswordController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePasswordController.swift; sourceTree = "<group>"; };
@@ -271,6 +273,7 @@
 			isa = PBXGroup;
 			children = (
 				3417FF6D22FB06E50009EC84 /* PasswordlessController.swift */,
+				A1C0FFEE22FB06E50009EC85 /* PasswordlessVerificationController.swift */,
 			);
 			path = Passwordless;
 			sourceTree = "<group>";
@@ -459,6 +462,7 @@
 				2AE326BD2E3931D1007D6763 /* DemoController.swift in Sources */,
 				3414A7CD22DDD39C00CF393A /* ProfileController.swift in Sources */,
 				3417FF6E22FB06E50009EC84 /* PasswordlessController.swift in Sources */,
+				A1C0FFEE22FB06E50009EC84 /* PasswordlessVerificationController.swift in Sources */,
 				2A65D1232E4253BE004B0004 /* MfaController.swift in Sources */,
 				2A65D1242E4253BE004B0004 /* PasskeyCredentialController.swift in Sources */,
 				EA91ACDEBA85D43349D63550 /* SecureStorage.swift in Sources */,
