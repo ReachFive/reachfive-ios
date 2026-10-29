@@ -23,7 +23,10 @@ class RecoveryStartController: UIViewController {
     }
 
     @IBAction func sendLink(_ sender: Any) {
-        guard let username = identifierInput.username else { return }
+        guard let username = identifierInput.username else {
+            presentAlert(title: "Missing identifier", message: "Enter an email address or a phone number.")
+            return
+        }
 
         Task { @MainActor in
             do {
@@ -40,7 +43,10 @@ class RecoveryStartController: UIViewController {
     }
 
     @IBAction func sendResetLink(_ sender: Any) {
-        guard let username = identifierInput.username else { return }
+        guard let username = identifierInput.username else {
+            presentAlert(title: "Missing identifier", message: "Enter an email address or a phone number.")
+            return
+        }
 
         Task { @MainActor in
             do {

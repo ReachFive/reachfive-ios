@@ -45,7 +45,10 @@ class PasswordlessVerificationController: UIViewController {
     }
 
     @IBAction func verify(_ sender: Any) {
-        guard let verificationCode = codeInput.nonEmptyText else { return }
+        guard let verificationCode = codeInput.nonEmptyText else {
+            presentAlert(title: "Missing code", message: "Enter the verification code you received.")
+            return
+        }
         let verifyAuthCodeRequest = VerifyAuthCodeRequest(
             phoneNumber: username.phoneNumber,
             email: username.email,

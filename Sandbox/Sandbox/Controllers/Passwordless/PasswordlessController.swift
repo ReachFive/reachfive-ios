@@ -58,7 +58,10 @@ class PasswordlessController: UIViewController {
     }
 
     @IBAction func sendCode(_ sender: Any) {
-        guard let username = identifierInput.username else { return }
+        guard let username = identifierInput.username else {
+            presentAlert(title: "Missing identifier", message: "Enter an email address or a phone number.")
+            return
+        }
         let origin = "PasswordlessController.sendCode"
         let scope = SettingsViewController.selectedScopes
 
