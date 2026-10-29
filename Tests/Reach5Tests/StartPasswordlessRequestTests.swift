@@ -2,6 +2,9 @@ import XCTest
 @testable import Reach5
 
 final class StartPasswordlessRequestTests: XCTestCase {
+    private let reachFive = ReachFive(sdkConfig: SdkConfig(domain: "example.reach5.net", clientId: "testclient"))
+    private let pkce = Pkce.generate()
+
     private func makeRequest(email: String? = nil, phoneNumber: String? = nil, data: PasswordlessSignupData? = nil) -> StartPasswordlessRequest {
         StartPasswordlessRequest(
             clientId: "testclient",
@@ -50,5 +53,27 @@ final class StartPasswordlessRequestTests: XCTestCase {
         XCTAssertEqual(payload["phone_number"] as? String, "+33612345678")
         XCTAssertNil(payload["email"])
         XCTAssertEqual((payload["data"] as? [String: Any])?["email"] as? String, "john.doe@example.com")
+    }
+
+    func testStartPasswordlessByEmailCarriesTheData() {
+        let data = PasswordlessSignupData(givenName: "John")
+
+        let request = reachFive.startPasswordlessRequest(.Email(email: "john.doe@example.com", redirectUri: nil, data: data), pkce: pkce, captcha: nil)
+
+        XCTAssertIdentical(request.data, data)
+    }
+
+    func testStartPasswordlessBySmsCarriesTheData() {
+        let data = PasswordlessSignupData(givenName: "John")
+
+        let request = reachFive.startPasswordlessRequest(.PhoneNumber(phoneNumber: "+33612345678", redirectUri: nil, data: data), pkce: pkce, captcha: nil)
+
+        XCTAssertIdentical(request.data, data)
+    }
+
+    func testStartPasswordlessWithoutDataSendsNone() {
+        let request = reachFive.startPasswordlessRequest(.Email(email: "john.doe@example.com", redirectUri: nil), pkce: pkce, captcha: nil)
+
+        XCTAssertNil(request.data)
     }
 }

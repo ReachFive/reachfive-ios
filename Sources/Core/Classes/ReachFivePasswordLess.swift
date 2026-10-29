@@ -25,7 +25,13 @@ extension ReachFive {
     public func startPasswordless(_ request: PasswordLessRequest, captcha: Captcha? = nil) async throws {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
-        let startPasswordlessRequest = switch request {
+        let startPasswordlessRequest = startPasswordlessRequest(request, pkce: pkce, captcha: captcha)
+        storage.save(key: passwordlessRedirectUriKey, value: PasswordlessRedirect(codeChallenge: pkce.codeChallenge, redirectUri: startPasswordlessRequest.redirectUri))
+        return try await reachFiveApi.startPasswordless(startPasswordlessRequest)
+    }
+
+    func startPasswordlessRequest(_ request: PasswordLessRequest, pkce: Pkce, captcha: Captcha?) -> StartPasswordlessRequest {
+        switch request {
         case let .Email(email, redirectUri, origin, scope, data):
             StartPasswordlessRequest(
                 clientId: sdkConfig.clientId,
@@ -53,8 +59,6 @@ extension ReachFive {
                 data: data
             )
         }
-        storage.save(key: passwordlessRedirectUriKey, value: PasswordlessRedirect(codeChallenge: pkce.codeChallenge, redirectUri: startPasswordlessRequest.redirectUri))
-        return try await reachFiveApi.startPasswordless(startPasswordlessRequest)
     }
 
     public func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> AuthToken {
