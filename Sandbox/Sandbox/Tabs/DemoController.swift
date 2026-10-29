@@ -156,7 +156,7 @@ class DemoController: UIViewController {
                         let flow = try await AppDelegate.reachfive().login(withRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                         flowTheLogin(flow)
                     } else {
-                        let authToken = try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                        let authToken = try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                         goToProfile(authToken)
                     }
                 } catch ReachFiveError.AuthCanceled {

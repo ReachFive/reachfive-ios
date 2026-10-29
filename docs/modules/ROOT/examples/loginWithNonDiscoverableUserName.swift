@@ -1,6 +1,6 @@
 do {
     let authToken = try await AppDelegate.reachfive().login(
-        withNonDiscoverableUsername: .Unspecified(username),
+        withNonDiscoverableUsername: .unspecified(username),
         forRequest: NativeLoginRequest(presenting: presenting),
         usingModalAuthorizationFor: [.Passkey],
         display: .Always

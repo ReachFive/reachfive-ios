@@ -2,8 +2,12 @@
 
 ## Unreleased
 
+### Breaking changes
+- `Username` has no `.Unspecified` case anymore: `Username.unspecified(_:)` resolves the identifier right away, to `.Email` if it contains "@", to `.PhoneNumber` otherwise. A `switch` over `Username` now has two cases.
+
 ### New features
 - Captcha provider `CaptchaProvider.reCaptchaEnterprise` (`recaptcha_enterprise`), for tokens obtained from reCAPTCHA Enterprise.
+- `Username.identifier`, `.email` and `.phoneNumber` give the identifier a `Username` carries, and the email and phone number fields the server expects.
 
 ### Bug fixes
 - `startPasswordless` now sends a scope. It is the SDK scope by default, or the new `scope` parameter of `PasswordLessRequest.Email` and `.PhoneNumber`.

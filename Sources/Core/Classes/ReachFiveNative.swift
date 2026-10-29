@@ -104,18 +104,32 @@ extension ReachFive {
 }
 
 public enum Username {
-    case Unspecified(_ username: String)
     case Email(_ email: String)
     case PhoneNumber(_ phoneNumber: String)
 
-    /// The two identifier fields the server expects. `.Unspecified` is split by the only heuristic the SDK has:
-    /// an identifier containing "@" is an email, anything else is a phone number.
-    var identifiers: (email: String?, phoneNumber: String?) {
+    public var identifier: String {
         switch self {
-        case let .Unspecified(username): username.contains("@") ? (username, nil) : (nil, username)
-        case let .Email(email): (email, nil)
-        case let .PhoneNumber(phoneNumber): (nil, phoneNumber)
+        case let .Email(email):
+            email
+        case let .PhoneNumber(phoneNumber):
+            phoneNumber
         }
+    }
+
+    public var email: String? {
+        guard case let .Email(email) = self else { return nil }
+        return email
+    }
+
+    public var phoneNumber: String? {
+        guard case let .PhoneNumber(phoneNumber) = self else { return nil }
+        return phoneNumber
+    }
+}
+
+extension Username {
+    public static func unspecified(_ username: String) -> Username {
+        username.contains("@") ? .Email(username) : .PhoneNumber(username)
     }
 }
 

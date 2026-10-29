@@ -23,7 +23,7 @@ class PasskeyNonDiscoverableController: UIViewController {
 
         let request = NativeLoginRequest(presenting: Presentation(from: self), origin: "PasskeyNonDiscoverableController.login")
         await handleAuthToken {
-            try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: mode)
+            try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: mode)
         }
     }
 }
