@@ -1,3 +1,4 @@
+import Reach5
 import UIKit
 
 extension UITextField {
@@ -7,10 +8,9 @@ extension UITextField {
         return text
     }
 
-    /// The identifier typed in an "Email or phone number" field, split by the only heuristic the Sandbox has,
-    /// the same one `Username.Unspecified` uses: an `@` makes an email, anything else a phone number.
-    var identifiers: (email: String?, phoneNumber: String?)? {
-        guard let text = nonEmptyText else { return nil }
-        return text.contains("@") ? (text, nil) : (nil, text)
+    /// The identifier typed in an "Email or phone number" field, left to the SDK's own heuristic:
+    /// `Username.Unspecified` makes an email of an identifier with an `@`, a phone number of anything else.
+    var username: Username? {
+        nonEmptyText.map(Username.Unspecified)
     }
 }

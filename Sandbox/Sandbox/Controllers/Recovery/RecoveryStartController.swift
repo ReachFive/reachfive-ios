@@ -23,14 +23,14 @@ class RecoveryStartController: UIViewController {
     }
 
     @IBAction func sendLink(_ sender: Any) {
-        guard let (email, phoneNumber) = identifierInput.identifiers else { return }
+        guard let username = identifierInput.username else { return }
 
         Task { @MainActor in
             do {
-                try await AppDelegate.reachfive().requestAccountRecovery(email: email, phoneNumber: phoneNumber, origin: "RecoveryStartController.sendLink", captcha: CaptchaStore.take())
-                if let verificationController = self.storyboard?.instantiateViewController(withIdentifier: "AccountRecoveryVerification") as? RecoveryVerificationController {
-                    verificationController.email = email
-                    verificationController.phoneNumber = phoneNumber
+                try await AppDelegate.reachfive().requestAccountRecovery(email: username.email, phoneNumber: username.phoneNumber, origin: "RecoveryStartController.sendLink", captcha: CaptchaStore.take())
+                if let verificationController = self.storyboard?.instantiateViewController(identifier: "AccountRecoveryVerification", creator: { coder in
+                    RecoveryVerificationController(coder: coder, username: username)
+                }) {
                     self.navigationController?.pushViewController(verificationController, animated: true)
                 }
             } catch {
@@ -40,11 +40,11 @@ class RecoveryStartController: UIViewController {
     }
 
     @IBAction func sendResetLink(_ sender: Any) {
-        guard let (email, phoneNumber) = identifierInput.identifiers else { return }
+        guard let username = identifierInput.username else { return }
 
         Task { @MainActor in
             do {
-                try await AppDelegate.reachfive().requestPasswordReset(email: email, phoneNumber: phoneNumber, origin: "RecoveryStartController.sendResetLink", captcha: CaptchaStore.take())
+                try await AppDelegate.reachfive().requestPasswordReset(email: username.email, phoneNumber: username.phoneNumber, origin: "RecoveryStartController.sendResetLink", captcha: CaptchaStore.take())
                 self.presentAlert(title: "Reset password", message: "If the account exists, a reset link has been sent.")
             } catch {
                 self.presentErrorAlert(title: "Password reset failed", error)

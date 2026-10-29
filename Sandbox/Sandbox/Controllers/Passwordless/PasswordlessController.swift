@@ -58,7 +58,7 @@ class PasswordlessController: UIViewController {
     }
 
     @IBAction func sendCode(_ sender: Any) {
-        guard let (email, phoneNumber) = identifierInput.identifiers else { return }
+        guard let username = identifierInput.username else { return }
         let origin = "PasswordlessController.sendCode"
         let scope = SettingsViewController.selectedScopes
 
@@ -66,15 +66,17 @@ class PasswordlessController: UIViewController {
             do {
                 let redirectUri = try typedRedirectUri()
                 let data = signupData()
-                let request: PasswordLessRequest = if let email {
+                let request: PasswordLessRequest = switch username {
+                case let .Email(email):
                     .Email(email: email, redirectUri: redirectUri, origin: origin)
-                } else {
-                    .PhoneNumber(phoneNumber: phoneNumber!, redirectUri: redirectUri, origin: origin)
+                case let .PhoneNumber(phoneNumber):
+                    .PhoneNumber(phoneNumber: phoneNumber, redirectUri: redirectUri, origin: origin)
                 }
+
                 try await AppDelegate.reachfive().startPasswordless(request, scope: scope, data: data, captcha: CaptchaStore.take())
-                if let verificationController = self.storyboard?.instantiateViewController(withIdentifier: "PasswordlessVerification") as? PasswordlessVerificationController {
-                    verificationController.email = email
-                    verificationController.phoneNumber = phoneNumber
+                if let verificationController = self.storyboard?.instantiateViewController(identifier: "PasswordlessVerification", creator: { coder in
+                    PasswordlessVerificationController(coder: coder, username: username)
+                }) {
                     self.navigationController?.pushViewController(verificationController, animated: true)
                 }
             } catch {
