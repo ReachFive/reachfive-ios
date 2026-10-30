@@ -569,23 +569,20 @@ Both the international format and the national conventions of the account's coun
 ! gender `string` ! The gender of the profile.
 
 Allowed values are `female`, `male` and `other`.
-! company `string` ! The company's name of the profile.
 // submodel to do
 ! addresses `ProfileAddress[]` ! The list of the profile's postal addresses
 ! locale `string` ! The profile's language code in lowercase and country code in uppercase, separated by a dash (eg `en`, `fr-FR` ...).
 ! bio `string` ! The biography of the profile.
 ! customFields `Map<string, any>` ! The custom fields of the profile.
 ! consents `Map<string, Consent>` ! The consents granted to the profile. It is a map of string keys with the associated consent object.
+! company `string` ! The company's name of the profile.
 !===
 // end::profilesignuprequest[]
 
 // tag::passwordlesssignupdata[]
 |[[data, data]] data `PasswordlessSignupData`
-|The profile to create if the flow turns out to be a signup. It is written once the code is verified.
-
-It is ignored when the identifier already has a profile, and unless *Accept profile data* is selected in the Console under *Passwordless settings*.
-
-An `email` or `phoneNumber` of the same kind as the identifier of the flow is ignored. One of the other kind is saved unverified.
+|The profile to create if the identifier has no associated profile to it, meaning that it is a signup.
+It is ignored if it is a login, and if *Accept profile data* is turned off in the Console under *Passwordless settings*.
 
 [cols="1,3a"]
 !===
@@ -596,17 +593,17 @@ An `email` or `phoneNumber` of the same kind as the identifier of the flow is ig
 ! familyName `string` ! The family name of the profile.
 ! name `string` ! The full name of the profile.
 ! nickname `string` ! The nickname of the profile.
-! username `string` ! The username of the profile (the login's name).
 ! birthdate `string` ! The birthdate of the profile, represented as an {iso-8601}[ISO 8601^] `YYYY-MM-DD` format.
+! picture `string` ! The URL of one of the profile picture. This URL refers to an image file (PNG, JPEG, or GIF image file).
+! username `string` ! The username of the profile (the login's name).
 ! gender `string` ! The gender of the profile.
 
 Allowed values are `female`, `male` and `other`.
 ! addresses `ProfileAddress[]` ! The list of the profile's postal addresses.
-! picture `string` ! The URL of one of the profile picture. This URL refers to an image file (PNG, JPEG, or GIF image file).
-! company `string` ! The company's name of the profile.
 ! locale `string` ! The profile's language code in lowercase and country code in uppercase, separated by a dash (eg `en`, `fr-FR` ...).
 ! customFields `Map<string, any>` ! The custom fields of the profile.
 ! consents `Map<string, Consent>` ! The consents granted to the profile. It is a map of string keys with the associated consent object.
+! company `string` ! The company's name of the profile.
 !===
 // end::passwordlesssignupdata[]
 
