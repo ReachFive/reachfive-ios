@@ -1,11 +1,5 @@
 import Foundation
 
-/// The profile a passwordless start creates if it resolves to a signup, written once the code is verified.
-/// Ignored when the identifier already has a profile, and unless the account accepts profile data in its
-/// passwordless settings (off by default).
-///
-/// The identifier of the flow stays in `PasswordLessRequest`. An `email` or `phoneNumber` here of the same kind
-/// is ignored; one of the other kind is written to the profile unverified.
 public class PasswordlessSignupData: Codable, DictionaryEncodable {
     public let email: String?
     public let phoneNumber: String?
@@ -14,15 +8,15 @@ public class PasswordlessSignupData: Codable, DictionaryEncodable {
     public let familyName: String?
     public let name: String?
     public let nickname: String?
-    public let username: String?
     public let birthdate: String?
+    public let picture: String?
+    public let username: String?
     public let gender: String?
     public let addresses: [ProfileAddress]?
-    public let picture: String?
-    public let company: String?
     public let locale: String?
     public let customFields: [String: CustomField]?
     public let consents: [String: Consent]?
+    public let company: String?
 
     public init(
         email: String? = nil,
@@ -32,15 +26,15 @@ public class PasswordlessSignupData: Codable, DictionaryEncodable {
         familyName: String? = nil,
         name: String? = nil,
         nickname: String? = nil,
-        username: String? = nil,
         birthdate: String? = nil,
+        picture: String? = nil,
+        username: String? = nil,
         gender: String? = nil,
         addresses: [ProfileAddress]? = nil,
-        picture: String? = nil,
-        company: String? = nil,
         locale: String? = nil,
         customFields: [String: CustomField]? = nil,
-        consents: [String: Consent]? = nil
+        consents: [String: Consent]? = nil,
+        company: String? = nil
     ) {
         self.email = email
         self.phoneNumber = phoneNumber
@@ -49,14 +43,14 @@ public class PasswordlessSignupData: Codable, DictionaryEncodable {
         self.familyName = familyName
         self.name = name
         self.nickname = nickname
-        self.username = username
         self.birthdate = birthdate
+        self.picture = picture
+        self.username = username
         self.gender = gender
         self.addresses = addresses
-        self.picture = picture
-        self.company = company
         self.locale = locale
         self.customFields = customFields
         self.consents = consents
+        self.company = company
     }
 }
