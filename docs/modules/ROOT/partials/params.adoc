@@ -580,7 +580,7 @@ Allowed values are `female`, `male` and `other`.
 // end::profilesignuprequest[]
 
 // tag::passwordlesssignupdata[]
-|[[data, data]] data `PasswordlessSignupData`
+|[[passwordlessSignupData, data]] data `PasswordlessSignupData`
 |The profile to create if the identifier has no associated profile to it, meaning that it is a signup.
 It is ignored if it is a login, and if *Accept profile data* is turned off in the Console under *Passwordless settings*.
 
