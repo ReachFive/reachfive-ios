@@ -3,11 +3,11 @@ import XCTest
 
 final class UsernameTests: XCTestCase {
     func testUnspecifiedIsSplitByTheAtSign() {
-        XCTAssertEqual(Username.unspecified("jane@example.com").email, "jane@example.com")
-        XCTAssertNil(Username.unspecified("jane@example.com").phoneNumber)
+        XCTAssertEqual(Username.Unspecified("jane@example.com").email, "jane@example.com")
+        XCTAssertNil(Username.Unspecified("jane@example.com").phoneNumber)
 
-        XCTAssertEqual(Username.unspecified("+33600000000").phoneNumber, "+33600000000")
-        XCTAssertNil(Username.unspecified("+33600000000").email)
+        XCTAssertEqual(Username.Unspecified("+33600000000").phoneNumber, "+33600000000")
+        XCTAssertNil(Username.Unspecified("+33600000000").email)
     }
 
     func testExplicitIdentifiersAreCarriedAsIs() {

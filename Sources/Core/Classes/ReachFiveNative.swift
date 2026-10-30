@@ -128,7 +128,7 @@ public enum Username {
 }
 
 extension Username {
-    public static func unspecified(_ username: String) -> Username {
+    public static func Unspecified(_ username: String) -> Username {
         username.contains("@") ? .Email(username) : .PhoneNumber(username)
     }
 }

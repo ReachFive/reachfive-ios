@@ -60,7 +60,7 @@ class LoginPasskeyController: UIViewController {
                     flowTheLogin(flow)
 
                 case let .some(username):
-                    let authToken = try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
+                    let authToken = try await AppDelegate.reachfive().login(withNonDiscoverableUsername: .Unspecified(username), forRequest: request, usingModalAuthorizationFor: [.Passkey], display: .Always)
                     goToProfile(authToken)
                 }
             } catch ReachFiveError.AuthCanceled {

@@ -459,7 +459,7 @@ extension CredentialManager {
     private func completeModalLogin(_ authorization: ASAuthorization, scopes: [String], siwa: SignInWithApple?, captcha: Captcha?, reachFive: ReachFive, originR5: String?) async throws -> LoginFlow {
         if let passwordCredential = authorization.credential as? ASPasswordCredential {
             // a password was selected to sign in. No custom identifier: none can be used at signup either.
-            let username = Username.unspecified(passwordCredential.user)
+            let username = Username.Unspecified(passwordCredential.user)
 
             return try await reachFive.loginWithPassword(email: username.email, phoneNumber: username.phoneNumber, password: passwordCredential.password, scope: scopes, origin: originR5, captcha: captcha)
         } else if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {

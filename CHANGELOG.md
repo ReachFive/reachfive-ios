@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Breaking changes
-- `Username` has no `.Unspecified` case anymore: `Username.unspecified(_:)` resolves the identifier right away, to `.Email` if it contains "@", to `.PhoneNumber` otherwise. A `switch` over `Username` now has two cases.
+- `Username.Unspecified` is no longer a case but a static function that resolves the identifier right away, to `.Email` if it contains "@", to `.PhoneNumber` otherwise. Building `.Unspecified(username)` still compiles; matching `case .Unspecified` in a `switch` over `Username` does not, the `switch` now has two cases.
 
 ### New features
 - Captcha provider `CaptchaProvider.reCaptchaEnterprise` (`recaptcha_enterprise`), for tokens obtained from reCAPTCHA Enterprise.
