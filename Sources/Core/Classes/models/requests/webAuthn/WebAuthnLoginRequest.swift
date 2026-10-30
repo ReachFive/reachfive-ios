@@ -12,9 +12,8 @@ public struct WebAuthnLoginRequest: Codable, DictionaryEncodable {
     public init(clientId: String, origin: String, username: Username? = nil, scope: [String]? = nil) {
         self.clientId = clientId
         self.origin = origin
-        let identifiers = username?.identifiers ?? (email: nil, phoneNumber: nil)
-        email = identifiers.email
-        phoneNumber = identifiers.phoneNumber
+        email = username?.email
+        phoneNumber = username?.phoneNumber
         self.scope = (scope ?? []).joined(separator: " ")
     }
 }
