@@ -1,8 +1,8 @@
 import Foundation
 
 public enum PasswordLessRequest {
-    case Email(email: String, redirectUri: URL?, origin: String? = nil, scope: [String]? = nil)
-    case PhoneNumber(phoneNumber: String, redirectUri: URL?, origin: String? = nil, scope: [String]? = nil)
+    case Email(email: String, redirectUri: URL? = nil, origin: String? = nil)
+    case PhoneNumber(phoneNumber: String, redirectUri: URL? = nil, origin: String? = nil)
 }
 
 /// The `redirect_uri` a passwordless code is bound to, saved with the challenge of the PKCE started alongside.
@@ -22,11 +22,17 @@ extension ReachFive {
         self.passwordlessCallback = passwordlessCallback
     }
 
-    public func startPasswordless(_ request: PasswordLessRequest, captcha: Captcha? = nil) async throws {
+    public func startPasswordless(_ request: PasswordLessRequest, scope: [String]? = nil, data: PasswordlessSignupData? = nil, captcha: Captcha? = nil) async throws {
         let pkce = Pkce.generate()
         storage.save(key: pkceKey, value: pkce)
-        let startPasswordlessRequest = switch request {
-        case let .Email(email, redirectUri, origin, scope):
+        let startPasswordlessRequest = startPasswordlessRequest(request, scope: scope, data: data, pkce: pkce, captcha: captcha)
+        storage.save(key: passwordlessRedirectUriKey, value: PasswordlessRedirect(codeChallenge: pkce.codeChallenge, redirectUri: startPasswordlessRequest.redirectUri))
+        return try await reachFiveApi.startPasswordless(startPasswordlessRequest)
+    }
+
+    func startPasswordlessRequest(_ request: PasswordLessRequest, scope: [String]?, data: PasswordlessSignupData?, pkce: Pkce, captcha: Captcha?) -> StartPasswordlessRequest {
+        switch request {
+        case let .Email(email, redirectUri, origin):
             StartPasswordlessRequest(
                 clientId: sdkConfig.clientId,
                 email: email,
@@ -36,9 +42,10 @@ extension ReachFive {
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin,
                 captcha: captcha,
-                scope: (scope ?? self.scope).joined(separator: " ")
+                scope: (scope ?? self.scope).joined(separator: " "),
+                data: data
             )
-        case let .PhoneNumber(phoneNumber, redirectUri, origin, scope):
+        case let .PhoneNumber(phoneNumber, redirectUri, origin):
             StartPasswordlessRequest(
                 clientId: sdkConfig.clientId,
                 phoneNumber: phoneNumber,
@@ -48,11 +55,10 @@ extension ReachFive {
                 codeChallengeMethod: pkce.codeChallengeMethod,
                 origin: origin,
                 captcha: captcha,
-                scope: (scope ?? self.scope).joined(separator: " ")
+                scope: (scope ?? self.scope).joined(separator: " "),
+                data: data
             )
         }
-        storage.save(key: passwordlessRedirectUriKey, value: PasswordlessRedirect(codeChallenge: pkce.codeChallenge, redirectUri: startPasswordlessRequest.redirectUri))
-        return try await reachFiveApi.startPasswordless(startPasswordlessRequest)
     }
 
     public func verifyPasswordlessCode(verifyAuthCodeRequest: VerifyAuthCodeRequest) async throws -> AuthToken {
