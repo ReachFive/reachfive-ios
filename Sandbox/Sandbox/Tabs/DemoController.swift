@@ -94,7 +94,7 @@ class DemoController: UIViewController {
 
     @IBAction func forgotPassword(_ sender: Any) {
         guard let recoveryController = storyboard?.instantiateViewController(withIdentifier: "RecoveryStartController") as? RecoveryStartController else { return }
-        recoveryController.initialUsername = usernameField.text
+        recoveryController.initialIdentifier = usernameField.text
         navigationController?.pushViewController(recoveryController, animated: true)
     }
 

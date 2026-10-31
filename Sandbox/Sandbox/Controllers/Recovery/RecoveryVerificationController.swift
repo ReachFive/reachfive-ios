@@ -1,21 +1,34 @@
 import Foundation
+import Reach5
 import UIKit
 
+/// The code step of an account recovery started by `RecoveryStartController`, laid out like
+/// `PasswordlessVerificationController`. The recovery link opened in the app completes the same step,
+/// through the account recovery callback this screen registers.
 class RecoveryVerificationController: UIViewController {
-    var email: String?
-    var phoneNumber: String?
+    let username: Username
 
-    @IBOutlet var code: UITextField!
+    @IBOutlet var identifierLabel: UILabel!
+    @IBOutlet var codeInput: UITextField!
+
+    init?(coder: NSCoder, username: Username) {
+        self.username = username
+        super.init(coder: coder)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("Instantiate with init(coder:username:)")
+    }
+
     override func viewDidLoad() {
+        super.viewDidLoad()
+        dismissKeyboardOnBackgroundTap()
+        identifierLabel.text = username.identifier
         AppDelegate.reachfive().addAccountRecoveryCallback { result in
             switch result {
             case let .success(resp):
-                if let recoveryEndController = self.storyboard?.instantiateViewController(withIdentifier: "AccountRecoveryEnd") as? RecoveryEndController {
-                    recoveryEndController.verificationCode = resp.verificationCode
-                    recoveryEndController.email = resp.email
-                    recoveryEndController.phoneNumber = self.phoneNumber
-                    self.navigationController?.pushViewController(recoveryEndController, animated: true)
-                }
+                self.goToRecoveryEnd(verificationCode: resp.verificationCode, username: .Email(resp.email))
 
             case let .failure(error):
                 self.presentErrorAlert(title: "Account Recovery failed", error)
@@ -23,16 +36,19 @@ class RecoveryVerificationController: UIViewController {
         }
     }
 
-    @IBAction func validate(_ sender: Any) {
-        guard let verificationCode = code.text, !verificationCode.isEmpty else {
-            print("no code")
+    @IBAction func verify(_ sender: Any) {
+        guard let verificationCode = codeInput.nonEmptyText else {
+            presentAlert(title: "Missing code", message: "Enter the verification code you received.")
             return
         }
 
-        if let recoveryEndController = storyboard?.instantiateViewController(withIdentifier: "AccountRecoveryEnd") as? RecoveryEndController {
-            recoveryEndController.verificationCode = verificationCode
-            recoveryEndController.email = email
-            recoveryEndController.phoneNumber = phoneNumber
+        goToRecoveryEnd(verificationCode: verificationCode, username: username)
+    }
+
+    private func goToRecoveryEnd(verificationCode: String, username: Username) {
+        if let recoveryEndController = storyboard?.instantiateViewController(identifier: "AccountRecoveryEnd", creator: { coder in
+            RecoveryEndController(coder: coder, username: username, verificationCode: verificationCode)
+        }) {
             navigationController?.pushViewController(recoveryEndController, animated: true)
         }
     }
