@@ -58,7 +58,7 @@ final class StartPasswordlessRequestTests: XCTestCase {
     func testStartPasswordlessByEmailCarriesTheData() {
         let data = PasswordlessSignupData(givenName: "John")
 
-        let request = reachFive.startPasswordlessRequest(.Email(email: "john.doe@example.com", redirectUri: nil, data: data), pkce: pkce, captcha: nil)
+        let request = reachFive.startPasswordlessRequest(.Email(email: "john.doe@example.com", redirectUri: nil), scope: nil, data: data, pkce: pkce, captcha: nil)
 
         XCTAssertIdentical(request.data, data)
     }
@@ -66,13 +66,13 @@ final class StartPasswordlessRequestTests: XCTestCase {
     func testStartPasswordlessBySmsCarriesTheData() {
         let data = PasswordlessSignupData(givenName: "John")
 
-        let request = reachFive.startPasswordlessRequest(.PhoneNumber(phoneNumber: "+33612345678", redirectUri: nil, data: data), pkce: pkce, captcha: nil)
+        let request = reachFive.startPasswordlessRequest(.PhoneNumber(phoneNumber: "+33612345678", redirectUri: nil), scope: nil, data: data, pkce: pkce, captcha: nil)
 
         XCTAssertIdentical(request.data, data)
     }
 
     func testStartPasswordlessWithoutDataSendsNone() {
-        let request = reachFive.startPasswordlessRequest(.Email(email: "john.doe@example.com", redirectUri: nil), pkce: pkce, captcha: nil)
+        let request = reachFive.startPasswordlessRequest(.Email(email: "john.doe@example.com", redirectUri: nil), scope: nil, data: nil, pkce: pkce, captcha: nil)
 
         XCTAssertNil(request.data)
     }
