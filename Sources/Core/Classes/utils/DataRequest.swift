@@ -118,10 +118,11 @@ class DataRequest {
             ))
         }
 
-        // Anything but a 2xx throws here, its `ApiError` decoded: a rejected `redirect_uri` answers
-        // `403 error.client.redirectUrlNotAllowed`. A 2xx is either the server not redirecting, or a web
-        // redirection `URLSession` followed, to a login or error page.
+        // No callback. An error status throws here, with the `ApiError` of its body: a rejected
+        // `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`.
         let final = try validate(data: data, response: response)
+        // A success status is a page instead of the callback: the server's own, or the one a followed
+        // redirection led to (the client's Login URL, on error), whose URL the error names.
         let redirectedTo = final.url.flatMap { $0 == request.url ? nil : " after redirecting to '\($0.absoluteString)'" } ?? ""
         throw logged(.TechnicalError(
             reason: "Request did not redirect to its redirect_uri: answered HTTP \(final.statusCode)\(redirectedTo)"
