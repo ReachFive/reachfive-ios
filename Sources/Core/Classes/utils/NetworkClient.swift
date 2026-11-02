@@ -6,7 +6,7 @@ class NetworkClient {
     private let correlationId: String
 
     init(decoder: JSONDecoder, configuration: URLSessionConfiguration = .default) {
-        session = URLSession(configuration: configuration, delegate: CustomSchemeRedirectRefusal(), delegateQueue: nil)
+        session = URLSession(configuration: configuration, delegate: CallbackRedirectRefusal(), delegateQueue: nil)
         self.decoder = decoder
         correlationId = UUID().uuidString
     }
@@ -38,11 +38,11 @@ class NetworkClient {
     }
 }
 
-/// Follows redirections as `URLSession` normally would, except one to the app's custom scheme — the
-/// `/oauth/authorize` callback — which it refuses. The task then ends on the redirect response itself, and
-/// ``DataRequest/redirect()`` reads the callback from its `Location` header.
-class CustomSchemeRedirectRefusal: NSObject, URLSessionTaskDelegate {
+/// Follows redirections as `URLSession` normally would, except the `/oauth/authorize` callback — the
+/// request's own `redirect_uri`, `https` included, or any custom scheme — which it refuses. The task then ends
+/// on the redirect response itself, and ``DataRequest/redirect()`` reads the callback from its `Location` header.
+class CallbackRedirectRefusal: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
-        request.url?.hasCustomScheme == true ? nil : request
+        request.url?.isCallback(of: task.originalRequest?.url) == true ? nil : request
     }
 }
