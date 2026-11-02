@@ -581,8 +581,9 @@ Allowed values are `female`, `male` and `other`.
 
 // tag::passwordlesssignupdata[]
 |[[passwordlessSignupData, data]] data `PasswordlessSignupData`
-|The profile to create if the identifier has no associated profile to it, meaning that it is a signup.
-It is ignored if it is a login, and if *Accept profile data* is turned off in the Console under *Passwordless settings*.
+|The profile data to use when the identifier doesn't match an existing profile and the flow creates one (signup).
+ReachFive ignores `data` when the profile already exists (login).
+It also ignores `data` unless your account allows profile data at passwordless signup. An administrator turns this on in the Console.
 
 [cols="1,3a"]
 !===
