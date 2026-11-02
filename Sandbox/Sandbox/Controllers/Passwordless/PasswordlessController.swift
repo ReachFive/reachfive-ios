@@ -40,9 +40,9 @@ class PasswordlessController: UIViewController {
                         .Email(
                             email: emailInput.text ?? "",
                             redirectUri: typedRedirectUri(),
-                            origin: "PasswordlessController.loginWithEmail",
-                            scope: SettingsViewController.selectedScopes
+                            origin: "PasswordlessController.loginWithEmail"
                         ),
+                        scope: SettingsViewController.selectedScopes,
                         captcha: CaptchaStore.take()
                     )
                 self.presentAlert(title: "Login with email", message: "Success")
@@ -60,9 +60,9 @@ class PasswordlessController: UIViewController {
                         .PhoneNumber(
                             phoneNumber: phoneNumberInput.text ?? "",
                             redirectUri: typedRedirectUri(),
-                            origin: "PasswordlessController.loginWithPhoneNumber",
-                            scope: SettingsViewController.selectedScopes
+                            origin: "PasswordlessController.loginWithPhoneNumber"
                         ),
+                        scope: SettingsViewController.selectedScopes,
                         captcha: CaptchaStore.take()
                     )
                 self.presentAlert(title: "Login with phone number", message: "Success")
