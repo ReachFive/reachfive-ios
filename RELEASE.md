@@ -17,14 +17,14 @@
 
 6. Submit and merge the pull request
 
-7. Add git tag `11.0.0` to the merge commit
+7. Add git tag `11.1.0` to the merge commit
     ```sh
-    git tag 11.0.0
+    git tag 11.1.0
     ```
 
 8. Push the tag
     ```sh
-    git push origin 11.0.0
+    git push origin 11.1.0
     ```
 
 9. The tag is the published version: SPM resolves it directly, there is nothing else to publish

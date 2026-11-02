@@ -3,6 +3,17 @@
 ## Unreleased
 
 ### New features
+- Captcha provider `CaptchaProvider.reCaptchaEnterprise` (`recaptcha_enterprise`), for tokens obtained from reCAPTCHA Enterprise.
+- `startPasswordless` supports an optional scope parameter.
+- `startPasswordless` supports an optional profile data for signups.
+
+### Bug fixes
+- `startPasswordless` and `mfaStart(stepUp: .AuthTokenFlow(...))` now correctly keep track of a non default `redirectUri` used when finishing their flow. Resolve the `Invalid redirect uri` error.
+- The `redirectUri` of `.LoginFlow` is documented as ignored by the backend.
+
+## v11.1.0
+
+### New features
 - Add a public SdkVersion which contains the current version of this Sdk
 - Captcha support on every endpoint this SDK calls that the server can protect: `loginWithPassword`, `signup(profile:)`, `requestPasswordReset`, `requestAccountRecovery`, `startPasswordless`, `updateEmail` and `login(withRequest:usingModalAuthorizationFor:display:)` take a new optional `captcha: Captcha?`, a token and its `CaptchaProvider` (`.reCaptcha`, `.captchaFox`, or any name the server gains later). On the modal sign-in it only applies if a saved password is selected.
 

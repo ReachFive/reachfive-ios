@@ -2,6 +2,17 @@ import Reach5
 import UIKit
 
 extension UIViewController {
+    /// Tap anywhere to dismiss the keyboard and access the buttons underneath.
+    func dismissKeyboardOnBackgroundTap() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedBackground))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func tappedBackground() {
+        view.endEditing(true)
+    }
+
     func handleAuthToken(errorMessage: String = "Login failed", _ body: () async throws -> AuthToken) async {
         do {
             let authToken = try await body()
