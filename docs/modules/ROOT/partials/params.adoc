@@ -603,7 +603,7 @@ In that configuration, this endpoint is named `update_email`.
 endif::[]
 
 The SDK never produces the token: obtaining one is your application's job.
-A token is single-use and short-lived, and the action it was minted with is sealed inside it, so there is no action parameter to pass here.
+A token is single-use and short-lived, and the action is encoded inside it, so there is no action parameter to pass here.
 // end::captcha[]
 
 // tag::origin[]
