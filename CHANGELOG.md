@@ -10,6 +10,11 @@
 ### Bug fixes
 - `startPasswordless` and `mfaStart(stepUp: .AuthTokenFlow(...))` now correctly keep track of a non default `redirectUri` used when finishing their flow. Resolve the `Invalid redirect uri` error.
 - The `redirectUri` of `.LoginFlow` is documented as ignored by the backend.
+- Logins no longer fail when the app intercepts network traffic (SSL pinning, APM agent), as in 8.x.
+- A failed login reports the server's error instead of `Request did not redirect as expected`.
+- An `https` `redirectUri` works again for password, passkey and native provider logins.
+- An error response without an `ApiError` body reports its HTTP status.
+- Fix a crash when a request ends with neither a response nor an error.
 
 ## v11.1.0
 
