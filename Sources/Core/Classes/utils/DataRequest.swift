@@ -118,7 +118,7 @@ class DataRequest {
             ))
         }
 
-        // No callback. An error status throws here, with the `ApiError` of its body: a rejected
+        // No callback. On an error status, `validate` throws with the `ApiError` of the body: a rejected
         // `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`.
         let final = try validate(data: data, response: response)
         // A success status is a page instead of the callback: the server's own, or the one a followed
