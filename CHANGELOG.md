@@ -10,6 +10,7 @@
 ### Bug fixes
 - `startPasswordless` and `mfaStart(stepUp: .AuthTokenFlow(...))` now correctly keep track of a non default `redirectUri` used when finishing their flow. Resolve the `Invalid redirect uri` error.
 - The `redirectUri` of `.LoginFlow` is documented as ignored by the backend.
+- Improve network redirect and error handling.
 
 ## v11.1.0
 

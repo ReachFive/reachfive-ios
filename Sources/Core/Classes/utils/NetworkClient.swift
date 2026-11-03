@@ -2,12 +2,11 @@ import Foundation
 
 class NetworkClient {
     private let session: URLSession
-    private let redirectHandler = RedirectHandler()
     private let decoder: JSONDecoder
     private let correlationId: String
 
-    init(decoder: JSONDecoder) {
-        session = URLSession(configuration: .default, delegate: redirectHandler, delegateQueue: nil)
+    init(decoder: JSONDecoder, configuration: URLSessionConfiguration = .default) {
+        session = URLSession(configuration: configuration, delegate: CallbackRedirectRefusal(), delegateQueue: nil)
         self.decoder = decoder
         correlationId = UUID().uuidString
     }
@@ -30,7 +29,7 @@ class NetworkClient {
             urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
 
-        return DataRequest(request: urlRequest, session: session, redirectHandler: redirectHandler, decoder: decoder)
+        return DataRequest(request: urlRequest, session: session, decoder: decoder)
     }
 
     func request(_ url: URL, method: HttpMethod = .get, headers: [String: String]? = nil, parameters: [String: Any]?) -> DataRequest {
@@ -39,45 +38,11 @@ class NetworkClient {
     }
 }
 
-private actor RedirectContinuationManager {
-    var redirectContinuations = [Int: CheckedContinuation<URL, Error>]()
-
-    func registerContinuation(_ continuation: CheckedContinuation<URL, Error>, for taskIdentifier: Int) {
-        redirectContinuations[taskIdentifier] = continuation
-    }
-
-    func pullContinuation(for taskIdentifier: Int) -> CheckedContinuation<URL, Error>? {
-        redirectContinuations.removeValue(forKey: taskIdentifier)
-    }
-}
-
-class RedirectHandler: NSObject, URLSessionTaskDelegate {
-    private let continuationManager = RedirectContinuationManager()
-
-    func registerContinuation(_ continuation: CheckedContinuation<URL, Error>, for taskIdentifier: Int) async {
-        await continuationManager.registerContinuation(continuation, for: taskIdentifier)
-    }
-
+/// Follows redirections as `URLSession` normally would, except the `/oauth/authorize` callback — the
+/// request's own `redirect_uri`, `https` included, or any custom scheme — which it refuses. The task then ends
+/// on the redirect response itself, and ``DataRequest/redirect()`` reads the callback from its `Location` header.
+class CallbackRedirectRefusal: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest) async -> URLRequest? {
-        guard let url = request.url, let scheme = url.scheme, !scheme.lowercased().starts(with: "http") else {
-            return request
-        }
-
-        let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
-        continuation?.resume(returning: url)
-        return nil
-    }
-
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        Task {
-            let continuation = await continuationManager.pullContinuation(for: task.taskIdentifier)
-
-            // empty error means request finished with success
-            if let error {
-                continuation?.resume(throwing: error)
-            } else {
-                continuation?.resume(throwing: ReachFiveError.TechnicalError(reason: "Request did not redirect as expected"))
-            }
-        }
+        request.url?.isCallback(of: task.originalRequest?.url) == true ? nil : request
     }
 }
