@@ -95,12 +95,12 @@ final class DataRequestRedirectTests: XCTestCase {
         }
     }
 
-    func testNetworkFailureIsRethrownUntouched() async throws {
+    func testNetworkFailureIsReportedAsTechnicalErrorKeepingItsCode() async throws {
         StubURLProtocol.stubHandler = { _ in .networkFailure(URLError(.secureConnectionFailed)) }
 
-        let thrown = try await failureOfAuthorize()
+        let (reason, _) = try await technicalErrorFromAuthorize()
 
-        XCTAssertEqual((thrown as? URLError)?.code, .secureConnectionFailed)
+        XCTAssertTrue(reason.hasPrefix("URLError -1200: "), reason)
     }
 
     func testTaskEndingWithNeitherResponseNorErrorThrowsInsteadOfCrashingOnEveryCall() async throws {
