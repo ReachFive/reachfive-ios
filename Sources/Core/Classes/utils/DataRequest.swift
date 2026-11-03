@@ -75,7 +75,7 @@ class DataRequest {
             session.dataTask(with: request) { [logger] data, response, error in
                 if let error {
                     logger.log(error: error)
-                    continuation.resume(throwing: error)
+                    continuation.resume(throwing: ReachFiveError.wrapping(error))
                 } else {
                     continuation.resume(returning: (data ?? Data(), response))
                 }
