@@ -64,6 +64,26 @@ final class RedirectRefusalTests: XCTestCase {
         XCTAssertEqual(callback.absoluteString, "https://www.example.com/account/callback?code=abc123")
     }
 
+    func testRedirectionToAnHttpsRedirectUriCarryingItsOwnQueryIsRefusedAndYieldsTheCallback() async throws {
+        server = try LoopbackHTTPServer { _ in
+            "HTTP/1.1 303 See Other\r\nLocation: https://www.example.com/profile-management?conf_key=legacy_configuration&code=abc123\r\nContent-Length: 0\r\n\r\n"
+        }
+
+        let callback = try await authorize(redirectUri: "https://www.example.com/profile-management?conf_key=legacy_configuration")
+
+        XCTAssertEqual(callback.queryValue("code"), "abc123")
+    }
+
+    func testRedirectionToAnHttpsRedirectUriWithoutPathIsRefusedEvenWithTheRootSlashAdded() async throws {
+        server = try LoopbackHTTPServer { _ in
+            "HTTP/1.1 303 See Other\r\nLocation: https://www.example.com/?code=abc123\r\nContent-Length: 0\r\n\r\n"
+        }
+
+        let callback = try await authorize(redirectUri: "https://www.example.com")
+
+        XCTAssertEqual(callback.queryValue("code"), "abc123")
+    }
+
     func testWebRedirectionOtherThanTheRedirectUriIsStillFollowed() async throws {
         server = try LoopbackHTTPServer { requestLine in
             requestLine.contains("/oauth/authorize")
