@@ -3,19 +3,26 @@ import Foundation
 class DataRequest {
     private let request: URLRequest
     private let session: URLSession
-    private let redirectHandler: RedirectHandler
     private let decoder: JSONDecoder
     private let logger = Logger.shared
 
-    init(request: URLRequest, session: URLSession, redirectHandler: RedirectHandler, decoder: JSONDecoder) {
+    init(request: URLRequest, session: URLSession, decoder: JSONDecoder) {
         self.request = request
         self.session = session
-        self.redirectHandler = redirectHandler
         self.decoder = decoder
     }
 
     private func isSuccess(_ status: Int) -> Bool {
         status >= 200 && status < 300
+    }
+
+    private func isRedirection(_ status: Int) -> Bool {
+        status >= 300 && status < 400
+    }
+
+    private func logged(_ error: ReachFiveError) -> ReachFiveError {
+        logger.log(error: error)
+        return error
     }
 
     private func parseJson<T: Decodable>(json: Data, type: T.Type) throws -> T {
@@ -29,61 +36,96 @@ class DataRequest {
         }
     }
 
-    private func handleResponseStatus(status: Int, apiError: ApiError) -> ReachFiveError {
-        let error: ReachFiveError = if status == 400 {
+    private func handleResponseStatus(status: Int, apiError: ApiError?) -> ReachFiveError {
+        let error: ReachFiveError = if status == 400, let apiError {
             .RequestError(apiError: apiError)
         } else if status == 401 {
             .AuthFailure(reason: "Unauthorized", apiError: apiError)
         } else {
-            .TechnicalError(
-                reason: "Response with \(status) error code",
-                apiError: apiError
-            )
+            .TechnicalError(reason: "Response with \(status) error code", apiError: apiError)
         }
-        logger.log(error: error)
-        return error
+        return logged(error)
     }
 
-    private func processHttpResponse<T>(data: Data, response: URLResponse, onSuccess: (Data) throws -> T) throws -> T {
+    /// Logs the response and hands it back when it is a 2xx. Throws on anything else, with the `ApiError` of
+    /// the body decoded into the error whenever the body carries one, and the status code alone otherwise.
+    @discardableResult
+    private func validate(data: Data, response: URLResponse?) throws -> HTTPURLResponse {
         guard let httpResponse = response as? HTTPURLResponse else {
-            let error = ReachFiveError.TechnicalError(reason: "Request without response")
-            logger.log(error: error)
-            throw error
+            throw logged(.TechnicalError(reason: "Request ended without a response nor an error"))
         }
 
         logger.log(response: httpResponse, data: data)
 
         let status = httpResponse.statusCode
         guard isSuccess(status) else {
-            let apiError = try parseJson(json: data, type: ApiError.self)
+            // Decoded without `parseJson`, which would log a decoding failure for an HTML page or an empty body.
+            let apiError = try? decoder.decode(ApiError.self, from: data)
             throw handleResponseStatus(status: status, apiError: apiError)
         }
 
-        return try onSuccess(data)
+        return httpResponse
+    }
+
+    /// Runs the request over the completion handler rather than `URLSession.data(for:)`, whose back-deployed
+    /// form traps when a task ends with neither a response nor an error — which a network interception layer
+    /// can produce. Cancelling the calling `Task` does not cancel the request: its result is dropped instead.
+    private func perform() async throws -> (Data, URLResponse?) {
+        try await withCheckedThrowingContinuation { continuation in
+            session.dataTask(with: request) { [logger] data, response, error in
+                if let error {
+                    logger.log(error: error)
+                    continuation.resume(throwing: ReachFiveError.wrapping(error))
+                } else {
+                    continuation.resume(returning: (data ?? Data(), response))
+                }
+            }.resume()
+        }
     }
 
     func responseJson() async throws {
         logger.log(request: request)
-        let (data, response) = try await session.data(for: request)
-        try processHttpResponse(data: data, response: response) { _ in }
+        let (data, response) = try await perform()
+        try validate(data: data, response: response)
     }
 
     func responseJson<T: Decodable>(type: T.Type) async throws -> T {
         logger.log(request: request)
-        let (data, response) = try await session.data(for: request)
-        return try processHttpResponse(data: data, response: response) { data in
-            try parseJson(json: data, type: T.self)
-        }
+        let (data, response) = try await perform()
+        try validate(data: data, response: response)
+        return try parseJson(json: data, type: T.self)
     }
 
+    /// The `/oauth/authorize` call, whose result is not a response to read but a redirection to its
+    /// `redirect_uri`: the callback URL, with the authorization code in it.
+    ///
+    /// ``CallbackRedirectRefusal`` refuses that redirection, so the task ends on the redirect response
+    /// itself and the callback is read from its `Location` header.
     func redirect() async throws -> URL {
         logger.log(request: request)
-        let task = session.dataTask(with: request)
-        return try await withCheckedThrowingContinuation { continuation in
-            Task {
-                await redirectHandler.registerContinuation(continuation, for: task.taskIdentifier)
-                task.resume()
+        let (data, response) = try await perform()
+
+        if let redirection = response as? HTTPURLResponse, isRedirection(redirection.statusCode) {
+            logger.log(response: redirection, data: data)
+
+            let location = redirection.value(forHTTPHeaderField: "Location")
+            if let callback = location.flatMap(URL.init(string:)), callback.isCallback(of: request.url) {
+                return callback
             }
+            let target = location.map { "Location '\($0)'" } ?? "no Location header"
+            throw logged(.TechnicalError(
+                reason: "Request did not redirect to its redirect_uri: answered HTTP \(redirection.statusCode) with \(target)"
+            ))
         }
+
+        // No callback. On an error status, `validate` throws with the `ApiError` of the body: a rejected
+        // `redirect_uri` answers `403 error.client.redirectUrlNotAllowed`.
+        let final = try validate(data: data, response: response)
+        // A success status is a page instead of the callback: the server's own, or the one a followed
+        // redirection led to (the client's Login URL, on error), whose URL the error names.
+        let redirectedTo = final.url.flatMap { $0 == request.url ? nil : " after redirecting to '\($0.absoluteString)'" } ?? ""
+        throw logged(.TechnicalError(
+            reason: "Request did not redirect to its redirect_uri: answered HTTP \(final.statusCode)\(redirectedTo)"
+        ))
     }
 }
