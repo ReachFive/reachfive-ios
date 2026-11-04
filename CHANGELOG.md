@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v11.2.0
+
 ### New features
 - Captcha provider `CaptchaProvider.reCaptchaEnterprise` (`recaptcha_enterprise`), for tokens obtained from reCAPTCHA Enterprise.
 - `startPasswordless` supports an optional scope parameter.
