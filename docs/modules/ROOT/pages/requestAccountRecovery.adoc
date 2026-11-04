@@ -8,7 +8,8 @@ AppDelegate.reachfive().{docname}(
     <<phoneNumber>>,
     <<redirectUrl>>,
     // Optional arguments
-    <<origin>>
+    <<origin>>,
+    <<captcha>>
 )
 ----
 
@@ -51,6 +52,7 @@ include::partial$params.adoc[tag="email"]
 include::partial$params.adoc[tag="phoneNumber"]
 include::partial$params.adoc[tag="origin"]
 include::partial$params.adoc[tag="redirecturl"]
+include::partial$params.adoc[tag="captcha"]
 
 |===
 
