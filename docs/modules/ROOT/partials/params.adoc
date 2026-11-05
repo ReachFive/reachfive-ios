@@ -30,7 +30,9 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 * `authToken`: The authorization token. *required*
 * `scope`: The defined scope such as `openid`, `email`, or `phone_number`.
 * `redirectUri`: The URL to which the user is redirected.
+Defaults to `SdkConfig.redirectUri`.
 This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
+The SDK keeps it and reuses it when you verify the code with xref:mfaVerifyWithStepUp.adoc[], so you don't pass it again.
 * `origin`: The domain of the origin.
 It must be a valid URL.
 * `action`: A string describing the action for the MFA flow.
@@ -605,6 +607,15 @@ endif::[]
 
 The SDK never produces the token: obtaining one is your application's job.
 A token is single-use and short-lived, and the action is encoded inside it, so there is no action parameter to pass here.
+
+You build a `Captcha` from the `token` and the `provider` that issued it:
+
+* `.reCaptcha`: `recaptcha`
+* `.captchaFox`: `captchafox`
+
+The token must come from the captcha provider enabled for your account.
+Pass that provider's value in `provider`.
+// TODO CA-6703: add `.reCaptchaEnterprise` (`recaptcha_enterprise`) once the Console guide is published.
 // end::captcha[]
 
 // tag::passwordlesssignupdata[]
@@ -664,7 +675,10 @@ endif::[]
 // end::redirecturl[]
 
 // tag::redirecturi[]
-|[[redirectUri,redirectUri]] redirectUri `string` | The URL where the user will be redirected after the passwordless success. Default value is `reachfive-$\{clientId}://callback`.
+|[[redirectUri,redirectUri]] redirectUri `string` | The URL where the user will be redirected after the passwordless success.
+Defaults to `SdkConfig.redirectUri`, which is `reachfive-$\{clientId}://callback` unless you changed it.
+The SDK keeps the value you pass and reuses it when it exchanges the code for tokens, so you don't pass it again at the next step.
+Whitelist it in the `Allowed Callback URLs` field of your {company} client settings.
 // end::redirecturi[]
 
 // tag::scope[]
