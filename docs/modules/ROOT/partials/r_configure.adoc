@@ -77,9 +77,6 @@ let reachFive = ReachFive(
 ----
 <1> The custom URL scheme. Pass the scheme only (no `://`); it replaces the default `reachfive-${clientId}`. Every callback URI that you don't override explicitly is then derived from it (`myOwnScheme://callback`, `myOwnScheme://mfa`, and so on).
 <2> Overrides the full default callback URI.
-Any scheme works, `https` included.
-Match the entry in Allowed Callback URLs exactly.
-For logins that need no browser, such as password, passkeys, and native providers, the SDK reads the authorization code from the server's redirection to this URL instead of following it.
 <3> Overrides the full MFA callback URI.
 <4> Overrides the full account recovery callback URI.
 <5> Overrides the full email verification callback URI.
