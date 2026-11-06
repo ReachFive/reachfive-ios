@@ -32,7 +32,6 @@ If `expiresIn` is less than or equal to `0`, the `AuthToken` is expired.
 * `redirectUri`: The URL to which the user is redirected.
 Defaults to `SdkConfig.redirectUri`.
 This URL must be whitelisted in the `Allowed Callback URLs` field of your ReachFive client settings.
-The SDK keeps it and reuses it when you verify the code with xref:mfaVerifyWithStepUp.adoc[], so you don't pass it again.
 * `origin`: The domain of the origin.
 It must be a valid URL.
 * `action`: A string describing the action for the MFA flow.
