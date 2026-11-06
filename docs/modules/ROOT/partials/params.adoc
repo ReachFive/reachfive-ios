@@ -676,7 +676,7 @@ endif::[]
 
 // tag::redirecturi[]
 |[[redirectUri,redirectUri]] redirectUri `string` | The URL where the user will be redirected after the passwordless success.
-Defaults to `SdkConfig.redirectUri`, which is `reachfive-$\{clientId}://callback` unless you changed it.
+Defaults to `SdkConfig.redirectUri`.
 Whitelist it in the `Allowed Callback URLs` field of your {company} client settings.
 // end::redirecturi[]
 
