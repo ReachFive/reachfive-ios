@@ -13,7 +13,9 @@ All *must be* whitelisted in Allowed Callback URLs on your {cc}.
 |Allowed URL |Notes
 
 |reachfive-$\{clientId\}://callback
-|This callback URL is used to open the app from another app such as an email client or the web for passwordless.
+|This callback URL is the default `redirectUri` of the SDK configuration.
+Every OAuth call that doesn't pass its own `redirectUri` uses it.
+It is also used to open the app from another app such as an email client or the web for passwordless.
 
 Other uses:
 
