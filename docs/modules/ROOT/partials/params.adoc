@@ -610,11 +610,11 @@ A token is single-use and short-lived, and the action is encoded inside it, so t
 You build a `Captcha` from the `token` and the `provider` that issued it:
 
 * `.reCaptcha`: `recaptcha`
+* `.reCaptchaEnterprise`: `recaptcha_enterprise`
 * `.captchaFox`: `captchafox`
 
 The token must come from the captcha provider enabled for your account.
 Pass that provider's value in `provider`.
-// TODO CA-6703: add `.reCaptchaEnterprise` (`recaptcha_enterprise`) once the Console guide is published.
 // end::captcha[]
 
 // tag::passwordlesssignupdata[]
