@@ -4,6 +4,7 @@ import Reach5
 import Reach5Facebook
 import Reach5Google
 import UIKit
+import UserNotifications
 
 #if targetEnvironment(macCatalyst)
 // we don't add WeChat by default in order to be able to launch the app on mac Catalyst in order to test on local (more easily than with a simulator)
@@ -138,7 +139,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
+        let notificationCenter = UNUserNotificationCenter.current()
+        notificationCenter.delegate = self
+        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            print("APNs authorization granted=\(granted) error=\(String(describing: error))")
+        }
+        // The device token does not depend on the user's answer to the authorization prompt
+        application.registerForRemoteNotifications()
+
         return reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let token = deviceToken.map { String(format: "%02x", $0) }.joined()
+        print("APNs device token: \(token)")
+        UserDefaults.standard.set(token, forKey: "apnsDeviceToken")
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("APNs registration failed: \(error)")
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
@@ -200,6 +219,17 @@ extension AppDelegate {
             AppDelegate.storage.setToken(freshToken)
             return try await body(freshToken)
         }
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+        print("APNs notification received in foreground: \(notification.request.content.userInfo)")
+        return [.banner, .list, .sound]
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        print("APNs notification opened: \(response.notification.request.content.userInfo)")
     }
 }
 
