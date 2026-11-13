@@ -34,9 +34,9 @@ See xref:guides/apple-app-site-association.adoc[] for the file format, hosting r
 [#hosted-pages]
 === Hosted pages
 
-If you are using {company}'s xref:docs:ROOT:hosted-pages.adoc[] and need the `apple-app-site-association` file hosted on your domain at {company}, you should input the content of your `apple-app-site-association` file into the text area called *apple-app-site-association* in the menu:Settings[WebAuthn] section of the {cc}.
+If you use {company}'s xref:docs:ROOT:hosted-pages.adoc#mobile-app-links[Hosted Pages] and need the `apple-app-site-association` file hosted on your domain at {company}, paste the file into the *apple-app-site-association* text area at menu:Hosted Pages[Mobile app links].
 
-CAUTION: We do not perform any validation on the file.
+CAUTION: {company} does not validate the file.
 
 [tabs]
 ====
