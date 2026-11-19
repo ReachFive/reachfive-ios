@@ -3,7 +3,9 @@ import Foundation
 import Reach5
 import Reach5Facebook
 import Reach5Google
+import LocalAuthentication
 import UIKit
+import UserNotifications
 
 #if targetEnvironment(macCatalyst)
 // we don't add WeChat by default in order to be able to launch the app on mac Catalyst in order to test on local (more easily than with a simulator)
@@ -138,7 +140,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
+        let notificationCenter = UNUserNotificationCenter.current()
+        notificationCenter.delegate = self
+        notificationCenter.setNotificationCategories([ReachFive.cibaNotificationCategory])
+        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            print("Notification authorization granted=\(granted) error=\(String(describing: error))")
+        }
+        // The device token does not depend on the user's answer to the authorization prompt
+        application.registerForRemoteNotifications()
+
         return reachfive.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        print("APNs device token: \(deviceToken.map { String(format: "%02x", $0) }.joined())")
+        Self.apnsDeviceToken = deviceToken
+        Task { await Self.registerPushDevice() }
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("APNs registration failed: \(error)")
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
@@ -229,5 +250,157 @@ extension UITableView {
         cell.contentConfiguration = content
 
         return cell
+    }
+}
+
+// MARK: - Push notifications and CIBA
+
+extension AppDelegate {
+    @MainActor static var apnsDeviceToken: Data?
+
+    /// Registers the device for the logged-in user, once both the APNs token and an access token are known:
+    /// at each launch, and after each login.
+    @MainActor
+    static func registerPushDevice() async {
+        guard let deviceToken = apnsDeviceToken, let authToken = storage.getToken() else { return }
+        #if DEBUG
+            let environment = ApnsEnvironment.sandbox
+        #else
+            let environment = ApnsEnvironment.production
+        #endif
+        do {
+            let device = try await withFreshToken(potentiallyStale: authToken) { token in
+                try await reachfive().registerPushDevice(deviceToken: deviceToken, environment: environment, authToken: token)
+            }
+            UserDefaults.standard.set(device.id, forKey: "pushDeviceId")
+            print("Push device registered: \(device.id) \(device.maskedToken)")
+        } catch {
+            print("Push device registration failed: \(error)")
+        }
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+        [.banner, .list, .sound]
+    }
+
+    @MainActor
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        guard let ciba = CibaNotification(userInfo: response.notification.request.content.userInfo) else { return }
+        print("CIBA notification response: \(response.actionIdentifier) auth_req_id=\(ciba.authReqId)")
+        if response.actionIdentifier == CibaNotification.denyActionIdentifier {
+            // Denying needs no authentication: it is handled in the background, without opening the app
+            guard let authToken = Self.storage.getToken() else { return }
+            do {
+                try await Self.withFreshToken(potentiallyStale: authToken) { token in
+                    try await reachfive.decideCibaRequest(authReqId: ciba.authReqId, decision: .deny, authToken: token)
+                }
+                print("CIBA request denied")
+            } catch {
+                print("CIBA deny failed: \(error)")
+            }
+            return
+        }
+        // A tap or Approve: show the request, which the user approves only after authenticating again
+        guard let rootViewController = window?.rootViewController else { return }
+        let approval = UINavigationController(rootViewController: CibaApprovalViewController())
+        (rootViewController.presentedViewController ?? rootViewController).present(approval, animated: true)
+    }
+}
+
+/// Shows the pending CIBA request as the server describes it, not as the notification did, and records the
+/// user's decision. Approving requires the device owner's authentication (Face ID, Touch ID or passcode).
+final class CibaApprovalViewController: UIViewController {
+    private var request: CibaRequest?
+    private let label = UILabel()
+    private let approveButton = UIButton(type: .system)
+    private let denyButton = UIButton(type: .system)
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = "Demande de connexion"
+        view.backgroundColor = .systemBackground
+        navigationItem.leftBarButtonItem = UIBarButtonItem(systemItem: .close, primaryAction: UIAction { [weak self] _ in self?.dismiss(animated: true) })
+
+        label.numberOfLines = 0
+        label.font = .preferredFont(forTextStyle: .body)
+        label.adjustsFontForContentSizeCategory = true
+        label.text = "Chargement…"
+        approveButton.setTitle("Approuver", for: .normal)
+        denyButton.setTitle("Refuser", for: .normal)
+        denyButton.tintColor = .systemRed
+        approveButton.accessibilityIdentifier = "ciba.approve"
+        denyButton.accessibilityIdentifier = "ciba.deny"
+        approveButton.isEnabled = false
+        denyButton.isEnabled = false
+        approveButton.addAction(UIAction { [weak self] _ in self?.approve() }, for: .touchUpInside)
+        denyButton.addAction(UIAction { [weak self] _ in self?.decide(.deny) }, for: .touchUpInside)
+
+        let stack = UIStackView(arrangedSubviews: [label, approveButton, denyButton])
+        stack.axis = .vertical
+        stack.spacing = 16
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+        ])
+
+        Task { await load() }
+    }
+
+    private func load() async {
+        guard let authToken = AppDelegate.storage.getToken() else {
+            label.text = "Aucun utilisateur connecté"
+            return
+        }
+        do {
+            let request = try await AppDelegate.withFreshToken(potentiallyStale: authToken) { token in
+                try await AppDelegate.reachfive().getOngoingCibaRequest(authToken: token)
+            }
+            self.request = request
+            label.text = """
+            \(request.clientName ?? request.clientId) demande à vous connecter.
+
+            \(request.bindingMessage ?? "")
+
+            Expire : \(request.expiresAt)
+            """
+            approveButton.isEnabled = true
+            denyButton.isEnabled = true
+        } catch {
+            label.text = "Aucune demande en attente\n\n\(error.localizedDescription)"
+        }
+    }
+
+    private func approve() {
+        let context = LAContext()
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Approuver la connexion") { success, error in
+            Task { @MainActor in
+                if success {
+                    self.decide(.approve)
+                } else {
+                    self.label.text = "Authentification refusée : \(error?.localizedDescription ?? "")"
+                }
+            }
+        }
+    }
+
+    private func decide(_ decision: CibaDecision) {
+        guard let request, let authToken = AppDelegate.storage.getToken() else { return }
+        approveButton.isEnabled = false
+        denyButton.isEnabled = false
+        Task {
+            do {
+                try await AppDelegate.withFreshToken(potentiallyStale: authToken) { token in
+                    try await AppDelegate.reachfive().decideCibaRequest(authReqId: request.authReqId, decision: decision, authToken: token)
+                }
+                label.text = decision == .approve ? "Connexion approuvée" : "Connexion refusée"
+            } catch {
+                label.text = "Échec : \(error.localizedDescription)"
+            }
+        }
     }
 }

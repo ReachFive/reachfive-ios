@@ -25,6 +25,7 @@ extension UIViewController {
     @MainActor
     func goToProfile(_ authToken: AuthToken) {
         AppDelegate.storage.setToken(authToken)
+        Task { await AppDelegate.registerPushDevice() }
 
         if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "Tabs") as? UITabBarController {
             tabBarController.selectedIndex = 2 // profile is third from left
