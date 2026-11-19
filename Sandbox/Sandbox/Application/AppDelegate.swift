@@ -139,10 +139,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
+        Self.apnsLog("launch, launchOptions keys: \(launchOptions?.keys.map(\.rawValue) ?? [])")
         let notificationCenter = UNUserNotificationCenter.current()
         notificationCenter.delegate = self
+        // Approving opens the app, where the user is asked to authenticate again; denying runs without opening it
+        let approve = UNNotificationAction(identifier: "APPROVE", title: "Approuver", options: [.foreground])
+        let deny = UNNotificationAction(identifier: "DENY", title: "Refuser", options: [.destructive])
+        notificationCenter.setNotificationCategories([
+            UNNotificationCategory(identifier: "CIBA_APPROVAL", actions: [approve, deny], intentIdentifiers: [])
+        ])
         notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            print("APNs authorization granted=\(granted) error=\(String(describing: error))")
+            Self.apnsLog("authorization granted=\(granted) error=\(String(describing: error))")
         }
         // The device token does not depend on the user's answer to the authorization prompt
         application.registerForRemoteNotifications()
@@ -152,12 +159,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let token = deviceToken.map { String(format: "%02x", $0) }.joined()
-        print("APNs device token: \(token)")
+        Self.apnsLog("device token: \(token)")
         UserDefaults.standard.set(token, forKey: "apnsDeviceToken")
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("APNs registration failed: \(error)")
+        Self.apnsLog("registration failed: \(error)")
+    }
+
+    /// Printed and appended to Documents/apns.log, which survives the app being killed and can be read with `devicectl device copy from`
+    static func apnsLog(_ message: String) {
+        // 0 active, 1 inactive, 2 background; the state can only be read on the main thread
+        let state = Thread.isMainThread ? "\(UIApplication.shared.applicationState.rawValue)" : "-"
+        let line = "\(ISO8601DateFormatter().string(from: Date())) [\(state)] \(message)\n"
+        print("APNs \(line)", terminator: "")
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("apns.log")
+        if let handle = try? FileHandle(forWritingTo: url) {
+            handle.seekToEndOfFile()
+            handle.write(Data(line.utf8))
+            try? handle.close()
+        } else {
+            try? Data(line.utf8).write(to: url)
+        }
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
@@ -224,12 +247,22 @@ extension AppDelegate {
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        print("APNs notification received in foreground: \(notification.request.content.userInfo)")
+        Self.apnsLog("received in foreground: \(notification.request.content.userInfo)")
         return [.banner, .list, .sound]
     }
 
+    @MainActor
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        print("APNs notification opened: \(response.notification.request.content.userInfo)")
+        let authReqId = response.notification.request.content.userInfo["auth_req_id"] as? String ?? "?"
+        Self.apnsLog("response action=\(response.actionIdentifier) auth_req_id=\(authReqId)")
+        guard response.actionIdentifier != "DENY", let rootViewController = window?.rootViewController else { return }
+        let alert = UIAlertController(
+            title: "Demande \(authReqId)",
+            message: "Action : \(response.actionIdentifier)\nIci, l'app demanderait de se réauthentifier avant d'approuver.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        (rootViewController.presentedViewController ?? rootViewController).present(alert, animated: true)
     }
 }
 

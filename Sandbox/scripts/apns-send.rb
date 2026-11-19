@@ -24,6 +24,7 @@ payload = {
   aps: {
     alert: { title: 'Valider la connexion', body: 'Une demande de connexion attend votre validation' },
     sound: 'default',
+    category: 'CIBA_APPROVAL',
     'interruption-level': 'time-sensitive'
   },
   auth_req_id: 'etude-CA-5813'
