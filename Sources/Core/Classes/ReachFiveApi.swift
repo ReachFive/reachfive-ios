@@ -192,6 +192,28 @@ public class ReachFiveApi {
             .responseJson()
     }
 
+    // MARK: - Push notifications and CIBA
+
+    func registerPushDevice(request: PushDeviceRegistrationRequest, authToken: AuthToken) async throws -> PushDevice {
+        try await networkClient.request(createUrl(path: "/identity/v1/push-devices"), method: .put, headers: tokenHeader(authToken), parameters: request.dictionary())
+            .responseJson(type: PushDevice.self)
+    }
+
+    func unregisterPushDevice(id: String, authToken: AuthToken) async throws {
+        try await networkClient.request(createUrl(path: "/identity/v1/push-devices/\(id)"), method: .delete, headers: tokenHeader(authToken))
+            .responseJson()
+    }
+
+    func getOngoingCibaRequest(authToken: AuthToken) async throws -> CibaRequest {
+        try await networkClient.request(createUrl(path: "/ciba/ongoing-request"), method: .post, headers: tokenHeader(authToken))
+            .responseJson(type: CibaRequest.self)
+    }
+
+    func decideCibaRequest(request: CibaDecisionRequest, authToken: AuthToken) async throws {
+        try await networkClient.request(createUrl(path: "/ciba/decision"), method: .post, headers: tokenHeader(authToken), parameters: request.dictionary())
+            .responseJson()
+    }
+
     // MARK: - Verification
 
     public func sendEmailVerification(authToken: AuthToken, sendEmailVerificationRequest: SendEmailVerificationRequest) async throws -> SendEmailVerificationResponse {
